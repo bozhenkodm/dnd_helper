@@ -1,0 +1,126 @@
+{% load filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NPC</title>
+</head>
+<body>
+{% for npc in object.npcs.all %}
+    <table>
+        <tr>
+            <th>
+                {{ npc.name }} ({{ npc.get_sex_display }}), {{ npc.race }} {{ npc.klass }} {{ npc.level }} уровня
+            </th>
+        </tr>
+        <tr>
+            <td><a href="{{ npc.url }}" target="_blank">подробнее</a></td>
+        </tr>
+    </table>
+    <table border="1">
+        <tr>
+        <td>
+        <table>
+            <tr>
+                <td>Сила</td>
+                <td>{{ npc.strength }}</td>
+            </tr>
+            <tr>
+                <td>Телосложение</td>
+                <td>{{ npc.constitution }}</td>
+            </tr>
+            <tr>
+                <td>Ловкость</td>
+                <td>{{ npc.dexterity }}</td>
+            </tr>
+            <tr>
+                <td>Интеллект</td>
+                <td>{{ npc.intelligence }}</td>
+            </tr>
+            <tr>
+                <td>Мудрость</td>
+                <td>{{ npc.wisdom }}</td>
+            </tr>
+            <tr>
+                <td>Харизма</td>
+                <td>{{ npc.charisma }}</td>
+            </tr>
+        </table>
+        </td>
+
+        <td>
+        <table>
+             <tr>
+                <td>КД</td>
+                <td>{{ npc.armor_class }}</td>
+            </tr>
+            <tr>
+                <td>Стойкость</td>
+                <td>{{ npc.fortitude }}</td>
+            </tr>
+            <tr>
+                <td>Реакция</td>
+                <td>{{ npc.reflex }}</td>
+            </tr>
+            <tr>
+                <td>Воля</td>
+                <td>{{ npc.will }}</td>
+            </tr>
+
+        </table>
+        </td>
+        <td>
+        <table>
+            <tr>
+                <td>ХП</td>
+                <td>{{ npc.max_hit_points }}</td>
+            </tr>
+            <tr>
+                <td>Ранен</td>
+                <td>{{ npc.bloodied }}</td>
+            </tr>
+            <tr>
+                <td>Исцеление</td>
+                <td>{{ npc.surge }}</td>
+            </tr>
+            <tr>
+                <td>Исцелений</td>
+                <td>{{ npc.surges }}</td>
+            </tr>
+            <tr>
+                <td>Пассивная внимательность</td>
+                <td>{{ npc.insight|add:10}}</td>
+            </tr>
+            <tr>
+                <td>Пассивная проницательность</td>
+                <td>{{ npc.perception|add:10 }}</td>
+            </tr>
+        </table>
+        </td>
+    </table>
+    <table>
+        <tr>
+            <th>Тренированные навыки:</th>
+            {% for skill in npc.trained_skills %}
+                <th>
+                    {{ skills|get_item:skill }}{% if not forloop.last %},{% endif %}
+                </th>
+                {% endfor %}
+        </tr>
+    </table>
+    <table border="1">
+        <tr>
+            <th>Характеристика</th>
+            <th>Бонус атаки</th>
+        </tr>
+        {% for item in npc.attacks %}
+            <tr>
+                <td>{{ item.0 }}</td>
+                <td>{{ item.1 }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+<hr/>
+{% endfor %}
+</body>
+</html>
