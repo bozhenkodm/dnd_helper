@@ -10,9 +10,12 @@ from base.constants import (
     SkillsEnum,
 )
 from base.models import NPC, Armor, Class, Encounter, Race
+from base.models.models import RaceBonus, Weapon, WeaponType
 
 
 class AdminMixin:
+    enable_nav_sidebar = False
+
     ENUM = BaseCapitalizedEnum
     field_name = 'name'
 
@@ -28,10 +31,21 @@ class AdminMixin:
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.annotate(title=self.ENUM.generate_case(field=self.field_name)).order_by('title')
+        return qs.annotate(
+            title=self.ENUM.generate_case(field=self.field_name)
+        ).order_by('title')
+
+
+class RaceBonusInline(admin.TabularInline):
+    model = RaceBonus
+
+    def save_model(self, request, obj, form, change):
+        obj.name = ' '.join(item.capitalize() for item in obj.name.split())
+        return super().save_model(request, obj, form, change)
 
 
 class RaceAdmin(AdminMixin, admin.ModelAdmin):
+    inlines = (RaceBonusInline,)
     ENUM = NPCRace
 
 
@@ -57,10 +71,11 @@ class NPCAdmin(admin.ModelAdmin):
         'trained_skills',
         'armor',
         'shield',
+        'attack_attributes',
         'attack_bonus',
-        'npc',
+        'npc_link',
     ]
-    readonly_fields = ('npc',)
+    readonly_fields = ('npc_link',)
     save_as = True
 
     def formfield_for_choice_field(self, db_field, request, **kwargs):
@@ -81,10 +96,16 @@ class NPCAdmin(admin.ModelAdmin):
                 choices = ((item, SkillsEnum[item].value) for item in choices)
             else:
                 choices = ()
-
             kwargs['choices'] = choices
 
         return super().formfield_for_choice_field(db_field, request, **kwargs)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'race':
+            kwargs["queryset"] = Race.objects.annotate(
+                title=NPCRace.generate_case()
+            ).order_by('title')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_fields(self, request, obj=None):
         result = super().get_fields(request, obj=obj)
@@ -99,22 +120,42 @@ class NPCAdmin(admin.ModelAdmin):
         if not obj:
             return result
         for level, attr in level_attrs_bonuses.items():
+            print(level, attr, obj.level >= level)
             if obj.level >= level and attr not in result:
                 result.append(attr)
         return result
 
-    def npc(self, obj):
+    def npc_link(self, obj):
         return mark_safe(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
 
-    npc.short_description = 'Лист персонажа'
+    npc_link.short_description = 'Лист персонажа'
 
 
 class EncounterAdmin(admin.ModelAdmin):
-    pass
+    fields = (
+        'short_description',
+        'description',
+        'npcs',
+        'encounter_link',
+    )
+    readonly_fields = ('encounter_link',)
+
+    def encounter_link(self, obj):
+        return mark_safe(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
+
+    encounter_link.short_description = 'Страница сцены'
 
 
 class ArmorAdmin(admin.ModelAdmin):
     ordering = ('name',)
+
+
+class WeaponTypeAdmin(admin.ModelAdmin):
+    pass
+
+
+class WeaponAdmin(admin.ModelAdmin):
+    pass
 
 
 admin.site.register(Race, RaceAdmin)
@@ -122,6 +163,8 @@ admin.site.register(Class, ClassAdmin)
 admin.site.register(NPC, NPCAdmin)
 admin.site.register(Encounter, EncounterAdmin)
 admin.site.register(Armor, ArmorAdmin)
+admin.site.register(WeaponType, WeaponTypeAdmin)
+admin.site.register(Weapon, WeaponAdmin)
 
 admin.site.unregister(Group)
 admin.site.unregister(User)

@@ -9,5 +9,3 @@ d10 = partial(randint, 1, 10)
 d12 = partial(randint, 1, 12)
 d20 = partial(randint, 1, 20)
 d100 = partial(randint, 1, 100)
-
-

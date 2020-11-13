@@ -1,16 +1,22 @@
 {% load filters %}
 <!DOCTYPE html>
 <html lang="en">
+<style>
+    @media print {
+    .pagebreak { page-break-before: always; } /* page-break-after works, as well */
+}
+</style>
 <head>
     <meta charset="UTF-8">
     <title>NPC</title>
 </head>
 <body>
+
 {% for npc in object.npcs.all %}
     <table>
         <tr>
             <th>
-                {{ npc.name }} ({{ npc.get_sex_display }}), {{ npc.race }} {{ npc.klass }} {{ npc.level }} уровня
+                {{ npc.name }} ({{ npc.get_sex_display }}), {{ npc.race }} {{ npc.klass }} {{ npc.level }} уровня.
             </th>
         </tr>
         <tr>
@@ -22,27 +28,27 @@
         <td>
         <table>
             <tr>
-                <td>Сила</td>
+                <td>Сил</td>
                 <td>{{ npc.strength }}</td>
             </tr>
             <tr>
-                <td>Телосложение</td>
+                <td>Тел</td>
                 <td>{{ npc.constitution }}</td>
             </tr>
             <tr>
-                <td>Ловкость</td>
+                <td>Лов</td>
                 <td>{{ npc.dexterity }}</td>
             </tr>
             <tr>
-                <td>Интеллект</td>
+                <td>Инт</td>
                 <td>{{ npc.intelligence }}</td>
             </tr>
             <tr>
-                <td>Мудрость</td>
+                <td>Муд</td>
                 <td>{{ npc.wisdom }}</td>
             </tr>
             <tr>
-                <td>Харизма</td>
+                <td>Хар</td>
                 <td>{{ npc.charisma }}</td>
             </tr>
         </table>
@@ -88,11 +94,11 @@
                 <td>{{ npc.surges }}</td>
             </tr>
             <tr>
-                <td>Пассивная внимательность</td>
+                <td>Пасс. внимательность</td>
                 <td>{{ npc.insight|add:10}}</td>
             </tr>
             <tr>
-                <td>Пассивная проницательность</td>
+                <td>Пасс. проницательность</td>
                 <td>{{ npc.perception|add:10 }}</td>
             </tr>
         </table>
@@ -121,6 +127,7 @@
         {% endfor %}
     </table>
 <hr/>
+<div {% cycle '' '' 'class="pagebreak"' %}> </div>
 {% endfor %}
 </body>
 </html>
