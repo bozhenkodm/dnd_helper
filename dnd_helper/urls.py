@@ -18,13 +18,24 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 
-from base.views import EncounterDetailView, NPCDetailView
+from base.views import EncounterDetailView, EncounterExcelView, MainView, NPCDetailView
 from generator import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', MainView.as_view(), name='main_view'),
     path('generator/main', views.GeneratorsMainView.as_view(), name='generator_main'),
     path('generator/tavern', views.TavernView.as_view(), name='generator_tavern'),
+    path(
+        'generator/fantasy_name',
+        views.FantasyNameView.as_view(),
+        name='generator_fantasy_name',
+    ),
     path('npc/detail/<pk>', NPCDetailView.as_view(), name='npc'),
     path('encounter/detail/<pk>', EncounterDetailView.as_view(), name='encounter'),
+    path(
+        'encounter/detail/<pk>/excel',
+        EncounterExcelView.as_view(),
+        name='encounter_excel',
+    ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

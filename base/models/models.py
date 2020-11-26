@@ -4,20 +4,31 @@ from django.urls import reverse
 from multiselectfield import MultiSelectField
 
 from base.constants import (
+    AccessoryTypeEnum,
     ArmorTypeEnum,
     AttributesEnum,
-    DamageDice,
-    NPCClass,
-    NPCRace,
+    DefenceTypeEnum,
+    DiceEnum,
+    NPCClassEnum,
+    NPCRaceEnum,
+    PowerDamageTypeEnum,
+    PowerFrequencyEnum,
+    PowerRangeType,
+    PowerSourceEnum,
     SexEnum,
     ShieldTypeEnum,
     SizeEnum,
     SkillsEnum,
     VisionEnum,
-    WeaponCategory,
-    WeaponGroup,
+    WeaponCategoryEnum,
+    WeaponGroupEnum,
+    WeaponHandednessEnum,
+    WeaponPropertyEnum,
 )
+from base.models.mixins.attacks import AttackMixin
 from base.models.mixins.attributes import AttributeMixin
+from base.models.mixins.defences import DefenceMixin
+from base.models.mixins.encounter import ExcelMixin
 from base.models.mixins.skills import SkillMixin
 
 
@@ -56,24 +67,48 @@ class WeaponType(models.Model):
         verbose_name = 'Тип оружия'
         verbose_name_plural = 'Типы оружия'
 
-    name = models.CharField(verbose_name='Название', max_length=20)
+    name = models.CharField(verbose_name='Название', max_length=20, unique=True)
     prof_bonus = models.SmallIntegerField(verbose_name='Бонус владения', default=2)
-    group = models.CharField(
+    group = MultiSelectField(
         verbose_name='Группа оружия',
-        choices=WeaponGroup.generate_choices(),
-        max_length=WeaponGroup.max_length(),
+        choices=WeaponGroupEnum.generate_choices(),
     )
     category = models.CharField(
         verbose_name='Категория',
-        choices=WeaponCategory.generate_choices(),
-        max_length=WeaponCategory.max_length(),
+        choices=WeaponCategoryEnum.generate_choices(),
+        max_length=WeaponCategoryEnum.max_length(),
     )
-    damage = models.CharField(
-        verbose_name='Кость урона', choices=DamageDice.generate_choices(), max_length=5
+    dice_number = models.PositiveSmallIntegerField(
+        verbose_name='Количество кубов', default=1
     )
+    damage_dice = models.CharField(
+        verbose_name='Кость урона',
+        choices=DiceEnum.generate_choices(is_sorted=False),
+        max_length=DiceEnum.max_length(),
+    )
+    properties = MultiSelectField(
+        verbose_name='Свойства',
+        choices=WeaponPropertyEnum.generate_choices(),
+        null=True,
+        blank=True,
+    )
+    handedness = models.CharField(
+        verbose_name='Одноручное/Двуручное',
+        choices=WeaponHandednessEnum.generate_choices(is_sorted=False),
+        max_length=WeaponHandednessEnum.max_length(),
+        default=WeaponHandednessEnum.ONE.name,
+    )
+    range = models.SmallIntegerField(verbose_name='Дальность', default=0)
 
     def __str__(self):
         return self.name
+
+    @property
+    def max_range(self):
+        return self.range * 2
+
+    def damage(self, weapon_number=1):
+        return f'{self.dice_number*weapon_number}{self.get_damage_dice_display()}'
 
 
 class Weapon(models.Model):
@@ -81,27 +116,52 @@ class Weapon(models.Model):
         verbose_name = 'Оружие'
         verbose_name_plural = 'Оружие'
 
-    weapon_type = models.ForeignKey(WeaponType, on_delete=models.CASCADE, null=False)
+    weapon_type = models.ForeignKey(
+        WeaponType, verbose_name='Тип оружия', on_delete=models.CASCADE, null=False
+    )
     name = models.CharField(verbose_name='Название', max_length=20)
     enchantment = models.SmallIntegerField(verbose_name='Улучшение', default=0)
 
-    @property
-    def full_name(self):
-        return f'{self.weapon_type.name}, {self.name}'
-
     def __str__(self):
-        return self.full_name
+        if self.name == self.weapon_type.name:
+            return f'{self.name}, +{self.enchantment}'
+        return f'{self.name}, {self.weapon_type}, +{self.enchantment}'
 
 
 class ImplementType(models.Model):
-    name = models.CharField(verbose_name='Название', max_length=20)
+    class Meta:
+        verbose_name = 'Тип инструмента'
+        verbose_name_plural = 'Типы инструментов'
+
+    name = models.CharField(verbose_name='Название', max_length=20, blank=True)
+    inherited_weapon_type = models.OneToOneField(
+        WeaponType,
+        verbose_name='На основании оружия',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='implement_type',
+    )
+
+    def __str__(self):
+        return self.name
 
 
 class Implement(models.Model):
+    class Meta:
+        verbose_name = 'Инструмент'
+        verbose_name_plural = 'Инструменты'
+
     implement_type = models.ForeignKey(
         ImplementType, on_delete=models.CASCADE, null=True
     )
+    name = models.CharField(verbose_name='Название', max_length=20)
     enchantment = models.SmallIntegerField(verbose_name='Улучшение', default=0)
+
+    def __str__(self):
+        if self.name == self.implement_type.name:
+            return f'{self.name}, +{self.enchantment}'
+        return f'{self.name}, {self.implement_type}, +{self.enchantment}'
 
 
 class Race(models.Model):
@@ -111,8 +171,8 @@ class Race(models.Model):
 
     name = models.CharField(
         verbose_name='Название',
-        max_length=NPCRace.max_length(),
-        choices=NPCRace.generate_choices(),
+        max_length=NPCRaceEnum.max_length(),
+        choices=NPCRaceEnum.generate_choices(),
         unique=True,
     )
     speed = models.PositiveSmallIntegerField(default=6, verbose_name='Скорость')
@@ -156,8 +216,12 @@ class Race(models.Model):
         blank=True,
     )
 
+    available_weapon_types = models.ManyToManyField(
+        WeaponType, verbose_name='Владение оружием', blank=True
+    )
+
     def __str__(self):
-        return NPCRace[self.name].value
+        return NPCRaceEnum[self.name].value
 
 
 class RaceBonus(models.Model):
@@ -167,7 +231,7 @@ class RaceBonus(models.Model):
 
     name = models.CharField(verbose_name='Название', max_length=30, blank=True)
     description = models.TextField(verbose_name='Описание', blank=True)
-    race = models.ForeignKey(Race, on_delete=models.CASCADE)
+    race = models.ForeignKey(Race, on_delete=models.CASCADE, related_name='bonuses')
 
     def __str__(self):
         return f'Бонус расы: {self.race.get_name_display()}'
@@ -180,9 +244,18 @@ class Class(models.Model):
 
     name = models.CharField(
         verbose_name='Название',
-        max_length=NPCClass.max_length(),
-        choices=NPCClass.generate_choices(),
+        max_length=NPCClassEnum.max_length(),
+        choices=NPCClassEnum.generate_choices(),
         unique=True,
+    )
+    power_source = models.CharField(
+        verbose_name='Источник силы',
+        choices=PowerSourceEnum.generate_choices(),
+        max_length=PowerSourceEnum.max_length(),
+        null=True,
+    )
+    subclasses = models.SmallIntegerField(
+        verbose_name='Количество подклассов', default=0
     )
     fortitude_bonus = models.SmallIntegerField(
         verbose_name='Бонус стойкости', default=0
@@ -207,29 +280,130 @@ class Class(models.Model):
         blank=True,
         null=True,
     )
-    available_weapon_category = MultiSelectField(
+    available_weapon_categories = MultiSelectField(
         verbose_name='Владение категориями оружия',
-        choices=WeaponCategory.generate_choices(is_sorted=False),
+        choices=WeaponCategoryEnum.generate_choices(is_sorted=False),
         null=True,
+        blank=True,
     )
-    available_weapon_type = models.ManyToManyField(
+    available_weapon_types = models.ManyToManyField(
         WeaponType, verbose_name='Владение оружием', blank=True
     )
-    is_weapon_implement = models.BooleanField(
-        verbose_name='Оружие как инструмент', default=False
-    )
-    available_implement_type = models.ManyToManyField(
+    available_implement_types = models.ManyToManyField(
         ImplementType, verbose_name='Доступные инструменты', blank=True
+    )
+    weapon_attack_attributes = MultiSelectField(
+        verbose_name='Атакующие характеристики (оружие)',
+        choices=AttributesEnum.generate_choices(is_sorted=False),
+        default=AttributesEnum.STRENGTH.name,
+    )
+    implement_attack_attributes = MultiSelectField(
+        verbose_name='Атакующие характеристики (инструмент)',
+        choices=AttributesEnum.generate_choices(is_sorted=False),
+        null=True,
+        blank=True,
     )
     hit_points_per_level = models.PositiveSmallIntegerField(
         verbose_name='Хитов за уровень', default=8
     )
 
     def __str__(self):
-        return NPCClass[self.name].value
+        return NPCClassEnum[self.name].value
 
 
-class NPC(AttributeMixin, SkillMixin, models.Model):
+class ClassBonus(models.Model):
+    class Meta:
+        verbose_name = 'Бонус'
+        verbose_name_plural = 'Бонусы'
+
+    name = models.CharField(verbose_name='Название', max_length=30, blank=True)
+    description = models.TextField(verbose_name='Описание', blank=True)
+    klass = models.ForeignKey(Class, on_delete=models.CASCADE, related_name='bonuses')
+
+    def __str__(self):
+        return f'Классовое умение: {self.klass.get_name_display()}'
+
+
+class Power(models.Model):
+    class Meta:
+        verbose_name = 'Талант'
+        verbose_name_plural = 'Таланты'
+
+    name = models.CharField(verbose_name='Название', max_length=20)
+    description = models.TextField(verbose_name='Описание', null=True, blank=True)
+    frequency = models.CharField(
+        verbose_name='Частота использования',
+        choices=PowerFrequencyEnum.generate_choices(is_sorted=False),
+        max_length=PowerFrequencyEnum.max_length(),
+    )
+    klass = models.ForeignKey(
+        Class,
+        related_name='powers',
+        verbose_name='Класс',
+        on_delete=models.CASCADE,
+        null=False,
+    )
+    attack_attribute = models.CharField(
+        verbose_name='Атакующая характеристика',
+        choices=AttributesEnum.generate_choices(is_sorted=False),
+        default=AttributesEnum.STRENGTH.name,
+        max_length=AttributesEnum.max_length(),
+    )
+    attack_bonus = models.SmallIntegerField(verbose_name='Бонус атаки', default=0)
+    defence = models.CharField(
+        verbose_name='Против защиты',
+        choices=DefenceTypeEnum.generate_choices(is_sorted=False),
+        max_length=DefenceTypeEnum.max_length(),
+        default=DefenceTypeEnum.ARMOR_CLASS.name,
+    )
+    damage_type = MultiSelectField(
+        verbose_name='Тип урона',
+        choices=PowerDamageTypeEnum.generate_choices(),
+        default=PowerDamageTypeEnum.NONE.name,
+    )
+    dice_number = models.PositiveSmallIntegerField(
+        verbose_name='Количество кубов', default=1
+    )
+    damage_dice = models.CharField(
+        verbose_name='Кость урона',
+        null=True,
+        blank=True,
+        choices=DiceEnum.generate_choices(is_sorted=False),
+        max_length=DiceEnum.max_length(),
+    )
+    accessory_type = models.CharField(
+        verbose_name='Тип вооружения',
+        choices=AccessoryTypeEnum.generate_choices(),
+        max_length=AccessoryTypeEnum.max_length(),
+    )
+    range_type = models.CharField(
+        verbose_name='Дальность',
+        choices=PowerRangeType.generate_choices(is_sorted=False),
+        max_length=PowerRangeType.max_length(),
+        default=PowerRangeType.MELEE_WEAPON,
+    )
+    range = models.PositiveSmallIntegerField(verbose_name='Дальность', default=1)
+    burst = models.PositiveSmallIntegerField(verbose_name='Площадь', default=0)
+    hit_effect = models.TextField(verbose_name='Попадание', null=True, blank=True)
+    miss_effect = models.TextField(verbose_name='Промах', null=True, blank=True)
+    effect = models.TextField(verbose_name='Эффект', null=True, blank=True)
+    parent_power = models.ForeignKey(
+        'self',
+        verbose_name='Родительский талант',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+
+    def __str__(self):
+        return f'{self.name}, {self.klass.get_name_display()}, {self.get_frequency_display()}'
+
+    @property
+    def damage(self):
+        return f'{self.dice_number}{self.get_damage_dice_display()}'
+
+
+class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
     class Meta:
         verbose_name = 'NPC'
         verbose_name_plural = 'NPCS'
@@ -344,16 +518,21 @@ class NPC(AttributeMixin, SkillMixin, models.Model):
         null=True,
         blank=True,
     )
-    attack_attributes = MultiSelectField(
-        verbose_name='Атакующие характеристики',
+    weapon_attack_attributes = MultiSelectField(
+        verbose_name='Атакующие характеристики (оружие)',
         choices=AttributesEnum.generate_choices(is_sorted=False),
         default=AttributesEnum.STRENGTH.name,
     )
+    implement_attack_attributes = MultiSelectField(
+        verbose_name='Атакующие характеристики (инструмент)',
+        choices=AttributesEnum.generate_choices(is_sorted=False),
+        null=True,
+        blank=True,
+    )
 
-    weapons = models.ManyToManyField(Weapon, verbose_name='Оружие')
-    implements = models.ManyToManyField(Implement, verbose_name='Инструменты')
-    attack_bonus = models.SmallIntegerField(
-        verbose_name='Бонус атаки (Оружие, инструменты + заточка', default=0
+    weapons = models.ManyToManyField(Weapon, verbose_name='Оружие', blank=True)
+    implements = models.ManyToManyField(
+        Implement, verbose_name='Инструменты', blank=True
     )
 
     def __str__(self):
@@ -392,7 +571,7 @@ class NPC(AttributeMixin, SkillMixin, models.Model):
         """
         result = self.bloodied // 2
         # У драконорождённых исцеление увеличено
-        if self.race.name == NPCRace.DRAGONBORN.name:
+        if self.race.name == NPCRaceEnum.DRAGONBORN.name:
             result += self.modifier(self.constitution)
         return result
 
@@ -415,87 +594,11 @@ class NPC(AttributeMixin, SkillMixin, models.Model):
         return (value - 10) // 2
 
     @property
-    def armor_class(self):
-        result = 10 + self.half_level + self._level_bonus
-        if self.armor:
-            if self.armor.type in self.klass.available_armor_types:
-                result += self.armor.armor_class
-            result += self.armor.enchantment
-        if not self.armor or self.armor.is_light:
-            result += max(
-                self.modifier(self.dexterity), self.modifier(self.intelligence)
-            )
-        if self.shield and self.shield in self.klass.available_shield_types:
-            if self.shield == ShieldTypeEnum.LIGHT.name:
-                result += 1
-            else:
-                result += 2
-        if self.klass.name == NPCClass.BARBARIAN.name:
-            if not self.shield and self.armor.is_light:
-                result += (self.level - 1) // 10 + 1
-        if self.klass.name == NPCClass.AVENGER.name:
-            if not self.shield and (
-                not self.armor or self.armor.type == ArmorTypeEnum.CLOTH.name
-            ):
-                result += 3
-        return result
-
-    @property
-    def attacks(self):
-        """Общий бонус атаки"""
-        return (
-            (
-                AttributesEnum[name].value,
-                self.half_level
-                + self._level_bonus
-                + self.attack_bonus
-                + self.modifier(getattr(self, name.lower())),
-            )
-            for name in self.attack_attributes
-        )
-
-    @property
-    def fortitude(self):
-        return (
-            10
-            + self.half_level
-            + self._level_bonus
-            + max(self.modifier(self.strength), self.modifier(self.constitution))
-        )
-
-    @property
-    def reflex(self):
-        result = (
-            10
-            + self.half_level
-            + self._level_bonus
-            + max(self.modifier(self.dexterity), self.modifier(self.intelligence))
-        )
-        if self.shield and self.shield in self.klass.available_shield_types:
-            if self.shield == ShieldTypeEnum.LIGHT.name:
-                result += 1
-            else:
-                result += 2
-        if self.klass.name == NPCClass.BARBARIAN.name:
-            if not self.shield and self.armor.is_light:
-                result += (self.level - 1) // 10 + 1
-        return result
-
-    @property
-    def will(self):
-        return (
-            10
-            + self.half_level
-            + self._level_bonus
-            + max(self.modifier(self.wisdom), self.modifier(self.charisma))
-        )
-
-    @property
     def initiative(self):
         return self.modifier(self.dexterity) + self.half_level
 
 
-class Encounter(models.Model):
+class Encounter(ExcelMixin, models.Model):
     class Meta:
         verbose_name = 'Сцена'
         verbose_name_plural = 'Сцены'
@@ -514,3 +617,7 @@ class Encounter(models.Model):
     @property
     def url(self):
         return reverse('encounter', kwargs={'pk': self.pk})
+
+    @property
+    def excel_url(self):
+        return reverse('encounter_excel', kwargs={'pk': self.pk})

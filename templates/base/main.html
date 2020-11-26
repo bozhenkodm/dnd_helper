@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ДНД помощник</title>
+</head>
+<body>
+    <div align="center">
+        <h1>
+        <a href="{% url 'admin:index' %}">Админка</a><br/>
+        {% for link in links %}
+            <a href="{{ link.1 }}">{{ link.0 }}</a><br/>
+        {% endfor %}
+        </h1>
+    </div>
+</body>
+</html>

@@ -5,12 +5,21 @@ from django.utils.safestring import mark_safe
 from base.constants import (
     AttributesEnum,
     BaseCapitalizedEnum,
-    NPCClass,
-    NPCRace,
+    NPCClassEnum,
+    NPCRaceEnum,
     SkillsEnum,
+    WeaponPropertyEnum,
 )
 from base.models import NPC, Armor, Class, Encounter, Race
-from base.models.models import RaceBonus, Weapon, WeaponType
+from base.models.models import (
+    ClassBonus,
+    Implement,
+    ImplementType,
+    Power,
+    RaceBonus,
+    Weapon,
+    WeaponType,
+)
 
 
 class AdminMixin:
@@ -45,12 +54,24 @@ class RaceBonusInline(admin.TabularInline):
 
 
 class RaceAdmin(AdminMixin, admin.ModelAdmin):
+    autocomplete_fields = ('available_weapon_types',)
     inlines = (RaceBonusInline,)
-    ENUM = NPCRace
+    ENUM = NPCRaceEnum
+
+
+class ClassBonusInline(admin.TabularInline):
+    model = ClassBonus
+
+    def save_model(self, request, obj, form, change):
+        obj.name = ' '.join(item.capitalize() for item in obj.name.split())
+        return super().save_model(request, obj, form, change)
 
 
 class ClassAdmin(AdminMixin, admin.ModelAdmin):
-    ENUM = NPCClass
+    inlines = (ClassBonusInline,)
+    autocomplete_fields = ('available_weapon_types',)
+    save_on_top = True
+    ENUM = NPCClassEnum
 
 
 class NPCAdmin(admin.ModelAdmin):
@@ -71,11 +92,15 @@ class NPCAdmin(admin.ModelAdmin):
         'trained_skills',
         'armor',
         'shield',
-        'attack_attributes',
-        'attack_bonus',
+        'weapon_attack_attributes',
+        'implement_attack_attributes',
         'npc_link',
+        'weapons',
+        'implements',
     ]
     readonly_fields = ('npc_link',)
+    autocomplete_fields = ('weapons', 'implements')
+    list_filter = ('race', 'klass')
     save_as = True
 
     def formfield_for_choice_field(self, db_field, request, **kwargs):
@@ -103,11 +128,26 @@ class NPCAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'race':
             kwargs["queryset"] = Race.objects.annotate(
-                title=NPCRace.generate_case()
+                title=NPCRaceEnum.generate_case()
             ).order_by('title')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_fields(self, request, obj=None):
+        if not obj:
+            return (
+                'name',
+                'description',
+                'race',
+                'klass',
+                'sex',
+                'level',
+                'base_strength',
+                'base_constitution',
+                'base_dexterity',
+                'base_intelligence',
+                'base_wisdom',
+                'base_charisma',
+            )
         result = super().get_fields(request, obj=obj)
         level_attrs_bonuses = {
             4: 'level4_bonus_attrs',
@@ -117,10 +157,7 @@ class NPCAdmin(admin.ModelAdmin):
             24: 'level24_bonus_attrs',
             28: 'level28_bonus_attrs',
         }
-        if not obj:
-            return result
         for level, attr in level_attrs_bonuses.items():
-            print(level, attr, obj.level >= level)
             if obj.level >= level and attr not in result:
                 result.append(attr)
         return result
@@ -137,13 +174,24 @@ class EncounterAdmin(admin.ModelAdmin):
         'description',
         'npcs',
         'encounter_link',
+        'spreadsheet',
     )
-    readonly_fields = ('encounter_link',)
+    readonly_fields = (
+        'encounter_link',
+        'spreadsheet',
+    )
 
     def encounter_link(self, obj):
         return mark_safe(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
 
     encounter_link.short_description = 'Страница сцены'
+
+    def spreadsheet(self, obj):
+        return mark_safe(
+            f'<a href="{obj.excel_url}" target="_blank">{obj.excel_url}</a>'
+        )
+
+    spreadsheet.short_description = 'Таблица'
 
 
 class ArmorAdmin(admin.ModelAdmin):
@@ -151,11 +199,70 @@ class ArmorAdmin(admin.ModelAdmin):
 
 
 class WeaponTypeAdmin(admin.ModelAdmin):
-    pass
+    ordering = ('category', 'handedness', 'name')
+    list_display = ('name', 'handedness', 'category', 'display_properties')
+    list_filter = ('handedness', 'category')
+    search_fields = ('name',)
+    save_as = True
+
+    def display_properties(self, obj):
+        return sorted(
+            item.value for item in WeaponPropertyEnum if item.name in obj.properties
+        )
+
+    display_properties.short_description = 'Свойства'
 
 
 class WeaponAdmin(admin.ModelAdmin):
-    pass
+    ordering = (
+        'weapon_type__category',
+        'weapon_type__handedness',
+        'name',
+        'enchantment',
+    )
+    list_display = ('__str__', 'handedness', 'category', 'display_properties')
+    list_filter = ('weapon_type__handedness', 'weapon_type__category')
+    search_fields = ('name', 'weapon_type__name')
+    autocomplete_fields = ('weapon_type',)
+
+    def handedness(self, obj):
+        return obj.weapon_type.get_handedness_display()
+
+    handedness.short_description = 'Одноручное/Двуручное'
+
+    def category(self, obj):
+        return obj.weapon_type.get_category_display()
+
+    category.short_description = 'Категория'
+    category.admin_order_field = 'category'
+
+    def display_properties(self, obj):
+        return sorted(
+            item.value
+            for item in WeaponPropertyEnum
+            if item.name in obj.weapon_type.properties
+        )
+
+    display_properties.short_description = 'Свойства'
+
+
+class ImplementTypeAdmin(admin.ModelAdmin):
+    search_fields = ('name',)
+    autocomplete_fields = ('inherited_weapon_type',)
+
+    def save_model(self, request, obj, form, change):
+        obj.name = (
+            form.cleaned_data['name'] or form.cleaned_data['inherited_weapon_type'].name
+        )
+        return super().save_model(request, obj, form, change)
+
+
+class ImplementAdmin(admin.ModelAdmin):
+    search_fields = ('name', 'implement_type__name')
+
+
+class PowerAdmin(admin.ModelAdmin):
+    save_as = True
 
 
 admin.site.register(Race, RaceAdmin)
@@ -165,6 +272,9 @@ admin.site.register(Encounter, EncounterAdmin)
 admin.site.register(Armor, ArmorAdmin)
 admin.site.register(WeaponType, WeaponTypeAdmin)
 admin.site.register(Weapon, WeaponAdmin)
+admin.site.register(ImplementType, ImplementTypeAdmin)
+admin.site.register(Implement, ImplementAdmin)
+admin.site.register(Power, PowerAdmin)
 
 admin.site.unregister(Group)
 admin.site.unregister(User)

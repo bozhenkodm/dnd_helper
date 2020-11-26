@@ -115,15 +115,19 @@
 
         </tr>
     </table>
-    <table>
+    <table border="1">
         <tr>
             <th>Характеристика</th>
+            <th>Оружие</th>
             <th>Бонус атаки</th>
+            <th>Урон</th>
         </tr>
         {% for item in object.attacks %}
             <tr>
                 <td>{{ item.0 }}</td>
                 <td>{{ item.1 }}</td>
+                <td>{{ item.2 }}</td>
+                <td>{{ item.3 }}</td>
             </tr>
         {% endfor %}
     </table>

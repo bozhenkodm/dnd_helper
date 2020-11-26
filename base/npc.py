@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 
-from base.constants import NPCClass, NPCRace
+from base.constants import NPCClassEnum, NPCRaceEnum
 
 
 @dataclass()
 class Race:
-    title: NPCRace
+    title: NPCRaceEnum
     speed: int
 
     fortitude_bonus: int = 0
@@ -15,15 +15,15 @@ class Race:
 
 @dataclass()
 class Class:
-    title: NPCClass
+    title: NPCClassEnum
 
 
 @dataclass()
 class NPC:
     name: str
-    race: NPCRace
-    klass: NPCClass
+    race: NPCRaceEnum
+    klass: NPCClassEnum
 
 
 class Warlord(Class):
-    title = NPCClass.WARLORD
+    title = NPCClassEnum.WARLORD

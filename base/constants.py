@@ -1,6 +1,7 @@
 from enum import Enum
 from functools import partial
 from random import randint
+from typing import Union
 
 from django.db import models
 
@@ -9,9 +10,17 @@ d6 = partial(randint, 1, 6)
 d8 = partial(randint, 1, 8)
 d10 = partial(randint, 1, 10)
 d12 = partial(randint, 1, 12)
+d20 = partial(randint, 1, 20)
+d100 = partial(randint, 1, 100)
 
 
 class BaseCapitalizedEnum(str, Enum):
+    # def __new__(cls, value, order=0):
+    #     obj = str.__new__(cls, value)
+    #     obj._value_ = value
+    #     obj.order = order
+    #     return obj
+
     def _generate_next_value_(name, start, count, last_values):
         return name.lower().capitalize()
 
@@ -61,7 +70,7 @@ class VisionEnum(BaseCapitalizedEnum):
     DARK = 'Тёмное'
 
 
-class NPCRace(BaseCapitalizedEnum):
+class NPCRaceEnum(BaseCapitalizedEnum):
     DEVA = 'Дев'
     DOPPELGANGER = 'Доппельгангер'
     DRAGONBORN = 'Драконорожденный'
@@ -92,7 +101,7 @@ class NPCRace(BaseCapitalizedEnum):
         return self in (self.SHIFTER_LONGTEETH, self.SHIFTER_RAZORCLAW)
 
 
-class NPCClass(BaseCapitalizedEnum):
+class NPCClassEnum(BaseCapitalizedEnum):
     AVENGER = 'Каратель'
     BARBARIAN = 'Варвар'
     BARD = 'Бард'
@@ -165,7 +174,8 @@ class ShieldTypeEnum(BaseCapitalizedEnum):
     HEAVY = 'Тяжелый'
 
 
-class WeaponGroup(BaseCapitalizedEnum):
+class WeaponGroupEnum(BaseCapitalizedEnum):
+    # Рукопашное
     AXE = 'Топор'
     MACE = 'Булава'
     LIGHT_BLADE = 'Лёгкий клинок'
@@ -176,43 +186,148 @@ class WeaponGroup(BaseCapitalizedEnum):
     HAMMER = 'Молот'
     PICK = 'Кирка'
     POLEARM = 'Древковое'
+    # Дальнобойное
+    SLING = 'Праща'
+    CROSSBOW = 'Арбалет'
+    BOW = 'Лук'
 
 
-class WeaponCategory(BaseCapitalizedEnum):
-    SIMPLE = 'Простое'
-    MILITARY = 'Воинское'
-    SUPERIOR = 'Превосходное'
-
-
-class DamageDice(Enum):
-    D4 = ('1k4', lambda: d4())
-    D6 = ('1k6', lambda: d6())
-    D8 = ('1k8', lambda: d8())
-    D10 = ('1k10', lambda: d10())
-    D12 = ('1k12', lambda: d12())
-    D2_4 = ('2k4', lambda: d4() + d4())
-    D2_6 = ('2k6', lambda: d6() + d6())
-    D2_8 = ('2k8', lambda: d8() + d8())
-    D2_10 = ('2k10', lambda: d10() + d10())
-
-    @classmethod
-    def generate_choices(cls, is_sorted=True):
-        if is_sorted:
-            return sorted(((item.name, item.title) for item in cls), key=lambda x: x[1])
-        return ((item.name, item.title) for item in cls)
+class WeaponCategoryEnum(BaseCapitalizedEnum):
+    SIMPLE = 'Простое рукопашное'
+    MILITARY = 'Воинское рукопашное'
+    SUPERIOR = 'Превосходное рукопашное'
+    SIMPLE_RANGED = 'Простое дальнобойное'
+    MILITARY_RANGED = 'Воинское дальнобойное'
+    SUPERIOR_RANGED = 'Превосходное дальнобойное'
 
     @property
-    def title(self):
-        return self.value[0]
-
-    def roll(self):
-        return self.value[1]()
+    def is_melee(self):
+        return self in (self.SIMPLE, self.MILITARY, self.SUPERIOR)
 
 
-class WeaponProperty(BaseCapitalizedEnum):
+class DiceEnum(BaseCapitalizedEnum):
+    D4 = 'k4'
+    D6 = 'k6'
+    D8 = 'k8'
+    D10 = 'k10'
+    D12 = 'k12'
+    D20 = 'k20'
+    D100 = 'k100'
+
+    def roll(self, dice_number):
+        dice_func = {
+            self.D4: lambda: d4(),
+            self.D6: lambda: d6(),
+            self.D8: lambda: d8(),
+            self.D10: lambda: d10(),
+            self.D12: lambda: d12(),
+            self.D20: lambda: d20(),
+            self.D100: lambda: d100(),
+        }[self]
+        return sum(dice_func() for _ in range(dice_number))
+
+
+class WeaponPropertyEnum(BaseCapitalizedEnum):
     VERSATILE = 'Универсальное'
     LIGHT_THROWN = 'Лёгкое метательное'
     OFF_HAND = 'Дополнительное'
     HEAVY_THROWN = 'Тяжелое метательное'
     HIGH_CRIT = 'Высококритичное'
     REACH = 'Досягаемость'
+
+    LOAD_FREE = 'Зарядка свободным'
+    LOAD_MINOR = 'Зарядка малым'
+    SMALL = 'Маленький'
+
+
+class WeaponHandednessEnum(BaseCapitalizedEnum):
+    ONE = 'Одноручное'
+    TWO = 'Двуручное'
+
+
+class PowerSourceEnum(BaseCapitalizedEnum):
+    MARTIAL = 'Воинский'
+    DIVINE = 'Духовный'
+    ARCANE = 'Магический'
+    PRIMAL = 'Первородный'
+
+
+class PowerFrequencyEnum(BaseCapitalizedEnum):
+    AT_WILL = 'Неограниченный'
+    ENCOUNTER = 'На сцену'
+    DAYLY = 'На день'
+
+
+class PowerDamageTypeEnum(BaseCapitalizedEnum):
+    NONE = 'Без типа'
+    ACID = 'Кислота'
+    COLD = 'Холод'
+    FIRE = 'Огонь'
+    LIGHTNING = 'Электричество'
+    NECROTIC = 'Некротическая энергия'
+    POISON = 'Яд'
+    RADIANT = 'Излучение'
+
+
+class PowerEffectTypeEnum(BaseCapitalizedEnum):
+    CHARM = 'Очарование'
+    CONJURATION = 'Иллюзия'
+    FEAR = 'Страх'
+    HEALING = 'Исцеление'
+    POISON = 'Яд'
+    POLYMORPH = 'Превращение'
+    RELIABLE = 'Надежный'
+    SLEEP = 'Сон'
+    TELEPORTATION = 'Телепортация'
+    ZONE = 'Зона'
+
+
+class AccessoryTypeEnum(BaseCapitalizedEnum):
+    IMPLEMENT = 'Инструмент'
+    WEAPON = 'Оружие'
+
+
+class DefenceTypeEnum(BaseCapitalizedEnum):
+    ARMOR_CLASS = 'КД'
+    FORTITUDE = 'Стойкость'
+    REFLEX = 'Реакция'
+    WILL = 'Воля'
+
+
+class PowerRangeType(BaseCapitalizedEnum):
+    MELEE_WEAPON = 'Рукопашное оружие'
+    MELEE_DISTANCE = 'Рукопашное (дистанция)'
+    MELEE_TOUCH = 'Рукопашное касание'
+    RANGED_WEAPON = 'Дальнобойное оружие'
+    RANGED_DISTANCE = 'Дальнобойное (дистанция)'
+    RANGED_SIGHT = 'Дальнобойное (видимость)'
+    CLOSE_BURST = 'Ближняя вспышка'
+    CLOSE_BLAST = 'Ближняя волна'
+    AREA_BURST = 'Зональная вспышка'
+    AREA_WALL = 'Стена'
+
+    @property
+    def is_area(self):
+        return self in (self.AREA_WALL, self.AREA_BURST)
+
+    @property
+    def is_melee(self):
+        return self in (self.MELEE_DISTANCE, self.MELEE_TOUCH, self.MELEE_WEAPON)
+
+    @property
+    def is_ranged(self):
+        return self in (self.RANGED_SIGHT, self.RANGED_WEAPON, self.RANGED_DISTANCE)
+
+    @property
+    def is_provokable(self):
+        return self.is_ranged or self.is_area
+
+
+print(
+    '\n'.join(
+        f'{item.upper()} = \'\''
+        for item in '''
+
+'''.split()
+    )
+)
