@@ -43,9 +43,11 @@ class AttackMixin:
             enchantment = min(implement.enchantment, self._magic_threshold)
             bonus = self._level_bonus + self.half_level + enchantment
             for power in self.klass.powers.filter(
-                    accessory_type=AccessoryTypeEnum.IMPLEMENT.name
+                accessory_type=AccessoryTypeEnum.IMPLEMENT.name
             ):
-                attr_modifier = self.modifier(getattr(self, power.attack_attribute.lower()))
+                attr_modifier = self.modifier(
+                    getattr(self, power.attack_attribute.lower())
+                )
                 result.append(
                     (
                         AttributesEnum[power.attack_attribute].value,
@@ -60,9 +62,11 @@ class AttackMixin:
             enchantment = min(weapon.enchantment, self._magic_threshold)
             bonus = self._level_bonus + self.half_level + enchantment
             for power in self.klass.powers.filter(
-                    accessory_type=AccessoryTypeEnum.IMPLEMENT.name
+                accessory_type=AccessoryTypeEnum.IMPLEMENT.name
             ):
-                attr_modifier = self.modifier(getattr(self, power.attack_attribute.lower()))
+                attr_modifier = self.modifier(
+                    getattr(self, power.attack_attribute.lower())
+                )
                 result.append(
                     (
                         AttributesEnum[power.attack_attribute].value,

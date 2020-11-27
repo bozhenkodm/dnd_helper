@@ -67,3 +67,12 @@ class AttributeMixin:
         return self.base_charisma + self._calculate_attribute_bonus(
             AttributesEnum.CHARISMA
         )
+
+    def get_attribute_text(self, attribute: AttributesEnum):
+        attribute_value = getattr(self, attribute.name.lower())
+        modifier = self.modifier(attribute_value)
+        return f'{attribute.value[:3]} {attribute_value} ({modifier + self.half_level})'
+
+    @property
+    def attributes_texts(self) -> list:
+        return list(self.get_attribute_text(attr) for attr in AttributesEnum)

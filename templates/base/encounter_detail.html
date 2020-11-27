@@ -2,8 +2,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <style>
-    @media print {
-    .pagebreak { page-break-before: always; } /* page-break-after works, as well */
+@media print {
+.pagebreak { page-break-before: always; } /* page-break-after works, as well */
+}
+.npc-line {
+    width: 100%; clear: both;
+}
+.npc-header {
+    background-color: black; color: white; -webkit-print-color-adjust: exact;
+}
+.attr-header {
+    background-color: lightgray; -webkit-print-color-adjust: exact;
 }
 </style>
 <head>
@@ -12,130 +21,63 @@
 </head>
 <body>
 
+<div style="width: 350px; font-size: x-small">
 {% for npc in object.npcs.all %}
-    <table>
-        <tr>
-            <th>
-                {{ npc.name }} ({{ npc.get_sex_display }}), {{ npc.race }} {{ npc.klass }} {{ npc.level }} уровня.
-            </th>
-        </tr>
-        <tr>
-            <td><a href="{{ npc.url }}" target="_blank">подробнее</a></td>
-        </tr>
-    </table>
-    <table border="1">
-        <tr>
-        <td>
-        <table>
+    <div class="npc-line">
+        <div class="npc-header" style="float: left; width: 50%"><span><b>{{ npc.name }}</b></span></div>
+        <div class="npc-header" style="float: right; width: 50%"><span style="float: right">{{ npc.klass }} {{ npc.level }} уровня</span></div>
+    </div>
+    <div class="npc-line">
+        <div><span>Хиты {{ npc.max_hit_points }}; Ранен {{ npc.bloodied }}; Исцеление {{ npc.surge }}; Исцелений {{ npc.surges }}</span></div>
+        <div><span>КД {{ npc.armor_class }}; Стойкость {{ npc.fortitude }}; Реакция {{ npc.reflex }}; Воля {{ npc.will }}</span></div>
+    </div>
+    <div class="npc-line">
+        <div><span>Инициатива +{{ npc.initiative }}; Внимательность +{{ npc.insight }}; {{ npc.race.get_vision_display }} зрение</span></div>
+        <div><span>Скорость {{ npc.speed }}</span></div>
+    </div>
+    <div class="npc-line">
+        <span>{{ npc.race_and_class_feats|join:"; " }}</span>
+    </div>
+    {% for power in npc.powers_calculated %}
+        <div class="npc-line attr-header"><span><b>{{ power.name }}.</b> {{ power.keywords|join:", " }}</span></div>
+        {% if power.dice_num %}
+            <div class="npc-line">
+                <span>Атака: {{ power.attack }} против {{ power.get_defence_display }};</span>
+            </div>
+        {% endif %}
+        {% if power.dice_num or power.hit_effect %}
+            <div class="npc-line"><span><i>Попадание:</i> Урон {{ power.dice_num }}{{ power.dice }}+{{ power.attack_modifier|add:power.enchantment}};
+                {{ power.hit_effect }}</span></div>
+        {% elif power.hit_effect %}
+            <div class="npc-line"><span><i>Попадание:</i> {{ power.hit_effect }};</span></div>
+        {% endif %}
+        {% if power.miss_effect %}
+            <div class="npc-line"><span><i>Промах:</i> {{ power.miss_effect }};</span></div>
+        {% endif %}
+        {% if power.effect %}
+            <div class="npc-line"><span><i>Эффект:</i> {{ power.effect }};</span></div>
+        {% endif %}
+    {% endfor %}
+    <div class="npc-line attr-header"><span><b>Навыки:</b> {{ npc.trained_skills_text|join:", " }}</span></div>
+    <div class="npc-line" >
+        <table style="width: 100%">
             <tr>
-                <td>Сил</td>
-                <td>{{ npc.strength }}</td>
+                <td style="width: 33%">{{ npc.attributes_texts.0 }}</td>
+                <td style="width: 33%">{{ npc.attributes_texts.2 }}</td>
+                <td style="width: 33%">{{ npc.attributes_texts.4 }}</td>
             </tr>
             <tr>
-                <td>Тел</td>
-                <td>{{ npc.constitution }}</td>
-            </tr>
-            <tr>
-                <td>Лов</td>
-                <td>{{ npc.dexterity }}</td>
-            </tr>
-            <tr>
-                <td>Инт</td>
-                <td>{{ npc.intelligence }}</td>
-            </tr>
-            <tr>
-                <td>Муд</td>
-                <td>{{ npc.wisdom }}</td>
-            </tr>
-            <tr>
-                <td>Хар</td>
-                <td>{{ npc.charisma }}</td>
+                <td style="width: 33%">{{ npc.attributes_texts.1 }}</td>
+                <td style="width: 33%">{{ npc.attributes_texts.3 }}</td>
+                <td style="width: 33%">{{ npc.attributes_texts.5 }}</td>
             </tr>
         </table>
-        </td>
-
-        <td>
-        <table>
-             <tr>
-                <td>КД</td>
-                <td>{{ npc.armor_class }}</td>
-            </tr>
-            <tr>
-                <td>Стойкость</td>
-                <td>{{ npc.fortitude }}</td>
-            </tr>
-            <tr>
-                <td>Реакция</td>
-                <td>{{ npc.reflex }}</td>
-            </tr>
-            <tr>
-                <td>Воля</td>
-                <td>{{ npc.will }}</td>
-            </tr>
-
-        </table>
-        </td>
-        <td>
-        <table>
-            <tr>
-                <td>ХП</td>
-                <td>{{ npc.max_hit_points }}</td>
-            </tr>
-            <tr>
-                <td>Ранен</td>
-                <td>{{ npc.bloodied }}</td>
-            </tr>
-            <tr>
-                <td>Исцеление</td>
-                <td>{{ npc.surge }}</td>
-            </tr>
-            <tr>
-                <td>Исцелений</td>
-                <td>{{ npc.surges }}</td>
-            </tr>
-            <tr>
-                <td>Пасс. внимательность</td>
-                <td>{{ npc.insight|add:10}}</td>
-            </tr>
-            <tr>
-                <td>Пасс. проницательность</td>
-                <td>{{ npc.perception|add:10 }}</td>
-            </tr>
-            <tr>
-                <td>Инициатива</td>
-                <td>{{ npc.initiative }}</td>
-            </tr>
-        </table>
-        </td>
-    </table>
-    <table>
-        <tr>
-            <th>Тренированные навыки:</th>
-            {% for skill in npc.trained_skills %}
-                <th>
-                    {{ skills|get_item:skill }}{% if not forloop.last %},{% endif %}
-                </th>
-                {% endfor %}
-        </tr>
-    </table>
-    <table border="1">
-        <tr>
-            <th>Характеристика</th>
-            <th>Оружие</th>
-            <th>Бонус атаки</th>
-            <th>Урон</th>
-        </tr>
-        {% for item in npc.attacks %}
-            <tr>
-                <td>{{ item.0 }}</td>
-                <td>{{ item.1 }}</td>
-                <td>{{ item.2 }}</td>
-                <td>{{ item.3 }}</td>
-            </tr>
-        {% endfor %}
-    </table>
-<hr/>
-<div {% cycle '' '' 'class="pagebreak"' %}> </div>
+    </div>
+    <br><hr>
+    <div {% cycle '' 'class="pagebreak"' %}> </div>
 {% endfor %}
+</div>
+
+
 </body>
 </html>

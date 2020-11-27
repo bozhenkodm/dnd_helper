@@ -32,24 +32,6 @@ class EncounterDetailView(DetailView):
         return context
 
 
-class EncounterExcelView(DetailView):
-    model = Encounter
-
-    def get(self, request, *args, **kwargs):
-        encounter = self.get_object()
-        output = encounter.generate_excel()
-        output.seek(0)
-
-        response = HttpResponse(
-            output.read(),
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
-        response[
-            'Content-Disposition'
-        ] = f'attachment;filename="encounter_{encounter.id}.xlsx"'
-        return response
-
-
 class MainView(TemplateView):
     template_name = 'base/main.html'
 

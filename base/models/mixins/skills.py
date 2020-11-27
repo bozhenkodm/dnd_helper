@@ -107,3 +107,10 @@ class SkillMixin:
     def thievery(self):
         """Воровство"""
         return self._calculate_skill(SkillsEnum.THIEVERY)
+
+    @property
+    def trained_skills_text(self):
+        return list(
+            f'{SkillsEnum[skill].value} + {self._calculate_skill(SkillsEnum[skill])}'
+            for skill in self.trained_skills
+        )

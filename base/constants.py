@@ -1,7 +1,6 @@
 from enum import Enum
 from functools import partial
 from random import randint
-from typing import Union
 
 from django.db import models
 
@@ -15,12 +14,6 @@ d100 = partial(randint, 1, 100)
 
 
 class BaseCapitalizedEnum(str, Enum):
-    # def __new__(cls, value, order=0):
-    #     obj = str.__new__(cls, value)
-    #     obj._value_ = value
-    #     obj.order = order
-    #     return obj
-
     def _generate_next_value_(name, start, count, last_values):
         return name.lower().capitalize()
 
@@ -75,6 +68,7 @@ class NPCRaceEnum(BaseCapitalizedEnum):
     DOPPELGANGER = 'Доппельгангер'
     DRAGONBORN = 'Драконорожденный'
     DROW = 'Дроу'
+    DUERGAR = 'Дуэргар'
     DWARF = 'Дварф'
     ELADRIN = 'Эладрин'
     ELF = 'Эльф'
@@ -259,7 +253,7 @@ class PowerFrequencyEnum(BaseCapitalizedEnum):
 
 
 class PowerDamageTypeEnum(BaseCapitalizedEnum):
-    NONE = 'Без типа'
+    NONE = ''
     ACID = 'Кислота'
     COLD = 'Холод'
     FIRE = 'Огонь'
@@ -280,6 +274,17 @@ class PowerEffectTypeEnum(BaseCapitalizedEnum):
     SLEEP = 'Сон'
     TELEPORTATION = 'Телепортация'
     ZONE = 'Зона'
+
+
+class PowerActionTypeEnum(BaseCapitalizedEnum):
+    STANDARD = 'Стандартное действие'
+    MINOR = 'Малое действие'
+    FREE = 'Свободное действие'
+    MOVEMENT = 'Действие движения'
+    PROVOKED = 'Провоцированное действие'
+    INTERRUPT = 'Немедленное прерывание'
+    REACTION = 'Немедленный ответ'
+    NO_ACTION = 'Нет действия'
 
 
 class AccessoryTypeEnum(BaseCapitalizedEnum):

@@ -97,6 +97,7 @@ class NPCAdmin(admin.ModelAdmin):
         'npc_link',
         'weapons',
         'implements',
+        'powers',
     ]
     readonly_fields = ('npc_link',)
     autocomplete_fields = ('weapons', 'implements')
@@ -131,6 +132,18 @@ class NPCAdmin(admin.ModelAdmin):
                 title=NPCRaceEnum.generate_case()
             ).order_by('title')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        object_id = request.resolver_match.kwargs.get('object_id', 0)
+        try:
+            instance = self.model.objects.get(id=object_id)
+        except self.model.DoesNotExist:
+            instance = None
+        if db_field.name == 'powers':
+            print(Power.objects.filter(klass_id=object_id))
+            print(object_id)
+            kwargs['queryset'] = Power.objects.filter(klass=instance.klass)
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     def get_fields(self, request, obj=None):
         if not obj:

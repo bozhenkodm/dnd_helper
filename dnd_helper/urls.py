@@ -18,7 +18,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 
-from base.views import EncounterDetailView, EncounterExcelView, MainView, NPCDetailView
+from base.views import EncounterDetailView, MainView, NPCDetailView
 from generator import views
 
 urlpatterns = [
@@ -33,9 +33,4 @@ urlpatterns = [
     ),
     path('npc/detail/<pk>', NPCDetailView.as_view(), name='npc'),
     path('encounter/detail/<pk>', EncounterDetailView.as_view(), name='encounter'),
-    path(
-        'encounter/detail/<pk>/excel',
-        EncounterExcelView.as_view(),
-        name='encounter_excel',
-    ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

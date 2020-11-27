@@ -11,6 +11,7 @@ from base.constants import (
     DiceEnum,
     NPCClassEnum,
     NPCRaceEnum,
+    PowerActionTypeEnum,
     PowerDamageTypeEnum,
     PowerFrequencyEnum,
     PowerRangeType,
@@ -28,7 +29,6 @@ from base.constants import (
 from base.models.mixins.attacks import AttackMixin
 from base.models.mixins.attributes import AttributeMixin
 from base.models.mixins.defences import DefenceMixin
-from base.models.mixins.encounter import ExcelMixin
 from base.models.mixins.skills import SkillMixin
 
 
@@ -78,9 +78,7 @@ class WeaponType(models.Model):
         choices=WeaponCategoryEnum.generate_choices(),
         max_length=WeaponCategoryEnum.max_length(),
     )
-    dice_number = models.PositiveSmallIntegerField(
-        verbose_name='Количество кубов', default=1
-    )
+    dice_number = models.SmallIntegerField(verbose_name='Количество кубов', default=1)
     damage_dice = models.CharField(
         verbose_name='Кость урона',
         choices=DiceEnum.generate_choices(is_sorted=False),
@@ -336,6 +334,12 @@ class Power(models.Model):
         choices=PowerFrequencyEnum.generate_choices(is_sorted=False),
         max_length=PowerFrequencyEnum.max_length(),
     )
+    action_type = models.CharField(
+        verbose_name='Действие',
+        choices=PowerActionTypeEnum.generate_choices(is_sorted=False),
+        max_length=PowerActionTypeEnum.max_length(),
+        default=PowerActionTypeEnum.STANDARD.name,
+    )
     klass = models.ForeignKey(
         Class,
         related_name='powers',
@@ -361,9 +365,7 @@ class Power(models.Model):
         choices=PowerDamageTypeEnum.generate_choices(),
         default=PowerDamageTypeEnum.NONE.name,
     )
-    dice_number = models.PositiveSmallIntegerField(
-        verbose_name='Количество кубов', default=1
-    )
+    dice_number = models.SmallIntegerField(verbose_name='Количество кубов', default=1)
     damage_dice = models.CharField(
         verbose_name='Кость урона',
         null=True,
@@ -382,8 +384,8 @@ class Power(models.Model):
         max_length=PowerRangeType.max_length(),
         default=PowerRangeType.MELEE_WEAPON,
     )
-    range = models.PositiveSmallIntegerField(verbose_name='Дальность', default=1)
-    burst = models.PositiveSmallIntegerField(verbose_name='Площадь', default=0)
+    range = models.SmallIntegerField(verbose_name='Дальность', default=1)
+    burst = models.SmallIntegerField(verbose_name='Площадь', default=0)
     hit_effect = models.TextField(verbose_name='Попадание', null=True, blank=True)
     miss_effect = models.TextField(verbose_name='Промах', null=True, blank=True)
     effect = models.TextField(verbose_name='Эффект', null=True, blank=True)
@@ -401,6 +403,50 @@ class Power(models.Model):
     @property
     def damage(self):
         return f'{self.dice_number}{self.get_damage_dice_display()}'
+
+    @property
+    def attack_type(self):
+        if self.range_type in (
+            PowerRangeType.MELEE_WEAPON.name,
+            PowerRangeType.MELEE_TOUCH.name,
+            PowerRangeType.RANGED_SIGHT.name,
+            PowerRangeType.RANGED_WEAPON.name,
+        ):
+            return self.get_range_type_display()
+        if self.range_type in (
+            PowerRangeType.MELEE_DISTANCE.name,
+            PowerRangeType.RANGED_DISTANCE.name,
+        ):
+            return f'{self.get_range_type_display().split()[0]} {self.range}'
+        if self.range_type in (
+            PowerRangeType.CLOSE_BURST.name,
+            PowerRangeType.CLOSE_BLAST.name,
+        ):
+            return f'{self.get_range_type_display()} {self.burst}'
+        if self.range_type in (
+            PowerRangeType.AREA_BURST.name,
+            PowerRangeType.AREA_WALL.name,
+        ):
+            return (
+                f'{self.get_range_type_display()} {self.burst} в пределах {self.range}'
+            )
+        print('1'*88)
+        print(self.range_type)
+        print(self)
+        raise ValueError('Wrong attack type')
+
+    @property
+    def keywords(self):
+        return (
+            self.get_action_type_display(),
+            self.get_accessory_type_display(),
+            self.get_frequency_display(),
+            self.attack_type,
+        ) + tuple(
+            PowerDamageTypeEnum[type_].value
+            for type_ in self.damage_type
+            if type_ != PowerDamageTypeEnum.NONE.name
+        )
 
 
 class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
@@ -431,20 +477,20 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
         verbose_name='Уровень',
     )
 
-    base_strength = models.PositiveSmallIntegerField(verbose_name='Сила (базовая)')
-    base_constitution = models.PositiveSmallIntegerField(
+    base_strength = models.SmallIntegerField(verbose_name='Сила (базовая)')
+    base_constitution = models.SmallIntegerField(
         verbose_name='Телосложение (базовое)',
     )
-    base_dexterity = models.PositiveSmallIntegerField(
+    base_dexterity = models.SmallIntegerField(
         verbose_name='Ловкость (базовая)',
     )
-    base_intelligence = models.PositiveSmallIntegerField(
+    base_intelligence = models.SmallIntegerField(
         verbose_name='Интеллект (базовый)',
     )
-    base_wisdom = models.PositiveSmallIntegerField(
+    base_wisdom = models.SmallIntegerField(
         verbose_name='Мудрость (базовая)',
     )
-    base_charisma = models.PositiveSmallIntegerField(
+    base_charisma = models.SmallIntegerField(
         verbose_name='Харизма (базовая)',
     )
 
@@ -535,6 +581,8 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
         Implement, verbose_name='Инструменты', blank=True
     )
 
+    powers = models.ManyToManyField(Power, blank=True)
+
     def __str__(self):
         return f'{self.name} {self.race} {self.klass} {self.level} уровня'
 
@@ -597,8 +645,105 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
     def initiative(self):
         return self.modifier(self.dexterity) + self.half_level
 
+    @property
+    def speed(self):
+        if self.armor and self.race.name != NPCRaceEnum.DWARF.name:
+            penalty = self.armor.speed_penalty
+        else:
+            penalty = 0
+        return self.race.speed - penalty
 
-class Encounter(ExcelMixin, models.Model):
+    @property
+    def race_and_class_feats(self):
+        return self.race.bonuses.values_list('name', flat=True).union(
+            self.klass.bonuses.values_list('name', flat=True)
+        )
+
+    def powers_calculated(self):
+        qs = self.powers.none()
+        kwargs = (
+            {
+                'attack_attribute': item.name,
+                'then': models.Value(
+                    self.modifier(getattr(self, item.name.lower())),
+                    output_field=models.SmallIntegerField(),
+                ),
+            }
+            for item in AttributesEnum
+        )
+        whens = (models.When(**kws) for kws in kwargs)
+        attribute_case = models.Case(*whens, output_field=models.SmallIntegerField())
+        frequency_case = models.Case(
+            models.When(frequency=PowerFrequencyEnum.AT_WILL, then=models.Value(1)),
+            models.When(frequency=PowerFrequencyEnum.ENCOUNTER, then=models.Value(2)),
+            models.When(frequency=PowerFrequencyEnum.DAYLY, then=models.Value(3)),
+            output_field=models.PositiveSmallIntegerField(),
+        )
+        bonus = self._level_bonus + self.half_level
+        for weapon in self.weapons.all():
+            if self.is_weapon_proficient(weapon):
+                bonus += weapon.weapon_type.prof_bonus
+            qs = qs.union(
+                self.powers.annotate(
+                    enchantment=models.Value(
+                        min(weapon.enchantment, self._magic_threshold),
+                        output_field=models.SmallIntegerField(),
+                    ),
+                    attack_modifier=attribute_case,
+                    attack=models.F('attack_modifier')
+                    + models.Value(bonus, output_field=models.SmallIntegerField())
+                    + models.F('enchantment'),
+                    dice_num=models.Value(
+                        weapon.weapon_type.dice_number,
+                        output_field=models.SmallIntegerField(),
+                    )
+                    * models.F('dice_number'),
+                    dice=models.Value(
+                        weapon.weapon_type.damage_dice, output_field=models.CharField()
+                    ),
+                    frequency_order=frequency_case,
+                ).filter(accessory_type=AccessoryTypeEnum.WEAPON.name)
+            )
+        for implement in self.implements.all():
+            if not self.is_implement_proficient(implement):
+                continue
+            qs = qs.union(
+                self.powers.annotate(
+                    enchantment=models.Value(
+                        min(implement.enchantment, self._magic_threshold),
+                        output_field=models.SmallIntegerField(),
+                    ),
+                    attack_modifier=attribute_case,
+                    attack=models.F('attack_modifier')
+                    + models.Value(bonus, output_field=models.SmallIntegerField())
+                    + models.F('enchantment'),
+                    dice_num=models.F('dice_number'),
+                    dice=models.F('damage_dice'),
+                    frequency_order=frequency_case,
+                ).filter(accessory_type=AccessoryTypeEnum.IMPLEMENT.name)
+            )
+        for weapon in self.weapons.all():
+            if not hasattr(weapon.weapon_type, 'implement_type'):
+                continue
+            qs = qs.union(
+                self.powers.annotate(
+                    enchantment=models.Value(
+                        min(weapon.enchantment, self._magic_threshold),
+                        output_field=models.SmallIntegerField(),
+                    ),
+                    attack_modifier=attribute_case,
+                    attack=models.F('attack_modifier')
+                    + models.Value(bonus, output_field=models.SmallIntegerField())
+                    + models.F('enchantment'),
+                    dice_num=models.F('dice_number'),
+                    dice=models.F('damage_dice'),
+                    frequency_order=frequency_case,
+                ).filter(accessory_type=AccessoryTypeEnum.IMPLEMENT.name)
+            )
+        return qs.order_by('frequency_order')
+
+
+class Encounter(models.Model):
     class Meta:
         verbose_name = 'Сцена'
         verbose_name_plural = 'Сцены'
