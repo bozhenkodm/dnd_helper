@@ -7,10 +7,10 @@ class SkillMixin:
         return {key: 5 for key in self.trained_skills}
 
     def _calculate_skill(self, skill: SkillsEnum) -> int:
-        attribute = getattr(self, skill.get_base_attribute().name.lower())
+        attribute = getattr(self, skill.get_base_attribute().lname)
         result = (
             self.half_level
-            + self.modifier(attribute)
+            + self._modifier(attribute)
             + self._trained_skills_bonuses.get(skill.name, 0)
         )
         if skill in (

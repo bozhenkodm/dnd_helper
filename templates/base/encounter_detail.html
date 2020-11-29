@@ -4,6 +4,7 @@
 <style>
 @media print {
 .pagebreak { page-break-before: always; } /* page-break-after works, as well */
+.pagenotbreak {page-break-inside: avoid}
 }
 .npc-line {
     width: 100%; clear: both;
@@ -21,8 +22,9 @@
 </head>
 <body>
 
-<div style="width: 350px; font-size: x-small">
+<div style="width: 700px; font-size: x-small">
 {% for npc in object.npcs.all %}
+    <div class="pagenotbreak" style="float:{% cycle 'left' 'right' %}; clear: left; width: 48%">
     <div class="npc-line">
         <div class="npc-header" style="float: left; width: 50%"><span><b>{{ npc.name }}</b></span></div>
         <div class="npc-header" style="float: right; width: 50%"><span style="float: right">{{ npc.klass }} {{ npc.level }} уровня</span></div>
@@ -74,7 +76,7 @@
         </table>
     </div>
     <br><hr>
-    <div {% cycle '' 'class="pagebreak"' %}> </div>
+    </div>
 {% endfor %}
 </div>
 

@@ -187,24 +187,13 @@ class EncounterAdmin(admin.ModelAdmin):
         'description',
         'npcs',
         'encounter_link',
-        'spreadsheet',
     )
-    readonly_fields = (
-        'encounter_link',
-        'spreadsheet',
-    )
+    readonly_fields = ('encounter_link',)
 
     def encounter_link(self, obj):
         return mark_safe(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
 
     encounter_link.short_description = 'Страница сцены'
-
-    def spreadsheet(self, obj):
-        return mark_safe(
-            f'<a href="{obj.excel_url}" target="_blank">{obj.excel_url}</a>'
-        )
-
-    spreadsheet.short_description = 'Таблица'
 
 
 class ArmorAdmin(admin.ModelAdmin):
@@ -275,6 +264,10 @@ class ImplementAdmin(admin.ModelAdmin):
 
 
 class PowerAdmin(admin.ModelAdmin):
+    list_filter = (
+        'frequency',
+        'klass',
+    )
     save_as = True
 
 

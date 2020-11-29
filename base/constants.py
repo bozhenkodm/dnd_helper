@@ -33,6 +33,10 @@ class BaseCapitalizedEnum(str, Enum):
     def max_length(cls):
         return max(len(item.name) for item in cls)
 
+    @property
+    def lname(self):
+        return self.name.lower()
+
 
 class SexEnum(BaseCapitalizedEnum):
     M = 'Муж'
@@ -261,6 +265,7 @@ class PowerDamageTypeEnum(BaseCapitalizedEnum):
     NECROTIC = 'Некротическая энергия'
     POISON = 'Яд'
     RADIANT = 'Излучение'
+    SOUND = 'Звук'
 
 
 class PowerEffectTypeEnum(BaseCapitalizedEnum):

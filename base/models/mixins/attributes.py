@@ -23,6 +23,10 @@ class AttributeMixin:
         )
         return Counter(bonus_attrs)
 
+    @staticmethod
+    def _modifier(value):
+        return (value - 10) // 2
+
     @property
     def _tier_attrs_bonus(self):
         return self._tier
@@ -68,9 +72,33 @@ class AttributeMixin:
             AttributesEnum.CHARISMA
         )
 
+    @property
+    def str_mod(self):
+        return self._modifier(self.strength)
+
+    @property
+    def con_mod(self):
+        return self._modifier(self.constitution)
+
+    @property
+    def dex_mod(self):
+        return self._modifier(self.dexterity)
+
+    @property
+    def int_mod(self):
+        return self._modifier(self.intelligence)
+
+    @property
+    def wis_mod(self):
+        return self._modifier(self.wisdom)
+
+    @property
+    def cha_mod(self):
+        return self._modifier(self.charisma)
+
     def get_attribute_text(self, attribute: AttributesEnum):
-        attribute_value = getattr(self, attribute.name.lower())
-        modifier = self.modifier(attribute_value)
+        attribute_value = getattr(self, attribute.lname)
+        modifier = self._modifier(attribute_value)
         return f'{attribute.value[:3]} {attribute_value} ({modifier + self.half_level})'
 
     @property

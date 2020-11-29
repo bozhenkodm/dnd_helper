@@ -430,9 +430,6 @@ class Power(models.Model):
             return (
                 f'{self.get_range_type_display()} {self.burst} в пределах {self.range}'
             )
-        print('1'*88)
-        print(self.range_type)
-        print(self)
         raise ValueError('Wrong attack type')
 
     @property
@@ -620,7 +617,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
         result = self.bloodied // 2
         # У драконорождённых исцеление увеличено
         if self.race.name == NPCRaceEnum.DRAGONBORN.name:
-            result += self.modifier(self.constitution)
+            result += self._modifier(self.constitution)
         return result
 
     @property
@@ -637,13 +634,9 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
         """Количество исцелений"""
         return self._tier + 1
 
-    @staticmethod
-    def modifier(value):
-        return (value - 10) // 2
-
     @property
     def initiative(self):
-        return self.modifier(self.dexterity) + self.half_level
+        return self._modifier(self.dexterity) + self.half_level
 
     @property
     def speed(self):
@@ -659,13 +652,17 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
             self.klass.bonuses.values_list('name', flat=True)
         )
 
+    def _calculate_injected_string(self, string):
+        kwargs = {f'{attr.lname[:3]}_mod': getattr(self, f'{attr.lname[:3]}_mod') for attr in AttributesEnum}
+        return string.format(**kwargs)
+
     def powers_calculated(self):
         qs = self.powers.none()
         kwargs = (
             {
                 'attack_attribute': item.name,
                 'then': models.Value(
-                    self.modifier(getattr(self, item.name.lower())),
+                    self._modifier(getattr(self, item.lname)),
                     output_field=models.SmallIntegerField(),
                 ),
             }
@@ -702,6 +699,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                         weapon.weapon_type.damage_dice, output_field=models.CharField()
                     ),
                     frequency_order=frequency_case,
+                    effect=models.Value(self._calculate_injected_string(models.F('effect')))
                 ).filter(accessory_type=AccessoryTypeEnum.WEAPON.name)
             )
         for implement in self.implements.all():
@@ -720,6 +718,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                     dice_num=models.F('dice_number'),
                     dice=models.F('damage_dice'),
                     frequency_order=frequency_case,
+                    effect=models.Value(self._calculate_injected_string(models.F('effect')))
                 ).filter(accessory_type=AccessoryTypeEnum.IMPLEMENT.name)
             )
         for weapon in self.weapons.all():
@@ -738,6 +737,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                     dice_num=models.F('dice_number'),
                     dice=models.F('damage_dice'),
                     frequency_order=frequency_case,
+                    effect=models.Value(self._calculate_injected_string(models.F('effect')))
                 ).filter(accessory_type=AccessoryTypeEnum.IMPLEMENT.name)
             )
         return qs.order_by('frequency_order')
@@ -762,7 +762,3 @@ class Encounter(models.Model):
     @property
     def url(self):
         return reverse('encounter', kwargs={'pk': self.pk})
-
-    @property
-    def excel_url(self):
-        return reverse('encounter_excel', kwargs={'pk': self.pk})

@@ -19,7 +19,7 @@ class DefenceMixin:
             result += min(self.armor.enchantment, self._magic_threshold)
         if not self.armor or self.armor.is_light:
             result += max(
-                self.modifier(self.dexterity), self.modifier(self.intelligence)
+                self._modifier(self.dexterity), self._modifier(self.intelligence)
             )
         result += self._shield_bonus
         if self.klass.name == NPCClassEnum.BARBARIAN.name:
@@ -38,7 +38,7 @@ class DefenceMixin:
             10
             + self.half_level
             + self._level_bonus
-            + max(self.modifier(self.strength), self.modifier(self.constitution))
+            + max(self._modifier(self.strength), self._modifier(self.constitution))
         )
 
     @property
@@ -47,7 +47,7 @@ class DefenceMixin:
             10
             + self.half_level
             + self._level_bonus
-            + max(self.modifier(self.dexterity), self.modifier(self.intelligence))
+            + max(self._modifier(self.dexterity), self._modifier(self.intelligence))
         )
         result += self._shield_bonus
         if self.klass.name == NPCClassEnum.BARBARIAN.name:
@@ -61,5 +61,5 @@ class DefenceMixin:
             10
             + self.half_level
             + self._level_bonus
-            + max(self.modifier(self.wisdom), self.modifier(self.charisma))
+            + max(self._modifier(self.wisdom), self._modifier(self.charisma))
         )
