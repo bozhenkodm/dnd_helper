@@ -92,8 +92,6 @@ class NPCAdmin(admin.ModelAdmin):
         'trained_skills',
         'armor',
         'shield',
-        'weapon_attack_attributes',
-        'implement_attack_attributes',
         'npc_link',
         'weapons',
         'implements',

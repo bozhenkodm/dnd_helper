@@ -108,7 +108,8 @@ class NPCClassEnum(BaseCapitalizedEnum):
     INVOKER = 'Апостол'
     PALADIN = 'Паладин'
     PRIEST = 'Жрец'
-    RANGER = 'Следопыт'
+    RANGER_MARKSMAN = 'Следопыт (Дальнобойный)'
+    RANGER_MELEE = 'Следопыт (Рукопашник)'
     ROGUE = 'Плут'
     SHAMAN = 'Шаман'
     SORCERER = 'Чародей'
@@ -264,11 +265,13 @@ class PowerDamageTypeEnum(BaseCapitalizedEnum):
     LIGHTNING = 'Электричество'
     NECROTIC = 'Некротическая энергия'
     POISON = 'Яд'
+    PSYCHIC = 'Психическая энергия'
     RADIANT = 'Излучение'
-    SOUND = 'Звук'
+    THUNDER = 'Звук'
 
 
 class PowerEffectTypeEnum(BaseCapitalizedEnum):
+    NONE = ''
     CHARM = 'Очарование'
     CONJURATION = 'Иллюзия'
     FEAR = 'Страх'
@@ -277,6 +280,7 @@ class PowerEffectTypeEnum(BaseCapitalizedEnum):
     POLYMORPH = 'Превращение'
     RELIABLE = 'Надежный'
     SLEEP = 'Сон'
+    STANCE = 'Стойка'
     TELEPORTATION = 'Телепортация'
     ZONE = 'Зона'
 
@@ -304,10 +308,11 @@ class DefenceTypeEnum(BaseCapitalizedEnum):
     WILL = 'Воля'
 
 
-class PowerRangeType(BaseCapitalizedEnum):
+class PowerRangeTypeEnum(BaseCapitalizedEnum):
     MELEE_WEAPON = 'Рукопашное оружие'
     MELEE_DISTANCE = 'Рукопашное (дистанция)'
     MELEE_TOUCH = 'Рукопашное касание'
+    PERSONAL = 'Персональный'
     RANGED_WEAPON = 'Дальнобойное оружие'
     RANGED_DISTANCE = 'Дальнобойное (дистанция)'
     RANGED_SIGHT = 'Дальнобойное (видимость)'
@@ -323,6 +328,10 @@ class PowerRangeType(BaseCapitalizedEnum):
     @property
     def is_melee(self):
         return self in (self.MELEE_DISTANCE, self.MELEE_TOUCH, self.MELEE_WEAPON)
+
+    @property
+    def is_close(self):
+        return self in (self.CLOSE_BURST, self.CLOSE_BLAST)
 
     @property
     def is_ranged(self):
