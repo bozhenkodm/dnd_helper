@@ -70,6 +70,7 @@ class ClassBonusInline(admin.TabularInline):
 class ClassAdmin(AdminMixin, admin.ModelAdmin):
     inlines = (ClassBonusInline,)
     autocomplete_fields = ('available_weapon_types',)
+    search_fields = ('name',)
     save_on_top = True
     ENUM = NPCClassEnum
 
@@ -138,9 +139,7 @@ class NPCAdmin(admin.ModelAdmin):
         except self.model.DoesNotExist:
             instance = None
         if db_field.name == 'powers':
-            print(Power.objects.filter(klass_id=object_id))
-            print(object_id)
-            kwargs['queryset'] = Power.objects.filter(klass=instance.klass)
+            kwargs['queryset'] = Power.objects.filter(classes=instance.klass)
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     def get_fields(self, request, obj=None):
@@ -266,6 +265,7 @@ class PowerAdmin(admin.ModelAdmin):
         'frequency',
         'klass',
     )
+    autocomplete_fields = ('classes',)
     save_as = True
 
 

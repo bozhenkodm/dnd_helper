@@ -325,7 +325,7 @@ class Power(models.Model):
         verbose_name = 'Талант'
         verbose_name_plural = 'Таланты'
 
-    name = models.CharField(verbose_name='Название', max_length=20)
+    name = models.CharField(verbose_name='Название', max_length=40)
     description = models.TextField(verbose_name='Описание', null=True, blank=True)
     frequency = models.CharField(
         verbose_name='Частота использования',
@@ -343,7 +343,17 @@ class Power(models.Model):
         related_name='powers',
         verbose_name='Класс',
         on_delete=models.CASCADE,
-        null=False,
+        null=True,
+        blank=True,
+    )
+    classes = models.ManyToManyField(Class, verbose_name='Классы', blank=True)
+    race = models.ForeignKey(
+        Race,
+        verbose_name='Раса',
+        null=True,
+        on_delete=models.CASCADE,
+        blank=True,
+        related_name='powers',
     )
     level = models.PositiveSmallIntegerField(verbose_name='Уровень', default=1)
     attack_attribute = models.CharField(
@@ -398,6 +408,9 @@ class Power(models.Model):
     miss_effect = models.TextField(verbose_name='Промах', null=True, blank=True)
     effect = models.TextField(verbose_name='Эффект', null=True, blank=True)
     trigger = models.TextField(verbose_name='Триггер', null=True, blank=True)
+    requirement = models.TextField(verbose_name='Триггер', null=True, blank=True)
+    target = models.TextField(verbose_name='Триггер', null=True, blank=True)
+
     parent_power = models.ForeignKey(
         'self',
         verbose_name='Родительский талант',
@@ -407,6 +420,8 @@ class Power(models.Model):
     )
 
     def __str__(self):
+        if self.race:
+            return f'{self.name}, {self.race.get_name_display()}'
         return f'{self.name}, {self.klass.get_name_display()}, {self.get_frequency_display()}'
 
     @property
@@ -672,7 +687,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                 list(str(weapon) for weapon in self.weapons.all())
                 + list(str(implement) for implement in self.implements.all())
                 + [str(self.armor)]
-                + [self.shield],
+                + [self.get_shield_display()],
             )
         )
 
@@ -687,7 +702,9 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                     f'half_{modifier}': mod_value // 2,
                     f'{modifier}_add5': mod_value + 5,
                     f'{modifier}_add1': mod_value + 1,
+                    f'{modifier}_add2': mod_value + 2,
                     f'{modifier}_add_halflevel': mod_value + self.half_level,
+                    'halflevel_add3': self.half_level + 3,
                 }
             )
         if weapon:
@@ -698,6 +715,34 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
     def powers_calculated(self):
         powers = []
         base_bonus = self._level_bonus + self.half_level
+        for power in self.race.powers.all():
+            attack_modifier = (
+                self._modifier(
+                    getattr(self, AttributesEnum[power.attack_attribute].lname)
+                )
+                if power.attack_attribute
+                else 0
+            )
+            powers.append(
+                dict(
+                    name=power.name,
+                    keywords=power.keywords,
+                    enchantment=0,
+                    attack_modifier=attack_modifier,
+                    attack=attack_modifier + base_bonus + power.attack_bonus,
+                    defence=power.get_defence_display(),
+                    dice_number=power.dice_number,
+                    dice=power.get_damage_dice_display(),
+                    frequency_order=list(PowerFrequencyEnum).index(
+                        PowerFrequencyEnum[power.frequency]
+                    ),
+                    hit_effect=self._calculate_injected_string(power.hit_effect),
+                    miss_effect=self._calculate_injected_string(power.miss_effect),
+                    effect=self._calculate_injected_string(power.effect),
+                    trigger=self._calculate_injected_string(power.trigger),
+                    accessory='Расовый',
+                )
+            )
         for power in self.powers.filter(accessory_type=AccessoryTypeEnum.WEAPON.name):
             attack_modifier = self._modifier(
                 getattr(self, AttributesEnum[power.attack_attribute].lname)
@@ -738,7 +783,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
             for weapon in self.weapons.filter(filters):
                 bonus = base_bonus
                 if self.is_weapon_proficient(weapon):
-                    bonus = base_bonus + weapon.weapon_type.prof_bonus
+                    bonus += +weapon.weapon_type.prof_bonus
                 enchantment = min(weapon.enchantment, self._magic_threshold)
                 powers.append(
                     dict(

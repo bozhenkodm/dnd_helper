@@ -81,16 +81,19 @@ class NPCRaceEnum(BaseCapitalizedEnum):
     GNOLL = 'Гнолл'
     GOBLIN = 'Гоблин'
     GOLIATH = 'Голиаф'
-    HUMAN = 'Человек'
     HALFELF = 'Полуэльф'
     HALFLING = 'Полурослик'
     HALFORC = 'Полуорк'
+    HAMADRYAD = 'Гамадриада'
+    HUMAN = 'Человек'
     KALASHTAR = 'Калаштар'
     KOBOLD = 'Кобольд'
     MINOTAUR = 'Минотавр'
     ORC = 'Орк'
+    PIXIE = 'Пикси'
     TIEFLING = 'Тифлинг'
     TREANT = 'Древень'
+    SATYR = 'Сатир'
     SHIFTER_RAZORCLAW = 'Шифтер, бритволапый'
     SHIFTER_LONGTEETH = 'Шифтер, длиннозубый'
     WARFORGED = 'Кованый'
@@ -100,6 +103,7 @@ class NPCRaceEnum(BaseCapitalizedEnum):
 
 
 class NPCClassEnum(BaseCapitalizedEnum):
+    # TODO subtypes or different classes?
     AVENGER = 'Каратель'
     BARBARIAN = 'Варвар'
     BARD = 'Бард'
@@ -111,6 +115,8 @@ class NPCClassEnum(BaseCapitalizedEnum):
     RANGER_MARKSMAN = 'Следопыт (Дальнобойный)'
     RANGER_MELEE = 'Следопыт (Рукопашник)'
     ROGUE = 'Плут'
+    RUNEPRIEST_W = 'Рунный жрец (мстительный молот)'
+    RUNEPRIEST_D = 'Рунный жрец (непокорное слово)'
     SHAMAN = 'Шаман'
     SORCERER = 'Чародей'
     WARDEN = 'Хранитель'
@@ -169,8 +175,8 @@ class ArmorTypeEnum(BaseCapitalizedEnum):
 
 
 class ShieldTypeEnum(BaseCapitalizedEnum):
-    LIGHT = 'Лёгкий'
-    HEAVY = 'Тяжелый'
+    LIGHT = 'Лёгкий щит'
+    HEAVY = 'Тяжелый щит'
 
 
 class WeaponGroupEnum(BaseCapitalizedEnum):
@@ -252,6 +258,7 @@ class PowerSourceEnum(BaseCapitalizedEnum):
 
 
 class PowerFrequencyEnum(BaseCapitalizedEnum):
+    PASSIVE = 'Пассивный'
     AT_WILL = 'Неограниченный'
     ENCOUNTER = 'На сцену'
     DAYLY = 'На день'
@@ -276,8 +283,10 @@ class PowerEffectTypeEnum(BaseCapitalizedEnum):
     CONJURATION = 'Иллюзия'
     FEAR = 'Страх'
     HEALING = 'Исцеление'
+    INVIGORATING = 'Укрепляющий'
     POISON = 'Яд'
     POLYMORPH = 'Превращение'
+    RATTLING = 'Ужасающий'
     RELIABLE = 'Надежный'
     SLEEP = 'Сон'
     STANCE = 'Стойка'
