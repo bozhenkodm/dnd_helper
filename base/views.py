@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import DetailView, TemplateView
 
-from base.constants import SkillsEnum
+from base.constants.constants import SkillsEnum
 from base.models import NPC, Encounter
 
 

@@ -734,7 +734,7 @@ class Migration(migrations.Migration):
                             ('TELEPORTATION', 'Телепортация'),
                             ('POISON', 'Яд'),
                         ],
-                        default=base.constants.PowerEffectTypeEnum['NONE'],
+                        default=base.constants.constants.PowerEffectTypeEnum['NONE'],
                         max_length=93,
                         verbose_name='Тип эффекта',
                     ),
@@ -809,7 +809,9 @@ class Migration(migrations.Migration):
                             ('AREA_BURST', 'Зональная вспышка'),
                             ('AREA_WALL', 'Стена'),
                         ],
-                        default=base.constants.PowerRangeTypeEnum['MELEE_WEAPON'],
+                        default=base.constants.constants.PowerRangeTypeEnum[
+                            'MELEE_WEAPON'
+                        ],
                         max_length=15,
                         verbose_name='Дальность',
                     ),

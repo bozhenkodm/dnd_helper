@@ -1,6 +1,6 @@
 from collections import Counter
 
-from base.constants import AttributesEnum
+from base.constants.constants import AttributeEnum
 
 
 class AttributeMixin:
@@ -31,7 +31,7 @@ class AttributeMixin:
     def _tier_attrs_bonus(self):
         return self._tier
 
-    def _calculate_attribute_bonus(self, attribute: AttributesEnum):
+    def _calculate_attribute_bonus(self, attribute: AttributeEnum):
         return (
             self._initial_attr_bonuses.get(attribute.name, 0)
             + self._tier_attrs_bonus
@@ -41,35 +41,35 @@ class AttributeMixin:
     @property
     def strength(self):
         return self.base_strength + self._calculate_attribute_bonus(
-            AttributesEnum.STRENGTH
+            AttributeEnum.STRENGTH
         )
 
     @property
     def constitution(self):
         return self.base_constitution + self._calculate_attribute_bonus(
-            AttributesEnum.CONSTITUTION
+            AttributeEnum.CONSTITUTION
         )
 
     @property
     def dexterity(self):
         return self.base_dexterity + self._calculate_attribute_bonus(
-            AttributesEnum.DEXTERITY
+            AttributeEnum.DEXTERITY
         )
 
     @property
     def intelligence(self):
         return self.base_intelligence + self._calculate_attribute_bonus(
-            AttributesEnum.INTELLIGENCE
+            AttributeEnum.INTELLIGENCE
         )
 
     @property
     def wisdom(self):
-        return self.base_wisdom + self._calculate_attribute_bonus(AttributesEnum.WISDOM)
+        return self.base_wisdom + self._calculate_attribute_bonus(AttributeEnum.WISDOM)
 
     @property
     def charisma(self):
         return self.base_charisma + self._calculate_attribute_bonus(
-            AttributesEnum.CHARISMA
+            AttributeEnum.CHARISMA
         )
 
     @property
@@ -96,11 +96,11 @@ class AttributeMixin:
     def cha_mod(self):
         return self._modifier(self.charisma)
 
-    def get_attribute_text(self, attribute: AttributesEnum):
+    def get_attribute_text(self, attribute: AttributeEnum):
         attribute_value = getattr(self, attribute.lname)
         modifier = self._modifier(attribute_value)
         return f'{attribute.value[:3]} {attribute_value} ({modifier + self.half_level})'
 
     @property
     def attributes_texts(self) -> list:
-        return list(self.get_attribute_text(attr) for attr in AttributesEnum)
+        return list(self.get_attribute_text(attr) for attr in AttributeEnum)

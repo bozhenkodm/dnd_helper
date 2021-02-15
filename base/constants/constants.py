@@ -1,41 +1,6 @@
-from enum import Enum
-from functools import partial
 from random import randint
 
-from django.db import models
-
-d4 = partial(randint, 1, 4)
-d6 = partial(randint, 1, 6)
-d8 = partial(randint, 1, 8)
-d10 = partial(randint, 1, 10)
-d12 = partial(randint, 1, 12)
-d20 = partial(randint, 1, 20)
-d100 = partial(randint, 1, 100)
-
-
-class BaseCapitalizedEnum(str, Enum):
-    def _generate_next_value_(name, start, count, last_values):
-        return name.lower().capitalize()
-
-    @classmethod
-    def generate_choices(cls, is_sorted=True):
-        if is_sorted:
-            return sorted(((item.name, item.value) for item in cls), key=lambda x: x[1])
-        return ((item.name, item.value) for item in cls)
-
-    @classmethod
-    def generate_case(cls, field='name'):
-        kwargs = ({field: item.name, 'then': models.Value(item.value)} for item in cls)
-        whens = (models.When(**kws) for kws in kwargs)
-        return models.Case(*whens, output_field=models.CharField())
-
-    @classmethod
-    def max_length(cls):
-        return max(len(item.name) for item in cls)
-
-    @property
-    def lname(self):
-        return self.name.lower()
+from base.constants.base import BaseCapitalizedEnum, IntDescriptionEnum
 
 
 class SexEnum(BaseCapitalizedEnum):
@@ -44,7 +9,7 @@ class SexEnum(BaseCapitalizedEnum):
     N = 'Н/Д'
 
 
-class AttributesEnum(BaseCapitalizedEnum):
+class AttributeEnum(BaseCapitalizedEnum):
     STRENGTH = 'Сила'
     CONSTITUTION = 'Телосложение'
     DEXTERITY = 'Ловкость'
@@ -68,61 +33,92 @@ class VisionEnum(BaseCapitalizedEnum):
 
 
 class NPCRaceEnum(BaseCapitalizedEnum):
-    DEVA = 'Дев'
-    DOPPELGANGER = 'Доппельгангер'
-    DRAGONBORN = 'Драконорожденный'
-    DROW = 'Дроу'
-    DUERGAR = 'Дуэргар'
-    DWARF = 'Дварф'
-    ELADRIN = 'Эладрин'
-    ELF = 'Эльф'
+    BUGBEAR = 'Багбир'
+    HAMADRYAD = 'Гамадриада'
     GITHZERAI = 'Гитзерай'
     GNOME = 'Гном'
     GNOLL = 'Гнолл'
     GOBLIN = 'Гоблин'
     GOLIATH = 'Голиаф'
+    DWARF = 'Дварф'
+    DEVA = 'Дев'
+    GENASI_EARTHSOUL = 'Дженази, земля'
+    GENASI_FIRESOUL = 'Дженази, огонь'
+    GENASI_STORMSOUL = 'Дженази, шторм'
+    GENASI_WATERSOUL = 'Дженази, вода'
+    GENASI_WINDSOUL = 'Дженази, ветер'
+    WILDEN = 'Дикарь'
+    DOPPELGANGER = 'Доппельгангер'
+    DRAGONBORN = 'Драконорожденный'
+    TREANT = 'Древень'
+    DROW = 'Дроу'
+    DUERGAR = 'Дуэргар'
+    KALASHTAR = 'Калаштар'
+    KOBOLD = 'Кобольд'
+    WARFORGED = 'Кованый'
+    MINOTAUR = 'Минотавр'
+    ORC = 'Орк'
     HALFELF = 'Полуэльф'
     HALFLING = 'Полурослик'
     HALFORC = 'Полуорк'
-    HAMADRYAD = 'Гамадриада'
-    HUMAN = 'Человек'
-    KALASHTAR = 'Калаштар'
-    KOBOLD = 'Кобольд'
-    MINOTAUR = 'Минотавр'
-    ORC = 'Орк'
     PIXIE = 'Пикси'
-    TIEFLING = 'Тифлинг'
-    TREANT = 'Древень'
     SATYR = 'Сатир'
+    TIEFLING = 'Тифлинг'
+    HUMAN = 'Человек'
+    SHADAR_KAI = 'Шадар-Кай'
     SHIFTER_RAZORCLAW = 'Шифтер, бритволапый'
     SHIFTER_LONGTEETH = 'Шифтер, длиннозубый'
-    WARFORGED = 'Кованый'
+    ELADRIN = 'Эладрин'
+    ELF = 'Эльф'
 
     def is_shifter(self):
         return self in (self.SHIFTER_LONGTEETH, self.SHIFTER_RAZORCLAW)
 
 
 class NPCClassEnum(BaseCapitalizedEnum):
-    # TODO subtypes or different classes?
-    AVENGER = 'Каратель'
-    BARBARIAN = 'Варвар'
-    BARD = 'Бард'
-    DRUID = 'Друид'
-    FIGHTER = 'Воин'
     INVOKER = 'Апостол'
-    PALADIN = 'Паладин'
+    ARTIFICER = 'Артефактор'
+    BARD = 'Бард'
+    BARBARIAN = 'Варвар'
+    WARLORD = 'Военачальник'
+    FIGHTER = 'Воин'
+    WIZARD = 'Волшебник'
+    DRUID = 'Друид'
     PRIEST = 'Жрец'
+    AVENGER = 'Каратель'
+    WARLOCK = 'Колдун'
+    SWORDMAGE = 'Мечник-маг'
+    PALADIN = 'Паладин'
+    ROGUE = 'Плут'
+    RUNEPRIEST = 'Рунный жрец'
     RANGER_MARKSMAN = 'Следопыт (Дальнобойный)'
     RANGER_MELEE = 'Следопыт (Рукопашник)'
-    ROGUE = 'Плут'
-    RUNEPRIEST_W = 'Рунный жрец (мстительный молот)'
-    RUNEPRIEST_D = 'Рунный жрец (непокорное слово)'
-    SHAMAN = 'Шаман'
-    SORCERER = 'Чародей'
     WARDEN = 'Хранитель'
-    WARLORD = 'Военачальник'
-    WARLOCK = 'Колдун'
-    WIZARD = 'Волшебник'
+    SORCERER = 'Чародей'
+    SHAMAN = 'Шаман'
+
+
+class NPCClassIntEnum(IntDescriptionEnum):
+    INVOKER = 10, 'Апостол'
+    ARTIFICER = 20, 'Артефактор'
+    BARD = 30, 'Бард'
+    BARBARIAN = 40, 'Варвар'
+    WARLORD = 50, 'Военачальник'
+    FIGHTER = 60, 'Воин'
+    WIZARD = 70, 'Волшебник'
+    DRUID = 80, 'Друид'
+    PRIEST = 90, 'Жрец'
+    AVENGER = 100, 'Каратель'
+    WARLOCK = 110, 'Колдун'
+    SWORDMAGE = 120, 'Мечник-маг'
+    PALADIN = 130, 'Паладин'
+    ROGUE = 140, 'Плут'
+    RUNEPRIEST = 150, 'Рунный жрец'
+    RANGER_MARKSMAN = 160, 'Следопыт (Дальнобойный)'
+    RANGER_MELEE = 170, 'Следопыт (Рукопашник)'
+    WARDEN = 180, 'Хранитель'
+    SORCERER = 190, 'Чародей'
+    SHAMAN = 200, 'Шаман'
 
 
 class SkillsEnum(BaseCapitalizedEnum):
@@ -146,13 +142,13 @@ class SkillsEnum(BaseCapitalizedEnum):
 
     def get_base_attribute(self):
         if self in (self.ACROBATICS, self.STEALTH, self.THIEVERY):
-            return AttributesEnum.DEXTERITY
+            return AttributeEnum.DEXTERITY
         if self in (self.ARCANA, self.HISTORY, self.RELIGION):
-            return AttributesEnum.INTELLIGENCE
+            return AttributeEnum.INTELLIGENCE
         if self == self.ATHLETICS:
-            return AttributesEnum.STRENGTH
+            return AttributeEnum.STRENGTH
         if self in (self.BLUFF, self.DIPLOMACY, self.INTIMIDATE, self.STREETWISE):
-            return AttributesEnum.CHARISMA
+            return AttributeEnum.CHARISMA
         if self in (
             self.DUNGEONEERING,
             self.HEAL,
@@ -160,18 +156,18 @@ class SkillsEnum(BaseCapitalizedEnum):
             self.NATURE,
             self.PERCEPTION,
         ):
-            return AttributesEnum.WISDOM
+            return AttributeEnum.WISDOM
         if self == self.ENDURANCE:
-            return AttributesEnum.CONSTITUTION
+            return AttributeEnum.CONSTITUTION
 
 
-class ArmorTypeEnum(BaseCapitalizedEnum):
-    CLOTH = 'Тканевый'
-    LEATHER = 'Кожаный'
-    HIDE = 'Шкурный'
-    CHAINMAIL = 'Кольчуга'
-    SCALE = 'Чешуйчатый'
-    PLATE = 'Латный'
+class ArmorTypeIntEnum(IntDescriptionEnum):
+    CLOTH = 10, 'Тканевый'
+    LEATHER = 20, 'Кожаный'
+    HIDE = 30, 'Шкурный'
+    CHAINMAIL = 40, 'Кольчуга'
+    SCALE = 50, 'Чешуйчатый'
+    PLATE = 60, 'Латный'
 
 
 class ShieldTypeEnum(BaseCapitalizedEnum):
@@ -197,39 +193,30 @@ class WeaponGroupEnum(BaseCapitalizedEnum):
     BOW = 'Лук'
 
 
-class WeaponCategoryEnum(BaseCapitalizedEnum):
-    SIMPLE = 'Простое рукопашное'
-    MILITARY = 'Воинское рукопашное'
-    SUPERIOR = 'Превосходное рукопашное'
-    SIMPLE_RANGED = 'Простое дальнобойное'
-    MILITARY_RANGED = 'Воинское дальнобойное'
-    SUPERIOR_RANGED = 'Превосходное дальнобойное'
+class WeaponCategoryIntEnum(IntDescriptionEnum):
+    SIMPLE = 1, 'Простое рукопашное'
+    MILITARY = 2, 'Воинское рукопашное'
+    SUPERIOR = 3, 'Превосходное рукопашное'
+    SIMPLE_RANGED = 4, 'Простое дальнобойное'
+    MILITARY_RANGED = 5, 'Воинское дальнобойное'
+    SUPERIOR_RANGED = 6, 'Превосходное дальнобойное'
 
     @property
     def is_melee(self):
         return self in (self.SIMPLE, self.MILITARY, self.SUPERIOR)
 
 
-class DiceEnum(BaseCapitalizedEnum):
-    D4 = 'k4'
-    D6 = 'k6'
-    D8 = 'k8'
-    D10 = 'k10'
-    D12 = 'k12'
-    D20 = 'k20'
-    D100 = 'k100'
+class DiceIntEnum(IntDescriptionEnum):
+    D4 = 4, 'k4'
+    D6 = 6, 'k6'
+    D8 = 8, 'k8'
+    D10 = 10, 'k10'
+    D12 = 12, 'k12'
+    D20 = 20, 'k20'
+    D100 = 100, 'k100'
 
-    def roll(self, dice_number):
-        dice_func = {
-            self.D4: lambda: d4(),
-            self.D6: lambda: d6(),
-            self.D8: lambda: d8(),
-            self.D10: lambda: d10(),
-            self.D12: lambda: d12(),
-            self.D20: lambda: d20(),
-            self.D100: lambda: d100(),
-        }[self]
-        return sum(dice_func() for _ in range(dice_number))
+    def roll(self, dice_number=1):
+        return sum(randint(1, self) for _ in range(dice_number))
 
 
 class WeaponPropertyEnum(BaseCapitalizedEnum):
@@ -284,7 +271,6 @@ class PowerEffectTypeEnum(BaseCapitalizedEnum):
     FEAR = 'Страх'
     HEALING = 'Исцеление'
     INVIGORATING = 'Укрепляющий'
-    POISON = 'Яд'
     POLYMORPH = 'Превращение'
     RATTLING = 'Ужасающий'
     RELIABLE = 'Надежный'

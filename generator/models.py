@@ -2,7 +2,7 @@ import random
 
 from django.db import models
 
-from base.constants import SexEnum
+from base.constants.constants import SexEnum
 from base.models import Race
 from generator.constants import taverners_races
 
@@ -46,13 +46,14 @@ class NPCName(models.Model):
         race = Race.objects.get(name=race.name)
         sex = random.choice((SexEnum.M, SexEnum.F))
         first_names = cls.objects.filter(
-            sex=sex.name, name_type=cls.FIRST_NAME, race=race
+            sex__in=(sex.name, SexEnum.N.name), name_type=cls.FIRST_NAME, race=race
         ).values_list('name', flat=True)
+        print(race)
         last_names = cls.objects.filter(name_type=cls.LAST_NAME, race=race).values_list(
             'name', flat=True
         )
         first_name = random.choice(first_names)
-        last_name = random.choice(last_names)
+        last_name = random.choice(last_names) if last_names else ''
         return {
             'first_name': first_name,
             'last_name': last_name,

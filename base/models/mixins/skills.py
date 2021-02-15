@@ -1,4 +1,4 @@
-from base.constants import SkillsEnum
+from base.constants.constants import SkillsEnum
 
 
 class SkillMixin:

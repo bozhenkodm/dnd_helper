@@ -1,10 +1,12 @@
+from random import randint
+
 from django.contrib import admin
 from django.contrib.auth.models import Group, User
 from django.utils.safestring import mark_safe
 
-from base.constants import (
-    AttributesEnum,
-    BaseCapitalizedEnum,
+from base.constants.base import BaseCapitalizedEnum
+from base.constants.constants import (
+    AttributeEnum,
     NPCClassEnum,
     NPCRaceEnum,
     SkillsEnum,
@@ -40,9 +42,7 @@ class AdminMixin:
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.annotate(
-            title=self.ENUM.generate_case(field=self.field_name)
-        ).order_by('title')
+        return qs.order_by(self.field_name)
 
 
 class RaceBonusInline(admin.TabularInline):
@@ -98,7 +98,10 @@ class NPCAdmin(admin.ModelAdmin):
         'implements',
         'powers',
     ]
-    readonly_fields = ('npc_link',)
+    readonly_fields = (
+        'npc_link',
+        'generated_attributes',
+    )
     autocomplete_fields = ('weapons', 'implements')
     list_filter = ('race', 'klass')
     save_as = True
@@ -109,7 +112,7 @@ class NPCAdmin(admin.ModelAdmin):
             if object_id:
                 instance = self.model.objects.get(id=object_id)
                 choices = list(instance.race.var_bonus_attrs)
-                choices = ((item, AttributesEnum[item].value) for item in choices)
+                choices = ((item, AttributeEnum[item].value) for item in choices)
             else:
                 choices = ()
 
@@ -127,10 +130,15 @@ class NPCAdmin(admin.ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'race':
-            kwargs["queryset"] = Race.objects.annotate(
+            kwargs['queryset'] = Race.objects.annotate(
                 title=NPCRaceEnum.generate_case()
             ).order_by('title')
+        if db_field.name == 'klass':
+            kwargs['queryset'] = Class.objects.order_by('name')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         object_id = request.resolver_match.kwargs.get('object_id', 0)
@@ -139,7 +147,9 @@ class NPCAdmin(admin.ModelAdmin):
         except self.model.DoesNotExist:
             instance = None
         if db_field.name == 'powers':
-            kwargs['queryset'] = Power.objects.filter(classes=instance.klass)
+            kwargs['queryset'] = Power.objects.filter(
+                klass=instance.klass, level__lte=instance.level
+            ).order_by('level')
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     def get_fields(self, request, obj=None):
@@ -151,6 +161,7 @@ class NPCAdmin(admin.ModelAdmin):
                 'klass',
                 'sex',
                 'level',
+                'generated_attributes',
                 'base_strength',
                 'base_constitution',
                 'base_dexterity',
@@ -176,6 +187,15 @@ class NPCAdmin(admin.ModelAdmin):
         return mark_safe(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
 
     npc_link.short_description = 'Лист персонажа'
+
+    def generated_attributes(self, obj):
+        def generate_attribute():
+            l = [randint(1, 6) for _ in range(4)]
+            return sum(l) - min(l)
+
+        return ', '.join(sorted([str(generate_attribute()) for _ in range(6)]))
+
+    generated_attributes.short_description = 'Сгенерированные аттрибуты'
 
 
 class EncounterAdmin(admin.ModelAdmin):
@@ -265,7 +285,6 @@ class PowerAdmin(admin.ModelAdmin):
         'frequency',
         'klass',
     )
-    autocomplete_fields = ('classes',)
     save_as = True
 
 

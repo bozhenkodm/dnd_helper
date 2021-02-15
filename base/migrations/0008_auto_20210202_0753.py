@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                     ('INVIGORATING', 'Укрепляющий'),
                     ('POISON', 'Яд'),
                 ],
-                default=base.constants.PowerEffectTypeEnum['NONE'],
+                default=base.constants.constants.PowerEffectTypeEnum['NONE'],
                 max_length=115,
                 verbose_name='Тип эффекта',
             ),
