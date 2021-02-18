@@ -7,11 +7,12 @@ from django.utils.safestring import mark_safe
 from base.constants.base import BaseCapitalizedEnum
 from base.constants.constants import (
     AttributeEnum,
-    NPCClassEnum,
+    NPCClassIntEnum,
     NPCRaceEnum,
     SkillsEnum,
     WeaponPropertyEnum,
 )
+from base.constants.subclass import SUBCLASSES
 from base.models import NPC, Armor, Class, Encounter, Race
 from base.models.models import (
     ClassBonus,
@@ -72,15 +73,17 @@ class ClassAdmin(AdminMixin, admin.ModelAdmin):
     autocomplete_fields = ('available_weapon_types',)
     search_fields = ('name',)
     save_on_top = True
-    ENUM = NPCClassEnum
+    ENUM = NPCClassIntEnum
 
 
 class NPCAdmin(admin.ModelAdmin):
     fields = [
         'name',
+        'npc_link',
         'description',
         'race',
         'klass',
+        'subclass',
         'sex',
         'level',
         'base_strength',
@@ -93,15 +96,14 @@ class NPCAdmin(admin.ModelAdmin):
         'trained_skills',
         'armor',
         'shield',
-        'npc_link',
         'weapons',
         'implements',
         'powers',
     ]
-    readonly_fields = (
+    readonly_fields = [
         'npc_link',
         'generated_attributes',
-    )
+    ]
     autocomplete_fields = ('weapons', 'implements')
     list_filter = ('race', 'klass')
     save_as = True
@@ -137,9 +139,6 @@ class NPCAdmin(admin.ModelAdmin):
             kwargs['queryset'] = Class.objects.order_by('name')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
-
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         object_id = request.resolver_match.kwargs.get('object_id', 0)
         try:
@@ -151,6 +150,19 @@ class NPCAdmin(admin.ModelAdmin):
                 klass=instance.klass, level__lte=instance.level
             ).order_by('level')
         return super().formfield_for_manytomany(db_field, request, **kwargs)
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == 'subclass':
+            object_id = request.resolver_match.kwargs.get('object_id', 0)
+            try:
+                instance = self.model.objects.get(id=object_id)
+            except self.model.DoesNotExist:
+                instance = None
+            subclass_enum = SUBCLASSES.get(instance.klass.name, None)
+            choices = subclass_enum.generate_choices() if subclass_enum else ()
+            db_field.choices = choices
+
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     def get_fields(self, request, obj=None):
         if not obj:
@@ -183,6 +195,12 @@ class NPCAdmin(admin.ModelAdmin):
                 result.append(attr)
         return result
 
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super().get_readonly_fields(request, obj)
+        if obj and not SUBCLASSES.get(obj.klass.name, None):
+            readonly_fields.append('subclass')
+        return readonly_fields
+
     def npc_link(self, obj):
         return mark_safe(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
 
@@ -193,7 +211,7 @@ class NPCAdmin(admin.ModelAdmin):
             l = [randint(1, 6) for _ in range(4)]
             return sum(l) - min(l)
 
-        return ', '.join(sorted([str(generate_attribute()) for _ in range(6)]))
+        return ', '.join(sorted([str(generate_attribute()) for _ in range(6)], key=int))
 
     generated_attributes.short_description = 'Сгенерированные аттрибуты'
 
@@ -286,6 +304,15 @@ class PowerAdmin(admin.ModelAdmin):
         'klass',
     )
     save_as = True
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'race':
+            kwargs['queryset'] = Race.objects.annotate(
+                title=NPCRaceEnum.generate_case()
+            ).order_by('title')
+        if db_field.name == 'klass':
+            kwargs['queryset'] = Class.objects.order_by('name')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 admin.site.register(Race, RaceAdmin)

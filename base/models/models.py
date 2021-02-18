@@ -78,7 +78,10 @@ class WeaponType(models.Model):
     )
     dice_number = models.SmallIntegerField(verbose_name='Количество кубов', default=1)
     damage_dice = models.SmallIntegerField(
-        verbose_name='Кость урона', choices=DiceIntEnum.generate_choices(), null=True
+        verbose_name='Кость урона',
+        choices=DiceIntEnum.generate_choices(),
+        null=True,
+        blank=True,
     )
     properties = MultiSelectField(
         verbose_name='Свойства',
@@ -372,7 +375,10 @@ class Power(models.Model):
     )
     dice_number = models.SmallIntegerField(verbose_name='Количество кубов', default=1)
     damage_dice = models.SmallIntegerField(
-        verbose_name='Кость урона', choices=DiceIntEnum.generate_choices(), null=True
+        verbose_name='Кость урона',
+        choices=DiceIntEnum.generate_choices(),
+        null=True,
+        blank=True,
     )
     accessory_type = models.CharField(
         verbose_name='Тип вооружения',
@@ -394,7 +400,13 @@ class Power(models.Model):
     effect = models.TextField(verbose_name='Эффект', null=True, blank=True)
     trigger = models.TextField(verbose_name='Триггер', null=True, blank=True)
     requirement = models.TextField(verbose_name='Требование', null=True, blank=True)
-    target = models.TextField(verbose_name='Цель', null=True, blank=True)
+    target = models.CharField(
+        verbose_name='Цель',
+        null=True,
+        default='Одно существо',
+        max_length=50,
+        blank=True,
+    )
 
     parent_power = models.ForeignKey(
         'self',
@@ -421,6 +433,7 @@ class Power(models.Model):
     @property
     def attack_type(self):
         if self.range_type in (
+            PowerRangeTypeEnum.MELEE_RANGED_WEAPON.name,
             PowerRangeTypeEnum.MELEE_WEAPON.name,
             PowerRangeTypeEnum.MELEE_TOUCH.name,
             PowerRangeTypeEnum.RANGED_SIGHT.name,
@@ -491,7 +504,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
         on_delete=models.CASCADE,
         verbose_name='Класс',
     )
-    subclass = models.SmallIntegerField(verbose_name='Подкласс')
+    subclass = models.SmallIntegerField(verbose_name='Подкласс', choices=(), default=0)
     sex = models.CharField(
         max_length=SexEnum.max_length(),
         choices=SexEnum.generate_choices(is_sorted=False),
@@ -691,13 +704,18 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                 {
                     modifier: getattr(self, modifier),
                     f'half_{modifier}': mod_value // 2,
+                    f'{modifier}_add10': mod_value + 10,
                     f'{modifier}_add5': mod_value + 5,
                     f'{modifier}_add1': mod_value + 1,
                     f'{modifier}_add2': mod_value + 2,
                     f'{modifier}_add_halflevel': mod_value + self.half_level,
-                    'halflevel_add3': self.half_level + 3,
                 }
             )
+        kwargs.update(
+            {
+                'halflevel_add3': self.half_level + 3,
+            }
+        )
         if weapon:
             # TODO remove injection alert
             kwargs.update(weapon=weapon)
@@ -731,6 +749,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                     miss_effect=self._calculate_injected_string(power.miss_effect),
                     effect=self._calculate_injected_string(power.effect),
                     trigger=self._calculate_injected_string(power.trigger),
+                    target=power.target,
                     accessory='Расовый',
                 )
             )
@@ -769,6 +788,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                 bonus = base_bonus
                 if self.is_weapon_proficient(weapon):
                     bonus += +weapon.weapon_type.prof_bonus
+                    bonus += self.subclass_attack_bonus(weapon)
                 enchantment = min(weapon.enchantment, self._magic_threshold)
                 powers.append(
                     dict(
@@ -794,6 +814,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                         ),
                         effect=self._calculate_injected_string(power.effect, weapon),
                         trigger=self._calculate_injected_string(power.trigger, weapon),
+                        target=power.target,
                         accessory=str(weapon),
                     )
                 )
@@ -827,6 +848,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                         miss_effect=self._calculate_injected_string(power.miss_effect),
                         effect=self._calculate_injected_string(power.effect),
                         trigger=self._calculate_injected_string(power.trigger),
+                        target=power.target,
                         accessory=str(implement),
                     )
                 )
@@ -859,6 +881,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                         miss_effect=self._calculate_injected_string(power.miss_effect),
                         effect=self._calculate_injected_string(power.effect),
                         trigger=self._calculate_injected_string(power.trigger),
+                        target=power.target,
                         accessory=f'{weapon} - инструмент',
                     )
                 )
@@ -882,6 +905,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                     miss_effect=self._calculate_injected_string(power.miss_effect),
                     effect=self._calculate_injected_string(power.effect),
                     trigger=self._calculate_injected_string(power.trigger),
+                    target=power.target,
                     accessory='Приём',
                 )
             )

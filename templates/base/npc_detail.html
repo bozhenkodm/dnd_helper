@@ -41,6 +41,9 @@
         {% if power.trigger %}
             <div class="npc-line"><span><i>Триггер:</i> {{ power.trigger }};</span><div>
         {% endif %}
+        {% if power.target %}
+            <div class="npc-line"><span><i>Цель:</i> {{ power.target }};</span><div>
+        {% endif %}
         {% if power.dice_number %}
             <div class="npc-line"><span><i>Атака:</i> {{ power.attack }} против {{ power.defence }};</span></div>
         {% endif %}

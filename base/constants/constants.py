@@ -34,6 +34,7 @@ class VisionEnum(BaseCapitalizedEnum):
 
 class NPCRaceEnum(BaseCapitalizedEnum):
     BUGBEAR = 'Багбир'
+    VRYLOKA = 'Врылока'
     HAMADRYAD = 'Гамадриада'
     GITHZERAI = 'Гитзерай'
     GNOME = 'Гном'
@@ -50,13 +51,15 @@ class NPCRaceEnum(BaseCapitalizedEnum):
     WILDEN = 'Дикарь'
     DOPPELGANGER = 'Доппельгангер'
     DRAGONBORN = 'Драконорожденный'
-    TREANT = 'Древень'
     DROW = 'Дроу'
     DUERGAR = 'Дуэргар'
     KALASHTAR = 'Калаштар'
+    KENKU = 'Кенку'
     KOBOLD = 'Кобольд'
     WARFORGED = 'Кованый'
+    BLADELING = 'Лезвие'
     MINOTAUR = 'Минотавр'
+    MUL = 'Мул'
     ORC = 'Орк'
     HALFELF = 'Полуэльф'
     HALFLING = 'Полурослик'
@@ -64,6 +67,8 @@ class NPCRaceEnum(BaseCapitalizedEnum):
     PIXIE = 'Пикси'
     SATYR = 'Сатир'
     TIEFLING = 'Тифлинг'
+    THRI_KREEN = 'Три-крин'
+    HOBGOBLIN = 'Хобгоблин'
     HUMAN = 'Человек'
     SHADAR_KAI = 'Шадар-Кай'
     SHIFTER_RAZORCLAW = 'Шифтер, бритволапый'
@@ -73,29 +78,6 @@ class NPCRaceEnum(BaseCapitalizedEnum):
 
     def is_shifter(self):
         return self in (self.SHIFTER_LONGTEETH, self.SHIFTER_RAZORCLAW)
-
-
-class NPCClassEnum(BaseCapitalizedEnum):
-    INVOKER = 'Апостол'
-    ARTIFICER = 'Артефактор'
-    BARD = 'Бард'
-    BARBARIAN = 'Варвар'
-    WARLORD = 'Военачальник'
-    FIGHTER = 'Воин'
-    WIZARD = 'Волшебник'
-    DRUID = 'Друид'
-    PRIEST = 'Жрец'
-    AVENGER = 'Каратель'
-    WARLOCK = 'Колдун'
-    SWORDMAGE = 'Мечник-маг'
-    PALADIN = 'Паладин'
-    ROGUE = 'Плут'
-    RUNEPRIEST = 'Рунный жрец'
-    RANGER_MARKSMAN = 'Следопыт (Дальнобойный)'
-    RANGER_MELEE = 'Следопыт (Рукопашник)'
-    WARDEN = 'Хранитель'
-    SORCERER = 'Чародей'
-    SHAMAN = 'Шаман'
 
 
 class NPCClassIntEnum(IntDescriptionEnum):
@@ -108,6 +90,7 @@ class NPCClassIntEnum(IntDescriptionEnum):
     WIZARD = 70, 'Волшебник'
     DRUID = 80, 'Друид'
     PRIEST = 90, 'Жрец'
+    SEEKER = 95, 'Ловчий'
     AVENGER = 100, 'Каратель'
     WARLOCK = 110, 'Колдун'
     SWORDMAGE = 120, 'Мечник-маг'
@@ -307,6 +290,7 @@ class PowerRangeTypeEnum(BaseCapitalizedEnum):
     MELEE_WEAPON = 'Рукопашное оружие'
     MELEE_DISTANCE = 'Рукопашное (дистанция)'
     MELEE_TOUCH = 'Рукопашное касание'
+    MELEE_RANGED_WEAPON = 'Рукопашное или дальнобойное оружие'
     PERSONAL = 'Персональный'
     RANGED_WEAPON = 'Дальнобойное оружие'
     RANGED_DISTANCE = 'Дальнобойное (дистанция)'
@@ -322,7 +306,12 @@ class PowerRangeTypeEnum(BaseCapitalizedEnum):
 
     @property
     def is_melee(self):
-        return self in (self.MELEE_DISTANCE, self.MELEE_TOUCH, self.MELEE_WEAPON)
+        return self in (
+            self.MELEE_DISTANCE,
+            self.MELEE_TOUCH,
+            self.MELEE_WEAPON,
+            self.MELEE_RANGED_WEAPON,
+        )
 
     @property
     def is_close(self):
@@ -330,7 +319,12 @@ class PowerRangeTypeEnum(BaseCapitalizedEnum):
 
     @property
     def is_ranged(self):
-        return self in (self.RANGED_SIGHT, self.RANGED_WEAPON, self.RANGED_DISTANCE)
+        return self in (
+            self.RANGED_SIGHT,
+            self.RANGED_WEAPON,
+            self.RANGED_DISTANCE,
+            self.MELEE_RANGED_WEAPON,
+        )
 
     @property
     def is_provokable(self):
