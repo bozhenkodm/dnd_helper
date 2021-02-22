@@ -16,6 +16,7 @@ from base.constants.subclass import SUBCLASSES
 from base.models import NPC, Armor, Class, Encounter, Race
 from base.models.models import (
     ClassBonus,
+    FunctionalTemplate,
     Implement,
     ImplementType,
     Power,
@@ -84,6 +85,7 @@ class NPCAdmin(admin.ModelAdmin):
         'race',
         'klass',
         'subclass',
+        'functional_template',
         'sex',
         'level',
         'base_strength',
@@ -181,7 +183,7 @@ class NPCAdmin(admin.ModelAdmin):
                 'base_wisdom',
                 'base_charisma',
             )
-        result = super().get_fields(request, obj=obj)
+        result = self.fields
         level_attrs_bonuses = {
             4: 'level4_bonus_attrs',
             8: 'level8_bonus_attrs',
@@ -315,6 +317,15 @@ class PowerAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+class PowerInline(admin.StackedInline):
+    exclude = ('race', 'klass', 'level', 'attack_attribute', 'defence')
+    model = Power
+
+
+class FunctionalTemplateAdmin(admin.ModelAdmin):
+    inlines = (PowerInline,)
+
+
 admin.site.register(Race, RaceAdmin)
 admin.site.register(Class, ClassAdmin)
 admin.site.register(NPC, NPCAdmin)
@@ -325,6 +336,7 @@ admin.site.register(Weapon, WeaponAdmin)
 admin.site.register(ImplementType, ImplementTypeAdmin)
 admin.site.register(Implement, ImplementAdmin)
 admin.site.register(Power, PowerAdmin)
+admin.site.register(FunctionalTemplate, FunctionalTemplateAdmin)
 
 admin.site.unregister(Group)
 admin.site.unregister(User)

@@ -2,7 +2,7 @@ import random
 
 from django.db import models
 
-from base.constants.constants import SexEnum
+from base.constants.constants import NPCRaceEnum, SexEnum
 from base.models import Race
 from generator.constants import taverners_races
 
@@ -41,8 +41,11 @@ class NPCName(models.Model):
         )
 
     @classmethod
-    def generate_taverner(cls) -> dict:
-        race = random.choice(taverners_races)
+    def generate_taverner(cls, race=None) -> dict:
+        if not race:
+            race = random.choice(taverners_races)
+        else:
+            race = NPCRaceEnum[race]
         race = Race.objects.get(name=race.name)
         sex = random.choice((SexEnum.M, SexEnum.F))
         first_names = cls.objects.filter(
@@ -59,3 +62,7 @@ class NPCName(models.Model):
             'sex': sex.name,
             'race': race.get_name_display(),
         }
+
+    @staticmethod
+    def generate_links():
+        return sorted((race for race in set(taverners_races)), key=lambda x: x.value)

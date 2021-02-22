@@ -14,6 +14,7 @@ from base.constants.constants import (
     PowerDamageTypeEnum,
     PowerEffectTypeEnum,
     PowerFrequencyEnum,
+    PowerPropertyTitle,
     PowerRangeTypeEnum,
     PowerSourceEnum,
     SexEnum,
@@ -313,6 +314,31 @@ class ClassBonus(models.Model):
         return f'Классовое умение: {self.klass.get_name_display()}'
 
 
+class FunctionalTemplate(models.Model):
+    class Meta:
+        verbose_name = 'Функциональный шаблон'
+        verbose_name_plural = 'Фунециональные шаблоны'
+
+    title = models.CharField(max_length=50, null=False, verbose_name='Название')
+    min_level = models.SmallIntegerField(verbose_name='Минимальный уровень', default=0)
+    armor_class_bonus = models.SmallIntegerField(verbose_name='Бонус КД', default=0)
+    fortitude_bonus = models.SmallIntegerField(
+        verbose_name='Бонус стойкости', default=0
+    )
+    reflex_bonus = models.SmallIntegerField(verbose_name='Бонус реакции', default=0)
+    will_bonus = models.SmallIntegerField(verbose_name='Бонус воли', default=0)
+    save_bonus = models.SmallIntegerField(verbose_name='Бонус спасбросков', default=2)
+    action_points_bonus = models.SmallIntegerField(
+        verbose_name='Дополнительные очки действия', default=1
+    )
+    hit_points_per_level = models.SmallIntegerField(
+        verbose_name='Хиты за уровень', default=8
+    )
+
+    def __str__(self):
+        return self.title
+
+
 class Power(models.Model):
     class Meta:
         verbose_name = 'Талант'
@@ -347,6 +373,14 @@ class Power(models.Model):
         blank=True,
         related_name='powers',
     )
+    functional_template = models.ForeignKey(
+        FunctionalTemplate,
+        verbose_name='Функциональный шаблон',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name='powers',
+    )
     level = models.SmallIntegerField(verbose_name='Уровень', default=0)
     attack_attribute = models.CharField(
         verbose_name='Атакующая характеристика',
@@ -366,7 +400,7 @@ class Power(models.Model):
     effect_type = MultiSelectField(
         verbose_name='Тип эффекта',
         choices=PowerEffectTypeEnum.generate_choices(),
-        default=PowerEffectTypeEnum.NONE,
+        default=PowerEffectTypeEnum.NONE.name,
     )
     damage_type = MultiSelectField(
         verbose_name='Тип урона',
@@ -418,10 +452,12 @@ class Power(models.Model):
 
     def __str__(self):
         if self.race:
-            return f'{self.name}, {self.race.get_name_display()}, {self.level} уровень'
+            return f'{self.name}, {self.race.get_name_display()}'
+        if self.functional_template:
+            return f'{self.name}, {self.functional_template}'
         return (
             f'{self.name}, '
-            f'{self.klass.get_name_display()}, '
+            f'{self.klass.get_name_display()} ({(self.get_attack_attribute_display() or "Пр")[:3]}), '
             f'{self.get_frequency_display()}, '
             f'{self.level} уровень'
         )
@@ -487,6 +523,20 @@ class Power(models.Model):
         return not self.accessory_type
 
 
+class PowerProperty(models.Model):
+    power = models.ForeignKey(
+        Power, verbose_name='Талант', null=False, on_delete=models.CASCADE
+    )
+    title = models.CharField(
+        choices=PowerPropertyTitle.generate_choices(),
+        null=True,
+        blank=True,
+        max_length=PowerPropertyTitle.max_length(),
+    )
+    subclass = models.SmallIntegerField(verbose_name='Подкласс', choices=(), default=0)
+    description = models.TextField(verbose_name='Описание')
+
+
 class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
     class Meta:
         verbose_name = 'NPC'
@@ -505,6 +555,13 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
         verbose_name='Класс',
     )
     subclass = models.SmallIntegerField(verbose_name='Подкласс', choices=(), default=0)
+    functional_template = models.ForeignKey(
+        FunctionalTemplate,
+        on_delete=models.CASCADE,
+        verbose_name='Функциональный шаблон',
+        null=True,
+        blank=True,
+    )
     sex = models.CharField(
         max_length=SexEnum.max_length(),
         choices=SexEnum.generate_choices(is_sorted=False),
@@ -634,6 +691,8 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
             result += 5 * (
                 self._tier + 1
             )  # Бонусная черта крепкое тело у рейнджеров рукопашников
+        if self.functional_template:
+            result += self.functional_template.hit_points_per_level * self.level + self.constitution
         return result
 
     @property
@@ -713,7 +772,9 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
             )
         kwargs.update(
             {
+                'halflevel': self.half_level,
                 'halflevel_add3': self.half_level + 3,
+                'level_add2': self.level + 2,
             }
         )
         if weapon:
@@ -721,9 +782,65 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
             kwargs.update(weapon=weapon)
         return (string or '').format(**kwargs)
 
+    def _get_power_dict(self, power, attack_modifier, bonus, accessory, enchantment=0):
+        return dict(
+            name=power.name,
+            keywords=power.keywords,
+            enchantment=0,
+            attack_modifier=attack_modifier,
+            attack=attack_modifier + bonus + power.attack_bonus,
+            defence=power.get_defence_display(),
+            dice_number=power.dice_number,
+            dice=power.get_damage_dice_display(),
+            frequency_order=list(PowerFrequencyEnum).index(
+                PowerFrequencyEnum[power.frequency]
+            ),
+            hit_effect=self._calculate_injected_string(power.hit_effect),
+            miss_effect=self._calculate_injected_string(power.miss_effect),
+            effect=self._calculate_injected_string(power.effect),
+            trigger=self._calculate_injected_string(power.trigger),
+            target=power.target,
+            accessory=accessory,
+        )
+
     def powers_calculated(self):
         powers = []
         base_bonus = self._level_bonus + self.half_level
+        if self.functional_template:
+            for power in self.functional_template.powers.all():
+                attack_modifier = (
+                    self._modifier(
+                        getattr(self, AttributeEnum[power.attack_attribute].lname)
+                    )
+                    if power.attack_attribute
+                    else 0
+                )
+                # powers.append(
+                #     self._get_power_dict(
+                #         power=power, attack_modifier=attack_modifier, bonus=base_bonus, accessory=self.functional_template.title, enchantment=0
+                #     )
+                # )
+                powers.append(
+                    dict(
+                        name=power.name,
+                        keywords=power.keywords,
+                        enchantment=0,
+                        attack_modifier=attack_modifier,
+                        attack=attack_modifier + base_bonus + power.attack_bonus,
+                        defence=power.get_defence_display(),
+                        dice_number=power.dice_number,
+                        dice=power.get_damage_dice_display(),
+                        frequency_order=list(PowerFrequencyEnum).index(
+                            PowerFrequencyEnum[power.frequency]
+                        ),
+                        hit_effect=self._calculate_injected_string(power.hit_effect),
+                        miss_effect=self._calculate_injected_string(power.miss_effect),
+                        effect=self._calculate_injected_string(power.effect),
+                        trigger=self._calculate_injected_string(power.trigger),
+                        target=power.target,
+                        accessory=self.functional_template.title,
+                    )
+                )
         for power in self.race.powers.all():
             attack_modifier = (
                 self._modifier(

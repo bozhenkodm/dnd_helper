@@ -331,6 +331,16 @@ class PowerRangeTypeEnum(BaseCapitalizedEnum):
         return self.is_ranged or self.is_area
 
 
+class PowerPropertyTitle(BaseCapitalizedEnum):
+    ATTACK = 'Атака'
+    HIT = 'Попадание'
+    MISS = 'Промах'
+    EFFECT = 'Эффект'
+    REQUIREMENT = 'Требование'
+    TRIGGER = 'Триггер'
+    SPECIAL = 'Особенность'
+
+
 print(
     '\n'.join(
         f'{item.upper()} = \'\''

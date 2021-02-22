@@ -24,11 +24,21 @@ class TavernView(TemplateView):
         context = super().get_context_data(**kwargs)
         tavern = f'{random.choice(adjectives.split()).capitalize()} {random.choice(nouns.split()).capitalize()}'
         context['tavern'] = tavern
-        taverner = NPCName.generate_taverner()
+        race = kwargs.get('race')
+        if race:
+            race = race.upper()
+        taverner = NPCName.generate_taverner(race)
         context['taverner_first_name'] = taverner['first_name']
         context['taverner_last_name'] = taverner['last_name']
         context['taverner_sex'] = taverner['sex']
         context['taverner_race'] = taverner['race']
+        context['links'] = [('Все расы', reverse('generator_tavern'))] + [
+            (
+                race.value,
+                reverse('generator_tavern', kwargs={'race': race.name.lower()}),
+            )
+            for race in NPCName.generate_links()
+        ]
         return context
 
 

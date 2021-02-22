@@ -7,7 +7,15 @@
 <body>
     <div align="center">
         <h1>{{ tavern }}</h1>
-        <h3>{% if taverner_sex == 'M' %}Тавернщик{% else %} Тавернщица {% endif %} {{ taverner_first_name }} {{ taverner_last_name }}, {{ taverner_race }}</h3>
+        <h3>{% if taverner_sex == 'F' %}Тавернщица{% else %} Тавернщик {% endif %} {{ taverner_first_name }} {{ taverner_last_name }}, {{ taverner_race }}</h3>
+        <p></p>
+    </div>
+    <div>
+        <h4>
+            {% for link in links %}
+                <a href="{{ link.1 }}">{{ link.0 }}</a><br/>
+            {% endfor %}
+        </h4>
     </div>
 </body>
 </html>

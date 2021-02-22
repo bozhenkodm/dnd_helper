@@ -19,6 +19,7 @@ class DefenceMixin:
     @property
     def armor_class(self):
         result = 10 + self.half_level + self._level_bonus
+        result += self.functional_template.armor_class_bonus if self.functional_template else 0
         if self.armor:
             if self.armor.armor_type in map(int, self.klass.available_armor_types):
                 result += self.armor.armor_class
@@ -79,6 +80,7 @@ class DefenceMixin:
             + self.half_level
             + self._level_bonus
             + max(self._modifier(self.strength), self._modifier(self.constitution))
+            + (self.functional_template.fortitude_bonus if self.functional_template else 0)
         )
         if self.klass.name == NPCClassIntEnum.FIGHTER:
             if (
@@ -103,6 +105,7 @@ class DefenceMixin:
             + self.half_level
             + self._level_bonus
             + max(self._modifier(self.dexterity), self._modifier(self.intelligence))
+            + (self.functional_template.reflex_bonus if self.functional_template else 0)
         )
         result += self._shield_bonus
         if self.klass.name == NPCClassIntEnum.BARBARIAN:
@@ -117,4 +120,5 @@ class DefenceMixin:
             + self.half_level
             + self._level_bonus
             + max(self._modifier(self.wisdom), self._modifier(self.charisma))
+            + (self.functional_template.will_bonus if self.functional_template else 0)
         )

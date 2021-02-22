@@ -27,6 +27,9 @@ urlpatterns = [
     path('generator/main', views.GeneratorsMainView.as_view(), name='generator_main'),
     path('generator/tavern', views.TavernView.as_view(), name='generator_tavern'),
     path(
+        'generator/tavern/<race>', views.TavernView.as_view(), name='generator_tavern'
+    ),
+    path(
         'generator/fantasy_name',
         views.FantasyNameView.as_view(),
         name='generator_fantasy_name',
