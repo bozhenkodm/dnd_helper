@@ -9,18 +9,17 @@ from base.constants.constants import (
     AttributeEnum,
     NPCClassIntEnum,
     NPCRaceEnum,
+    PowerFrequencyEnum,
     SkillsEnum,
     WeaponPropertyEnum,
 )
 from base.constants.subclass import SUBCLASSES
 from base.models import NPC, Armor, Class, Encounter, Race
 from base.models.models import (
-    ClassBonus,
     FunctionalTemplate,
     Implement,
     ImplementType,
     Power,
-    RaceBonus,
     Weapon,
     WeaponType,
 )
@@ -47,30 +46,15 @@ class AdminMixin:
         return qs.order_by(self.field_name)
 
 
-class RaceBonusInline(admin.TabularInline):
-    model = RaceBonus
-
-    def save_model(self, request, obj, form, change):
-        obj.name = ' '.join(item.capitalize() for item in obj.name.split())
-        return super().save_model(request, obj, form, change)
-
-
-class RaceAdmin(AdminMixin, admin.ModelAdmin):
+class RaceAdmin(admin.ModelAdmin):
     autocomplete_fields = ('available_weapon_types',)
-    inlines = (RaceBonusInline,)
-    ENUM = NPCRaceEnum
 
-
-class ClassBonusInline(admin.TabularInline):
-    model = ClassBonus
-
-    def save_model(self, request, obj, form, change):
-        obj.name = ' '.join(item.capitalize() for item in obj.name.split())
-        return super().save_model(request, obj, form, change)
+    def get_queryset(self, request):
+        qs = super().get_queryset(request).annotate(title=NPCRaceEnum.generate_case())
+        return qs.order_by('title')
 
 
 class ClassAdmin(AdminMixin, admin.ModelAdmin):
-    inlines = (ClassBonusInline,)
     autocomplete_fields = ('available_weapon_types',)
     search_fields = ('name',)
     save_on_top = True
@@ -301,10 +285,7 @@ class ImplementAdmin(admin.ModelAdmin):
 
 
 class PowerAdmin(admin.ModelAdmin):
-    list_filter = (
-        'frequency',
-        'klass',
-    )
+    list_filter = ('frequency', 'klass', 'race', 'functional_template')
     save_as = True
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -315,6 +296,18 @@ class PowerAdmin(admin.ModelAdmin):
         if db_field.name == 'klass':
             kwargs['queryset'] = Class.objects.order_by('name')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def get_fields(self, request, obj=None):
+        if not obj or obj.frequency == PowerFrequencyEnum.PASSIVE.name:
+            return (
+                'name',
+                'description',
+                'frequency',
+                'race',
+                'klass',
+                'functional_template',
+            )
+        return super().get_fields(request, obj)
 
 
 class PowerInline(admin.StackedInline):

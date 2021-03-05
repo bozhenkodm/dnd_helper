@@ -84,6 +84,7 @@ class NPCClassIntEnum(IntDescriptionEnum):
     INVOKER = 10, 'Апостол'
     ARTIFICER = 20, 'Артефактор'
     BARD = 30, 'Бард'
+    VAMPIRE = 35, 'Вампир'
     BARBARIAN = 40, 'Варвар'
     WARLORD = 50, 'Военачальник'
     FIGHTER = 60, 'Воин'
@@ -225,6 +226,8 @@ class PowerSourceEnum(BaseCapitalizedEnum):
     DIVINE = 'Духовный'
     ARCANE = 'Магический'
     PRIMAL = 'Первородный'
+    SHADOW = 'Теневой'
+    PSIONIC = 'Псионический'
 
 
 class PowerFrequencyEnum(BaseCapitalizedEnum):

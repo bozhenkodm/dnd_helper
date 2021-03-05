@@ -228,19 +228,6 @@ class Race(models.Model):
         return NPCRaceEnum[self.name].value
 
 
-class RaceBonus(models.Model):
-    class Meta:
-        verbose_name = 'Бонус'
-        verbose_name_plural = 'Бонусы'
-
-    name = models.CharField(verbose_name='Название', max_length=30, blank=True)
-    description = models.TextField(verbose_name='Описание', blank=True)
-    race = models.ForeignKey(Race, on_delete=models.CASCADE, related_name='bonuses')
-
-    def __str__(self):
-        return f'Бонус расы: {self.race.get_name_display()}'
-
-
 class Class(models.Model):
     class Meta:
         verbose_name = 'Класс'
@@ -301,19 +288,6 @@ class Class(models.Model):
         return NPCClassIntEnum(self.name).description
 
 
-class ClassBonus(models.Model):
-    class Meta:
-        verbose_name = 'Бонус'
-        verbose_name_plural = 'Бонусы'
-
-    name = models.CharField(verbose_name='Название', max_length=30, blank=True)
-    description = models.TextField(verbose_name='Описание', blank=True)
-    klass = models.ForeignKey(Class, on_delete=models.CASCADE, related_name='bonuses')
-
-    def __str__(self):
-        return f'Классовое умение: {self.klass.get_name_display()}'
-
-
 class FunctionalTemplate(models.Model):
     class Meta:
         verbose_name = 'Функциональный шаблон'
@@ -344,7 +318,7 @@ class Power(models.Model):
         verbose_name = 'Талант'
         verbose_name_plural = 'Таланты'
 
-    name = models.CharField(verbose_name='Название', max_length=40)
+    name = models.CharField(verbose_name='Название', max_length=100)
     description = models.TextField(verbose_name='Описание', null=True, blank=True)
     frequency = models.CharField(
         verbose_name='Частота использования',
@@ -356,6 +330,8 @@ class Power(models.Model):
         choices=PowerActionTypeEnum.generate_choices(is_sorted=False),
         max_length=PowerActionTypeEnum.max_length(),
         default=PowerActionTypeEnum.STANDARD.name,
+        null=True,
+        blank=False,
     )
     klass = models.ForeignKey(
         Class,
@@ -425,7 +401,7 @@ class Power(models.Model):
         verbose_name='Дальность',
         choices=PowerRangeTypeEnum.generate_choices(is_sorted=False),
         max_length=PowerRangeTypeEnum.max_length(),
-        default=PowerRangeTypeEnum.MELEE_WEAPON,
+        default=PowerRangeTypeEnum.PERSONAL.name,
     )
     range = models.SmallIntegerField(verbose_name='Дальность', default=1)
     burst = models.SmallIntegerField(verbose_name='Площадь', default=0)
@@ -434,14 +410,7 @@ class Power(models.Model):
     effect = models.TextField(verbose_name='Эффект', null=True, blank=True)
     trigger = models.TextField(verbose_name='Триггер', null=True, blank=True)
     requirement = models.TextField(verbose_name='Требование', null=True, blank=True)
-    target = models.CharField(
-        verbose_name='Цель',
-        null=True,
-        default='Одно существо',
-        max_length=50,
-        blank=True,
-    )
-
+    target = models.CharField(verbose_name='Цель', null=True, max_length=50, blank=True)
     parent_power = models.ForeignKey(
         'self',
         verbose_name='Родительский талант',
@@ -498,6 +467,8 @@ class Power(models.Model):
 
     @property
     def keywords(self):
+        if self.frequency == PowerFrequencyEnum.PASSIVE.name:
+            return ''
         return filter(
             None,
             (
@@ -664,7 +635,11 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
     powers = models.ManyToManyField(Power, blank=True)
 
     def __str__(self):
-        return f'{self.name} {self.race} {self.klass} {self.level} уровня'
+        return (
+            f'{self.name}'
+            f'{f" ({self.functional_template}) " if self.functional_template else " "}'
+            f'{self.race} {self.klass} {self.level} уровня'
+        )
 
     @property
     def url(self):
@@ -692,7 +667,10 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                 self._tier + 1
             )  # Бонусная черта крепкое тело у рейнджеров рукопашников
         if self.functional_template:
-            result += self.functional_template.hit_points_per_level * self.level + self.constitution
+            result += (
+                self.functional_template.hit_points_per_level * self.level
+                + self.constitution
+            )
         return result
 
     @property
@@ -726,7 +704,11 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
 
     @property
     def initiative(self):
-        return self._modifier(self.dexterity) + self.half_level
+        result = self._modifier(self.dexterity) + self.half_level
+        if self.race.name == NPCRaceEnum.HOBGOBLIN.name:
+            # "Готовый к битве" хобгоблина
+            result += 2
+        return result
 
     @property
     def speed(self):
@@ -735,12 +717,6 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
         else:
             penalty = 0
         return self.race.speed - penalty
-
-    @property
-    def race_and_class_feats(self):
-        return self.race.bonuses.values_list('name', flat=True).union(
-            self.klass.bonuses.values_list('name', flat=True)
-        )
 
     @property
     def inventory_text(self):
@@ -763,10 +739,14 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                 {
                     modifier: getattr(self, modifier),
                     f'half_{modifier}': mod_value // 2,
-                    f'{modifier}_add10': mod_value + 10,
-                    f'{modifier}_add5': mod_value + 5,
                     f'{modifier}_add1': mod_value + 1,
                     f'{modifier}_add2': mod_value + 2,
+                    f'{modifier}_add3': mod_value + 3,
+                    f'{modifier}_add4': mod_value + 4,
+                    f'{modifier}_add5': mod_value + 5,
+                    f'{modifier}_add6': mod_value + 6,
+                    f'{modifier}_add9': mod_value + 9,
+                    f'{modifier}_add10': mod_value + 10,
                     f'{modifier}_add_halflevel': mod_value + self.half_level,
                 }
             )
@@ -774,6 +754,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
             {
                 'halflevel': self.half_level,
                 'halflevel_add3': self.half_level + 3,
+                'halflevel_add5': self.half_level + 5,
                 'level_add2': self.level + 2,
             }
         )
@@ -782,30 +763,9 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
             kwargs.update(weapon=weapon)
         return (string or '').format(**kwargs)
 
-    def _get_power_dict(self, power, attack_modifier, bonus, accessory, enchantment=0):
-        return dict(
-            name=power.name,
-            keywords=power.keywords,
-            enchantment=0,
-            attack_modifier=attack_modifier,
-            attack=attack_modifier + bonus + power.attack_bonus,
-            defence=power.get_defence_display(),
-            dice_number=power.dice_number,
-            dice=power.get_damage_dice_display(),
-            frequency_order=list(PowerFrequencyEnum).index(
-                PowerFrequencyEnum[power.frequency]
-            ),
-            hit_effect=self._calculate_injected_string(power.hit_effect),
-            miss_effect=self._calculate_injected_string(power.miss_effect),
-            effect=self._calculate_injected_string(power.effect),
-            trigger=self._calculate_injected_string(power.trigger),
-            target=power.target,
-            accessory=accessory,
-        )
-
     def powers_calculated(self):
         powers = []
-        base_bonus = self._level_bonus + self.half_level
+        base_attack_bonus = self._level_bonus + self.half_level
         if self.functional_template:
             for power in self.functional_template.powers.all():
                 attack_modifier = (
@@ -815,18 +775,13 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                     if power.attack_attribute
                     else 0
                 )
-                # powers.append(
-                #     self._get_power_dict(
-                #         power=power, attack_modifier=attack_modifier, bonus=base_bonus, accessory=self.functional_template.title, enchantment=0
-                #     )
-                # )
                 powers.append(
                     dict(
                         name=power.name,
                         keywords=power.keywords,
                         enchantment=0,
                         attack_modifier=attack_modifier,
-                        attack=attack_modifier + base_bonus + power.attack_bonus,
+                        attack=attack_modifier + base_attack_bonus + power.attack_bonus,
                         defence=power.get_defence_display(),
                         dice_number=power.dice_number,
                         dice=power.get_damage_dice_display(),
@@ -835,7 +790,9 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                         ),
                         hit_effect=self._calculate_injected_string(power.hit_effect),
                         miss_effect=self._calculate_injected_string(power.miss_effect),
-                        effect=self._calculate_injected_string(power.effect),
+                        effect=self._calculate_injected_string(
+                            power.effect or power.description
+                        ),
                         trigger=self._calculate_injected_string(power.trigger),
                         target=power.target,
                         accessory=self.functional_template.title,
@@ -855,7 +812,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                     keywords=power.keywords,
                     enchantment=0,
                     attack_modifier=attack_modifier,
-                    attack=attack_modifier + base_bonus + power.attack_bonus,
+                    attack=attack_modifier + base_attack_bonus + power.attack_bonus,
                     defence=power.get_defence_display(),
                     dice_number=power.dice_number,
                     dice=power.get_damage_dice_display(),
@@ -864,13 +821,17 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                     ),
                     hit_effect=self._calculate_injected_string(power.hit_effect),
                     miss_effect=self._calculate_injected_string(power.miss_effect),
-                    effect=self._calculate_injected_string(power.effect),
+                    effect=self._calculate_injected_string(
+                        power.effect or power.description
+                    ),
                     trigger=self._calculate_injected_string(power.trigger),
                     target=power.target,
-                    accessory='Расовый',
+                    accessory=str(self.race),
                 )
             )
         for power in self.powers.filter(accessory_type=AccessoryTypeEnum.WEAPON.name):
+            print('1' * 88)
+            print(power)
             attack_modifier = self._modifier(
                 getattr(self, AttributeEnum[power.attack_attribute].lname)
             )
@@ -902,7 +863,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                 )
 
             for weapon in self.weapons.filter(filters):
-                bonus = base_bonus
+                bonus = base_attack_bonus
                 if self.is_weapon_proficient(weapon):
                     bonus += +weapon.weapon_type.prof_bonus
                     bonus += self.subclass_attack_bonus(weapon)
@@ -952,7 +913,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                         enchantment=enchantment,
                         attack_modifier=attack_modifier,
                         attack=attack_modifier
-                        + base_bonus
+                        + base_attack_bonus
                         + enchantment
                         + power.attack_bonus,
                         defence=power.get_defence_display(),
@@ -985,7 +946,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                         enchantment=enchantment,
                         attack_modifier=attack_modifier,
                         attack=attack_modifier
-                        + base_bonus
+                        + base_attack_bonus
                         + enchantment
                         + power.attack_bonus,
                         defence=power.get_defence_display(),
@@ -1020,7 +981,9 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                     ),
                     hit_effect=self._calculate_injected_string(power.hit_effect),
                     miss_effect=self._calculate_injected_string(power.miss_effect),
-                    effect=self._calculate_injected_string(power.effect),
+                    effect=self._calculate_injected_string(
+                        power.effect or power.description
+                    ),
                     trigger=self._calculate_injected_string(power.trigger),
                     target=power.target,
                     accessory='Приём',

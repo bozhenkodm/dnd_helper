@@ -10,25 +10,26 @@ class FighterSubclass(IntDescriptionEnum):
     BRAWLER = 5, 'Воин задира'
 
 
-class SeekerSubclass(IntDescriptionEnum):
-    SPIRITBOND = 1, 'Духовная связь'
-    BLOODBOND = 2, 'Кровавая связь'
+class RogueSubclass(IntDescriptionEnum):
+    DODGER = 1, 'Мастер уклонения'
+    SCOUNDREL = 2, 'Жестокий головорез'
+    RUFFAIN = 3, 'Верзила'
+    SNEAK = 4, 'Скрытник'
 
 
 class RunePriestSubclass(IntDescriptionEnum):
     WRATHFUL_HAMMER = 1, 'Мстительный молот'
     DEFIANT_WORD = 2, 'Непокорное слово'
 
-    @staticmethod
-    def npc_class():
-        return NPCClassIntEnum.RUNEPRIEST
+
+class SorcererSubclass(IntDescriptionEnum):
+    DRAGON_MAGIC = 1, 'Драконья магия'
+    WILD_MAGIC = 2, 'Дикая магия'
 
 
-class RogueSubclass(IntDescriptionEnum):
-    DODGER = 1, 'Мастер уклонения'
-    SCOUNDREL = 2, 'Жестокий головорез'
-    RUFFAIN = 3, 'Верзила'
-    SNEAK = 4, 'Скрытник'
+class SeekerSubclass(IntDescriptionEnum):
+    SPIRITBOND = 1, 'Духовная связь'
+    BLOODBOND = 2, 'Кровавая связь'
 
 
 class WardenSubclass(IntDescriptionEnum):
@@ -40,5 +41,6 @@ SUBCLASSES = {
     NPCClassIntEnum.FIGHTER: FighterSubclass,
     NPCClassIntEnum.ROGUE: RogueSubclass,
     NPCClassIntEnum.SEEKER: SeekerSubclass,
+    NPCClassIntEnum.SORCERER: SorcererSubclass,
     NPCClassIntEnum.WARDEN: WardenSubclass,
 }

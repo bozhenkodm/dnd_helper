@@ -4,7 +4,7 @@ from base.constants.constants import (
     WeaponHandednessEnum,
     WeaponPropertyEnum,
 )
-from base.constants.subclass import FighterSubclass, SeekerSubclass
+from base.constants.subclass import FighterSubclass, SeekerSubclass, SorcererSubclass
 
 
 class AttackMixin:
@@ -61,4 +61,12 @@ class AttackMixin:
             # Свойство духовной связи ловчего
             return 1
 
+        return 0
+
+    @property
+    def class_damage_bonus(self):
+        # TODO finish it up
+        if self.klass.name == NPCClassIntEnum.SORCERER:
+            if self.subclass == SorcererSubclass:
+                return self._modifier(self.strength)
         return 0

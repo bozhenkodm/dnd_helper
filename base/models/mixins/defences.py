@@ -19,7 +19,11 @@ class DefenceMixin:
     @property
     def armor_class(self):
         result = 10 + self.half_level + self._level_bonus
-        result += self.functional_template.armor_class_bonus if self.functional_template else 0
+        result += (
+            self.functional_template.armor_class_bonus
+            if self.functional_template
+            else 0
+        )
         if self.armor:
             if self.armor.armor_type in map(int, self.klass.available_armor_types):
                 result += self.armor.armor_class
@@ -71,6 +75,14 @@ class DefenceMixin:
                 result += 3
             else:
                 result += 1
+
+        if (
+            self.klass.name == NPCClassIntEnum.VAMPIRE
+            and not self.shield
+            and (not self.armor or self.armor.armor_type == ArmorTypeIntEnum.CLOTH)
+        ):
+            # Рефлексы вампира
+            result += 2
         return result
 
     @property
@@ -80,7 +92,11 @@ class DefenceMixin:
             + self.half_level
             + self._level_bonus
             + max(self._modifier(self.strength), self._modifier(self.constitution))
-            + (self.functional_template.fortitude_bonus if self.functional_template else 0)
+            + (
+                self.functional_template.fortitude_bonus
+                if self.functional_template
+                else 0
+            )
         )
         if self.klass.name == NPCClassIntEnum.FIGHTER:
             if (
