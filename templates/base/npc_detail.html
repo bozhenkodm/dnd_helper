@@ -30,7 +30,7 @@
         <div><span>КД {{ object.armor_class }}; Стойкость {{ object.fortitude }}; Реакция {{ object.reflex }}; Воля {{ object.will }}</span></div>
     </div>
     <div class="npc-line">
-        <div><span>Инициатива +{{ object.initiative }}; Внимательность +{{ object.insight }}; {{ object.race.get_vision_display }} зрение</span></div>
+        <div><span>Инициатива +{{ object.initiative }}; Внимательность +{{ object.perception }}; {{ object.race.get_vision_display }} зрение</span></div>
         <div><span>Скорость {{ object.speed }}</span></div>
     </div>
     {% for power in object.powers_calculated %}
@@ -46,7 +46,7 @@
         {% endif %}
         {% if power.dice_number or power.hit_effect %}
             <div class="npc-line"><span><i>Попадание:</i>
-                {% if power.dice %}Урон {{ power.dice_number }}{{ power.dice }}+{{ power.attack_modifier|add:power.enchantment}};{% endif %}
+                {% if power.dice %}Урон {{ power.dice_number }}{{ power.dice }}+{{ power.damage_bonus|add:power.enchantment}};{% endif %}
                 {{ power.hit_effect }}</span></div>
         {% elif power.hit_effect %}
             <div class="npc-line"><span><i>Попадание:</i> {{ power.hit_effect }};</span></div>

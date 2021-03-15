@@ -1,12 +1,16 @@
 rerun:
-	python manage.py makemigrations; python manage.py migrate; black -S .; isort .; python manage.py runserver 0.0.0.0:8000
+	poetry run python manage.py makemigrations
+	poetry run python manage.py migrate
+	poetry run black -S .
+	poetry run isort .
+	poetry run python manage.py runserver 0.0.0.0:8000
 
 run:
-	python manage.py runserver 0.0.0.0:8000
+	poetry run python manage.py runserver 0.0.0.0:8000
 
 format:
-	black -S .
-	isort .
+	poetry run black -S .
+	poetry run isort .
 
 shell:
-	python manage.py shell -i ipython
+	poetry run python manage.py shell -i ipython

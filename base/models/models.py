@@ -1,3 +1,5 @@
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.urls import reverse
 from multiselectfield import MultiSelectField
@@ -780,7 +782,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                         name=power.name,
                         keywords=power.keywords,
                         enchantment=0,
-                        attack_modifier=attack_modifier,
+                        damage_bonus=attack_modifier + (self.class_damage_bonus if attack_modifier else 0),
                         attack=attack_modifier + base_attack_bonus + power.attack_bonus,
                         defence=power.get_defence_display(),
                         dice_number=power.dice_number,
@@ -811,7 +813,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                     name=power.name,
                     keywords=power.keywords,
                     enchantment=0,
-                    attack_modifier=attack_modifier,
+                    damage_bonus=attack_modifier + (self.class_damage_bonus if attack_modifier else 0),
                     attack=attack_modifier + base_attack_bonus + power.attack_bonus,
                     defence=power.get_defence_display(),
                     dice_number=power.dice_number,
@@ -830,8 +832,6 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                 )
             )
         for power in self.powers.filter(accessory_type=AccessoryTypeEnum.WEAPON.name):
-            print('1' * 88)
-            print(power)
             attack_modifier = self._modifier(
                 getattr(self, AttributeEnum[power.attack_attribute].lname)
             )
@@ -873,7 +873,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                         name=power.name,
                         keywords=power.keywords,
                         enchantment=enchantment,
-                        attack_modifier=attack_modifier,
+                        damage_bonus=attack_modifier + self.class_damage_bonus,
                         attack=attack_modifier
                         + bonus
                         + enchantment
@@ -911,7 +911,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                         name=power.name,
                         keywords=power.keywords,
                         enchantment=enchantment,
-                        attack_modifier=attack_modifier,
+                        damage_bonus=attack_modifier + self.class_damage_bonus,
                         attack=attack_modifier
                         + base_attack_bonus
                         + enchantment
@@ -944,7 +944,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                         name=power.name,
                         keywords=power.keywords,
                         enchantment=enchantment,
-                        attack_modifier=attack_modifier,
+                        damage_bonus=attack_modifier + self.class_damage_bonus,
                         attack=attack_modifier
                         + base_attack_bonus
                         + enchantment
@@ -971,7 +971,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                     name=power.name,
                     keywords=power.keywords,
                     enchantment=0,
-                    attack_modifier=0,
+                    damage_bonus=0,
                     attack=0,
                     defence=power.get_defence_display(),
                     dice_number=0,
@@ -986,7 +986,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                     ),
                     trigger=self._calculate_injected_string(power.trigger),
                     target=power.target,
-                    accessory='Приём',
+                    accessory='Пассивный' if power.frequency == PowerFrequencyEnum.PASSIVE.name else 'Приём',
                 )
             )
         return sorted(powers, key=lambda x: x['frequency_order'])

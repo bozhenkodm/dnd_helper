@@ -70,7 +70,7 @@ class SkillMixin:
 
     @property
     def insight(self):
-        """Внимательность"""
+        """Проницательность"""
         return self._calculate_skill(SkillsEnum.INSIGHT)
 
     @property
@@ -85,7 +85,7 @@ class SkillMixin:
 
     @property
     def perception(self):
-        """Проницательность"""
+        """Внимательность"""
         return self._calculate_skill(SkillsEnum.PERCEPTION)
 
     @property

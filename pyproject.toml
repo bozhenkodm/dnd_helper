@@ -24,4 +24,4 @@ mypy = "^0.812"
 [tool.black]
 include = '\.py$'
 skip-string-normalization = true
-target-version = ['py39']
+target-version = ['py38']

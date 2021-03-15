@@ -67,6 +67,8 @@ class AttackMixin:
     def class_damage_bonus(self):
         # TODO finish it up
         if self.klass.name == NPCClassIntEnum.SORCERER:
-            if self.subclass == SorcererSubclass:
-                return self._modifier(self.strength)
+            if self.subclass == SorcererSubclass.DRAGON_MAGIC:
+                return self._modifier(self.strength) + 2 * self._tier
+            if self.subclass == SorcererSubclass.WILD_MAGIC:
+                return self._modifier(self.dexterity) + 2 * self._tier
         return 0

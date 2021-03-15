@@ -4,7 +4,12 @@ from base.constants.constants import (
     ShieldTypeEnum,
     WeaponCategoryIntEnum,
 )
-from base.constants.subclass import FighterSubclass, SeekerSubclass, WardenSubclass
+from base.constants.subclass import (
+    FighterSubclass,
+    SeekerSubclass,
+    SorcererSubclass,
+    WardenSubclass,
+)
 
 
 class DefenceMixin:
@@ -42,6 +47,12 @@ class DefenceMixin:
                     armor_attributes.append(self.constitution)
                 elif self.subclass == WardenSubclass.WILDBLOOD:
                     armor_attributes.append(self.wisdom)
+            if (
+                self.klass.name == NPCClassIntEnum.SORCERER
+                and self.subclass == SorcererSubclass.DRAGON_MAGIC
+            ):
+                # Драконья магия
+                armor_attributes.append(self.strength)
             result += max(map(self._modifier, armor_attributes))
         result += self._shield_bonus
         if self.klass.name == NPCClassIntEnum.AVENGER:
