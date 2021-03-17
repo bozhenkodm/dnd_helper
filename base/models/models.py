@@ -782,7 +782,8 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                         name=power.name,
                         keywords=power.keywords,
                         enchantment=0,
-                        damage_bonus=attack_modifier + (self.class_damage_bonus if attack_modifier else 0),
+                        damage_bonus=attack_modifier
+                        + (self.class_damage_bonus if attack_modifier else 0),
                         attack=attack_modifier + base_attack_bonus + power.attack_bonus,
                         defence=power.get_defence_display(),
                         dice_number=power.dice_number,
@@ -813,7 +814,8 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                     name=power.name,
                     keywords=power.keywords,
                     enchantment=0,
-                    damage_bonus=attack_modifier + (self.class_damage_bonus if attack_modifier else 0),
+                    damage_bonus=attack_modifier
+                    + (self.class_damage_bonus if attack_modifier else 0),
                     attack=attack_modifier + base_attack_bonus + power.attack_bonus,
                     defence=power.get_defence_display(),
                     dice_number=power.dice_number,
@@ -986,7 +988,9 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                     ),
                     trigger=self._calculate_injected_string(power.trigger),
                     target=power.target,
-                    accessory='Пассивный' if power.frequency == PowerFrequencyEnum.PASSIVE.name else 'Приём',
+                    accessory='Пассивный'
+                    if power.frequency == PowerFrequencyEnum.PASSIVE.name
+                    else 'Приём',
                 )
             )
         return sorted(powers, key=lambda x: x['frequency_order'])
