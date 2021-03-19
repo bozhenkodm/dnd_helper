@@ -315,6 +315,19 @@ class FunctionalTemplate(models.Model):
         return self.title
 
 
+class PowerTarget(models.Model):
+    class Meta:
+        verbose_name = 'Цель таланта'
+        verbose_name_plural = 'Цели талантов'
+
+    target = models.CharField(
+        verbose_name='Цель', null=False, max_length=50, unique=True
+    )
+
+    def __str__(self):
+        return self.target
+
+
 class Power(models.Model):
     class Meta:
         verbose_name = 'Талант'
@@ -343,6 +356,7 @@ class Power(models.Model):
         null=True,
         blank=True,
     )
+    subclass = models.SmallIntegerField(verbose_name='Подкласс', choices=(), default=0)
     race = models.ForeignKey(
         Race,
         verbose_name='Раса',
@@ -412,11 +426,10 @@ class Power(models.Model):
     effect = models.TextField(verbose_name='Эффект', null=True, blank=True)
     trigger = models.TextField(verbose_name='Триггер', null=True, blank=True)
     requirement = models.TextField(verbose_name='Требование', null=True, blank=True)
-    target = models.CharField(verbose_name='Цель', null=True, max_length=50, blank=True)
-    parent_power = models.ForeignKey(
-        'self',
-        verbose_name='Родительский талант',
-        on_delete=models.CASCADE,
+    target = models.ForeignKey(
+        PowerTarget,
+        verbose_name='Цель',
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )
@@ -506,6 +519,7 @@ class PowerProperty(models.Model):
         blank=True,
         max_length=PowerPropertyTitle.max_length(),
     )
+    level = models.SmallIntegerField(verbose_name='Уровень', default=0)
     subclass = models.SmallIntegerField(verbose_name='Подкласс', choices=(), default=0)
     description = models.TextField(verbose_name='Описание')
 

@@ -20,6 +20,7 @@ from base.models.models import (
     Implement,
     ImplementType,
     Power,
+    PowerTarget,
     Weapon,
     WeaponType,
 )
@@ -286,6 +287,7 @@ class ImplementAdmin(admin.ModelAdmin):
 
 class PowerAdmin(admin.ModelAdmin):
     list_filter = ('frequency', 'klass', 'race', 'functional_template')
+    autocomplete_fields = ('target',)
     save_as = True
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -305,14 +307,44 @@ class PowerAdmin(admin.ModelAdmin):
                 'frequency',
                 'race',
                 'klass',
+                'subclass',
                 'functional_template',
+                'level',
             )
-        return super().get_fields(request, obj)
+        result = super().get_fields(request, obj)
+        owner_fields = {'race', 'klass', 'functional_template'}
+        for field in owner_fields:
+            if getattr(obj, field):
+                for obsolete_field in owner_fields - {field}:
+                    result.remove(obsolete_field)
+                if field != 'klass' and 'subclass' in result:
+                    result.remove('subclass')
+                break
+        return result
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == 'subclass':
+            object_id = request.resolver_match.kwargs.get('object_id', 0)
+            try:
+                instance = self.model.objects.get(id=object_id)
+            except self.model.DoesNotExist:
+                instance = None
+            if instance.klass:
+                subclass_enum = SUBCLASSES.get(instance.klass.name, None)
+                choices = subclass_enum.generate_choices() if subclass_enum else ()
+                db_field.choices = choices
+
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
 
 class PowerInline(admin.StackedInline):
     exclude = ('race', 'klass', 'level', 'attack_attribute', 'defence')
     model = Power
+
+
+class PowerTargetAdmin(admin.ModelAdmin):
+    ordering = ('target',)
+    search_fields = ('target',)
 
 
 class FunctionalTemplateAdmin(admin.ModelAdmin):
@@ -329,6 +361,7 @@ admin.site.register(Weapon, WeaponAdmin)
 admin.site.register(ImplementType, ImplementTypeAdmin)
 admin.site.register(Implement, ImplementAdmin)
 admin.site.register(Power, PowerAdmin)
+admin.site.register(PowerTarget, PowerTargetAdmin)
 admin.site.register(FunctionalTemplate, FunctionalTemplateAdmin)
 
 admin.site.unregister(Group)

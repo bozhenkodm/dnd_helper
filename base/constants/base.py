@@ -50,3 +50,12 @@ class IntDescriptionEnum(IntEnum):
         kwargs = ({field: item.name, 'then': models.Value(item.value)} for item in cls)
         whens = (models.When(**kws) for kws in kwargs)
         return models.Case(*whens, output_field=models.CharField())
+
+
+class IntDescriptionSubclassEnum(IntDescriptionEnum):
+    @classmethod
+    def generate_choices(cls):
+        return sorted(
+            [(item.value, item.description) for item in cls] + [(0, '---------')],
+            key=lambda x: x[0],
+        )
