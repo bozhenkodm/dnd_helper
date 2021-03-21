@@ -144,10 +144,11 @@ class NPCAdmin(admin.ModelAdmin):
             try:
                 instance = self.model.objects.get(id=object_id)
             except self.model.DoesNotExist:
-                instance = None
-            subclass_enum = SUBCLASSES.get(instance.klass.name, None)
-            choices = subclass_enum.generate_choices() if subclass_enum else ()
-            db_field.choices = choices
+                pass
+            else:
+                if subclass_enum := SUBCLASSES.get(instance.klass.name, None):
+                    choices = subclass_enum.generate_choices() if subclass_enum else ()
+                    db_field.choices = choices
 
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
@@ -329,8 +330,9 @@ class PowerAdmin(admin.ModelAdmin):
                 instance = self.model.objects.get(id=object_id)
             except self.model.DoesNotExist:
                 instance = None
-            if instance.klass:
-                subclass_enum = SUBCLASSES.get(instance.klass.name, None)
+            if instance.klass and (
+                subclass_enum := SUBCLASSES.get(instance.klass.name, None)
+            ):
                 choices = subclass_enum.generate_choices() if subclass_enum else ()
                 db_field.choices = choices
 

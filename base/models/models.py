@@ -4,6 +4,7 @@ from django.db import models
 from django.urls import reverse
 from multiselectfield import MultiSelectField
 
+from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
     AccessoryTypeEnum,
     ArmorTypeIntEnum,
@@ -356,7 +357,11 @@ class Power(models.Model):
         null=True,
         blank=True,
     )
-    subclass = models.SmallIntegerField(verbose_name='Подкласс', choices=(), default=0)
+    subclass = models.SmallIntegerField(
+        verbose_name='Подкласс',
+        choices=IntDescriptionSubclassEnum.generate_choices(),
+        default=0,
+    )
     race = models.ForeignKey(
         Race,
         verbose_name='Раса',
@@ -520,7 +525,11 @@ class PowerProperty(models.Model):
         max_length=PowerPropertyTitle.max_length(),
     )
     level = models.SmallIntegerField(verbose_name='Уровень', default=0)
-    subclass = models.SmallIntegerField(verbose_name='Подкласс', choices=(), default=0)
+    subclass = models.SmallIntegerField(
+        verbose_name='Подкласс',
+        choices=IntDescriptionSubclassEnum.generate_choices(),
+        default=0,
+    )
     description = models.TextField(verbose_name='Описание')
 
 
@@ -541,7 +550,11 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
         on_delete=models.CASCADE,
         verbose_name='Класс',
     )
-    subclass = models.SmallIntegerField(verbose_name='Подкласс', choices=(), default=0)
+    subclass = models.SmallIntegerField(
+        verbose_name='Подкласс',
+        choices=IntDescriptionSubclassEnum.generate_choices(),
+        default=0,
+    )
     functional_template = models.ForeignKey(
         FunctionalTemplate,
         on_delete=models.CASCADE,
