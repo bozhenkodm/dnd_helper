@@ -289,6 +289,7 @@ class ImplementAdmin(admin.ModelAdmin):
 class PowerAdmin(admin.ModelAdmin):
     list_filter = ('frequency', 'klass', 'race', 'functional_template')
     autocomplete_fields = ('target',)
+    ordering = ('klass', 'level', 'frequency')
     save_as = True
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):

@@ -511,7 +511,7 @@ class Power(models.Model):
 
     @property
     def is_utility(self):
-        return not self.accessory_type
+        return self.klass and not self.accessory_type
 
 
 class PowerProperty(models.Model):
@@ -531,6 +531,38 @@ class PowerProperty(models.Model):
         default=0,
     )
     description = models.TextField(verbose_name='Описание')
+
+
+class AttackPowerProperty(models.Model):
+    attack_attribute = models.CharField(
+        verbose_name='Атакующая характеристика',
+        choices=AttributeEnum.generate_choices(is_sorted=False),
+        max_length=AttributeEnum.max_length(),
+        null=True,
+        blank=True,
+    )
+    attack_bonus = models.SmallIntegerField(verbose_name='Бонус атаки', default=0)
+    defence = models.CharField(
+        verbose_name='Против защиты',
+        choices=DefenceTypeEnum.generate_choices(is_sorted=False),
+        max_length=DefenceTypeEnum.max_length(),
+        null=True,
+        blank=True,
+    )
+    dice_number = models.SmallIntegerField(verbose_name='Количество кубов', default=1)
+    damage_dice = models.SmallIntegerField(
+        verbose_name='Кость урона',
+        choices=DiceIntEnum.generate_choices(),
+        null=True,
+        blank=True,
+    )
+    accessory_type = models.CharField(
+        verbose_name='Тип вооружения',
+        choices=AccessoryTypeEnum.generate_choices(),
+        max_length=AccessoryTypeEnum.max_length(),
+        null=True,
+        blank=True,
+    )
 
 
 class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):

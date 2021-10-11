@@ -114,3 +114,9 @@ class SkillMixin:
             f'{SkillsEnum[skill].value} + {self._calculate_skill(SkillsEnum[skill])}'
             for skill in self.trained_skills
         )
+
+    @property
+    def skills_text(self):
+        return list(
+            f'{skill.value} + {self._calculate_skill(skill)}' for skill in SkillsEnum
+        )
