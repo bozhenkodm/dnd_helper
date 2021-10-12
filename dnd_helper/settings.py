@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'multiselectfield',
     'base',
     'generator',
+    'printer',
 ]
 
 MIDDLEWARE = [
