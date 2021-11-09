@@ -50,6 +50,11 @@ urlpatterns = [
         generator_views.FantasyNameView.as_view(),
         name='generator_fantasy_name',
     ),
+    path(
+        'generator/random_name',
+        generator_views.RandomNameView.as_view(),
+        name='random_fantasy_name',
+    ),
     path('npc/detail/<pk>', NPCDetailView.as_view(), name='npc'),
     path('encounter/detail/<pk>', EncounterDetailView.as_view(), name='encounter'),
     path('printer/detail/<pk>', PrintableObjectView.as_view(), name='printer'),

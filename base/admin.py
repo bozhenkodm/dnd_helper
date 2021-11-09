@@ -1,3 +1,4 @@
+# TODO handle new dataclasses in django admin
 from random import randint
 
 from django.contrib import admin
@@ -331,8 +332,10 @@ class PowerAdmin(admin.ModelAdmin):
                 instance = self.model.objects.get(id=object_id)
             except self.model.DoesNotExist:
                 instance = None
-            if instance.klass and (
-                subclass_enum := SUBCLASSES.get(instance.klass.name, None)
+            if (
+                instance
+                and instance.klass
+                and (subclass_enum := SUBCLASSES.get(instance.klass.name, None))
             ):
                 choices = subclass_enum.generate_choices() if subclass_enum else ()
                 db_field.choices = choices

@@ -12,8 +12,9 @@ class GeneratorsMainView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
-        tavern_url = reverse('generator_tavern')
-        context['tavern_url'] = tavern_url
+        context['tavern_url'] = reverse('generator_tavern')
+        context['fantasy_name_url'] = reverse('generator_fantasy_name')
+        context['random_name_url'] = reverse('random_fantasy_name')
         return context
 
 
@@ -42,9 +43,11 @@ class TavernView(TemplateView):
         return context
 
 
-class FantasyNameView(TemplateView):
+class GenerateNameView(TemplateView):
     template_name = 'generator/fantasy_name.html'
 
+
+class FantasyNameView(GenerateNameView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         name = random.choice(names.split()).lower()
@@ -61,3 +64,21 @@ class FantasyNameView(TemplateView):
         name = ''.join(replacements.get(i, l) for i, l in enumerate(name)).capitalize()
         context['name'] = name
         return context
+
+
+class RandomNameView(GenerateNameView):
+    vovels = 'аеиоуэ'
+    consolants = 'бвгджзклмнпрстфхцчш'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        name = ''.join(self.get_syllable() for _ in range(random.randint(1, 4)))
+        context['name'] = name.capitalize()
+        return context
+
+    def get_syllable(self):
+        return (
+            f'{random.choice(self.consolants)}'
+            f'{random.choice(self.vovels)}'
+            f'{random.randint(False, True) * random.choice(self.consolants)}'
+        )

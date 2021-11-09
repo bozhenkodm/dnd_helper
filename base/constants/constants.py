@@ -18,6 +18,15 @@ class AttributeEnum(BaseCapitalizedEnum):
     CHARISMA = 'Харизма'
 
 
+class AttributeIntEnum(IntDescriptionEnum):
+    STRENGTH = 1, 'Сила'
+    CONSTITUTION = 2, 'Телосложение'
+    DEXTERITY = 3, 'Ловкость'
+    INTELLIGENCE = 4, 'Интеллект'
+    WISDOM = 5, 'Мудрость'
+    CHARISMA = 6, 'Харизма'
+
+
 class SizeEnum(BaseCapitalizedEnum):
     TINY = 'Крошечный'
     SMALL = 'Маленький'

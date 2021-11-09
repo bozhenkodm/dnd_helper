@@ -1,7 +1,8 @@
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
+from functools import cached_property
+
 from django.db import models
 from django.urls import reverse
+# from django.utils.functional import cached_property
 from multiselectfield import MultiSelectField
 
 from base.constants.base import IntDescriptionSubclassEnum
@@ -34,6 +35,7 @@ from base.models.mixins.attacks import AttackMixin
 from base.models.mixins.attributes import AttributeMixin
 from base.models.mixins.defences import DefenceMixin
 from base.models.mixins.skills import SkillMixin
+from base.objects import race_classes
 
 
 class Armor(models.Model):
@@ -226,6 +228,10 @@ class Race(models.Model):
     available_weapon_types = models.ManyToManyField(
         WeaponType, verbose_name='Владение оружием', blank=True
     )
+
+    @cached_property
+    def data_instance(self):
+        return race_classes.get(self.name)()
 
     def __str__(self):
         return NPCRaceEnum[self.name].value
@@ -743,11 +749,9 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
         """
         Исцеление
         """
-        result = self.bloodied // 2
-        # У драконорождённых исцеление увеличено
-        if self.race.name == NPCRaceEnum.DRAGONBORN.name:
-            result += self._modifier(self.constitution)
-        return result
+        return self.bloodied // 2 + self.race.data_instance.healing_surge_bonus(
+            constitution=self.constitution
+        )
 
     @property
     def _tier(self):
@@ -765,19 +769,20 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
 
     @property
     def initiative(self):
-        result = self._modifier(self.dexterity) + self.half_level
-        if self.race.name == NPCRaceEnum.HOBGOBLIN.name:
-            # "Готовый к битве" хобгоблина
-            result += 2
-        return result
+        return (
+            self._modifier(self.dexterity)
+            + self.half_level
+            + self.race.data_instance.initiative()
+        )
 
     @property
     def speed(self):
-        if self.armor and self.race.name != NPCRaceEnum.DWARF.name:
-            penalty = self.armor.speed_penalty
-        else:
-            penalty = 0
-        return self.race.speed - penalty
+        if self.armor:
+            return self.race.speed - min(
+                self.armor.speed_penalty,
+                self.race.data_instance.heavy_armor_speed_penalty,
+            )
+        return self.race.speed
 
     @property
     def inventory_text(self):
