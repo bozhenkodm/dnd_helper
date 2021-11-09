@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 from typing import ClassVar
 
-from base.constants.constants import NPCRaceEnum, VisionEnum, SizeEnum
+from base.constants.constants import NPCRaceEnum, SizeEnum, VisionEnum
 from base.objects.abilities import Abilities
 from base.objects.skills import Skills
+
 # TODO add the rest of race properties
+
 
 class Race:
     slug: ClassVar[NPCRaceEnum] = None
@@ -98,6 +100,11 @@ class ElfRace(Race):
 
 class VrylokaRace(Race):
     slug = NPCRaceEnum.VRYLOKA
+    const_ability_bonus = Abilities(charisma=2)
+    var_ability_bonus = Abilities(strength=2, dexterity=2)
+    vision = VisionEnum.TWILIGHT
+    skill_bonuses = Skills(perception=2, stealth=2)
+    speed = 7
 
 
 class HamadryadRace(Race):
@@ -188,6 +195,7 @@ class DrowRace(Race):
     skill_bonuses = Skills(intimidate=2, stealth=2)
     vision = VisionEnum.DARK
 
+
 class DuergarRace(Race):
     slug = NPCRaceEnum.DUERGAR
 
@@ -212,7 +220,6 @@ class WarforgedRace(Race):
     const_ability_bonus = Abilities(constitution=2)
     var_ability_bonus = Abilities(strength=2, intelligence=2)
     skill_bonuses = Skills(intimidate=2, endurance=2)
-
 
 
 class BladelingRace(Race):
@@ -254,7 +261,6 @@ class HalforcRace(Race):
     skill_bonuses = Skills(endurance=2, intimidate=2)
 
 
-
 class PixieRace(Race):
     slug = NPCRaceEnum.PIXIE
     size = SizeEnum.TINY
@@ -278,11 +284,12 @@ class Thri_kreenRace(Race):
 
 class HumanRace(Race):
     slug = NPCRaceEnum.HUMAN
-    var_ability_bonus = Abilities(strength=2, constitution=2, dexterity=2, intelligence=2, wisdom=2, charisma=2)
+    var_ability_bonus = Abilities(
+        strength=2, constitution=2, dexterity=2, intelligence=2, wisdom=2, charisma=2
+    )
     fortitude = 1
     reflex = 1
     will = 1
-
 
 
 class ShadarKaiRace(Race):

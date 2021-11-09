@@ -31,8 +31,8 @@ from base.constants.constants import (
     WeaponHandednessEnum,
     WeaponPropertyEnum,
 )
+from base.models.mixins.abilities import AttributeMixin
 from base.models.mixins.attacks import AttackMixin
-from base.models.mixins.attributes import AttributeMixin
 from base.models.mixins.defences import DefenceMixin
 from base.models.mixins.skills import SkillMixin
 from base.objects import race_classes
@@ -772,7 +772,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
         return (
             self._modifier(self.dexterity)
             + self.half_level
-            + self.race.data_instance.initiative()
+            + self.race.data_instance.initiative
         )
 
     @property

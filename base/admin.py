@@ -1,4 +1,5 @@
 # TODO handle new dataclasses in django admin
+from dataclasses import asdict
 from random import randint
 
 from django.contrib import admin
@@ -101,8 +102,17 @@ class NPCAdmin(admin.ModelAdmin):
         if db_field.name == 'var_bonus_attr':
             if object_id:
                 instance = self.model.objects.get(id=object_id)
-                choices = list(instance.race.var_bonus_attrs)
-                choices = ((item, AttributeEnum[item].value) for item in choices)
+                # TODO temporary (?) solution until npc.var_bonus_attr refactored
+                # getting list of choices according to var_ability_bonus in ract dataclass
+                print(object_id)
+                choices = [
+                    (key.upper(), AttributeEnum[key.upper()].value)
+                    for key, value in asdict(
+                        instance.race.data_instance.var_ability_bonus
+                    ).items()
+                    if value
+                ]
+                print(choices)
             else:
                 choices = ()
 

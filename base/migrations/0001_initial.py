@@ -4,8 +4,8 @@ import django.db.models.deletion
 import multiselectfield.db.fields
 from django.db import migrations, models
 
+import base.models.mixins.abilities
 import base.models.mixins.attacks
-import base.models.mixins.attributes
 import base.models.mixins.defences
 import base.models.mixins.skills
 
@@ -1226,7 +1226,7 @@ class Migration(migrations.Migration):
             bases=(
                 base.models.mixins.defences.DefenceMixin,
                 base.models.mixins.attacks.AttackMixin,
-                base.models.mixins.attributes.AttributeMixin,
+                base.models.mixins.abilities.AttributeMixin,
                 base.models.mixins.skills.SkillMixin,
                 models.Model,
             ),

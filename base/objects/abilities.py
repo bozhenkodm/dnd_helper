@@ -12,3 +12,13 @@ class Abilities:
 
     def description(self):
         return astuple(self)
+
+    def __add__(self, other):
+        return Abilities(
+            strength=self.strength + other.strength,
+            constitution=self.constitution + other.constitution,
+            dexterity=self.dexterity + other.dexterity,
+            intelligence=self.intelligence + other.intelligence,
+            wisdom=self.wisdom + other.wisdom,
+            charisma=self.charisma + other.charisma,
+        )
