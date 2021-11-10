@@ -35,7 +35,7 @@ from base.models.mixins.abilities import AttributeMixin
 from base.models.mixins.attacks import AttackMixin
 from base.models.mixins.defences import DefenceMixin
 from base.models.mixins.skills import SkillMixin
-from base.objects import race_classes
+from base.objects import npc_klasses, race_classes
 
 
 class Armor(models.Model):
@@ -184,46 +184,6 @@ class Race(models.Model):
         choices=NPCRaceEnum.generate_choices(),
         unique=True,
     )
-    speed = models.PositiveSmallIntegerField(default=6, verbose_name='Скорость')
-    const_bonus_attrs = MultiSelectField(
-        verbose_name='Обязательные бонусы характеристик',
-        choices=AttributeEnum.generate_choices(is_sorted=False),
-        max_choices=2,
-        null=True,
-        blank=True,
-    )
-    var_bonus_attrs = MultiSelectField(
-        verbose_name='Выборочные бонусы характеристик',
-        choices=AttributeEnum.generate_choices(is_sorted=False),
-        null=True,
-        blank=True,
-    )
-    size = models.CharField(
-        verbose_name='Размер',
-        max_length=SizeEnum.max_length(),
-        choices=SizeEnum.generate_choices(is_sorted=False),
-        default=SizeEnum.AVERAGE.name,
-    )
-    vision = models.CharField(
-        verbose_name='Зрение',
-        max_length=VisionEnum.max_length(),
-        choices=VisionEnum.generate_choices(),
-        default=VisionEnum.TWILIGHT.name,
-    )
-
-    fortitude_bonus = models.SmallIntegerField(
-        verbose_name='Бонус стойкости', default=0
-    )
-    reflex_bonus = models.SmallIntegerField(verbose_name='Бонус реакции', default=0)
-    will_bonus = models.SmallIntegerField(verbose_name='Бонус воли', default=0)
-
-    skill_bonuses = MultiSelectField(
-        verbose_name='Бонусы навыков',
-        choices=SkillsEnum.generate_choices(),
-        max_choices=2,
-        null=True,
-        blank=True,
-    )
 
     available_weapon_types = models.ManyToManyField(
         WeaponType, verbose_name='Владение оружием', blank=True
@@ -232,6 +192,10 @@ class Race(models.Model):
     @cached_property
     def data_instance(self):
         return race_classes.get(self.name)()
+
+    @property
+    def vision(self):
+        return self.data_instance.vision.value
 
     def __str__(self):
         return NPCRaceEnum[self.name].value
@@ -245,26 +209,8 @@ class Class(models.Model):
     name = models.SmallIntegerField(
         verbose_name='Название', choices=NPCClassIntEnum.generate_choices(), unique=True
     )
-    power_source = models.CharField(
-        verbose_name='Источник силы',
-        choices=PowerSourceEnum.generate_choices(),
-        max_length=PowerSourceEnum.max_length(),
-        null=True,
-    )
     subclasses = models.SmallIntegerField(
         verbose_name='Количество подклассов', default=0
-    )
-    fortitude_bonus = models.SmallIntegerField(
-        verbose_name='Бонус стойкости', default=0
-    )
-    reflex_bonus = models.SmallIntegerField(verbose_name='Бонус реакции', default=0)
-    will_bonus = models.SmallIntegerField(verbose_name='Бонус воли', default=0)
-    trained_skills = MultiSelectField(
-        verbose_name='Тренированные навыки',
-        choices=SkillsEnum.generate_choices(),
-        min_choices=1,
-        null=True,
-        blank=True,
     )
     available_armor_types = MultiSelectField(
         verbose_name='Ношение доспехов',
@@ -289,12 +235,13 @@ class Class(models.Model):
     available_implement_types = models.ManyToManyField(
         ImplementType, verbose_name='Доступные инструменты', blank=True
     )
-    hit_points_per_level = models.PositiveSmallIntegerField(
-        verbose_name='Хитов за уровень', default=8
-    )
 
     def __str__(self):
         return NPCClassIntEnum(self.name).description
+
+    @cached_property
+    def data_instance(self):
+        return npc_klasses.get(self.name)()
 
 
 class FunctionalTemplate(models.Model):
@@ -728,11 +675,11 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
 
     @property
     def max_hit_points(self):
-        result = self.klass.hit_points_per_level * self.level + self.constitution
-        if self.klass.name == NPCClassIntEnum.RANGER_MELEE:
-            result += 5 * (
-                self._tier + 1
-            )  # Бонусная черта крепкое тело у рейнджеров рукопашников
+        result = (
+            self.klass.data_instance.hit_points_per_level * self.level
+            + self.constitution
+            + self.klass.data_instance.hit_points_bonus(tier=self._tier)
+        )
         if self.functional_template:
             result += (
                 self.functional_template.hit_points_per_level * self.level
@@ -778,7 +725,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
     @property
     def speed(self):
         if self.armor:
-            return self.race.speed - min(
+            return self.race.data_instance.speed - min(
                 self.armor.speed_penalty,
                 self.race.data_instance.heavy_armor_speed_penalty,
             )

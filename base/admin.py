@@ -82,6 +82,7 @@ class NPCAdmin(admin.ModelAdmin):
         'base_wisdom',
         'base_charisma',
         'var_bonus_attr',
+        'mandatory_skills',
         'trained_skills',
         'armor',
         'shield',
@@ -91,6 +92,7 @@ class NPCAdmin(admin.ModelAdmin):
     ]
     readonly_fields = [
         'npc_link',
+        'mandatory_skills',
         'generated_attributes',
     ]
     autocomplete_fields = ('weapons', 'implements')
@@ -120,8 +122,12 @@ class NPCAdmin(admin.ModelAdmin):
         if db_field.name == 'trained_skills':
             if object_id:
                 instance = self.model.objects.get(id=object_id)
-                choices = list(instance.klass.trained_skills)
-                choices = ((item, SkillsEnum[item].value) for item in choices)
+                choices = instance.klass.data_instance.trainable_skills
+                choices = (
+                    (key.upper(), SkillsEnum[key.upper()].value)
+                    for key, value in asdict(choices).items()
+                    if value
+                )
             else:
                 choices = ()
             kwargs['choices'] = choices
@@ -213,6 +219,15 @@ class NPCAdmin(admin.ModelAdmin):
         return ', '.join(sorted([str(generate_attribute()) for _ in range(6)], key=int))
 
     generated_attributes.short_description = 'Сгенерированные аттрибуты'
+
+    def mandatory_skills(self, obj):
+        return ', '.join(
+            SkillsEnum[key.upper()]
+            for key, value in asdict(obj.klass.data_instance.mandatory_skills).items()
+            if value
+        )
+
+    mandatory_skills.short_description = 'Тренированные навыки'
 
 
 class EncounterAdmin(admin.ModelAdmin):

@@ -1,17 +1,19 @@
 from base.constants.constants import SkillsEnum
+from base.objects.skills import Skills
 
 
 class SkillMixin:
     @property
-    def _trained_skills_bonuses(self):
-        return {key: 5 for key in self.trained_skills}
+    def _trained_skills_bonuses(self) -> Skills:
+        # TODO refactor with Skills.intersect method
+        return Skills(**{key.lower(): 5 for key in list(self.trained_skills)})
 
     def _calculate_skill(self, skill: SkillsEnum) -> int:
         attribute = getattr(self, skill.get_base_attribute().lname)
         result = (
             self.half_level
             + self._modifier(attribute)
-            + self._trained_skills_bonuses.get(skill.name, 0)
+            + getattr(self._trained_skills_bonuses, skill.name.lower())
         )
         if skill in (
             SkillsEnum.ACROBATICS,
