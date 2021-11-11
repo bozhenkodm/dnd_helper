@@ -180,6 +180,7 @@ class WeaponGroupEnum(BaseCapitalizedEnum):
     HAMMER = 'Молот'
     PICK = 'Кирка'
     POLEARM = 'Древковое'
+    UNARMED = 'Безоружное'
     # Дальнобойное
     SLING = 'Праща'
     CROSSBOW = 'Арбалет'
@@ -228,6 +229,8 @@ class WeaponPropertyEnum(BaseCapitalizedEnum):
 class WeaponHandednessEnum(BaseCapitalizedEnum):
     ONE = 'Одноручное'
     TWO = 'Двуручное'
+    VERSATILE = 'Универсальное'  # one handed, but can be used with two hands
+    # (with +1 to damage, unless user is small)
 
 
 class PowerSourceEnum(BaseCapitalizedEnum):

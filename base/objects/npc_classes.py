@@ -1,4 +1,4 @@
-from typing import ClassVar
+from typing import ClassVar, Sequence
 
 from base.constants.constants import (
     ArmorTypeIntEnum,
@@ -9,6 +9,7 @@ from base.constants.constants import (
     WeaponCategoryIntEnum,
 )
 from base.objects.skills import Skills
+from base.objects.weapon_types import WeaponType
 
 
 class NPCClass:
@@ -20,10 +21,10 @@ class NPCClass:
     mandatory_skills: ClassVar[Skills] = Skills()
     trainable_skills: ClassVar[Skills] = Skills()
     skill_bonuses: ClassVar[Skills] = Skills()
-    available_armor_types: ClassVar[tuple[ArmorTypeIntEnum]] = ()
-    available_shield_types: ClassVar[tuple[ShieldTypeEnum]] = ()
-    available_weapon_categories: ClassVar[tuple[WeaponCategoryIntEnum]] = ()
-    # available_weapon_types
+    available_armor_types: ClassVar[Sequence[ArmorTypeIntEnum]] = ()
+    available_shield_types: ClassVar[Sequence[ShieldTypeEnum]] = ()
+    available_weapon_categories: ClassVar[Sequence[WeaponCategoryIntEnum]] = ()
+    available_weapon_types: ClassVar[Sequence[WeaponType]]
     # available_implement_types
     hit_points_per_level: ClassVar[int] = 8
 
@@ -101,6 +102,9 @@ class BarbarianClass(NPCClass):
 class WarlordClass(NPCClass):
     slug = NPCClassIntEnum.WARLORD
     power_source = PowerSourceEnum.MARTIAL
+    fortitude = 1
+    will = 1
+    trainable_skills = Skills(athletics=5, endurance=5, intimidate=5, history=5, diplomacy=5, heal=5)
 
 
 class FighterClass(NPCClass):

@@ -1,11 +1,12 @@
 from dataclasses import dataclass
-from typing import ClassVar
+from typing import ClassVar, Sequence
 
 from base.constants.constants import NPCRaceEnum, SizeEnum, VisionEnum
 from base.objects.abilities import Abilities
 from base.objects.skills import Skills
 
 # TODO add the rest of race properties
+from base.objects.weapon_types import WeaponType, Warhammer, ThrowingHammer, LongSword, Longbow, Shortbow
 
 
 class Race:
@@ -19,7 +20,7 @@ class Race:
 
     skill_bonuses: ClassVar[Skills] = Skills()
 
-    # available_weapon_types: ClassVar[set[WeaponType]] = field(default_factory=set)
+    available_weapon_types: ClassVar[Sequence[WeaponType]] = frozenset()
     vision: ClassVar[VisionEnum] = VisionEnum.NORMAL
     size: ClassVar[SizeEnum] = SizeEnum.AVERAGE
 
@@ -47,6 +48,7 @@ class DwarfRace(Race):
     speed = 5
     vision = VisionEnum.TWILIGHT
     skill_bonuses = Skills(endurance=2, dungeoneering=2)
+    available_weapon_types = {Warhammer, ThrowingHammer}
 
     @property
     def heavy_armor_speed_penalty(self):
@@ -85,6 +87,7 @@ class EladrinRace(Race):
     const_ability_bonus = Abilities(intelligence=2)
     var_ability_bonus = Abilities(dexterity=2, charisma=2)
     skill_bonuses = Skills(history=2, arcana=2)
+    available_weapon_types = (LongSword,)
     vision = VisionEnum.TWILIGHT
     will = 1
 
@@ -94,6 +97,7 @@ class ElfRace(Race):
     const_ability_bonus = Abilities(dexterity=2)
     var_ability_bonus = Abilities(wisdom=2, intelligence=2)
     skill_bonuses = Skills(perception=2, nature=2)
+    available_weapon_types = (Longbow, Shortbow)
     vision = VisionEnum.TWILIGHT
     speed = 7
 
@@ -278,7 +282,7 @@ class TieflingRace(Race):
     vision = VisionEnum.TWILIGHT
 
 
-class Thri_kreenRace(Race):
+class ThriKreenRace(Race):
     slug = NPCRaceEnum.THRI_KREEN
 
 

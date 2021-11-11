@@ -2,7 +2,6 @@ from functools import cached_property
 
 from django.db import models
 from django.urls import reverse
-# from django.utils.functional import cached_property
 from multiselectfield import MultiSelectField
 
 from base.constants.base import IntDescriptionSubclassEnum
@@ -20,12 +19,9 @@ from base.constants.constants import (
     PowerFrequencyEnum,
     PowerPropertyTitle,
     PowerRangeTypeEnum,
-    PowerSourceEnum,
     SexEnum,
     ShieldTypeEnum,
-    SizeEnum,
     SkillsEnum,
-    VisionEnum,
     WeaponCategoryIntEnum,
     WeaponGroupEnum,
     WeaponHandednessEnum,
@@ -35,7 +31,7 @@ from base.models.mixins.abilities import AttributeMixin
 from base.models.mixins.attacks import AttackMixin
 from base.models.mixins.defences import DefenceMixin
 from base.models.mixins.skills import SkillMixin
-from base.objects import npc_klasses, race_classes
+from base.objects import npc_klasses, race_classes, weapon_types_classes
 
 
 class Armor(models.Model):
@@ -73,6 +69,7 @@ class WeaponType(models.Model):
         verbose_name_plural = 'Типы оружия'
 
     name = models.CharField(verbose_name='Название', max_length=20, unique=True)
+    slug = models.CharField(verbose_name='Slug', max_length=20, unique=True)
     prof_bonus = models.SmallIntegerField(verbose_name='Бонус владения', default=2)
     group = MultiSelectField(
         verbose_name='Группа оружия',
@@ -105,6 +102,10 @@ class WeaponType(models.Model):
 
     def __str__(self):
         return self.name
+
+    @cached_property
+    def dataclass_instance(self):
+        return weapon_types_classes.get(self.slug)()
 
     @property
     def max_range(self):
