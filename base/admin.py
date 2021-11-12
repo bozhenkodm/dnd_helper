@@ -25,6 +25,7 @@ from base.models.models import (
     Weapon,
     WeaponType,
 )
+from base.objects import npc_klasses
 
 
 class AdminMixin:
@@ -49,7 +50,6 @@ class AdminMixin:
 
 
 class RaceAdmin(admin.ModelAdmin):
-
     def get_queryset(self, request):
         qs = super().get_queryset(request).annotate(title=NPCRaceEnum.generate_case())
         return qs.order_by('title')
@@ -107,7 +107,7 @@ class NPCAdmin(admin.ModelAdmin):
                 choices = [
                     (key.upper(), AttributeEnum[key.upper()].value)
                     for key, value in asdict(
-                        instance.race.data_instance.var_ability_bonus
+                        instance.race_data_instance.var_ability_bonus
                     ).items()
                     if value
                 ]
@@ -119,7 +119,7 @@ class NPCAdmin(admin.ModelAdmin):
         if db_field.name == 'trained_skills':
             if object_id:
                 instance = self.model.objects.get(id=object_id)
-                choices = instance.klass.data_instance.trainable_skills
+                choices = instance.klass_data_instance.trainable_skills
                 choices = (
                     (key.upper(), SkillsEnum[key.upper()].value)
                     for key, value in asdict(choices).items()
@@ -161,7 +161,7 @@ class NPCAdmin(admin.ModelAdmin):
                 pass
             else:
                 if subclass_enum := getattr(
-                    instance.klass.data_instance, 'SubclassEnum', None
+                    instance.klass_data_instance, 'SubclassEnum', None
                 ):
                     choices = subclass_enum.generate_choices()
                     db_field.choices = choices
@@ -201,7 +201,7 @@ class NPCAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super().get_readonly_fields(request, obj)
-        if obj and not getattr(obj.klass.data_instance, 'SubclassEnum', None):
+        if obj and not getattr(obj.klass_data_instance, 'SubclassEnum', None):
             readonly_fields.append('subclass')
         return readonly_fields
 
@@ -222,7 +222,7 @@ class NPCAdmin(admin.ModelAdmin):
     def mandatory_skills(self, obj):
         return ', '.join(
             SkillsEnum[key.upper()]
-            for key, value in asdict(obj.klass.data_instance.mandatory_skills).items()
+            for key, value in asdict(obj.klass_data_instance.mandatory_skills).items()
             if value
         )
 
@@ -350,7 +350,7 @@ class PowerAdmin(admin.ModelAdmin):
                 and instance.klass
                 and (
                     subclass_enum := getattr(
-                        instance.klass.data_instance, 'SubclassEnum', None
+                        npc_klasses[instance.klass.name], 'SubclassEnum', None
                     )
                 )
             ):

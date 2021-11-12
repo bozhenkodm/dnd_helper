@@ -152,11 +152,7 @@ class Race(models.Model):
 
     @cached_property
     def data_instance(self):
-        return race_classes.get(self.name)()
-
-    @property
-    def vision(self):
-        return self.data_instance.vision.value
+        return race_classes.get(self.name)(npc=self)
 
     def __str__(self):
         return NPCRaceEnum[self.name].value
@@ -190,7 +186,7 @@ class Class(models.Model):
 
     @cached_property
     def data_instance(self):
-        return npc_klasses.get(self.name)()
+        return npc_klasses.get(self.name)(npc=self)
 
 
 class FunctionalTemplate(models.Model):
@@ -604,6 +600,18 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
             f'{self.race} {self.klass} {self.level} уровня'
         )
 
+    # TODO these two next methods are shitshow, appeared to be parallel structures of race and class
+    # instead of complementing models. how to integrate npc instance to these instances and initialise them
+    # in race and class models respectively?
+
+    @cached_property
+    def race_data_instance(self):
+        return race_classes.get(self.race.name)(npc=self)
+
+    @cached_property
+    def klass_data_instance(self):
+        return npc_klasses.get(self.klass.name)(npc=self)
+
     @property
     def url(self):
         return reverse('npc', kwargs={'pk': self.pk})
@@ -625,9 +633,9 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
     @property
     def max_hit_points(self):
         result = (
-            self.klass.data_instance.hit_points_per_level * self.level
+            self.klass_data_instance.hit_points_per_level * self.level
             + self.constitution
-            + self.klass.data_instance.hit_points_bonus(tier=self._tier)
+            + self.klass_data_instance.hit_points_bonus
         )
         if self.functional_template:
             result += (
@@ -645,9 +653,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
         """
         Исцеление
         """
-        return self.bloodied // 2 + self.race.data_instance.healing_surge_bonus(
-            constitution=self.constitution
-        )
+        return self.bloodied // 2 + self.race_data_instance.healing_surge_bonus
 
     @property
     def _tier(self):
@@ -668,17 +674,17 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
         return (
             self._modifier(self.dexterity)
             + self.half_level
-            + self.race.data_instance.initiative
+            + self.race_data_instance.initiative
         )
 
     @property
     def speed(self):
         if self.armor:
-            return self.race.data_instance.speed - min(
+            return self.race_data_instance.speed - min(
                 self.armor.speed_penalty,
-                self.race.data_instance.heavy_armor_speed_penalty,
+                self.race_data_instance.heavy_armor_speed_penalty,
             )
-        return self.race.data_instance.speed
+        return self.race_data_instance.speed
 
     @property
     def inventory_text(self):
@@ -743,7 +749,11 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                         keywords=power.keywords,
                         enchantment=0,
                         damage_bonus=attack_modifier
-                        + (self.klass.data_instance.damage_bonus(npc=self) if attack_modifier else 0),
+                        + (
+                            self.klass_data_instance.damage_bonus(npc=self)
+                            if attack_modifier
+                            else 0
+                        ),
                         attack=attack_modifier + base_attack_bonus + power.attack_bonus,
                         defence=power.get_defence_display(),
                         dice_number=power.dice_number,
@@ -775,7 +785,11 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                     keywords=power.keywords,
                     enchantment=0,
                     damage_bonus=attack_modifier
-                    + (self.klass.data_instance.damage_bonus(npc=self) if attack_modifier else 0),
+                    + (
+                        self.klass_data_instance.damage_bonus(npc=self)
+                        if attack_modifier
+                        else 0
+                    ),
                     attack=attack_modifier + base_attack_bonus + power.attack_bonus,
                     defence=power.get_defence_display(),
                     dice_number=power.dice_number,
@@ -801,14 +815,15 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                 bonus = base_attack_bonus
                 if self.is_weapon_proficient(weapon):
                     bonus += +weapon.weapon_type.data_instance.prof_bonus
-                    bonus += self.klass.data_instance.attack_bonus(weapon=weapon)
+                    bonus += self.klass_data_instance.attack_bonus(weapon=weapon)
                 enchantment = min(weapon.enchantment, self._magic_threshold)
                 powers.append(
                     dict(
                         name=power.name,
                         keywords=power.keywords,
                         enchantment=enchantment,
-                        damage_bonus=attack_modifier + self.klass.data_instance.damage_bonus(npc=self),
+                        damage_bonus=attack_modifier
+                        + self.klass_data_instance.damage_bonus,
                         attack=attack_modifier
                         + bonus
                         + enchantment
@@ -847,7 +862,8 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                         name=power.name,
                         keywords=power.keywords,
                         enchantment=enchantment,
-                        damage_bonus=attack_modifier + self.klass.data_instance.damage_bonus(npc=self),
+                        damage_bonus=attack_modifier
+                        + self.klass_data_instance.damage_bonus,
                         attack=attack_modifier
                         + base_attack_bonus
                         + enchantment
@@ -880,7 +896,8 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                         name=power.name,
                         keywords=power.keywords,
                         enchantment=enchantment,
-                        damage_bonus=attack_modifier + self.klass.data_instance.damage_bonus(npc=self),
+                        damage_bonus=attack_modifier
+                        + self.klass_data_instance.damage_bonus,
                         attack=attack_modifier
                         + base_attack_bonus
                         + enchantment

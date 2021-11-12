@@ -19,7 +19,7 @@ class WeaponType:
     group: ClassVar[Union[Sequence[WeaponGroupEnum], WeaponGroupEnum]]
     category: ClassVar[WeaponCategoryIntEnum]
     damage_dice: ClassVar[DiceIntEnum]
-    properties: ClassVar[tuple[WeaponPropertyEnum]]
+    # properties: ClassVar[tuple[WeaponPropertyEnum]]
     handedness: ClassVar[WeaponHandednessEnum] = WeaponHandednessEnum.ONE
     name: ClassVar[str] = None
     prof_bonus: ClassVar[int] = 2

@@ -4,9 +4,9 @@ class AttackMixin:
         return any(
             (
                 data_instance.category
-                in map(int, self.klass.data_instance.available_weapon_categories),
-                type(data_instance) in self.klass.data_instance.available_weapon_types,
-                type(data_instance) in self.race.data_instance.available_weapon_types,
+                in map(int, self.klass_data_instance.available_weapon_categories),
+                type(data_instance) in self.klass_data_instance.available_weapon_types,
+                type(data_instance) in self.race_data_instance.available_weapon_types,
             )
         )
 

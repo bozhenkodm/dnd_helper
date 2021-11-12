@@ -30,7 +30,7 @@
         <div><span>КД {{ object.armor_class }}; Стойкость {{ object.fortitude }}; Реакция {{ object.reflex }}; Воля {{ object.will }}</span></div>
     </div>
     <div class="npc-line">
-        <div><span>Инициатива +{{ object.initiative }}; Внимательность +{{ object.perception }}; {{ object.race.vision }} зрение</span></div>
+        <div><span>Инициатива +{{ object.initiative }}; Внимательность +{{ object.perception }}; {{ object.race_data_instance.vision.value }} зрение</span></div>
         <div><span>Скорость {{ object.speed }}</span></div>
     </div>
     {% for power in object.powers_calculated %}

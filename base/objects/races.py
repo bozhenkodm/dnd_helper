@@ -35,7 +35,8 @@ class Race:
     reflex: ClassVar[int] = 0
     will: ClassVar[int] = 0
 
-    def healing_surge_bonus(self, **kwargs):
+    @property
+    def healing_surge_bonus(self):
         return 0
 
     @property
@@ -45,6 +46,9 @@ class Race:
     @property
     def initiative(self):
         return 0
+
+    def __init__(self, npc):
+        self.npc = npc
 
 
 class DwarfRace(Race):
@@ -67,9 +71,10 @@ class DragonbornRace(Race):
     var_ability_bonus = Abilities(strength=2, constitution=2)
     skill_bonuses = Skills(intimidate=2, history=2)
 
-    def healing_surge_bonus(self, **kwargs):
+    @property
+    def healing_surge_bonus(self):
         # У драконорождённых исцеление увеличено
-        return kwargs.get('constitution', 0)
+        return self.npc.constitution
 
 
 class ShifterRace(Race):
@@ -140,6 +145,12 @@ class GnollRace(Race):
 
 class GoblinRace(Race):
     slug = NPCRaceEnum.GOBLIN
+    const_ability_bonus = Abilities(dexterity=2)
+    var_ability_bonus = Abilities(wisdom=2, charisma=2)
+    skill_bonuses = Skills(thievery=2, stealth=2)
+    reflex = 1
+    size = SizeEnum.SMALL
+    vision = VisionEnum.TWILIGHT
 
 
 class GoliathRace(Race):

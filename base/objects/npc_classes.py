@@ -33,32 +33,57 @@ class NPCClass:
     mandatory_skills: ClassVar[Skills] = Skills()
     trainable_skills: ClassVar[Skills] = Skills()
     skill_bonuses: ClassVar[Skills] = Skills()
-    available_armor_types: ClassVar[Sequence[ArmorTypeIntEnum]] = (ArmorTypeIntEnum.CLOTH,)
+    available_armor_types: ClassVar[Sequence[ArmorTypeIntEnum]] = (
+        ArmorTypeIntEnum.CLOTH,
+    )
     available_shield_types: ClassVar[Sequence[ShieldTypeEnum]] = ()
     available_weapon_categories: ClassVar[Sequence[WeaponCategoryIntEnum]] = (
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.SIMPLE_RANGED,
     )
-    available_weapon_types: ClassVar[Sequence[WeaponType]]
+    available_weapon_types: ClassVar[Sequence[WeaponType]] = ()
     # available_implement_types
     hit_points_per_level: ClassVar[int] = 8
 
     # class SubclassEnum(IntDescriptionSubclassEnum):
     #     pass
 
-    def hit_points_bonus(self, **kwargs):
+    def __init__(self, npc):
+        self.npc = npc
+
+    @property
+    def hit_points_bonus(self):
         return 0
 
-    def attack_bonus(self, **kwargs):
+    def attack_bonus(self, weapon):
         return 0
 
-    def damage_bonus(self, **kwargs):
+    @property
+    def damage_bonus(self):
         return 0
 
-    def armor_class_bonus(self, **kwargs):
-        if npc := kwargs.get('npc'):
-            # TODO handle armor here?
-            return max(map(npc._modifier, (npc.intelligence, npc.dexterity)))
+    @staticmethod
+    def _modifier(value: int) -> int:
+        # TODO move to helper function for now it doubles
+        return (value - 10) // 2
+
+    @property
+    def _armor_class_ability_bonus(self):
+        return max(map(self._modifier, (self.npc.intelligence, self.npc.dexterity)))
+
+    @property
+    def armor_class_bonus(self):
+        result = 0
+        if self.npc.armor:
+            if self.npc.armor.armor_type in self.available_armor_types:
+                result += self.npc.armor.armor_class
+            result += min(self.npc.armor.enchantment, self.npc._magic_threshold)
+        if not self.npc.armor or self.npc.armor.is_light:
+            result += self._armor_class_ability_bonus
+        return result
+
+    @property
+    def fortitude_bonus(self):
         return 0
 
 
@@ -133,14 +158,14 @@ class VampireClass(NPCClass):
     slug = NPCClassIntEnum.VAMPIRE
     power_source = PowerSourceEnum.SHADOW
 
-    def armor_class_bonus(self, **kwargs):
-        result = super().armor_class_bonus(**kwargs)
-        if npc := kwargs.get('npc'):
-            if not npc.shield and (
-                not npc.armor or npc.armor.armor_type == ArmorTypeIntEnum.CLOTH
-            ):
-                # Рефлексы вампира
-                result += 2
+    @property
+    def armor_class_bonus(self):
+        result = super().armor_class_bonus
+        if not self.npc.shield and (
+            not self.npc.armor or self.npc.armor.armor_type == ArmorTypeIntEnum.CLOTH
+        ):
+            # Рефлексы вампира
+            result += 2
         return result
 
 
@@ -167,12 +192,17 @@ class BarbarianClass(NPCClass):
     )
     fortitude = 2
 
-    def armor_class_bonus(self, **kwargs):
-        result = super().armor_class_bonus(**kwargs)
-        if npc := kwargs.get('npc'):
-            if not npc.shield and (not npc.armor or npc.armor.is_light):
-                result += npc._tier + 1
+    @property
+    def armor_class_bonus(self):
+        result = super().armor_class_bonus
+        if not self.npc.shield and (not self.npc.armor or self.npc.armor.is_light):
+            result += self.npc._tier + 1
         return result
+
+    @property
+    def reflex(self):
+        if not self.npc.shield and self.npc.armor and self.npc.armor.is_light:
+            return self.npc._tier + 1
 
 
 class WarlordClass(NPCClass):
@@ -212,7 +242,6 @@ class FighterClass(NPCClass):
         WeaponCategoryIntEnum.SIMPLE_RANGED,
         WeaponCategoryIntEnum.MILITARY_RANGED,
     )
-    fortitude = 2
     trainable_skills = Skills(
         athletics=5, endurance=5, intimidate=5, streetwise=5, heal=5
     )
@@ -223,6 +252,34 @@ class FighterClass(NPCClass):
         BATTLERAGER = 3, 'Неистовый воин'
         TEMPPEST = 4, 'Воин вихрь'
         BRAWLER = 5, 'Воин задира'
+
+    def _is_browler_and_properly_armed(self) -> bool:
+        # brawler fighter should have melee weaopn in just one hand
+        if any(
+            (
+                self.npc.subclass != self.SubclassEnum.BRAWLER,
+                self.npc.shield,
+                len(weapons := tuple(self.npc.weapons.all())) != 1,
+                not weapons[0].weapon_type.data_instance.category.is_melee,
+            )
+        ):
+            return False
+        return True
+
+    @property
+    def armor_class_bonus(self):
+        result = super().armor_class_bonus
+        if self._is_browler_and_properly_armed():
+            result += 1
+        return result
+
+    @property
+    def fortitude(self):
+        # we are overriding class variable with method...
+        result = 2  # base fighter fortitude bonus
+        if self._is_browler_and_properly_armed():
+            result += 2
+        return result
 
 
 class WizardClass(NPCClass):
@@ -307,13 +364,13 @@ class AvengerClass(NPCClass):
     reflex = 1
     will = 1
 
-    def armor_class_bonus(self, **kwargs):
-        if npc := kwargs.get('npc'):
-            if not npc.shield and (
-                not npc.armor or npc.armor.armor_type == ArmorTypeIntEnum.CLOTH
-            ):
-                return 3
-        return super().armor_class_bonus(**kwargs)
+    def armor_class_bonus(self):
+        result = super().armor_class_bonus
+        if not self.npc.shield and (
+            not self.npc.armor or self.npc.armor.armor_type == ArmorTypeIntEnum.CLOTH
+        ):
+            result += 3
+        return result
 
 
 class WarlockClass(NPCClass):
@@ -354,14 +411,13 @@ class SwordmageClass(NPCClass):
     )
     will = 2
 
-    def armor_class_bonus(self, **kwargs):
-        result = super().armor_class_bonus(**kwargs)
-        if npc := kwargs.get('npc'):
-            # TODO add handling offhand weapon
-            if not npc.shield:
-                result += 3
-            else:
-                result += 1
+    def armor_class_bonus(self):
+        result = super().armor_class_bonus
+        # TODO add handling offhand weapon
+        if not self.npc.shield:
+            result += 3
+        else:
+            result += 1
         return result
 
 
@@ -412,13 +468,12 @@ class RogueClass(NPCClass):
         RUFFAIN = 3, 'Верзила'
         SNEAK = 4, 'Скрытник'
 
-    def attack_bonus(self, **kwargs):
-        weapon = kwargs.get('weapon')
+    def attack_bonus(self, weapon):
         if not weapon:
             return 0
-        data_instance = weapon.weapon_type.data_instance
-        if type(data_instance) in self.available_weapon_types and isinstance(
-            data_instance, Dagger
+        wt_data_instance = weapon.weapon_type.data_instance
+        if type(wt_data_instance) in self.available_weapon_types and isinstance(
+            wt_data_instance, Dagger
         ):
             return 1
         return 0
@@ -461,9 +516,8 @@ class RangerMarksmanClass(RangerClass):
 class RangerMeleeClass(RangerClass):
     slug = NPCClassIntEnum.RANGER_MELEE
 
-    def hit_points_bonus(self, **kwargs):
-        tier: int = kwargs.get('tier', 0)
-        return tier * 5
+    def hit_points_bonus(self):
+        return (self.npc._tier + 1) * 5
 
 
 class WardenClass(NPCClass):
@@ -513,22 +567,29 @@ class SorcererClass(NPCClass):
         DRAGON_MAGIC = 1, 'Драконья магия'
         WILD_MAGIC = 2, 'Дикая магия'
 
-    def damage_bonus(self, **kwargs):
-        if npc := kwargs.get('npc'):
-            if npc.subclass == self.SubclassEnum.DRAGON_MAGIC:
-                return npc.strength + 2 * npc._tier
-            elif npc.subclass == self.SubclassEnum.WILD_MAGIC:
-                return npc.dexterity + 2 * npc._tier
-        return 0
+    @property
+    def damage_bonus(self):
+        if self.npc.subclass == self.SubclassEnum.DRAGON_MAGIC:
+            return self.npc.strength + 2 * self.npc._tier
+        elif self.npc.subclass == self.SubclassEnum.WILD_MAGIC:
+            return self.npc.dexterity + 2 * self.npc._tier
 
-    def armor_class_bonus(self, **kwargs):
-        if npc := kwargs.get('npc'):
-            if npc.subclass == self.SubclassEnum.DRAGON_MAGIC:
-                return max(
-                    map(npc._modifier, (npc.intelligence, npc.dexterity, npc.strength))
+    @property
+    def _armor_class_ability_bonus(self):
+        result = super()._armor_class_ability_bonus
+        if self.npc.subclass == self.SubclassEnum.DRAGON_MAGIC:
+            result = max(self._modifier(self.npc.strength), result)
+        return result
+
+    def armor_class_bonus(self):
+        if self.npc.subclass == self.SubclassEnum.DRAGON_MAGIC:
+            return max(
+                map(
+                    self._modifier,
+                    (self.npc.intelligence, self.npc.dexterity, self.npc.strength),
                 )
-            return super().armor_class_bonus(npc=npc)
-        return 0
+            )
+        return super().armor_class_bonus
 
 
 class ShamanClass(NPCClass):
