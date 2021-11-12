@@ -13,6 +13,10 @@ class Abilities:
     def description(self):
         return astuple(self)
 
+    @staticmethod
+    def _modifier(value):
+        return (value - 10) // 2
+
     def __add__(self, other):
         return Abilities(
             strength=self.strength + other.strength,

@@ -78,7 +78,7 @@ npc_klasses = {
 
 
 weapon_types_classes = {
-    cls.slug
+    cls.slug: cls
     for cls in (
         weapon_types.BastardSword,
         weapon_types.Battleaxe,

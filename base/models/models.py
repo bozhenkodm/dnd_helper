@@ -22,10 +22,6 @@ from base.constants.constants import (
     SexEnum,
     ShieldTypeEnum,
     SkillsEnum,
-    WeaponCategoryIntEnum,
-    WeaponGroupEnum,
-    WeaponHandednessEnum,
-    WeaponPropertyEnum,
 )
 from base.models.mixins.abilities import AttributeMixin
 from base.models.mixins.attacks import AttackMixin
@@ -70,49 +66,16 @@ class WeaponType(models.Model):
 
     name = models.CharField(verbose_name='Название', max_length=20, unique=True)
     slug = models.CharField(verbose_name='Slug', max_length=20, unique=True)
-    prof_bonus = models.SmallIntegerField(verbose_name='Бонус владения', default=2)
-    group = MultiSelectField(
-        verbose_name='Группа оружия',
-        choices=WeaponGroupEnum.generate_choices(),
-    )
-    category = models.SmallIntegerField(
-        verbose_name='Категория',
-        choices=WeaponCategoryIntEnum.generate_choices(),
-    )
-    dice_number = models.SmallIntegerField(verbose_name='Количество кубов', default=1)
-    damage_dice = models.SmallIntegerField(
-        verbose_name='Кость урона',
-        choices=DiceIntEnum.generate_choices(),
-        null=True,
-        blank=True,
-    )
-    properties = MultiSelectField(
-        verbose_name='Свойства',
-        choices=WeaponPropertyEnum.generate_choices(),
-        null=True,
-        blank=True,
-    )
-    handedness = models.CharField(
-        verbose_name='Одноручное/Двуручное',
-        choices=WeaponHandednessEnum.generate_choices(is_sorted=False),
-        max_length=WeaponHandednessEnum.max_length(),
-        default=WeaponHandednessEnum.ONE.name,
-    )
-    range = models.SmallIntegerField(verbose_name='Дальность', default=0)
 
     def __str__(self):
         return self.name
 
     @cached_property
-    def dataclass_instance(self):
+    def data_instance(self):
         return weapon_types_classes.get(self.slug)()
 
-    @property
-    def max_range(self):
-        return self.range * 2
-
     def damage(self, weapon_number=1):
-        return f'{self.dice_number*weapon_number}{self.get_damage_dice_display()}'
+        return f'{self.dataclass_instance.dice_number*weapon_number}{self.dataclass_instance.damage_dice.description}'
 
 
 class Weapon(models.Model):
@@ -133,9 +96,10 @@ class Weapon(models.Model):
 
     @property
     def damage(self):
+        dataclass_instance = self.weapon_type.dataclass_instance
         if not self.enchantment:
-            return f'{self.weapon_type.dice_number}{self.weapon_type.get_damage_dice_display()}'
-        return f'{self.weapon_type.dice_number}{self.weapon_type.get_damage_dice_display()} + {self.enchantment}'
+            return f'{dataclass_instance.dice_number}{dataclass_instance.damage_dice.description}'
+        return f'{dataclass_instance.dice_number}{dataclass_instance.damage_dice.description} + {self.enchantment}'
 
 
 class ImplementType(models.Model):
@@ -186,10 +150,6 @@ class Race(models.Model):
         unique=True,
     )
 
-    available_weapon_types = models.ManyToManyField(
-        WeaponType, verbose_name='Владение оружием', blank=True
-    )
-
     @cached_property
     def data_instance(self):
         return race_classes.get(self.name)()
@@ -210,9 +170,6 @@ class Class(models.Model):
     name = models.SmallIntegerField(
         verbose_name='Название', choices=NPCClassIntEnum.generate_choices(), unique=True
     )
-    subclasses = models.SmallIntegerField(
-        verbose_name='Количество подклассов', default=0
-    )
     available_armor_types = MultiSelectField(
         verbose_name='Ношение доспехов',
         choices=ArmorTypeIntEnum.generate_choices(),
@@ -223,15 +180,6 @@ class Class(models.Model):
         choices=ShieldTypeEnum.generate_choices(),
         blank=True,
         null=True,
-    )
-    available_weapon_categories = MultiSelectField(
-        verbose_name='Владение категориями оружия',
-        choices=WeaponCategoryIntEnum.generate_choices(),
-        null=True,
-        blank=True,
-    )
-    available_weapon_types = models.ManyToManyField(
-        WeaponType, verbose_name='Владение оружием', blank=True
     )
     available_implement_types = models.ManyToManyField(
         ImplementType, verbose_name='Доступные инструменты', blank=True
@@ -248,7 +196,7 @@ class Class(models.Model):
 class FunctionalTemplate(models.Model):
     class Meta:
         verbose_name = 'Функциональный шаблон'
-        verbose_name_plural = 'Фунециональные шаблоны'
+        verbose_name_plural = 'Функциональные шаблоны'
 
     title = models.CharField(max_length=50, null=False, verbose_name='Название')
     min_level = models.SmallIntegerField(verbose_name='Минимальный уровень', default=0)
@@ -730,7 +678,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                 self.armor.speed_penalty,
                 self.race.data_instance.heavy_armor_speed_penalty,
             )
-        return self.race.speed
+        return self.race.data_instance.speed
 
     @property
     def inventory_text(self):
@@ -795,7 +743,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                         keywords=power.keywords,
                         enchantment=0,
                         damage_bonus=attack_modifier
-                        + (self.class_damage_bonus if attack_modifier else 0),
+                        + (self.klass.data_instance.damage_bonus(npc=self) if attack_modifier else 0),
                         attack=attack_modifier + base_attack_bonus + power.attack_bonus,
                         defence=power.get_defence_display(),
                         dice_number=power.dice_number,
@@ -827,7 +775,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                     keywords=power.keywords,
                     enchantment=0,
                     damage_bonus=attack_modifier
-                    + (self.class_damage_bonus if attack_modifier else 0),
+                    + (self.klass.data_instance.damage_bonus(npc=self) if attack_modifier else 0),
                     attack=attack_modifier + base_attack_bonus + power.attack_bonus,
                     defence=power.get_defence_display(),
                     dice_number=power.dice_number,
@@ -849,52 +797,26 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
             attack_modifier = self._modifier(
                 getattr(self, AttributeEnum[power.attack_attribute].lname)
             )
-            if (
-                range_type := PowerRangeTypeEnum[power.range_type]
-            ).is_melee or range_type.is_close:
-                filters = models.Q(
-                    weapon_type__category__in=(
-                        WeaponCategoryIntEnum.SIMPLE,
-                        WeaponCategoryIntEnum.MILITARY,
-                        WeaponCategoryIntEnum.SUPERIOR,
-                    )
-                )
-            else:
-                filters = (
-                    models.Q(
-                        weapon_type__category__in=(
-                            WeaponCategoryIntEnum.SIMPLE_RANGED,
-                            WeaponCategoryIntEnum.MILITARY_RANGED,
-                            WeaponCategoryIntEnum.SUPERIOR_RANGED,
-                        )
-                    )
-                    | models.Q(
-                        weapon_type__properties__contains=WeaponPropertyEnum.LIGHT_THROWN.name
-                    )
-                    | models.Q(
-                        weapon_type__properties__contains=WeaponPropertyEnum.HEAVY_THROWN.name
-                    )
-                )
-
-            for weapon in self.weapons.filter(filters):
+            for weapon in self.weapons.all():
                 bonus = base_attack_bonus
                 if self.is_weapon_proficient(weapon):
-                    bonus += +weapon.weapon_type.prof_bonus
-                    bonus += self.subclass_attack_bonus(weapon)
+                    bonus += +weapon.weapon_type.data_instance.prof_bonus
+                    bonus += self.klass.data_instance.attack_bonus(weapon=weapon)
                 enchantment = min(weapon.enchantment, self._magic_threshold)
                 powers.append(
                     dict(
                         name=power.name,
                         keywords=power.keywords,
                         enchantment=enchantment,
-                        damage_bonus=attack_modifier + self.class_damage_bonus,
+                        damage_bonus=attack_modifier + self.klass.data_instance.damage_bonus(npc=self),
                         attack=attack_modifier
                         + bonus
                         + enchantment
                         + power.attack_bonus,
                         defence=power.get_defence_display(),
-                        dice_number=weapon.weapon_type.dice_number * power.dice_number,
-                        dice=weapon.weapon_type.get_damage_dice_display(),
+                        dice_number=weapon.weapon_type.data_instance.dice_number
+                        * power.dice_number,
+                        dice=weapon.weapon_type.data_instance.damage_dice.description,
                         frequency_order=list(PowerFrequencyEnum).index(
                             PowerFrequencyEnum[power.frequency]
                         ),
@@ -925,7 +847,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                         name=power.name,
                         keywords=power.keywords,
                         enchantment=enchantment,
-                        damage_bonus=attack_modifier + self.class_damage_bonus,
+                        damage_bonus=attack_modifier + self.klass.data_instance.damage_bonus(npc=self),
                         attack=attack_modifier
                         + base_attack_bonus
                         + enchantment
@@ -958,7 +880,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                         name=power.name,
                         keywords=power.keywords,
                         enchantment=enchantment,
-                        damage_bonus=attack_modifier + self.class_damage_bonus,
+                        damage_bonus=attack_modifier + self.klass.data_instance.damage_bonus(npc=self),
                         attack=attack_modifier
                         + base_attack_bonus
                         + enchantment

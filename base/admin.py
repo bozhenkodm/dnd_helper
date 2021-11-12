@@ -15,7 +15,6 @@ from base.constants.constants import (
     SkillsEnum,
     WeaponPropertyEnum,
 )
-from base.constants.subclass import SUBCLASSES
 from base.models import NPC, Armor, Class, Encounter, Race
 from base.models.models import (
     FunctionalTemplate,
@@ -50,7 +49,6 @@ class AdminMixin:
 
 
 class RaceAdmin(admin.ModelAdmin):
-    autocomplete_fields = ('available_weapon_types',)
 
     def get_queryset(self, request):
         qs = super().get_queryset(request).annotate(title=NPCRaceEnum.generate_case())
@@ -58,7 +56,6 @@ class RaceAdmin(admin.ModelAdmin):
 
 
 class ClassAdmin(AdminMixin, admin.ModelAdmin):
-    autocomplete_fields = ('available_weapon_types',)
     search_fields = ('name',)
     save_on_top = True
     ENUM = NPCClassIntEnum
@@ -163,8 +160,10 @@ class NPCAdmin(admin.ModelAdmin):
             except self.model.DoesNotExist:
                 pass
             else:
-                if subclass_enum := SUBCLASSES.get(instance.klass.name, None):
-                    choices = subclass_enum.generate_choices() if subclass_enum else ()
+                if subclass_enum := getattr(
+                    instance.klass.data_instance, 'SubclassEnum', None
+                ):
+                    choices = subclass_enum.generate_choices()
                     db_field.choices = choices
 
         return super().formfield_for_dbfield(db_field, request, **kwargs)
@@ -202,7 +201,7 @@ class NPCAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super().get_readonly_fields(request, obj)
-        if obj and not SUBCLASSES.get(obj.klass.name, None):
+        if obj and not getattr(obj.klass.data_instance, 'SubclassEnum', None):
             readonly_fields.append('subclass')
         return readonly_fields
 
@@ -250,51 +249,40 @@ class ArmorAdmin(admin.ModelAdmin):
 
 
 class WeaponTypeAdmin(admin.ModelAdmin):
-    ordering = ('category', 'handedness', 'name')
-    list_display = ('name', 'handedness', 'category', 'display_properties')
-    list_filter = ('handedness', 'category')
+    ordering = ('name',)
+    list_display = ('name',)
     search_fields = ('name',)
     save_as = True
-
-    def display_properties(self, obj):
-        return sorted(
-            item.value for item in WeaponPropertyEnum if item.name in obj.properties
-        )
-
-    display_properties.short_description = 'Свойства'
 
 
 class WeaponAdmin(admin.ModelAdmin):
     ordering = (
-        'weapon_type__category',
-        'weapon_type__handedness',
         'name',
         'enchantment',
     )
-    list_display = ('__str__', 'handedness', 'category', 'display_properties')
-    list_filter = ('weapon_type__handedness', 'weapon_type__category')
-    search_fields = ('name', 'weapon_type__name')
+    readonly_fields = (
+        'category',
+        'group',
+        'damage',
+    )
+    list_display = ('__str__',)
+    search_fields = ('name',)
     autocomplete_fields = ('weapon_type',)
 
-    def handedness(self, obj):
-        return obj.weapon_type.get_handedness_display()
-
-    handedness.short_description = 'Одноручное/Двуручное'
-
     def category(self, obj):
-        return obj.weapon_type.get_category_display()
+        return obj.weapon_type.data_instance.category.description
 
-    category.short_description = 'Категория'
-    category.admin_order_field = 'category'
+    category.short_description = 'Категория оружия'
 
-    def display_properties(self, obj):
-        return sorted(
-            item.value
-            for item in WeaponPropertyEnum
-            if item.name in obj.weapon_type.properties
-        )
+    def group(self, obj):
+        return obj.weapon_type.data_instance.group.value
 
-    display_properties.short_description = 'Свойства'
+    group.short_description = 'Группа оружия'
+
+    def damage(self, obj):
+        return f'{obj.weapon_type.data_instance.damage()} + {obj.enchantment}'
+
+    damage.short_description = 'Урон'
 
 
 class ImplementTypeAdmin(admin.ModelAdmin):
@@ -360,9 +348,13 @@ class PowerAdmin(admin.ModelAdmin):
             if (
                 instance
                 and instance.klass
-                and (subclass_enum := SUBCLASSES.get(instance.klass.name, None))
+                and (
+                    subclass_enum := getattr(
+                        instance.klass.data_instance, 'SubclassEnum', None
+                    )
+                )
             ):
-                choices = subclass_enum.generate_choices() if subclass_enum else ()
+                choices = subclass_enum.generate_choices()
                 db_field.choices = choices
 
         return super().formfield_for_dbfield(db_field, request, **kwargs)

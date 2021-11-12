@@ -1,12 +1,18 @@
-from dataclasses import dataclass
 from typing import ClassVar, Sequence
 
 from base.constants.constants import NPCRaceEnum, SizeEnum, VisionEnum
 from base.objects.abilities import Abilities
 from base.objects.skills import Skills
+from base.objects.weapon_types import (
+    Longbow,
+    LongSword,
+    Shortbow,
+    ThrowingHammer,
+    Warhammer,
+    WeaponType,
+)
 
 # TODO add the rest of race properties
-from base.objects.weapon_types import WeaponType, Warhammer, ThrowingHammer, LongSword, Longbow, Shortbow
 
 
 class Race:
