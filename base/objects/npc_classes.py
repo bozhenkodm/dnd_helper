@@ -1,4 +1,4 @@
-from typing import ClassVar, Sequence
+from typing import ClassVar, Sequence, Union
 
 from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
@@ -8,6 +8,14 @@ from base.constants.constants import (
     ShieldTypeEnum,
     SkillsEnum,
     WeaponCategoryIntEnum,
+)
+from base.objects.implement_types import (
+    HolySymbol,
+    ImplementType,
+    Rod,
+    Sphere,
+    Totem,
+    Wand, KiFocus,
 )
 from base.objects.skills import Skills
 from base.objects.weapon_types import (
@@ -21,6 +29,7 @@ from base.objects.weapon_types import (
     Shuriken,
     Sling,
     WeaponType,
+    WinterMourningBlade,
 )
 
 
@@ -42,7 +51,7 @@ class NPCClass:
         WeaponCategoryIntEnum.SIMPLE_RANGED,
     )
     available_weapon_types: ClassVar[Sequence[WeaponType]] = ()
-    # available_implement_types
+    available_implement_types: ClassVar[Sequence[Union[WeaponType, ImplementType]]] = ()
     hit_points_per_level: ClassVar[int] = 8
 
     # class SubclassEnum(IntDescriptionSubclassEnum):
@@ -64,7 +73,7 @@ class NPCClass:
 
     @staticmethod
     def _modifier(value: int) -> int:
-        # TODO move to helper function for now it doubles
+        # TODO move to helper function for now it repeats logic in models
         return (value - 10) // 2
 
     @property
@@ -96,6 +105,10 @@ class InvokerClass(NPCClass):
         ArmorTypeIntEnum.HIDE,
         ArmorTypeIntEnum.CHAINMAIL,
     )
+    available_implement_types = (
+        Rod,
+        Quaterstaff,
+    )
     hit_points_per_level = 6
 
 
@@ -106,6 +119,7 @@ class ArtificerClass(NPCClass):
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
     )
+    available_implement_types = (Wand, Rod, Quaterstaff)
     mandatory_skills = Skills(arcana=5)
     trainable_skills = Skills(
         perception=5, thievery=5, history=5, diplomacy=5, dungeoneering=5, heal=5
@@ -133,6 +147,7 @@ class BardClass(NPCClass):
         ShortSword,
         Scimitar,
     )
+    available_implement_types = (Wand,)
     mandatory_skills = Skills(arcana=5)
     trainable_skills = Skills(
         acrobatics=5,
@@ -157,6 +172,7 @@ class BardClass(NPCClass):
 class VampireClass(NPCClass):
     slug = NPCClassIntEnum.VAMPIRE
     power_source = PowerSourceEnum.SHADOW
+    available_implement_types = (KiFocus,HolySymbol)
 
     @property
     def armor_class_bonus(self):
@@ -287,6 +303,7 @@ class WizardClass(NPCClass):
     power_source = PowerSourceEnum.ARCANE
     available_weapon_categories = ()
     available_weapon_types = (Dagger, Quaterstaff)
+    available_implement_types = (Wand, Sphere, Quaterstaff)
     hit_points_per_level = 6
     mandatory_skills = Skills(arcana=5)
     trainable_skills = Skills(
@@ -303,6 +320,7 @@ class DruidClass(NPCClass):
         ArmorTypeIntEnum.LEATHER,
         ArmorTypeIntEnum.HIDE,
     )
+    available_implement_types = (Totem,)
     mandatory_skills = Skills(nature=5)
     trainable_skills = Skills(
         athletics=5,
@@ -321,14 +339,15 @@ class DruidClass(NPCClass):
 class PriestClass(NPCClass):
     slug = NPCClassIntEnum.PRIEST
     power_source = PowerSourceEnum.DIVINE
-    mandatory_skills = Skills(religion=5)
-    trainable_skills = Skills(history=5, arcana=5, diplomacy=5, insight=5, heal=5)
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
         ArmorTypeIntEnum.HIDE,
         ArmorTypeIntEnum.CHAINMAIL,
     )
+    available_implement_types = (HolySymbol,)
+    mandatory_skills = Skills(religion=5)
+    trainable_skills = Skills(history=5, arcana=5, diplomacy=5, insight=5, heal=5)
     will = 2
 
 
@@ -349,6 +368,7 @@ class AvengerClass(NPCClass):
         WeaponCategoryIntEnum.MILITARY,
         WeaponCategoryIntEnum.SIMPLE_RANGED,
     )
+    available_implement_types = (HolySymbol,)
     mandatory_skills = Skills(religion=5)
     trainable_skills = Skills(
         acrobatics=5,
@@ -376,6 +396,7 @@ class AvengerClass(NPCClass):
 class WarlockClass(NPCClass):
     slug = NPCClassIntEnum.WARLOCK
     power_source = PowerSourceEnum.ARCANE
+    available_implement_types = (Wand, Rod)
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -405,6 +426,7 @@ class SwordmageClass(NPCClass):
         LongSword,
         ShortSword,
     )  # TODO Fill it up
+    available_implement_types = available_weapon_types
     mandatory_skills = Skills(arcana=5)
     trainable_skills = Skills(
         athletics=5, endurance=5, intimidate=5, history=5, diplomacy=5, insight=5
@@ -430,6 +452,7 @@ class PaladinClass(NPCClass):
         WeaponCategoryIntEnum.MILITARY,
         WeaponCategoryIntEnum.SIMPLE_RANGED,
     )
+    available_implement_types = (HolySymbol,)
     mandatory_skills = Skills(religion=5)
     trainable_skills = Skills(
         endurance=5, intimidate=5, history=5, diplomacy=5, insight=5, heal=5
@@ -549,6 +572,7 @@ class WardenClass(NPCClass):
 class SorcererClass(NPCClass):
     slug = NPCClassIntEnum.SORCERER
     power_source = PowerSourceEnum.ARCANE
+    available_implement_types = (Dagger, Quaterstaff)
     mandatory_skills = Skills(arcana=5)
     trainable_skills = Skills(
         athletics=5,
@@ -601,6 +625,7 @@ class ShamanClass(NPCClass):
     )
     available_weapon_categories = (WeaponCategoryIntEnum.SIMPLE,)
     available_weapon_types = (Longspear,)
+    available_implement_types = (Totem,)
     mandatory_skills = Skills(nature=5)
     trainable_skills = Skills(
         athletics=5,
@@ -614,3 +639,41 @@ class ShamanClass(NPCClass):
     )
     fortitude = 1
     will = 1
+
+
+class HexbladeClass(WarlockClass):
+    slug = NPCClassIntEnum.HEXBLADE
+    power_source = PowerSourceEnum.ARCANE
+    available_armor_types = (
+        ArmorTypeIntEnum.CLOTH,
+        ArmorTypeIntEnum.LEATHER,
+        ArmorTypeIntEnum.HIDE,
+        ArmorTypeIntEnum.CHAINMAIL,
+    )
+    available_weapon_categories = (
+        WeaponCategoryIntEnum.SIMPLE,
+        WeaponCategoryIntEnum.MILITARY,
+        WeaponCategoryIntEnum.SIMPLE_RANGED,
+    )
+    available_weapon_types = (WinterMourningBlade,)
+    trainable_skills = Skills(
+        thievery=5,
+        intimidate=5,
+        streetwise=5,
+        stealth=5,
+        history=5,
+        arcana=5,
+        bluff=5,
+        insight=5,
+        religion=5,
+    )
+    fortitude = 1
+    reflex = 0
+    will = 1
+
+    class SubclassEnum(IntDescriptionSubclassEnum):
+        FEY_PACT = 1, 'Фейский договор'
+
+    @property
+    def damage_bonus(self):
+        return ((self.npc.level - 5) // 10) * 2 + 2 + self._modifier(self.npc.dexterity)

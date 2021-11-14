@@ -1,9 +1,7 @@
 from base.constants.constants import (
     NPCClassIntEnum,
     ShieldTypeEnum,
-    WeaponCategoryIntEnum,
 )
-from base.constants.subclass import FighterSubclass
 
 INITIAL_DEFENCE_VALUE = 10
 

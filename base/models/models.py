@@ -27,7 +27,12 @@ from base.models.mixins.abilities import AttributeMixin
 from base.models.mixins.attacks import AttackMixin
 from base.models.mixins.defences import DefenceMixin
 from base.models.mixins.skills import SkillMixin
-from base.objects import npc_klasses, race_classes, weapon_types_classes
+from base.objects import (
+    implement_types_classes,
+    npc_klasses,
+    race_classes,
+    weapon_types_classes,
+)
 
 
 class Armor(models.Model):
@@ -102,40 +107,23 @@ class Weapon(models.Model):
         return f'{dataclass_instance.dice_number}{dataclass_instance.damage_dice.description} + {self.enchantment}'
 
 
-class ImplementType(models.Model):
-    class Meta:
-        verbose_name = 'Тип инструмента'
-        verbose_name_plural = 'Типы инструментов'
-
-    name = models.CharField(verbose_name='Название', max_length=20, blank=True)
-    inherited_weapon_type = models.OneToOneField(
-        WeaponType,
-        verbose_name='На основании оружия',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name='implement_type',
-    )
-
-    def __str__(self):
-        return self.name
-
-
 class Implement(models.Model):
     class Meta:
         verbose_name = 'Инструмент'
         verbose_name_plural = 'Инструменты'
 
-    implement_type = models.ForeignKey(
-        ImplementType, on_delete=models.CASCADE, null=True
-    )
+    slug = models.CharField(verbose_name='Тип инструмента', max_length=20)
     name = models.CharField(verbose_name='Название', max_length=20)
     enchantment = models.SmallIntegerField(verbose_name='Улучшение', default=0)
+
+    @property
+    def implement_type(self):
+        return implement_types_classes[self.slug]()
 
     def __str__(self):
         if self.name == self.implement_type.name:
             return f'{self.name}, +{self.enchantment}'
-        return f'{self.name}, {self.implement_type}, +{self.enchantment}'
+        return f'{self.name}, {self.implement_type.name}, +{self.enchantment}'
 
 
 class Race(models.Model):
@@ -166,19 +154,11 @@ class Class(models.Model):
     name = models.SmallIntegerField(
         verbose_name='Название', choices=NPCClassIntEnum.generate_choices(), unique=True
     )
-    available_armor_types = MultiSelectField(
-        verbose_name='Ношение доспехов',
-        choices=ArmorTypeIntEnum.generate_choices(),
-        default=ArmorTypeIntEnum.CLOTH.value,
-    )
     available_shield_types = MultiSelectField(
         verbose_name='Ношение щитов',
         choices=ShieldTypeEnum.generate_choices(),
         blank=True,
         null=True,
-    )
-    available_implement_types = models.ManyToManyField(
-        ImplementType, verbose_name='Доступные инструменты', blank=True
     )
 
     def __str__(self):
@@ -785,11 +765,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                     keywords=power.keywords,
                     enchantment=0,
                     damage_bonus=attack_modifier
-                    + (
-                        self.klass_data_instance.damage_bonus(npc=self)
-                        if attack_modifier
-                        else 0
-                    ),
+                    + (self.klass_data_instance.damage_bonus if attack_modifier else 0),
                     attack=attack_modifier + base_attack_bonus + power.attack_bonus,
                     defence=power.get_defence_display(),
                     dice_number=power.dice_number,
@@ -884,10 +860,9 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                 )
             for weapon in self.weapons.all():
                 if (
-                    not hasattr(weapon.weapon_type, 'implement_type')
-                    or not self.klass.available_implement_types.filter(
-                        name=weapon.weapon_type.implement_type.name
-                    ).count()
+                    not weapon.weapon_type.data_instance.is_implement
+                    or weapon.weapon_type
+                    not in self.klass_data_instance.available_implement_types
                 ):
                     continue
                 enchantment = min(weapon.enchantment, self._magic_threshold)

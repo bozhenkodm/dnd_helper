@@ -13,19 +13,17 @@ from base.constants.constants import (
     NPCRaceEnum,
     PowerFrequencyEnum,
     SkillsEnum,
-    WeaponPropertyEnum,
 )
 from base.models import NPC, Armor, Class, Encounter, Race
 from base.models.models import (
     FunctionalTemplate,
     Implement,
-    ImplementType,
     Power,
     PowerTarget,
     Weapon,
     WeaponType,
 )
-from base.objects import npc_klasses
+from base.objects import implement_types_classes, npc_klasses
 
 
 class AdminMixin:
@@ -57,8 +55,43 @@ class RaceAdmin(admin.ModelAdmin):
 
 class ClassAdmin(AdminMixin, admin.ModelAdmin):
     search_fields = ('name',)
+    readonly_fields = (
+        'available_armor_types',
+        'available_weapons',
+        'available_implements',
+    )
     save_on_top = True
     ENUM = NPCClassIntEnum
+
+    def available_armor_types(self, obj):
+        return ', '.join(
+            armor_type.description
+            for armor_type in npc_klasses[obj.name].available_armor_types
+        )
+
+    available_armor_types.short_description = 'Ношение брони'
+
+    def available_weapons(self, obj):
+        return ', '.join(
+            [
+                weapon_category.description
+                for weapon_category in npc_klasses[obj.name].available_weapon_categories
+            ]
+            + [
+                weapon_type.name
+                for weapon_type in npc_klasses[obj.name].available_weapon_types
+            ]
+        )
+
+    available_weapons.short_description = 'Владение оружием'
+
+    def available_implements(self, obj):
+        return ', '.join(
+            armor_type.name
+            for armor_type in npc_klasses[obj.name].available_implement_types
+        )
+
+    available_implements.short_description = 'Владение инструментами'
 
 
 class NPCAdmin(admin.ModelAdmin):
@@ -102,8 +135,7 @@ class NPCAdmin(admin.ModelAdmin):
             if object_id:
                 instance = self.model.objects.get(id=object_id)
                 # TODO temporary (?) solution until npc.var_bonus_attr refactored
-                # getting list of choices according to var_ability_bonus in ract dataclass
-                print(object_id)
+                # getting list of choices according to var_ability_bonus in race dataclass
                 choices = [
                     (key.upper(), AttributeEnum[key.upper()].value)
                     for key, value in asdict(
@@ -111,7 +143,6 @@ class NPCAdmin(admin.ModelAdmin):
                     ).items()
                     if value
                 ]
-                print(choices)
             else:
                 choices = ()
 
@@ -285,19 +316,20 @@ class WeaponAdmin(admin.ModelAdmin):
     damage.short_description = 'Урон'
 
 
-class ImplementTypeAdmin(admin.ModelAdmin):
-    search_fields = ('name',)
-    autocomplete_fields = ('inherited_weapon_type',)
-
-    def save_model(self, request, obj, form, change):
-        obj.name = (
-            form.cleaned_data['name'] or form.cleaned_data['inherited_weapon_type'].name
-        )
-        return super().save_model(request, obj, form, change)
-
-
 class ImplementAdmin(admin.ModelAdmin):
-    search_fields = ('name', 'implement_type__name')
+    search_fields = ('name',)
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == 'slug':
+            db_field.choices = sorted(
+                (
+                    (slug, implement_type.name)
+                    for slug, implement_type in implement_types_classes.items()
+                ),
+                key=lambda x: x[1],
+            )
+
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
 
 class PowerAdmin(admin.ModelAdmin):
@@ -381,7 +413,6 @@ admin.site.register(Encounter, EncounterAdmin)
 admin.site.register(Armor, ArmorAdmin)
 admin.site.register(WeaponType, WeaponTypeAdmin)
 admin.site.register(Weapon, WeaponAdmin)
-admin.site.register(ImplementType, ImplementTypeAdmin)
 admin.site.register(Implement, ImplementAdmin)
 admin.site.register(Power, PowerAdmin)
 admin.site.register(PowerTarget, PowerTargetAdmin)

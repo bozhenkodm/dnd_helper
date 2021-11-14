@@ -109,6 +109,7 @@ class NPCClassIntEnum(IntDescriptionEnum):
     RUNEPRIEST = 150, 'Рунный жрец'
     RANGER_MARKSMAN = 160, 'Следопыт (Дальнобойный)'
     RANGER_MELEE = 170, 'Следопыт (Рукопашник)'
+    HEXBLADE = 175, 'Хексблэйд (колдун)'
     WARDEN = 180, 'Хранитель'
     SORCERER = 190, 'Чародей'
     SHAMAN = 200, 'Шаман'

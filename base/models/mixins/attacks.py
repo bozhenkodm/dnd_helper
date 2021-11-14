@@ -11,4 +11,7 @@ class AttackMixin:
         )
 
     def is_implement_proficient(self, implement):
-        return implement.implement_type in self.klass.available_implement_types.all()
+        return (
+            type(implement.implement_type)
+            in self.klass_data_instance.available_implement_types
+        )

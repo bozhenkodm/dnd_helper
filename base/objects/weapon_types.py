@@ -6,7 +6,6 @@ from base.constants.constants import (
     WeaponCategoryIntEnum,
     WeaponGroupEnum,
     WeaponHandednessEnum,
-    WeaponPropertyEnum,
 )
 
 
@@ -25,6 +24,8 @@ class WeaponType:
     prof_bonus: ClassVar[int] = 2
     dice_number: ClassVar[int] = 1
     range: ClassVar[int] = 0
+
+    is_implement: ClassVar[bool] = False
 
     # properties
     brutal: ClassVar[int] = 0
@@ -83,6 +84,7 @@ class LongSword(WeaponType):
     damage_dice = DiceIntEnum.D8
     handedness = WeaponHandednessEnum.VERSATILE
     prof_bonus = 3
+    is_implement = True
 
 
 class Club(WeaponType):
@@ -101,6 +103,7 @@ class Dagger(WeaponType):
     is_off_hand = True
     is_light_thrown = True
     range = 5
+    is_implement = True
 
 
 class Javelin(WeaponType):
@@ -182,11 +185,12 @@ class Morningstar(WeaponType):
 
 
 class Quaterstaff(WeaponType):
-    name = 'Боевой посох'
+    name = 'Посох'
     group = WeaponGroupEnum.STAFF
     category = WeaponCategoryIntEnum.SIMPLE
     handedness = WeaponHandednessEnum.TWO
     damage_dice = DiceIntEnum.D8
+    is_implement = True
 
 
 class Scythe(WeaponType):
@@ -444,6 +448,7 @@ class Kukri(Dagger):
     is_off_hand = True
     range = 0
     prof_bonus = 2
+    is_implement = False
 
 
 class ParryingDagger(Dagger):
@@ -455,6 +460,7 @@ class ParryingDagger(Dagger):
     is_defensive = True
     range = 0
     prof_bonus = 2
+    is_implement = False
 
 
 class Tratnyr(WeaponType):
@@ -612,6 +618,15 @@ class SuperiorCrossbow(WeaponType):
     is_load_minor = True
     prof_bonus = 3
     range = 20
+
+
+class WinterMourningBlade(WeaponType):
+    name = 'Клинок зимней скорби'
+    group = WeaponGroupEnum.LIGHT_BLADE
+    category = WeaponCategoryIntEnum.SUPERIOR
+    damage_dice = DiceIntEnum.D10
+    handedness = WeaponHandednessEnum.ONE
+    prof_bonus = 3
 
 
 # Double axe 	AV 	+2 	1d10/1d10 	— 	40gp 	15 	Axe 	Double weapon, off-hand
