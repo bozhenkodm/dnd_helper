@@ -12,10 +12,11 @@ from base.constants.constants import (
 from base.objects.implement_types import (
     HolySymbol,
     ImplementType,
+    KiFocus,
     Rod,
     Sphere,
     Totem,
-    Wand, KiFocus,
+    Wand,
 )
 from base.objects.skills import Skills
 from base.objects.weapon_types import (
@@ -172,7 +173,7 @@ class BardClass(NPCClass):
 class VampireClass(NPCClass):
     slug = NPCClassIntEnum.VAMPIRE
     power_source = PowerSourceEnum.SHADOW
-    available_implement_types = (KiFocus,HolySymbol)
+    available_implement_types = (KiFocus, HolySymbol)
 
     @property
     def armor_class_bonus(self):
@@ -433,6 +434,7 @@ class SwordmageClass(NPCClass):
     )
     will = 2
 
+    @property
     def armor_class_bonus(self):
         result = super().armor_class_bonus
         # TODO add handling offhand weapon

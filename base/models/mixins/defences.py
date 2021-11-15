@@ -1,7 +1,4 @@
-from base.constants.constants import (
-    NPCClassIntEnum,
-    ShieldTypeEnum,
-)
+from base.constants.constants import NPCClassIntEnum, ShieldTypeEnum
 
 INITIAL_DEFENCE_VALUE = 10
 

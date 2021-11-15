@@ -355,13 +355,3 @@ class PowerPropertyTitle(BaseCapitalizedEnum):
     REQUIREMENT = 'Требование'
     TRIGGER = 'Триггер'
     SPECIAL = 'Особенность'
-
-
-print(
-    '\n'.join(
-        f'{item.upper()} = \'\''
-        for item in '''
-
-'''.split()
-    )
-)

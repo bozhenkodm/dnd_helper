@@ -84,7 +84,6 @@ class LongSword(WeaponType):
     damage_dice = DiceIntEnum.D8
     handedness = WeaponHandednessEnum.VERSATILE
     prof_bonus = 3
-    is_implement = True
 
 
 class Club(WeaponType):

@@ -393,6 +393,7 @@ class Power(models.Model):
 
 
 class PowerProperty(models.Model):
+    # TODO if title == attack, calculate attack with power, unless description is filled
     power = models.ForeignKey(
         Power, verbose_name='Талант', null=False, on_delete=models.CASCADE
     )
@@ -408,39 +409,14 @@ class PowerProperty(models.Model):
         choices=IntDescriptionSubclassEnum.generate_choices(),
         default=0,
     )
-    description = models.TextField(verbose_name='Описание')
+    description = models.TextField(verbose_name='Описание', blank=True, null=True)
 
-
-class AttackPowerProperty(models.Model):
-    attack_attribute = models.CharField(
-        verbose_name='Атакующая характеристика',
-        choices=AttributeEnum.generate_choices(is_sorted=False),
-        max_length=AttributeEnum.max_length(),
-        null=True,
-        blank=True,
-    )
-    attack_bonus = models.SmallIntegerField(verbose_name='Бонус атаки', default=0)
-    defence = models.CharField(
-        verbose_name='Против защиты',
-        choices=DefenceTypeEnum.generate_choices(is_sorted=False),
-        max_length=DefenceTypeEnum.max_length(),
-        null=True,
-        blank=True,
-    )
-    dice_number = models.SmallIntegerField(verbose_name='Количество кубов', default=1)
-    damage_dice = models.SmallIntegerField(
-        verbose_name='Кость урона',
-        choices=DiceIntEnum.generate_choices(),
-        null=True,
-        blank=True,
-    )
-    accessory_type = models.CharField(
-        verbose_name='Тип вооружения',
-        choices=AccessoryTypeEnum.generate_choices(),
-        max_length=AccessoryTypeEnum.max_length(),
-        null=True,
-        blank=True,
-    )
+    @property
+    def content(self):
+        if self.title != PowerPropertyTitle.ATTACK:
+            return self.description
+        if not self.description:
+            return ""
 
 
 class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
