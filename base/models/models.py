@@ -1,3 +1,4 @@
+import re
 from functools import cached_property
 
 from django.db import models
@@ -19,12 +20,13 @@ from base.constants.constants import (
     PowerFrequencyEnum,
     PowerPropertyTitle,
     PowerRangeTypeEnum,
+    PowersVariables,
     SexEnum,
     ShieldTypeEnum,
     SkillsEnum,
 )
+from base.dice import DiceRoll
 from base.models.mixins.abilities import AttributeMixin
-from base.models.mixins.attacks import AttackMixin
 from base.models.mixins.defences import DefenceMixin
 from base.models.mixins.skills import SkillMixin
 from base.objects import (
@@ -101,10 +103,22 @@ class Weapon(models.Model):
 
     @property
     def damage(self):
-        dataclass_instance = self.weapon_type.dataclass_instance
+        dataclass_instance = self.weapon_type.data_instance
         if not self.enchantment:
             return f'{dataclass_instance.dice_number}{dataclass_instance.damage_dice.description}'
         return f'{dataclass_instance.dice_number}{dataclass_instance.damage_dice.description} + {self.enchantment}'
+
+    @property
+    def damage_roll(self):
+        return DiceRoll(
+            rolls=self.weapon_type.data_instance.dice_number,
+            dice=self.weapon_type.data_instance.damage_dice,
+            addendant=self.enchantment,
+        )
+
+    @property
+    def prof_bonus(self):
+        return self.weapon_type.data_instance.prof_bonus
 
 
 class Implement(models.Model):
@@ -163,10 +177,6 @@ class Class(models.Model):
 
     def __str__(self):
         return NPCClassIntEnum(self.name).description
-
-    @cached_property
-    def data_instance(self):
-        return npc_klasses.get(self.name)(npc=self)
 
 
 class FunctionalTemplate(models.Model):
@@ -322,12 +332,14 @@ class Power(models.Model):
             return f'{self.name}, {self.race.get_name_display()}'
         if self.functional_template:
             return f'{self.name}, {self.functional_template}'
-        return (
-            f'{self.name}, '
-            f'{self.klass.get_name_display()} ({(self.get_attack_attribute_display() or "Пр")[:3]}), '
-            f'{self.get_frequency_display()}, '
-            f'{self.level} уровень'
-        )
+        if self.klass:
+            return (
+                f'{self.name}, '
+                f'{self.klass.get_name_display()} ({(self.get_attack_attribute_display() or "Пр")[:3]}), '
+                f'{self.get_frequency_display()}, '
+                f'{self.level} уровень'
+            )
+        return self.name
 
     @property
     def damage(self):
@@ -395,7 +407,11 @@ class Power(models.Model):
 class PowerProperty(models.Model):
     # TODO if title == attack, calculate attack with power, unless description is filled
     power = models.ForeignKey(
-        Power, verbose_name='Талант', null=False, on_delete=models.CASCADE
+        Power,
+        verbose_name='Талант',
+        null=False,
+        on_delete=models.CASCADE,
+        related_name='properties',
     )
     title = models.CharField(
         choices=PowerPropertyTitle.generate_choices(),
@@ -412,14 +428,11 @@ class PowerProperty(models.Model):
     description = models.TextField(verbose_name='Описание', blank=True, null=True)
 
     @property
-    def content(self):
-        if self.title != PowerPropertyTitle.ATTACK:
-            return self.description
-        if not self.description:
-            return ""
+    def content_function(self):
+        return ''
 
 
-class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
+class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
     class Meta:
         verbose_name = 'NPC'
         verbose_name_plural = 'NPCS'
@@ -642,6 +655,23 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
             )
         return self.race_data_instance.speed
 
+    def is_weapon_proficient(self, weapon) -> bool:
+        data_instance = weapon.weapon_type.data_instance
+        return any(
+            (
+                data_instance.category
+                in map(int, self.klass_data_instance.available_weapon_categories),
+                type(data_instance) in self.klass_data_instance.available_weapon_types,
+                type(data_instance) in self.race_data_instance.available_weapon_types,
+            )
+        )
+
+    def is_implement_proficient(self, implement):
+        return (
+            type(implement.implement_type)
+            in self.klass_data_instance.available_implement_types
+        )
+
     @property
     def inventory_text(self):
         return list(
@@ -686,6 +716,101 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
             # TODO remove injection alert
             kwargs.update(weapon=weapon)
         return (string or '').format(**kwargs)
+
+    @property
+    def power_attrs(self):
+        return {
+            PowersVariables.STR: self.str_mod,
+            PowersVariables.CON: self.con_mod,
+            PowersVariables.DEX: self.dex_mod,
+            PowersVariables.INT: self.int_mod,
+            PowersVariables.WIS: self.wis_mod,
+            PowersVariables.CHA: self.cha_mod,
+            PowersVariables.LVL: self.level,
+            PowersVariables.DMG: self.klass_data_instance.damage_bonus,
+        }
+
+    def parse_string(self, string, weapon: Weapon = None, implement: Implement = None):
+        print('1' * 88)
+        print(string)
+        print(self._level_bonus)
+        pattern = r'\$([^\s]{3,})'  # gets substing from '$' to next whitespace
+        expressions = re.findall(pattern, string)
+        template = re.sub(
+            pattern, '{}', string
+        )  # preparing template for format() method
+        calculated_expressions = []
+        # calculating without operations order for now, just op for op
+        # TODO fix with polish record
+        # TODO rename variables!
+        for expression in expressions:
+            parsed_expression = re.findall(r'[a-z]{3}|[+\-*/]|[0-9]{0,2}', expression)
+            current_calculated_expression = 0
+            current_operation = None
+            # current_element = None
+            for parsed_expression_element in parsed_expression:
+                if parsed_expression_element in ('+', '-', '*', '/'):
+                    if parsed_expression_element == '+':
+                        current_operation = lambda x, y: x + y
+                    if parsed_expression_element == '-':
+                        current_operation = lambda x, y: x - y
+                    if parsed_expression_element == '*':
+                        current_operation = lambda x, y: x * y
+                    if parsed_expression_element == '/':
+                        current_operation = lambda x, y: x // y
+                    continue
+                if parsed_expression_element == PowersVariables.WPN:
+                    if not weapon:
+                        raise ValueError('У данного таланта нет оружия')
+                    current_element = weapon.damage_roll.treshhold(self._magic_threshold)
+                elif parsed_expression_element == PowersVariables.ATK:
+                    current_element = (
+                        self.klass_data_instance.attack_bonus(weapon)
+                        # armament enchantment
+                        + min(max(
+                            weapon and weapon.enchantment or 0,
+                            implement and implement.enchantment or 0,
+                        ), self._magic_threshold)
+                        # power attack bonus should be added
+                        # to string when creating power property
+                    )
+                elif parsed_expression_element.isdigit():
+                    current_element = int(parsed_expression_element)
+                else:
+                    current_element = self.power_attrs.get(parsed_expression_element)
+                if current_element:
+                    if current_operation:
+                        current_calculated_expression = current_operation(
+                            current_calculated_expression, current_element
+                        )
+                    else:
+                        current_calculated_expression = current_element
+            calculated_expressions.append(current_calculated_expression)
+        print(calculated_expressions)
+        return template.format(*calculated_expressions)
+
+    def powers_calculated_tmp(self):
+        powers = []
+        for power in self.powers.all():
+            for weapon in self.weapons.all():
+                powers.append(
+                    dict(
+                        name=power.name,
+                        keywords=power.keywords,
+                        accessory=str(weapon),
+                        properties=[
+                            {
+                                'title': property.get_title_display(),
+                                'description': self.parse_string(
+                                    property.description, weapon=weapon
+                                ),
+                                'debug': property.description,
+                            }
+                            for property in power.properties.all()
+                        ],
+                    )
+                )
+        return powers
 
     def powers_calculated(self):
         powers = []
@@ -764,11 +889,11 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                 getattr(self, AttributeEnum[power.attack_attribute].lname)
             )
             for weapon in self.weapons.all():
-                bonus = base_attack_bonus
-                if self.is_weapon_proficient(weapon):
-                    bonus += +weapon.weapon_type.data_instance.prof_bonus
-                    bonus += self.klass_data_instance.attack_bonus(weapon=weapon)
                 enchantment = min(weapon.enchantment, self._magic_threshold)
+                print(
+                    attack_modifier, self.klass_data_instance.attack_bonus(weapon=weapon),
+                    enchantment, power.attack_bonus
+                )
                 powers.append(
                     dict(
                         name=power.name,
@@ -777,7 +902,7 @@ class NPC(DefenceMixin, AttackMixin, AttributeMixin, SkillMixin, models.Model):
                         damage_bonus=attack_modifier
                         + self.klass_data_instance.damage_bonus,
                         attack=attack_modifier
-                        + bonus
+                        + self.klass_data_instance.attack_bonus(weapon=weapon)
                         + enchantment
                         + power.attack_bonus,
                         defence=power.get_defence_display(),

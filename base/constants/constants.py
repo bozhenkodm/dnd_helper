@@ -1,3 +1,4 @@
+from enum import Enum, auto
 from random import randint
 
 from base.constants.base import BaseCapitalizedEnum, IntDescriptionEnum
@@ -25,6 +26,24 @@ class AttributeIntEnum(IntDescriptionEnum):
     INTELLIGENCE = 4, 'Интеллект'
     WISDOM = 5, 'Мудрость'
     CHARISMA = 6, 'Харизма'
+
+
+class PowersVariables(str, Enum):
+    def _generate_next_value_(name, start, count, last_values):
+        return name.lower()
+
+    STR = auto()
+    CON = auto()
+    DEX = auto()
+    INT = auto()
+    WIS = auto()
+    CHA = auto()
+    WPN = auto()  # weapon damage dice
+    LVL = auto()
+    DMG = auto()  # damage bonus
+    ATK = (
+        auto()
+    )  # attack bonus (class bonus + half level + level bonus + enchantment. NOT POWER BONUS)
 
 
 class SizeEnum(BaseCapitalizedEnum):
@@ -355,3 +374,4 @@ class PowerPropertyTitle(BaseCapitalizedEnum):
     REQUIREMENT = 'Требование'
     TRIGGER = 'Триггер'
     SPECIAL = 'Особенность'
+    TARGET = 'Цель'

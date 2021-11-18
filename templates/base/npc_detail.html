@@ -58,6 +58,15 @@
             <div class="npc-line"><span><i>Эффект:</i> {{ power.effect }};</span></div>
         {% endif %}
     {% endfor %}
+                <div>--------------------------------------------------------------------------</div>
+    {% for power in object.powers_calculated_tmp %}
+                {{power.name}}
+        <div class="npc-line attr-header"><span><b>{{ power.name }} ({{ power.accessory }})</b> {{ power.keywords|join:", " }}</span></div>
+                {% for property in power.properties %}
+                <div>{{property.title}}: {{property.description}}</div>
+                <div>{{property.debug}}</div>
+                {% endfor %}
+    {% endfor%}
     <div class="npc-line attr-header"><span><b>Навыки:</b> {{ object.trained_skills_text|join:", " }}</span></div>
     <div class="npc-line" >
         <table style="width: 100%">

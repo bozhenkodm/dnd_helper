@@ -65,12 +65,15 @@ class NPCClass:
     def hit_points_bonus(self):
         return 0
 
-    def attack_bonus(self, weapon):
-        return 0
+    def attack_bonus(self, weapon=None):
+        level_bonus = self.npc._level_bonus + self.npc.half_level
+        if weapon and self.npc.is_weapon_proficient(weapon=weapon):
+            return level_bonus + weapon.prof_bonus
+        return level_bonus
 
     @property
     def damage_bonus(self):
-        return 0
+        return self.npc._level_bonus
 
     @staticmethod
     def _modifier(value: int) -> int:
@@ -493,15 +496,16 @@ class RogueClass(NPCClass):
         RUFFAIN = 3, 'Верзила'
         SNEAK = 4, 'Скрытник'
 
-    def attack_bonus(self, weapon):
+    def attack_bonus(self, weapon=None):
         if not weapon:
-            return 0
+            return super().attack_bonus()
+        base_bonus = super().attack_bonus(weapon=weapon)
         wt_data_instance = weapon.weapon_type.data_instance
         if type(wt_data_instance) in self.available_weapon_types and isinstance(
             wt_data_instance, Dagger
         ):
-            return 1
-        return 0
+            return base_bonus + 1
+        return base_bonus
 
 
 class RunepriestClass(NPCClass):
@@ -596,9 +600,9 @@ class SorcererClass(NPCClass):
     @property
     def damage_bonus(self):
         if self.npc.subclass == self.SubclassEnum.DRAGON_MAGIC:
-            return self.npc.strength + 2 * self.npc._tier
+            return self.npc._level_bonus + self.npc.strength + 2 * self.npc._tier
         elif self.npc.subclass == self.SubclassEnum.WILD_MAGIC:
-            return self.npc.dexterity + 2 * self.npc._tier
+            return self.npc._level_bonus + self.npc.dexterity + 2 * self.npc._tier
 
     @property
     def _armor_class_ability_bonus(self):
@@ -678,4 +682,9 @@ class HexbladeClass(WarlockClass):
 
     @property
     def damage_bonus(self):
-        return ((self.npc.level - 5) // 10) * 2 + 2 + self._modifier(self.npc.dexterity)
+        return (
+            self.npc._level_bonus
+            + ((self.npc.level - 5) // 10) * 2
+            + 2
+            + self._modifier(self.npc.dexterity)
+        )

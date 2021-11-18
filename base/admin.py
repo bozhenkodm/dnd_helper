@@ -19,6 +19,7 @@ from base.models.models import (
     FunctionalTemplate,
     Implement,
     Power,
+    PowerProperty,
     PowerTarget,
     Weapon,
     WeaponType,
@@ -332,8 +333,13 @@ class ImplementAdmin(admin.ModelAdmin):
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
 
+class PowerPropertyInline(admin.StackedInline):
+    model = PowerProperty
+
+
 class PowerAdmin(admin.ModelAdmin):
     list_filter = ('frequency', 'klass', 'race', 'functional_template')
+    inlines = (PowerPropertyInline,)
     autocomplete_fields = ('target',)
     ordering = ('klass', 'level', 'frequency')
     save_as = True
