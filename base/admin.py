@@ -13,7 +13,7 @@ from base.constants.constants import (
     NPCClassIntEnum,
     NPCRaceEnum,
     PowerFrequencyEnum,
-    SkillsEnum,
+    SkillsEnum, PowerPropertyTitle, AccessoryTypeEnum,
 )
 from base.models import NPC, Armor, Class, Encounter, Race
 from base.models.models import (
@@ -274,7 +274,6 @@ class NPCAdmin(admin.ModelAdmin):
             models.Q(klass=obj.klass) & models.Q(subclass__in=(obj.subclass, 0))
         ).filter(level=0)
         for power in default_powers:
-            print(power)
             obj.powers.add(power)
 
 
@@ -393,7 +392,6 @@ class PowerAdmin(admin.ModelAdmin):
     ordering = ('klass', 'level', 'frequency')
     save_as = True
 
-    # TODO add readonly field explaining properties syntax
     def syntax(self, obj):
         return '''
         str - модификатор силы 
@@ -408,6 +406,8 @@ class PowerAdmin(admin.ModelAdmin):
         atk - бонус атаки
         
         Выражения начинаются со знака $. поддерживаются операции +, -, *, / с целыми числами.
+        Операции выполняются по порядку написания, игнорируя арифметический порядок действий 
+        (лень возиться со стеками и польской записью)
         Атака по умолчанию $[ATTACK_ATTRIBUTE]+atk+[power.attack_bonus]
         Урон по умолчанию $wpn+dmg / $[damage_dice]+dmg
         '''
@@ -471,6 +471,32 @@ class PowerAdmin(admin.ModelAdmin):
         if obj:
             return super().get_inlines(request, obj)
         return ()
+
+    def save_related(self, request, form, formsets, change):
+        super(PowerAdmin, self).save_related(request, form, formsets, change)
+        obj = form.instance
+        ability_mod = obj.attack_attribute.lower()[:3]
+        for property in obj.properties.filter(title=PowerPropertyTitle.ATTACK.name):
+            if not property.description:
+                property.description = f'${ability_mod}+atk+{obj.attack_bonus} против {obj.defence_subjanctive}'
+            elif property.description.startswith('+'):
+                property.description = (
+                        f'${ability_mod}+atk+{obj.attack_bonus} '
+                        f'против {obj.defence_subjanctive}. {property.description[1:]}'
+                )
+            property.save()
+        for property in obj.properties.filter(title=PowerPropertyTitle.HIT.name):
+            if obj.accessory_type == AccessoryTypeEnum.WEAPON.name:
+                default_string = f'$wpn*{obj.dice_number}+dmg+{ability_mod}'
+            elif obj.accessory_type == AccessoryTypeEnum.IMPLEMENT:
+                default_string = f'${obj.damage_dice}+dmg+{ability_mod}'
+            else:
+                continue
+            if not property.description:
+                property.description = default_string
+            elif property.description.startswith('+'):
+                property.description = default_string + property.description[1:]
+            property.save()
 
 
 class PowerInline(admin.StackedInline):

@@ -344,17 +344,11 @@ class Power(models.Model):
             )
         return self.name
 
-    def valid_properties(self):
-        if self.frequency == PowerFrequencyEnum.PASSIVE:
-            return ()
-        properties = {}
-        for prop in self.properties.filter(level__gte=self.level):
-            if (
-                prop.title not in properties
-                or properties[prop.title].level < prop.level
-            ):
-                properties[prop.title] = prop
-        return sorted(properties.values(), key=lambda x: x and x.order)
+    @property
+    def defence_subjanctive(self):
+        if self.defence == DefenceTypeEnum.ARMOR_CLASS.name:
+            return self.get_defence_display()
+        return self.get_defence_display()[:-1] + 'и'
 
     @property
     def damage(self):
@@ -819,6 +813,20 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
         result = template.format(*calculated_expressions)
         return mark_safe('<br>'.join(result.split('\n')))
 
+    def valid_properties(self, power: Power):
+        if power.frequency == PowerFrequencyEnum.PASSIVE:
+            return ()
+        properties = {}
+        for prop in power.properties.filter(
+            level__lte=self.level, subclass__in=(self.subclass, 0)
+        ):
+            if (
+                prop.title not in properties
+                or properties[prop.title].level < prop.level
+            ):
+                properties[prop.title] = prop
+        return sorted(properties.values(), key=lambda x: x and x.order)
+
     def powers_calculated(self):
         powers = []
         if self.functional_template:
@@ -837,7 +845,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                                 ),
                                 'debug': property.description,
                             }
-                            for property in power.valid_properties()
+                            for property in self.valid_properties(power)
                         ],
                     )
                 )
@@ -856,7 +864,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                             ),
                             'debug': property.description,
                         }
-                        for property in power.valid_properties()
+                        for property in self.valid_properties(power)
                     ],
                 )
             )
@@ -876,7 +884,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                                 ),
                                 'debug': property.description,
                             }
-                            for property in power.valid_properties()
+                            for property in self.valid_properties(power)
                         ],
                     )
                 )
@@ -898,7 +906,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                                 ),
                                 'debug': property.description,
                             }
-                            for property in power.valid_properties()
+                            for property in self.valid_properties(power)
                         ],
                     )
                 )
@@ -922,7 +930,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                                 ),
                                 'debug': property.description,
                             }
-                            for property in power.valid_properties()
+                            for property in self.valid_properties(power)
                         ],
                     )
                 )
@@ -943,7 +951,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                             'description': self.parse_string(property.description),
                             'debug': property.description,
                         }
-                        for property in power.valid_properties()
+                        for property in self.valid_properties(power)
                     ],
                 )
             )
