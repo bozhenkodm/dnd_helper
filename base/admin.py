@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.contrib.auth.models import Group, User
 from django.utils.safestring import mark_safe
 
-from base.constants.base import BaseCapitalizedEnum
+from base.constants.base import BaseCapitalizedEnum, IntDescriptionSubclassEnum
 from base.constants.constants import (
     AttributeEnum,
     NPCClassIntEnum,
@@ -260,6 +260,9 @@ class NPCAdmin(admin.ModelAdmin):
 
     mandatory_skills.short_description = 'Тренированные навыки'
 
+    # def save_model(self, request, obj, form, change):
+        # TODO add all 0 level powers matching class and subclass
+
 
 class EncounterAdmin(admin.ModelAdmin):
     fields = (
@@ -336,13 +339,41 @@ class ImplementAdmin(admin.ModelAdmin):
 class PowerPropertyInline(admin.StackedInline):
     model = PowerProperty
 
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == 'subclass':
+            object_id = request.resolver_match.kwargs.get('object_id', 0)
+            try:
+                instance = self.parent_model.objects.get(id=object_id)
+            except self.parent_model.DoesNotExist:
+                instance = None
+            if (
+                instance
+                and instance.klass
+                and instance.subclass == 0
+                and (
+                    subclass_enum := getattr(
+                        npc_klasses[instance.klass.name], 'SubclassEnum', None
+                    )
+                )
+            ):
+                choices = subclass_enum.generate_choices()
+                db_field.choices = choices
+            else:
+                db_field.choices = IntDescriptionSubclassEnum.generate_choices()
+
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+
 
 class PowerAdmin(admin.ModelAdmin):
     list_filter = ('frequency', 'klass', 'race', 'functional_template')
+    exclude = ('hit_effect', 'miss_effect', 'effect', 'trigger', 'requirement', 'target')
     inlines = (PowerPropertyInline,)
     autocomplete_fields = ('target',)
     ordering = ('klass', 'level', 'frequency')
     save_as = True
+
+    # TODO add readonly field explaining properties syntax
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'race':
@@ -396,6 +427,11 @@ class PowerAdmin(admin.ModelAdmin):
                 db_field.choices = choices
 
         return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def get_inlines(self, request, obj):
+        if obj:
+            return super().get_inlines(request, obj)
+        return ()
 
 
 class PowerInline(admin.StackedInline):

@@ -1,8 +1,11 @@
 import re
+from collections import defaultdict
 from functools import cached_property
+from typing import Union
 
 from django.db import models
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 from multiselectfield import MultiSelectField
 
 from base.constants.base import IntDescriptionSubclassEnum
@@ -341,6 +344,18 @@ class Power(models.Model):
             )
         return self.name
 
+    def valid_properties(self):
+        if self.frequency == PowerFrequencyEnum.PASSIVE:
+            return ()
+        properties = {}
+        for prop in self.properties.filter(level__gte=self.level):
+            if (
+                prop.title not in properties
+                or properties[prop.title].level < prop.level
+            ):
+                properties[prop.title] = prop
+        return sorted(properties.values(), key=lambda x: x and x.order)
+
     @property
     def damage(self):
         return f'{self.dice_number}{self.get_damage_dice_display()}'
@@ -426,10 +441,14 @@ class PowerProperty(models.Model):
         default=0,
     )
     description = models.TextField(verbose_name='Описание', blank=True, null=True)
+    order = models.SmallIntegerField(verbose_name='Порядок', default=0)
 
     @property
     def content_function(self):
         return ''
+
+    def __str__(self):
+        return f'{self.title} {self.description} {self.level}'
 
 
 class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
@@ -727,13 +746,11 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
             PowersVariables.WIS: self.wis_mod,
             PowersVariables.CHA: self.cha_mod,
             PowersVariables.LVL: self.level,
-            PowersVariables.DMG: self.klass_data_instance.damage_bonus,
         }
 
-    def parse_string(self, string, weapon: Weapon = None, implement: Implement = None):
-        print('1' * 88)
-        print(string)
-        print(self._level_bonus)
+    def parse_string(
+        self, string, weapon: Weapon = None, implement: Union[Weapon, Implement] = None
+    ):
         pattern = r'\$([^\s]{3,})'  # gets substing from '$' to next whitespace
         expressions = re.findall(pattern, string)
         template = re.sub(
@@ -762,17 +779,30 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                 if parsed_expression_element == PowersVariables.WPN:
                     if not weapon:
                         raise ValueError('У данного таланта нет оружия')
-                    current_element = weapon.damage_roll.treshhold(self._magic_threshold)
+                    current_element = weapon.damage_roll.treshhold(
+                        self._magic_threshold
+                    )
                 elif parsed_expression_element == PowersVariables.ATK:
                     current_element = (
                         self.klass_data_instance.attack_bonus(weapon)
                         # armament enchantment
-                        + min(max(
-                            weapon and weapon.enchantment or 0,
-                            implement and implement.enchantment or 0,
-                        ), self._magic_threshold)
+                        + min(
+                            max(
+                                weapon and weapon.enchantment or 0,
+                                implement and implement.enchantment or 0,
+                            ),
+                            self._magic_threshold,
+                        )
                         # power attack bonus should be added
                         # to string when creating power property
+                    )
+                elif parsed_expression_element == PowersVariables.DMG:
+                    current_element = self.klass_data_instance.damage_bonus + min(
+                        max(
+                            weapon and weapon.enchantment or 0,
+                            implement and implement.enchantment or 0,
+                        ),
+                        self._magic_threshold,
                     )
                 elif parsed_expression_element.isdigit():
                     current_element = int(parsed_expression_element)
@@ -786,18 +816,58 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                     else:
                         current_calculated_expression = current_element
             calculated_expressions.append(current_calculated_expression)
-        print(calculated_expressions)
-        return template.format(*calculated_expressions)
+        result = template.format(*calculated_expressions)
+        return mark_safe('<br>'.join(result.split('\n')))
 
-    def powers_calculated_tmp(self):
+    def powers_calculated(self):
         powers = []
-        for power in self.powers.all():
+        if self.functional_template:
+            for power in self.functional_template.powers.all():
+                powers.append(
+                    dict(
+                        name=power.name,
+                        keywords=power.keywords,
+                        accessory_text=self.functional_template.title,
+                        description=self.parse_string(power.description),
+                        properties=[
+                            {
+                                'title': property.get_title_display(),
+                                'description': self.parse_string(
+                                    property.description,
+                                ),
+                                'debug': property.description,
+                            }
+                            for property in power.valid_properties()
+                        ],
+                    )
+                )
+        for power in self.race.powers.all():
+            powers.append(
+                dict(
+                    name=power.name,
+                    keywords=power.keywords,
+                    accessory_text=self.race.get_name_display(),
+                    description=self.parse_string(power.description),
+                    properties=[
+                        {
+                            'title': property.get_title_display(),
+                            'description': self.parse_string(
+                                property.description,
+                            ),
+                            'debug': property.description,
+                        }
+                        for property in power.valid_properties()
+                    ],
+                )
+            )
+        for power in self.powers.filter(accessory_type=AccessoryTypeEnum.WEAPON.name):
             for weapon in self.weapons.all():
                 powers.append(
                     dict(
                         name=power.name,
                         keywords=power.keywords,
-                        accessory=str(weapon),
+                        accessory_text=str(weapon),
+                        description=self.parse_string(power.description),
                         properties=[
                             {
                                 'title': property.get_title_display(),
@@ -806,13 +876,80 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                                 ),
                                 'debug': property.description,
                             }
-                            for property in power.properties.all()
+                            for property in power.valid_properties()
                         ],
                     )
                 )
+        for power in self.powers.filter(
+            accessory_type=AccessoryTypeEnum.IMPLEMENT.name
+        ):
+            for implement in self.implements.all():
+                powers.append(
+                    dict(
+                        name=power.name,
+                        keywords=power.keywords,
+                        accessory_text=str(implement),
+                        description=self.parse_string(power.description),
+                        properties=[
+                            {
+                                'title': property.get_title_display(),
+                                'description': self.parse_string(
+                                    property.description, implement=implement
+                                ),
+                                'debug': property.description,
+                            }
+                            for property in power.valid_properties()
+                        ],
+                    )
+                )
+            for weapon in self.weapons.all():
+                if (
+                    type(weapon.weapon_type.data_instance)
+                    not in self.klass_data_instance.available_implement_types
+                ):
+                    continue
+                powers.append(
+                    dict(
+                        name=power.name,
+                        keywords=power.keywords,
+                        accessory_text=f'{weapon} - инструмент',
+                        description=self.parse_string(power.description),
+                        properties=[
+                            {
+                                'title': property.get_title_display(),
+                                'description': self.parse_string(
+                                    property.description, implement=weapon
+                                ),
+                                'debug': property.description,
+                            }
+                            for property in power.valid_properties()
+                        ],
+                    )
+                )
+        for power in self.powers.filter(
+            models.Q(accessory_type__isnull=True) | models.Q(accessory_type='')
+        ):
+            powers.append(
+                dict(
+                    name=power.name,
+                    keywords=power.keywords,
+                    accessory_text='Пассивный'
+                    if power.frequency == PowerFrequencyEnum.PASSIVE.name
+                    else 'Приём',
+                    description=self.parse_string(power.description),
+                    properties=[
+                        {
+                            'title': property.get_title_display(),
+                            'description': self.parse_string(property.description),
+                            'debug': property.description,
+                        }
+                        for property in power.valid_properties()
+                    ],
+                )
+            )
         return powers
 
-    def powers_calculated(self):
+    def powers_calculated_old(self):
         powers = []
         base_attack_bonus = self._level_bonus + self.half_level
         if self.functional_template:
@@ -890,10 +1027,6 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
             )
             for weapon in self.weapons.all():
                 enchantment = min(weapon.enchantment, self._magic_threshold)
-                print(
-                    attack_modifier, self.klass_data_instance.attack_bonus(weapon=weapon),
-                    enchantment, power.attack_bonus
-                )
                 powers.append(
                     dict(
                         name=power.name,
@@ -1010,9 +1143,11 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                     ),
                     hit_effect=self._calculate_injected_string(power.hit_effect),
                     miss_effect=self._calculate_injected_string(power.miss_effect),
-                    effect=self._calculate_injected_string(
-                        power.effect or power.description
-                    ),
+                    effect=self._calculate_injected_string(power.effect)
+                    if power.effect
+                    else self.parse_string(power.description)
+                    if power.description
+                    else '',
                     trigger=self._calculate_injected_string(power.trigger),
                     target=power.target,
                     accessory='Пассивный'

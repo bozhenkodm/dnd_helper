@@ -151,7 +151,7 @@ class BardClass(NPCClass):
         ShortSword,
         Scimitar,
     )
-    available_implement_types = (Wand,)
+    available_implement_types = (Wand, LongSword)
     mandatory_skills = Skills(arcana=5)
     trainable_skills = Skills(
         acrobatics=5,

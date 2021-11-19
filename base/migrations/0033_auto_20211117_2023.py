@@ -43,11 +43,21 @@ kwargs.update(
 )
 
 
+def replace_string(string: str):
+    for old, new in kwargs.items():
+        string = string.replace('{' + old + '}', new)
+    return string
+
+
 def migrate_power_properties(apps, schema_editor):
     PowerProperty = apps.get_model('base', 'PowerProperty')
     Power = apps.get_model('base', 'Power')
     pps = []
     for power in Power.objects.all():
+        if power.frequency == 'PASSIVE':
+            power.description = replace_string(power.description)
+            power.save()
+            continue
         if power.dice_number and power.attack_attribute:
             pps.append(
                 PowerProperty(
@@ -55,7 +65,10 @@ def migrate_power_properties(apps, schema_editor):
                     title='ATTACK',
                     level=power.level,
                     subclass=power.subclass,
-                    description=f'${power.attack_attribute[:3].lower()}+atk+{power.attack_bonus}. {power.hit_effect or ""}',
+                    description=(
+                        f'${power.attack_attribute[:3].lower()}+atk+{power.attack_bonus} '
+                        f'против {power.get_defence_display()}.'
+                    ),
                 )
             )
         if power.accessory_type == 'WEAPON':
@@ -65,7 +78,7 @@ def migrate_power_properties(apps, schema_editor):
                     title='HIT',
                     level=power.level,
                     subclass=power.subclass,
-                    description=f'$wpn*{power.dice_number}+{power.attack_attribute[:3].lower()}+dmg. {power.hit_effect}',
+                    description=f'$wpn*{power.dice_number}+{power.attack_attribute[:3].lower()}+dmg. {replace_string(power.hit_effect or "")}',
                 )
             )
         if power.accessory_type == 'IMPLEMENT':
@@ -75,28 +88,31 @@ def migrate_power_properties(apps, schema_editor):
                     title='HIT',
                     level=power.level,
                     subclass=power.subclass,
-                    description=f'{power.dice_number}{power.get_damage_dice_display()}+${power.attack_attribute[:3].lower()}+dmg. {power.hit_effect}',
+                    description=f'{power.dice_number}{power.get_damage_dice_display()}+${power.attack_attribute[:3].lower()}+dmg. {replace_string(power.hit_effect or "")}',
                 )
             )
-        pps.append(
-            PowerProperty(
-                power=power,
-                title='TARGET',
-                level=power.level,
-                subclass=power.subclass,
-                description=power.target.target,
-            )
-        )
-        for title, attr in property_title_to_power_attr.items():
+        if power.target:
             pps.append(
                 PowerProperty(
                     power=power,
-                    title=title,
+                    title='TARGET',
                     level=power.level,
                     subclass=power.subclass,
-                    description=getattr(power, attr),
+                    description=replace_string(power.target.target),
                 )
             )
+        for title, attr in property_title_to_power_attr.items():
+            description = getattr(power, attr)
+            if description:
+                pps.append(
+                    PowerProperty(
+                        power=power,
+                        title=title,
+                        level=power.level,
+                        subclass=power.subclass,
+                        description=replace_string(description),
+                    )
+                )
     PowerProperty.objects.bulk_create(pps)
 
 

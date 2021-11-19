@@ -19,7 +19,7 @@ from django.contrib import admin
 from django.urls import path
 from django.views.generic.base import RedirectView
 
-from base.views import EncounterDetailView, MainView, NPCDetailView
+from base.views import EncounterDetailView, MainView, NPCDetailView, NPCOldDetailView
 from generator import views as generator_views
 from printer.views import PrintableObjectView
 
@@ -56,6 +56,7 @@ urlpatterns = [
         name='random_fantasy_name',
     ),
     path('npc/detail/<pk>', NPCDetailView.as_view(), name='npc'),
+    path('npc/detail/<pk>/old', NPCOldDetailView.as_view(), name='npc-old'),  # deprecated
     path('encounter/detail/<pk>', EncounterDetailView.as_view(), name='encounter'),
     path('printer/detail/<pk>', PrintableObjectView.as_view(), name='printer'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
