@@ -4,6 +4,7 @@ from random import randint
 
 from django.contrib import admin
 from django.contrib.auth.models import Group, User
+from django.db import models
 from django.utils.safestring import mark_safe
 
 from base.constants.base import BaseCapitalizedEnum, IntDescriptionSubclassEnum
@@ -260,8 +261,21 @@ class NPCAdmin(admin.ModelAdmin):
 
     mandatory_skills.short_description = 'Тренированные навыки'
 
-    # def save_model(self, request, obj, form, change):
-        # TODO add all 0 level powers matching class and subclass
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        for power in obj.powers.filter(level=0):
+            obj.powers.remove(power)
+        obj.save()
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        obj = form.instance
+        default_powers = Power.objects.filter(
+            models.Q(klass=obj.klass) & models.Q(subclass__in=(obj.subclass, 0))
+        ).filter(level=0)
+        for power in default_powers:
+            print(power)
+            obj.powers.add(power)
 
 
 class EncounterAdmin(admin.ModelAdmin):
@@ -364,16 +378,41 @@ class PowerPropertyInline(admin.StackedInline):
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
 
-
 class PowerAdmin(admin.ModelAdmin):
     list_filter = ('frequency', 'klass', 'race', 'functional_template')
-    exclude = ('hit_effect', 'miss_effect', 'effect', 'trigger', 'requirement', 'target')
+    exclude = (
+        'hit_effect',
+        'miss_effect',
+        'effect',
+        'trigger',
+        'requirement',
+        'target',
+    )
     inlines = (PowerPropertyInline,)
-    autocomplete_fields = ('target',)
+    readonly_fields = ('syntax',)
     ordering = ('klass', 'level', 'frequency')
     save_as = True
 
     # TODO add readonly field explaining properties syntax
+    def syntax(self, obj):
+        return '''
+        str - модификатор силы 
+        con - модификатор телосложения
+        dex - модификатор ловкости 
+        int - модификатор интеллекта
+        wis - модификатор мудрости
+        cha - модификатор харизмы
+        wpn - урон от оружия (кубы + бонус зачарования) 
+        lvl - уровень персонажа
+        dmg - бонус урона
+        atk - бонус атаки
+        
+        Выражения начинаются со знака $. поддерживаются операции +, -, *, / с целыми числами.
+        Атака по умолчанию $[ATTACK_ATTRIBUTE]+atk+[power.attack_bonus]
+        Урон по умолчанию $wpn+dmg / $[damage_dice]+dmg
+        '''
+
+    syntax.short_description = 'Синтаксис'
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'race':
@@ -457,7 +496,6 @@ admin.site.register(WeaponType, WeaponTypeAdmin)
 admin.site.register(Weapon, WeaponAdmin)
 admin.site.register(Implement, ImplementAdmin)
 admin.site.register(Power, PowerAdmin)
-admin.site.register(PowerTarget, PowerTargetAdmin)
 admin.site.register(FunctionalTemplate, FunctionalTemplateAdmin)
 
 admin.site.unregister(Group)
