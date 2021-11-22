@@ -13,7 +13,7 @@ class SkillMixin:
         result = (
             self.half_level
             + self._modifier(attribute)
-            + getattr(self._trained_skills_bonuses, skill.name.lower())
+            + getattr(self._trained_skills_bonuses, skill.lname)
         )
         if skill in (
             SkillsEnum.ACROBATICS,

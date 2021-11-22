@@ -20,10 +20,6 @@ class Race:
     speed: ClassVar[int] = 6
     const_ability_bonus: ClassVar[Abilities] = Abilities()
     var_ability_bonus: ClassVar[Abilities] = Abilities()
-    fortitude_bonus: ClassVar[int] = 0
-    reflex_bonus: ClassVar[int] = 0
-    will_bonus: ClassVar[int] = 0
-
     skill_bonuses: ClassVar[Skills] = Skills()
 
     available_weapon_types: ClassVar[Sequence[WeaponType]] = frozenset()
@@ -34,6 +30,8 @@ class Race:
     fortitude: ClassVar[int] = 0
     reflex: ClassVar[int] = 0
     will: ClassVar[int] = 0
+
+    surges_number_bonus: ClassVar[int] = 0
 
     @property
     def healing_surge_bonus(self):
@@ -253,6 +251,10 @@ class MinotaurRace(Race):
 
 class MulRace(Race):
     slug = NPCRaceEnum.MUL
+    const_ability_bonus = Abilities(constitution=2)
+    var_ability_bonus = Abilities(strength=2, wisdom=2)
+    skill_bonuses = Skills(endurance=2, streetwise=2)
+    surges_number_bonus = 1
 
 
 class OrcRace(Race):

@@ -59,6 +59,7 @@ npc_klasses = {
         npc_classes.FighterClass,
         npc_classes.HexbladeClass,
         npc_classes.InvokerClass,
+        npc_classes.MonkClass,
         npc_classes.PaladinClass,
         npc_classes.PriestClass,
         npc_classes.RangerMarksmanClass,
@@ -78,14 +79,17 @@ npc_klasses = {
 }
 
 _weapon_types_tuple = (
+    weapon_types.AnnihilationBlade,  # hexblade weapon
     weapon_types.BastardSword,
     weapon_types.Battleaxe,
     weapon_types.Broadsword,
+    weapon_types.ChaosBlade,  # hexblade weapon
     weapon_types.Club,
     weapon_types.Craghammer,
     weapon_types.Crossbow,
     weapon_types.Dagger,
     weapon_types.ExecutionAxe,
+    weapon_types.ExquisiteAgonyScourge,  # hexblade weapon
     weapon_types.Falchion,
     weapon_types.Flail,
     weapon_types.Fullblade,
@@ -137,7 +141,7 @@ _weapon_types_tuple = (
     weapon_types.WarPick,
     weapon_types.Waraxe,
     weapon_types.Warhammer,
-    weapon_types.WinterMourningBlade,
+    weapon_types.WinterMourningBlade,  # hexblade weapon
 )
 
 weapon_types_classes = {cls.slug: cls for cls in _weapon_types_tuple}

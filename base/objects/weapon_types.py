@@ -620,12 +620,44 @@ class SuperiorCrossbow(WeaponType):
 
 
 class WinterMourningBlade(WeaponType):
-    name = 'Клинок зимней скорби'
+    name = 'Клинок зимней скорби (Оружие договора)'
     group = WeaponGroupEnum.LIGHT_BLADE
     category = WeaponCategoryIntEnum.SUPERIOR
     damage_dice = DiceIntEnum.D10
-    handedness = WeaponHandednessEnum.ONE
     prof_bonus = 3
+
+
+class AnnihilationBlade(WeaponType):
+    name = 'Клинок аннигиляции (Оружие договора)'
+    group = WeaponGroupEnum.HEAVY_BLADE
+    category = WeaponCategoryIntEnum.SUPERIOR
+    damage_dice = DiceIntEnum.D12
+
+
+class ExquisiteAgonyScourge(WeaponType):
+    name = 'Бич изысканной агонии (Оружие договора)'
+    group = WeaponGroupEnum.FLAIL
+    category = WeaponCategoryIntEnum.SUPERIOR
+    damage_dice = DiceIntEnum.D10
+    is_reach = True
+
+
+class ChaosBlade(WeaponType):
+    name = 'Клинок хаоса (Оружие договора)'
+    group = WeaponGroupEnum.HEAVY_BLADE
+    category = WeaponCategoryIntEnum.SUPERIOR
+    dice_number = 2
+    damage_dice = DiceIntEnum.D4
+    is_high_crit = True
+
+
+class UnarmedMonkStrile(WeaponType):
+    name = 'Безоружный удар монаха'
+    group = WeaponGroupEnum.UNARMED
+    category = WeaponCategoryIntEnum.SUPERIOR
+    damage_dice = DiceIntEnum.D8
+    prof_bonus = 3
+    is_off_hand = True
 
 
 # Double axe 	AV 	+2 	1d10/1d10 	— 	40gp 	15 	Axe 	Double weapon, off-hand

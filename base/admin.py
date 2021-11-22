@@ -9,11 +9,13 @@ from django.utils.safestring import mark_safe
 
 from base.constants.base import BaseCapitalizedEnum, IntDescriptionSubclassEnum
 from base.constants.constants import (
+    AccessoryTypeEnum,
     AttributeEnum,
     NPCClassIntEnum,
     NPCRaceEnum,
     PowerFrequencyEnum,
-    SkillsEnum, PowerPropertyTitle, AccessoryTypeEnum,
+    PowerPropertyTitle,
+    SkillsEnum,
 )
 from base.models import NPC, Armor, Class, Encounter, Race
 from base.models.models import (
@@ -66,6 +68,8 @@ class ClassAdmin(AdminMixin, admin.ModelAdmin):
     ENUM = NPCClassIntEnum
 
     def available_armor_types(self, obj):
+        if not obj:
+            return '-'
         return ', '.join(
             armor_type.description
             for armor_type in npc_klasses[obj.name].available_armor_types
@@ -74,6 +78,8 @@ class ClassAdmin(AdminMixin, admin.ModelAdmin):
     available_armor_types.short_description = 'Ношение брони'
 
     def available_weapons(self, obj):
+        if not obj:
+            return '-'
         return ', '.join(
             [
                 weapon_category.description
@@ -475,27 +481,37 @@ class PowerAdmin(admin.ModelAdmin):
     def save_related(self, request, form, formsets, change):
         super(PowerAdmin, self).save_related(request, form, formsets, change)
         obj = form.instance
+        if not obj.attack_attribute:
+            return
         ability_mod = obj.attack_attribute.lower()[:3]
         for property in obj.properties.filter(title=PowerPropertyTitle.ATTACK.name):
             if not property.description:
                 property.description = f'${ability_mod}+atk+{obj.attack_bonus} против {obj.defence_subjanctive}'
             elif property.description.startswith('+'):
                 property.description = (
-                        f'${ability_mod}+atk+{obj.attack_bonus} '
-                        f'против {obj.defence_subjanctive}. {property.description[1:]}'
+                    f'${ability_mod}+atk+{obj.attack_bonus} '
+                    f'против {obj.defence_subjanctive}. {property.description[1:]}'
                 )
             property.save()
         for property in obj.properties.filter(title=PowerPropertyTitle.HIT.name):
             if obj.accessory_type == AccessoryTypeEnum.WEAPON.name:
-                default_string = f'$wpn*{obj.dice_number}+dmg+{ability_mod}'
-            elif obj.accessory_type == AccessoryTypeEnum.IMPLEMENT:
-                default_string = f'${obj.damage_dice}+dmg+{ability_mod}'
+                default_string = f'Урон $wpn*{obj.dice_number}+dmg+{ability_mod}'
+            elif obj.accessory_type == AccessoryTypeEnum.IMPLEMENT.name:
+                default_string = f'Урон {obj.dice_number}{obj.get_damage_dice_display()}+$dmg+{ability_mod}'
             else:
                 continue
             if not property.description:
                 property.description = default_string
             elif property.description.startswith('+'):
                 property.description = default_string + property.description[1:]
+            property.save()
+        for property in obj.properties.filter(title=PowerPropertyTitle.TARGET.name):
+            if not property.description:
+                property.description = 'Одно существо'
+            property.save()
+        for property in obj.properties.filter(title=PowerPropertyTitle.MISS.name):
+            if not property.description:
+                property.description = 'Половина урона'
             property.save()
 
 

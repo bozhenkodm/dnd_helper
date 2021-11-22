@@ -8,6 +8,8 @@ class AttributeMixin:
     @property
     def _initial_attr_bonuses(self) -> Abilities:
         # getting one of variable ability bonus for specific npc
+        if not self.var_bonus_attr:
+            return self.race_data_instance.const_ability_bonus
         var_bonus_attr_name = self.var_bonus_attr.lower()
         return self.race_data_instance.const_ability_bonus + Abilities(
             **{

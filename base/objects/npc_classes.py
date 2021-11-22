@@ -8,6 +8,7 @@ from base.constants.constants import (
     ShieldTypeEnum,
     SkillsEnum,
     WeaponCategoryIntEnum,
+    WeaponHandednessEnum,
 )
 from base.objects.implement_types import (
     HolySymbol,
@@ -20,7 +21,10 @@ from base.objects.implement_types import (
 )
 from base.objects.skills import Skills
 from base.objects.weapon_types import (
+    AnnihilationBlade,
+    Club,
     Dagger,
+    ExquisiteAgonyScourge,
     HandCrossbow,
     Longspear,
     LongSword,
@@ -29,6 +33,8 @@ from base.objects.weapon_types import (
     ShortSword,
     Shuriken,
     Sling,
+    Spear,
+    UnarmedMonkStrile,
     WeaponType,
     WinterMourningBlade,
 )
@@ -177,6 +183,19 @@ class VampireClass(NPCClass):
     slug = NPCClassIntEnum.VAMPIRE
     power_source = PowerSourceEnum.SHADOW
     available_implement_types = (KiFocus, HolySymbol)
+    trainable_skills = Skills(
+        acrobatics=5,
+        arcana=5,
+        athletics=5,
+        bluff=5,
+        diplomacy=5,
+        history=5,
+        intimidate=5,
+        perception=5,
+        religion=5,
+        stealth=5,
+        thievery=5,
+    )
 
     @property
     def armor_class_bonus(self):
@@ -245,6 +264,10 @@ class WarlordClass(NPCClass):
         athletics=5, endurance=5, intimidate=5, history=5, diplomacy=5, heal=5
     )
 
+    class SubclassEnum(IntDescriptionSubclassEnum):
+        INSPIRING = 1, 'Вдохновитель'
+        TACTICAL = 2, 'Тактик'
+
 
 class FighterClass(NPCClass):
     slug = NPCClassIntEnum.FIGHTER
@@ -274,13 +297,15 @@ class FighterClass(NPCClass):
         BRAWLER = 5, 'Воин задира'
 
     def _is_browler_and_properly_armed(self) -> bool:
-        # brawler fighter should have melee weaopn in just one hand
+        # brawler fighter should have melee weapon in just one hand
         if any(
             (
                 self.npc.subclass != self.SubclassEnum.BRAWLER,
                 self.npc.shield,
                 len(weapons := tuple(self.npc.weapons.all())) != 1,
                 not weapons[0].weapon_type.data_instance.category.is_melee,
+                weapons[0].weapon_type.data_instance.handenness
+                == WeaponHandednessEnum.TWO,
             )
         ):
             return False
@@ -299,6 +324,29 @@ class FighterClass(NPCClass):
         result = 2  # base fighter fortitude bonus
         if self._is_browler_and_properly_armed():
             result += 2
+        return result
+
+    def attack_bonus(self, weapon=None):
+        result = super(FighterClass, self).attack_bonus(weapon)
+        if not weapon:
+            return result
+        if self.npc.subclass == self.SubclassEnum.GREAT_WEAPON:
+            if (
+                not self.npc.shield
+                and weapon.weapon_type.data_instance.handenness
+                != WeaponHandednessEnum.ONE
+                and self.npc.weapons.count() == 1
+            ):
+                return result + 1
+        if self.npc.subclass == self.SubclassEnum.GUARDIAN:
+            if weapon.weapon_type.data_instance.handenness != WeaponHandednessEnum.TWO:
+                return result + 1
+        if self.npc.subclass == self.SubclassEnum.TEMPPEST:
+            if (
+                self.npc.weapons.count() == 2
+                and weapon.weapon_type.data_instance.is_off_hand
+            ):
+                return result + 1
         return result
 
 
@@ -451,7 +499,14 @@ class SwordmageClass(NPCClass):
 class PaladinClass(NPCClass):
     slug = NPCClassIntEnum.PALADIN
     power_source = PowerSourceEnum.DIVINE
-    available_armor_types = ArmorTypeIntEnum
+    available_armor_types = (
+        ArmorTypeIntEnum.CLOTH,
+        ArmorTypeIntEnum.LEATHER,
+        ArmorTypeIntEnum.HIDE,
+        ArmorTypeIntEnum.CHAINMAIL,
+        ArmorTypeIntEnum.SCALE,
+        ArmorTypeIntEnum.PLATE,
+    )
     available_weapon_categories = (
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.MILITARY,
@@ -545,6 +600,7 @@ class RangerMarksmanClass(RangerClass):
 class RangerMeleeClass(RangerClass):
     slug = NPCClassIntEnum.RANGER_MELEE
 
+    @property
     def hit_points_bonus(self):
         return (self.npc._tier + 1) * 5
 
@@ -608,17 +664,12 @@ class SorcererClass(NPCClass):
     def _armor_class_ability_bonus(self):
         result = super()._armor_class_ability_bonus
         if self.npc.subclass == self.SubclassEnum.DRAGON_MAGIC:
-            result = max(self._modifier(self.npc.strength), result)
+            result = max(self.npc.str_mod, result)
         return result
 
     def armor_class_bonus(self):
         if self.npc.subclass == self.SubclassEnum.DRAGON_MAGIC:
-            return max(
-                map(
-                    self._modifier,
-                    (self.npc.intelligence, self.npc.dexterity, self.npc.strength),
-                )
-            )
+            return max(self.npc.int_mod, self.npc.dex_mod, self.npc.str_mod)
         return super().armor_class_bonus
 
 
@@ -649,19 +700,11 @@ class ShamanClass(NPCClass):
 
 class HexbladeClass(WarlockClass):
     slug = NPCClassIntEnum.HEXBLADE
-    power_source = PowerSourceEnum.ARCANE
-    available_armor_types = (
-        ArmorTypeIntEnum.CLOTH,
-        ArmorTypeIntEnum.LEATHER,
-        ArmorTypeIntEnum.HIDE,
-        ArmorTypeIntEnum.CHAINMAIL,
-    )
     available_weapon_categories = (
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.MILITARY,
         WeaponCategoryIntEnum.SIMPLE_RANGED,
     )
-    available_weapon_types = (WinterMourningBlade,)
     trainable_skills = Skills(
         thievery=5,
         intimidate=5,
@@ -679,12 +722,95 @@ class HexbladeClass(WarlockClass):
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         FEY_PACT = 1, 'Фейский договор'
+        INFERNAL_PACT = 2, 'Адский договор'
+        STAR_PACT = 3, 'Звёздный договор'
+        GLOOM_PACT = 4, 'Тёмный договор'
+        ELEMENTAL_PACT = 5, 'Элементный договор'
+
+    @property
+    def available_armor_types(self):
+        result = (
+            ArmorTypeIntEnum.CLOTH,
+            ArmorTypeIntEnum.LEATHER,
+            ArmorTypeIntEnum.HIDE,
+            ArmorTypeIntEnum.CHAINMAIL,
+        )
+        if self.npc.subclass in (
+            self.SubclassEnum.INFERNAL_PACT,
+            self.SubclassEnum.ELEMENTAL_PACT,
+        ):
+            result += (ArmorTypeIntEnum.SCALE,)
+        return result
+
+    @property
+    def available_weapon_types(self):
+        if self.npc.subclass == self.SubclassEnum.FEY_PACT:
+            return (WinterMourningBlade,)
+        if self.npc.subclass == self.SubclassEnum.INFERNAL_PACT:
+            return (AnnihilationBlade,)
+        if self.npc.subclass == self.SubclassEnum.GLOOM_PACT:
+            return (ExquisiteAgonyScourge,)
 
     @property
     def damage_bonus(self):
-        return (
+        base_bonus = super().damage_bonus
+        damage_modifier = 0
+        if self.npc.subclass in (
+            self.SubclassEnum.FEY_PACT,
+            self.SubclassEnum.GLOOM_PACT,
+        ):
+            damage_modifier = self.npc.dex_mod
+        if self.npc.subclass in (
+            self.SubclassEnum.INFERNAL_PACT,
+            self.SubclassEnum.ELEMENTAL_PACT,
+        ):
+            damage_modifier = self.npc.con_mod
+        if self.npc.subclass == self.SubclassEnum.STAR_PACT:
+            damage_modifier = self.npc.int_mod
+        return base_bonus + (
             self.npc._level_bonus
             + ((self.npc.level - 5) // 10) * 2
             + 2
-            + self._modifier(self.npc.dexterity)
+            + damage_modifier
         )
+
+
+class MonkClass(NPCClass):
+    slug = NPCClassIntEnum.MONK
+    power_source: PowerSourceEnum.PSIONIC
+    reflex = 1
+    trainable_skills = Skills(
+        acrobatics=5,
+        athletics=5,
+        perception=5,
+        thievery=5,
+        endurance=5,
+        diplomacy=5,
+        insight=5,
+        religion=5,
+        stealth=5,
+        heal=5,
+    )
+    available_weapon_categories = ()
+    available_accesories = (Quaterstaff, Club, Dagger, Spear, Sling, Shuriken)
+    available_weapon_types = available_accesories + (UnarmedMonkStrile,)
+    available_implement_types = available_accesories + (KiFocus,)
+
+    class SubclassEnum(IntDescriptionSubclassEnum):
+        CENTERED_BREATH = 1, 'Сконцентрированное дыхание'
+        STONE_FIST = 2, 'Каменный кулак'
+        # IRON_SOUL = 3, 'Железная душа'
+        # DESERT_WIND = 4, 'Пустнынный ветер'
+        # ETERNAL_TIDE = 5, 'Вечный прилив'
+
+    @property
+    def fortitude(self):
+        if self.npc.subclass == self.SubclassEnum.CENTERED_BREATH:
+            return self.npc._tier + 2
+        return 1
+
+    @property
+    def will(self):
+        if self.npc.subclass == self.SubclassEnum.STONE_FIST:
+            return self.npc._tier + 2
+        return 1

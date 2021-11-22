@@ -56,9 +56,6 @@ urlpatterns = [
         name='random_fantasy_name',
     ),
     path('npc/detail/<pk>', NPCDetailView.as_view(), name='npc'),
-    path(
-        'npc/detail/<pk>/old', NPCOldDetailView.as_view(), name='npc-old'
-    ),  # deprecated
     path('encounter/detail/<pk>', EncounterDetailView.as_view(), name='encounter'),
     path('printer/detail/<pk>', PrintableObjectView.as_view(), name='printer'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -428,7 +428,7 @@ class PowerProperty(models.Model):
         blank=True,
         max_length=PowerPropertyTitle.max_length(),
     )
-    level = models.SmallIntegerField(verbose_name='Уровень', default=0)
+    level = models.SmallIntegerField(verbose_name='Уровень', default=1)
     subclass = models.SmallIntegerField(
         verbose_name='Подкласс',
         choices=IntDescriptionSubclassEnum.generate_choices(),
@@ -649,7 +649,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
     @property
     def surges(self):
         """Количество исцелений"""
-        return self._tier + 1
+        return self._tier + 1 + self.race_data_instance.surges_number_bonus
 
     @property
     def initiative(self):
@@ -696,39 +696,6 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                 + [self.get_shield_display()],
             )
         )
-
-    def _calculate_injected_string(self, string, weapon=None):
-        kwargs = {}
-        for attr in AttributeEnum:
-            modifier = f'{attr.lname[:3]}_mod'
-            mod_value = getattr(self, modifier)
-            kwargs.update(
-                {
-                    modifier: getattr(self, modifier),
-                    f'half_{modifier}': mod_value // 2,
-                    f'{modifier}_add1': mod_value + 1,
-                    f'{modifier}_add2': mod_value + 2,
-                    f'{modifier}_add3': mod_value + 3,
-                    f'{modifier}_add4': mod_value + 4,
-                    f'{modifier}_add5': mod_value + 5,
-                    f'{modifier}_add6': mod_value + 6,
-                    f'{modifier}_add9': mod_value + 9,
-                    f'{modifier}_add10': mod_value + 10,
-                    f'{modifier}_add_halflevel': mod_value + self.half_level,
-                }
-            )
-        kwargs.update(
-            {
-                'halflevel': self.half_level,
-                'halflevel_add3': self.half_level + 3,
-                'halflevel_add5': self.half_level + 5,
-                'level_add2': self.level + 2,
-            }
-        )
-        if weapon:
-            # TODO remove injection alert
-            kwargs.update(weapon=weapon)
-        return (string or '').format(**kwargs)
 
     @property
     def power_attrs(self):
@@ -811,6 +778,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                         current_calculated_expression = current_element
             calculated_expressions.append(current_calculated_expression)
         result = template.format(*calculated_expressions)
+        # TODO remove injection weakness, leaving only markdown tags
         return mark_safe('<br>'.join(result.split('\n')))
 
     def valid_properties(self, power: Power):
@@ -820,11 +788,9 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
         for prop in power.properties.filter(
             level__lte=self.level, subclass__in=(self.subclass, 0)
         ):
-            if (
-                prop.title not in properties
-                or properties[prop.title].level < prop.level
-            ):
-                properties[prop.title] = prop
+            key = f'{prop.title},{prop.order}'
+            if key not in properties or properties[key].level < prop.level:
+                properties[key] = prop
         return sorted(properties.values(), key=lambda x: x and x.order)
 
     def powers_calculated(self):
@@ -956,214 +922,6 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                 )
             )
         return powers
-
-    def powers_calculated_old(self):
-        powers = []
-        base_attack_bonus = self._level_bonus + self.half_level
-        if self.functional_template:
-            for power in self.functional_template.powers.all():
-                attack_modifier = (
-                    self._modifier(
-                        getattr(self, AttributeEnum[power.attack_attribute].lname)
-                    )
-                    if power.attack_attribute
-                    else 0
-                )
-                powers.append(
-                    dict(
-                        name=power.name,
-                        keywords=power.keywords,
-                        enchantment=0,
-                        damage_bonus=attack_modifier
-                        + (
-                            self.klass_data_instance.damage_bonus(npc=self)
-                            if attack_modifier
-                            else 0
-                        ),
-                        attack=attack_modifier + base_attack_bonus + power.attack_bonus,
-                        defence=power.get_defence_display(),
-                        dice_number=power.dice_number,
-                        dice=power.get_damage_dice_display(),
-                        frequency_order=list(PowerFrequencyEnum).index(
-                            PowerFrequencyEnum[power.frequency]
-                        ),
-                        hit_effect=self._calculate_injected_string(power.hit_effect),
-                        miss_effect=self._calculate_injected_string(power.miss_effect),
-                        effect=self._calculate_injected_string(
-                            power.effect or power.description
-                        ),
-                        trigger=self._calculate_injected_string(power.trigger),
-                        target=power.target,
-                        accessory=self.functional_template.title,
-                    )
-                )
-        for power in self.race.powers.all():
-            attack_modifier = (
-                self._modifier(
-                    getattr(self, AttributeEnum[power.attack_attribute].lname)
-                )
-                if power.attack_attribute
-                else 0
-            )
-            powers.append(
-                dict(
-                    name=power.name,
-                    keywords=power.keywords,
-                    enchantment=0,
-                    damage_bonus=attack_modifier
-                    + (self.klass_data_instance.damage_bonus if attack_modifier else 0),
-                    attack=attack_modifier + base_attack_bonus + power.attack_bonus,
-                    defence=power.get_defence_display(),
-                    dice_number=power.dice_number,
-                    dice=power.get_damage_dice_display(),
-                    frequency_order=list(PowerFrequencyEnum).index(
-                        PowerFrequencyEnum[power.frequency]
-                    ),
-                    hit_effect=self._calculate_injected_string(power.hit_effect),
-                    miss_effect=self._calculate_injected_string(power.miss_effect),
-                    effect=self._calculate_injected_string(
-                        power.effect or power.description
-                    ),
-                    trigger=self._calculate_injected_string(power.trigger),
-                    target=power.target,
-                    accessory=str(self.race),
-                )
-            )
-        for power in self.powers.filter(accessory_type=AccessoryTypeEnum.WEAPON.name):
-            attack_modifier = self._modifier(
-                getattr(self, AttributeEnum[power.attack_attribute].lname)
-            )
-            for weapon in self.weapons.all():
-                enchantment = min(weapon.enchantment, self._magic_threshold)
-                powers.append(
-                    dict(
-                        name=power.name,
-                        keywords=power.keywords,
-                        enchantment=enchantment,
-                        damage_bonus=attack_modifier
-                        + self.klass_data_instance.damage_bonus,
-                        attack=attack_modifier
-                        + self.klass_data_instance.attack_bonus(weapon=weapon)
-                        + enchantment
-                        + power.attack_bonus,
-                        defence=power.get_defence_display(),
-                        dice_number=weapon.weapon_type.data_instance.dice_number
-                        * power.dice_number,
-                        dice=weapon.weapon_type.data_instance.damage_dice.description,
-                        frequency_order=list(PowerFrequencyEnum).index(
-                            PowerFrequencyEnum[power.frequency]
-                        ),
-                        hit_effect=self._calculate_injected_string(
-                            power.hit_effect, weapon
-                        ),
-                        miss_effect=self._calculate_injected_string(
-                            power.miss_effect, weapon
-                        ),
-                        effect=self._calculate_injected_string(power.effect, weapon),
-                        trigger=self._calculate_injected_string(power.trigger, weapon),
-                        target=power.target,
-                        accessory=str(weapon),
-                    )
-                )
-        for power in self.powers.filter(
-            accessory_type=AccessoryTypeEnum.IMPLEMENT.name
-        ):
-            attack_modifier = self._modifier(
-                getattr(self, AttributeEnum[power.attack_attribute].lname)
-            )
-            for implement in self.implements.all():
-                if not self.is_implement_proficient(implement):
-                    continue
-                enchantment = min(implement.enchantment, self._magic_threshold)
-                powers.append(
-                    dict(
-                        name=power.name,
-                        keywords=power.keywords,
-                        enchantment=enchantment,
-                        damage_bonus=attack_modifier
-                        + self.klass_data_instance.damage_bonus,
-                        attack=attack_modifier
-                        + base_attack_bonus
-                        + enchantment
-                        + power.attack_bonus,
-                        defence=power.get_defence_display(),
-                        dice_number=power.dice_number,
-                        dice=power.get_damage_dice_display(),
-                        frequency_order=list(PowerFrequencyEnum).index(
-                            PowerFrequencyEnum[power.frequency]
-                        ),
-                        hit_effect=self._calculate_injected_string(power.hit_effect),
-                        miss_effect=self._calculate_injected_string(power.miss_effect),
-                        effect=self._calculate_injected_string(power.effect),
-                        trigger=self._calculate_injected_string(power.trigger),
-                        target=power.target,
-                        accessory=str(implement),
-                    )
-                )
-            for weapon in self.weapons.all():
-                if (
-                    not weapon.weapon_type.data_instance.is_implement
-                    or weapon.weapon_type
-                    not in self.klass_data_instance.available_implement_types
-                ):
-                    continue
-                enchantment = min(weapon.enchantment, self._magic_threshold)
-                powers.append(
-                    dict(
-                        name=power.name,
-                        keywords=power.keywords,
-                        enchantment=enchantment,
-                        damage_bonus=attack_modifier
-                        + self.klass_data_instance.damage_bonus,
-                        attack=attack_modifier
-                        + base_attack_bonus
-                        + enchantment
-                        + power.attack_bonus,
-                        defence=power.get_defence_display(),
-                        dice_number=power.dice_number,
-                        dice=power.get_damage_dice_display(),
-                        frequency_order=list(PowerFrequencyEnum).index(
-                            PowerFrequencyEnum[power.frequency]
-                        ),
-                        hit_effect=self._calculate_injected_string(power.hit_effect),
-                        miss_effect=self._calculate_injected_string(power.miss_effect),
-                        effect=self._calculate_injected_string(power.effect),
-                        trigger=self._calculate_injected_string(power.trigger),
-                        target=power.target,
-                        accessory=f'{weapon} - инструмент',
-                    )
-                )
-        for power in self.powers.filter(
-            models.Q(accessory_type__isnull=True) | models.Q(accessory_type='')
-        ):
-            powers.append(
-                dict(
-                    name=power.name,
-                    keywords=power.keywords,
-                    enchantment=0,
-                    damage_bonus=0,
-                    attack=0,
-                    defence=power.get_defence_display(),
-                    dice_number=0,
-                    dice='',
-                    frequency_order=list(PowerFrequencyEnum).index(
-                        PowerFrequencyEnum[power.frequency]
-                    ),
-                    hit_effect=self._calculate_injected_string(power.hit_effect),
-                    miss_effect=self._calculate_injected_string(power.miss_effect),
-                    effect=self._calculate_injected_string(power.effect)
-                    if power.effect
-                    else self.parse_string(power.description)
-                    if power.description
-                    else '',
-                    trigger=self._calculate_injected_string(power.trigger),
-                    target=power.target,
-                    accessory='Пассивный'
-                    if power.frequency == PowerFrequencyEnum.PASSIVE.name
-                    else 'Приём',
-                )
-            )
-        return sorted(powers, key=lambda x: x['frequency_order'])
 
 
 class Encounter(models.Model):
