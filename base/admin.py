@@ -23,7 +23,6 @@ from base.models.models import (
     Implement,
     Power,
     PowerProperty,
-    PowerTarget,
     Weapon,
     WeaponType,
 )
@@ -143,7 +142,8 @@ class NPCAdmin(admin.ModelAdmin):
             if object_id:
                 instance = self.model.objects.get(id=object_id)
                 # TODO temporary (?) solution until npc.var_bonus_attr refactored
-                # getting list of choices according to var_ability_bonus in race dataclass
+                # getting list of choices
+                # according to var_ability_bonus in race dataclass
                 choices = [
                     (key.upper(), AttributeEnum[key.upper()].value)
                     for key, value in asdict(
@@ -251,8 +251,8 @@ class NPCAdmin(admin.ModelAdmin):
 
     def generated_attributes(self, obj):
         def generate_attribute():
-            l = [randint(1, 6) for _ in range(4)]
-            return sum(l) - min(l)
+            generated_sum = [randint(1, 6) for _ in range(4)]
+            return sum(generated_sum) - min(generated_sum)
 
         return ', '.join(sorted([str(generate_attribute()) for _ in range(6)], key=int))
 
@@ -355,7 +355,7 @@ class ImplementAdmin(admin.ModelAdmin):
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
 
-class PowerPropertyInline(admin.StackedInline):
+class PowerPropertyInline(admin.TabularInline):
     model = PowerProperty
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
@@ -385,14 +385,6 @@ class PowerPropertyInline(admin.StackedInline):
 
 class PowerAdmin(admin.ModelAdmin):
     list_filter = ('frequency', 'klass', 'race', 'functional_template')
-    exclude = (
-        'hit_effect',
-        'miss_effect',
-        'effect',
-        'trigger',
-        'requirement',
-        'target',
-    )
     inlines = (PowerPropertyInline,)
     readonly_fields = ('syntax',)
     ordering = ('klass', 'level', 'frequency')
@@ -400,19 +392,21 @@ class PowerAdmin(admin.ModelAdmin):
 
     def syntax(self, obj):
         return '''
-        str - модификатор силы 
+        str - модификатор силы
         con - модификатор телосложения
-        dex - модификатор ловкости 
+        dex - модификатор ловкости
         int - модификатор интеллекта
         wis - модификатор мудрости
         cha - модификатор харизмы
-        wpn - урон от оружия (кубы + бонус зачарования) 
+        wpn - урон от оружия (кубы + бонус зачарования)
         lvl - уровень персонажа
-        dmg - бонус урона
-        atk - бонус атаки
-        
-        Выражения начинаются со знака $. поддерживаются операции +, -, *, / с целыми числами.
-        Операции выполняются по порядку написания, игнорируя арифметический порядок действий 
+        dmg - бонус урона (= бонусу за уровень + бонусу урона от класса)
+        atk - бонус атаки (= бонусу за уровень + пол уровня + бонус атаки от класса)
+
+        Выражения начинаются со знака $.
+        поддерживаются операции +, -, *, / с целыми числами.
+        Операции выполняются по порядку написания,
+        игнорируя арифметический порядок действий
         (лень возиться со стеками и польской записью)
         Атака по умолчанию $[ATTACK_ATTRIBUTE]+atk+[power.attack_bonus]
         Урон по умолчанию $wpn+dmg / $[damage_dice]+dmg
@@ -486,7 +480,10 @@ class PowerAdmin(admin.ModelAdmin):
         ability_mod = obj.attack_attribute.lower()[:3]
         for property in obj.properties.filter(title=PowerPropertyTitle.ATTACK.name):
             if not property.description:
-                property.description = f'${ability_mod}+atk+{obj.attack_bonus} против {obj.defence_subjanctive}'
+                property.description = (
+                    f'${ability_mod}+atk+{obj.attack_bonus} '
+                    f'против {obj.defence_subjanctive}'
+                )
             elif property.description.startswith('+'):
                 property.description = (
                     f'${ability_mod}+atk+{obj.attack_bonus} '
@@ -497,7 +494,10 @@ class PowerAdmin(admin.ModelAdmin):
             if obj.accessory_type == AccessoryTypeEnum.WEAPON.name:
                 default_string = f'Урон $wpn*{obj.dice_number}+dmg+{ability_mod}'
             elif obj.accessory_type == AccessoryTypeEnum.IMPLEMENT.name:
-                default_string = f'Урон {obj.dice_number}{obj.get_damage_dice_display()}+$dmg+{ability_mod}'
+                default_string = (
+                    f'Урон {obj.dice_number}{obj.get_damage_dice_display()}'
+                    f'+$dmg+{ability_mod}'
+                )
             else:
                 continue
             if not property.description:

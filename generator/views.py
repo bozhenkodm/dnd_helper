@@ -23,7 +23,10 @@ class TavernView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        tavern = f'{random.choice(adjectives.split()).capitalize()} {random.choice(nouns.split()).capitalize()}'
+        tavern = (
+            f'{random.choice(adjectives.split()).capitalize()}'
+            f' {random.choice(nouns.split()).capitalize()}'
+        )
         context['tavern'] = tavern
         race = kwargs.get('race')
         if race:

@@ -102,7 +102,6 @@ class Dagger(WeaponType):
     is_off_hand = True
     is_light_thrown = True
     range = 5
-    is_implement = True
 
 
 class Javelin(WeaponType):
@@ -660,7 +659,17 @@ class UnarmedMonkStrile(WeaponType):
     is_off_hand = True
 
 
-# Double axe 	AV 	+2 	1d10/1d10 	— 	40gp 	15 	Axe 	Double weapon, off-hand
-# Double flail 	AV 	+2 	1d8/1d8 	— 	30gp 	11 	Flail 	Double weapon, defensive, off-hand
-# Double sword 	AV 	+3 	1d6/1d6 	— 	40gp 	9 	Light blade 	Double weapon, defensive, off-hand
-# Urgrosh 	AV 	+2 	1d12/1d6 	— 	30gp 	8 	Axe, spear 	Double weapon, defensive, off-hand
+class RitualDagger(Dagger):
+    name = 'Ритуальный кинжал'
+    is_implement = True
+
+
+class RitualSickle(Sickle):
+    name = 'Ритуальный серп'
+    is_implement = True
+
+
+# Double axe 	AV 	+2 	1d10/1d10  	Axe 	Double weapon, off-hand
+# Double flail 	AV 	+2 	1d8/1d8 Flail 	Double weapon, defensive, off-hand
+# Double sword 	AV 	+3 	1d6/1d6 Light blade 	Double weapon, defensive, off-hand
+# Urgrosh 	AV 	+2 	1d12/1d6 Axe, spear 	Double weapon, defensive, off-hand

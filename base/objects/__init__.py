@@ -1,7 +1,7 @@
 from base.objects import implement_types, npc_classes, races, weapon_types
 
 races_tuple = (
-    races.BladelingRace,
+    # races.BladelingRace,  # too exotic for now
     races.BugbearRace,
     races.DevaRace,
     races.DoppelgangerRace,
@@ -24,17 +24,17 @@ races_tuple = (
     races.HalfelfRace,
     races.HalflingRace,
     races.HalforcRace,
-    races.HamadryadRace,
+    # races.HamadryadRace,  # too exotic for now
     races.HobgoblinRace,
     races.HumanRace,
     races.KalashtarRace,
-    races.KenkuRace,
+    # races.KenkuRace,  # too exotic for now
     races.KoboldRace,
     races.MinotaurRace,
     races.MulRace,
-    races.OrcRace,
-    races.PixieRace,
-    races.SatyrRace,
+    # races.OrcRace,
+    # races.PixieRace,  # too exotic for now
+    races.SatyrRace,  # too exotic for now
     races.ShadarKaiRace,
     races.ShifterLongteethRace,
     races.ShifterRazorclawRace,
@@ -42,7 +42,7 @@ races_tuple = (
     races.TieflingRace,
     races.VrylokaRace,
     races.WarforgedRace,
-    races.WildenRace,
+    # races.WildenRace,  # dummy
 )
 
 race_classes = {cls.slug.name: cls for cls in races_tuple}
@@ -121,6 +121,8 @@ _weapon_types_tuple = (
     weapon_types.Quaterstaff,
     weapon_types.Rapier,
     weapon_types.RepeatingCrossbow,
+    weapon_types.RitualDagger,  # warlock implements
+    weapon_types.RitualSickle,  # warlock implements
     weapon_types.Scimitar,
     weapon_types.Scourge,
     weapon_types.Scythe,

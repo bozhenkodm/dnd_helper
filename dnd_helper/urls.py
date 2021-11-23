@@ -19,7 +19,7 @@ from django.contrib import admin
 from django.urls import path
 from django.views.generic.base import RedirectView
 
-from base.views import EncounterDetailView, MainView, NPCDetailView, NPCOldDetailView
+from base.views import EncounterDetailView, MainView, NPCDetailView
 from generator import views as generator_views
 from printer.views import PrintableObjectView
 

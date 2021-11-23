@@ -29,6 +29,8 @@ from base.objects.weapon_types import (
     Longspear,
     LongSword,
     Quaterstaff,
+    RitualDagger,
+    RitualSickle,
     Scimitar,
     ShortSword,
     Shuriken,
@@ -147,6 +149,7 @@ class BardClass(NPCClass):
         ArmorTypeIntEnum.HIDE,
         ArmorTypeIntEnum.CHAINMAIL,
     )
+    available_shield_types = (ShieldTypeEnum.LIGHT,)
     available_weapon_categories = (
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.SIMPLE_RANGED,
@@ -230,18 +233,30 @@ class BarbarianClass(NPCClass):
         heal=5,
     )
     fortitude = 2
+    hit_points_per_level = 10
+
+    class SubclassEnum(IntDescriptionSubclassEnum):
+        THANEBORN = 1, 'Глава клана'
+        RAGEBLOOD = 2, 'Яростная кровь'
+        THUNDERBORN = 3, 'Громорождённый'
+        WHIRLING = 4, 'Крутящийся'
+
+    @property
+    def _is_armored_properly(self) -> bool:
+        return not self.npc.shield and (not self.npc.armor or self.npc.armor.is_light)
 
     @property
     def armor_class_bonus(self):
         result = super().armor_class_bonus
-        if not self.npc.shield and (not self.npc.armor or self.npc.armor.is_light):
+        if self._is_armored_properly:
             result += self.npc._tier + 1
         return result
 
     @property
     def reflex(self):
-        if not self.npc.shield and self.npc.armor and self.npc.armor.is_light:
+        if self._is_armored_properly:
             return self.npc._tier + 1
+        return 0
 
 
 class WarlordClass(NPCClass):
@@ -253,6 +268,7 @@ class WarlordClass(NPCClass):
         ArmorTypeIntEnum.HIDE,
         ArmorTypeIntEnum.CHAINMAIL,
     )
+    available_shield_types = (ShieldTypeEnum.LIGHT,)
     available_weapon_categories = (
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.MILITARY,
@@ -279,6 +295,7 @@ class FighterClass(NPCClass):
         ArmorTypeIntEnum.CHAINMAIL,
         ArmorTypeIntEnum.SCALE,
     )
+    available_shield_types = (ShieldTypeEnum.LIGHT, ShieldTypeEnum.HEAVY)
     available_weapon_categories = (
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.MILITARY,
@@ -436,6 +453,7 @@ class AvengerClass(NPCClass):
     reflex = 1
     will = 1
 
+    @property
     def armor_class_bonus(self):
         result = super().armor_class_bonus
         if not self.npc.shield and (
@@ -448,7 +466,7 @@ class AvengerClass(NPCClass):
 class WarlockClass(NPCClass):
     slug = NPCClassIntEnum.WARLOCK
     power_source = PowerSourceEnum.ARCANE
-    available_implement_types = (Wand, Rod)
+    available_implement_types = (Wand, Rod, RitualDagger, RitualSickle)
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -465,6 +483,13 @@ class WarlockClass(NPCClass):
     )
     reflex = 1
     will = 1
+
+    class SubclassEnum(IntDescriptionSubclassEnum):
+        FEY_PACT = 1, 'Фейский договор'
+        INFERNAL_PACT = 2, 'Адский договор'
+        STAR_PACT = 3, 'Звёздный договор'
+        GLOOM_PACT = 4, 'Тёмный договор'
+        ELEMENTAL_PACT = 5, 'Элементный договор'
 
 
 class SwordmageClass(NPCClass):
@@ -507,6 +532,7 @@ class PaladinClass(NPCClass):
         ArmorTypeIntEnum.SCALE,
         ArmorTypeIntEnum.PLATE,
     )
+    available_shield_types = (ShieldTypeEnum.LIGHT, ShieldTypeEnum.HEAVY)
     available_weapon_categories = (
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.MILITARY,
@@ -566,6 +592,14 @@ class RogueClass(NPCClass):
 class RunepriestClass(NPCClass):
     slug = NPCClassIntEnum.RUNEPRIEST
     power_source = PowerSourceEnum.DIVINE
+    available_armor_types = (
+        ArmorTypeIntEnum.CLOTH,
+        ArmorTypeIntEnum.LEATHER,
+        ArmorTypeIntEnum.HIDE,
+        ArmorTypeIntEnum.CHAINMAIL,
+        ArmorTypeIntEnum.SCALE,
+    )
+    available_shield_types = (ShieldTypeEnum.LIGHT,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         WRATHFUL_HAMMER = 1, 'Мстительный молот'
@@ -613,6 +647,7 @@ class WardenClass(NPCClass):
         ArmorTypeIntEnum.LEATHER,
         ArmorTypeIntEnum.HIDE,
     )
+    available_shield_types = (ShieldTypeEnum.LIGHT, ShieldTypeEnum.HEAVY)
     available_weapon_categories = (
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.MILITARY,
@@ -667,6 +702,7 @@ class SorcererClass(NPCClass):
             result = max(self.npc.str_mod, result)
         return result
 
+    @property
     def armor_class_bonus(self):
         if self.npc.subclass == self.SubclassEnum.DRAGON_MAGIC:
             return max(self.npc.int_mod, self.npc.dex_mod, self.npc.str_mod)
@@ -719,13 +755,6 @@ class HexbladeClass(WarlockClass):
     fortitude = 1
     reflex = 0
     will = 1
-
-    class SubclassEnum(IntDescriptionSubclassEnum):
-        FEY_PACT = 1, 'Фейский договор'
-        INFERNAL_PACT = 2, 'Адский договор'
-        STAR_PACT = 3, 'Звёздный договор'
-        GLOOM_PACT = 4, 'Тёмный договор'
-        ELEMENTAL_PACT = 5, 'Элементный договор'
 
     @property
     def available_armor_types(self):

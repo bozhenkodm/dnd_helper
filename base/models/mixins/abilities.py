@@ -1,5 +1,3 @@
-from collections import Counter
-
 from base.constants.constants import AttributeEnum
 from base.objects.abilities import Abilities
 

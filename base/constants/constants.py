@@ -41,9 +41,8 @@ class PowersVariables(str, Enum):
     WPN = auto()  # weapon damage dice
     LVL = auto()
     DMG = auto()  # damage bonus
-    ATK = (
-        auto()
-    )  # attack bonus (class bonus + half level + level bonus + enchantment. NOT POWER BONUS)
+    ATK = auto()  # attack bonus =
+    # (class bonus + half level + level bonus + enchantment. NOT POWER BONUS)
 
 
 class SizeEnum(BaseCapitalizedEnum):
@@ -291,6 +290,7 @@ class PowerEffectTypeEnum(BaseCapitalizedEnum):
     HEALING = 'Исцеление'
     INVIGORATING = 'Укрепляющий'
     POLYMORPH = 'Превращение'
+    RAGE = 'Ярость'
     RATTLING = 'Ужасающий'
     RELIABLE = 'Надежный'
     SLEEP = 'Сон'
@@ -324,47 +324,14 @@ class DefenceTypeEnum(BaseCapitalizedEnum):
 
 class PowerRangeTypeEnum(BaseCapitalizedEnum):
     MELEE_WEAPON = 'Рукопашное оружие'
-    MELEE_DISTANCE = 'Рукопашное (дистанция)'
-    MELEE_TOUCH = 'Рукопашное касание'
+    MELEE = 'Рукопашное'
+    RANGED = 'Дальнобойное'
     MELEE_RANGED_WEAPON = 'Рукопашное или дальнобойное оружие'
-    PERSONAL = 'Персональный'
     RANGED_WEAPON = 'Дальнобойное оружие'
-    RANGED_DISTANCE = 'Дальнобойное (дистанция)'
-    RANGED_SIGHT = 'Дальнобойное (видимость)'
-    CLOSE_BURST = 'Ближняя вспышка'
-    CLOSE_BLAST = 'Ближняя волна'
-    AREA_BURST = 'Зональная вспышка'
-    AREA_WALL = 'Стена'
-
-    @property
-    def is_area(self):
-        return self in (self.AREA_WALL, self.AREA_BURST)
-
-    @property
-    def is_melee(self):
-        return self in (
-            self.MELEE_DISTANCE,
-            self.MELEE_TOUCH,
-            self.MELEE_WEAPON,
-            self.MELEE_RANGED_WEAPON,
-        )
-
-    @property
-    def is_close(self):
-        return self in (self.CLOSE_BURST, self.CLOSE_BLAST)
-
-    @property
-    def is_ranged(self):
-        return self in (
-            self.RANGED_SIGHT,
-            self.RANGED_WEAPON,
-            self.RANGED_DISTANCE,
-            self.MELEE_RANGED_WEAPON,
-        )
-
-    @property
-    def is_provokable(self):
-        return self.is_ranged or self.is_area
+    BURST = 'Вспышка'
+    BLAST = 'Волна'
+    WALL = 'Стена'
+    PERSONAL = 'Персональный'
 
 
 class PowerPropertyTitle(BaseCapitalizedEnum):

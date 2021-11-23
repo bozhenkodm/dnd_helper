@@ -1,5 +1,4 @@
 import re
-from collections import defaultdict
 from functools import cached_property
 from typing import Union
 
@@ -58,7 +57,11 @@ class Armor(models.Model):
     def __str__(self):
         if self.name == ArmorTypeIntEnum(self.armor_type).description:
             return f'{self.name}, +{self.enchantment}'
-        return f'{self.name}, {ArmorTypeIntEnum(self.armor_type).description}, +{self.enchantment}'
+        return (
+            f'{self.name},'
+            f' {ArmorTypeIntEnum(self.armor_type).description},'
+            f' +{self.enchantment}'
+        )
 
     @property
     def is_light(self):
@@ -85,7 +88,10 @@ class WeaponType(models.Model):
         return weapon_types_classes.get(self.slug)()
 
     def damage(self, weapon_number=1):
-        return f'{self.dataclass_instance.dice_number*weapon_number}{self.dataclass_instance.damage_dice.description}'
+        return (
+            f'{self.dataclass_instance.dice_number*weapon_number}'
+            f'{self.dataclass_instance.damage_dice.description}'
+        )
 
 
 class Weapon(models.Model):
@@ -108,8 +114,15 @@ class Weapon(models.Model):
     def damage(self):
         dataclass_instance = self.weapon_type.data_instance
         if not self.enchantment:
-            return f'{dataclass_instance.dice_number}{dataclass_instance.damage_dice.description}'
-        return f'{dataclass_instance.dice_number}{dataclass_instance.damage_dice.description} + {self.enchantment}'
+            return (
+                f'{dataclass_instance.dice_number}'
+                f'{dataclass_instance.damage_dice.description}'
+            )
+        return (
+            f'{dataclass_instance.dice_number}'
+            f'{dataclass_instance.damage_dice.description} + '
+            f'{self.enchantment}'
+        )
 
     @property
     def damage_roll(self):
@@ -207,19 +220,6 @@ class FunctionalTemplate(models.Model):
         return self.title
 
 
-class PowerTarget(models.Model):
-    class Meta:
-        verbose_name = 'Цель таланта'
-        verbose_name_plural = 'Цели талантов'
-
-    target = models.CharField(
-        verbose_name='Цель', null=False, max_length=50, unique=True
-    )
-
-    def __str__(self):
-        return self.target
-
-
 class Power(models.Model):
     class Meta:
         verbose_name = 'Талант'
@@ -315,20 +315,8 @@ class Power(models.Model):
         max_length=PowerRangeTypeEnum.max_length(),
         default=PowerRangeTypeEnum.PERSONAL.name,
     )
-    range = models.SmallIntegerField(verbose_name='Дальность', default=1)
+    range = models.SmallIntegerField(verbose_name='Дальность', default=0)
     burst = models.SmallIntegerField(verbose_name='Площадь', default=0)
-    hit_effect = models.TextField(verbose_name='Попадание', null=True, blank=True)
-    miss_effect = models.TextField(verbose_name='Промах', null=True, blank=True)
-    effect = models.TextField(verbose_name='Эффект', null=True, blank=True)
-    trigger = models.TextField(verbose_name='Триггер', null=True, blank=True)
-    requirement = models.TextField(verbose_name='Требование', null=True, blank=True)
-    target = models.ForeignKey(
-        PowerTarget,
-        verbose_name='Цель',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-    )
 
     def __str__(self):
         if self.race:
@@ -338,7 +326,8 @@ class Power(models.Model):
         if self.klass:
             return (
                 f'{self.name}, '
-                f'{self.klass.get_name_display()} ({(self.get_attack_attribute_display() or "Пр")[:3]}), '
+                f'{self.klass.get_name_display()} '
+                f'({(self.get_attack_attribute_display() or "Пр")[:3]}), '
                 f'{self.get_frequency_display()}, '
                 f'{self.level} уровень'
             )
@@ -356,31 +345,44 @@ class Power(models.Model):
 
     @property
     def attack_type(self):
+        # PowerRangeTypeEnum.MELEE_TOUCH.name,
+        # PowerRangeTypeEnum.RANGED_SIGHT.name,
         if self.range_type in (
             PowerRangeTypeEnum.MELEE_RANGED_WEAPON.name,
             PowerRangeTypeEnum.MELEE_WEAPON.name,
-            PowerRangeTypeEnum.MELEE_TOUCH.name,
-            PowerRangeTypeEnum.RANGED_SIGHT.name,
             PowerRangeTypeEnum.RANGED_WEAPON.name,
             PowerRangeTypeEnum.PERSONAL.name,
         ):
             return self.get_range_type_display()
-        if self.range_type in (
-            PowerRangeTypeEnum.MELEE_DISTANCE.name,
-            PowerRangeTypeEnum.RANGED_DISTANCE.name,
+        if (
+            self.range_type
+            in (
+                PowerRangeTypeEnum.MELEE.name,
+                PowerRangeTypeEnum.RANGED.name,
+            )
+            and self.range
         ):
             return f'{self.get_range_type_display().split()[0]} {self.range}'
-        if self.range_type in (
-            PowerRangeTypeEnum.CLOSE_BURST.name,
-            PowerRangeTypeEnum.CLOSE_BLAST.name,
+        if self.range_type == PowerRangeTypeEnum.MELEE.name:
+            return f'{self.get_range_type_display()} касание'
+        if self.range_type == PowerRangeTypeEnum.RANGED.name:
+            return f'{self.get_range_type_display()} видимость'
+        if (
+            self.range_type
+            in (
+                PowerRangeTypeEnum.BURST.name,
+                PowerRangeTypeEnum.BLAST.name,
+            )
+            and not self.range
         ):
-            return f'{self.get_range_type_display()} {self.burst}'
+            return f'Ближняя {self.get_range_type_display().lower()} {self.burst}'
         if self.range_type in (
-            PowerRangeTypeEnum.AREA_BURST.name,
-            PowerRangeTypeEnum.AREA_WALL.name,
+            PowerRangeTypeEnum.BURST.name,
+            PowerRangeTypeEnum.WALL.name,
         ):
             return (
-                f'{self.get_range_type_display()} {self.burst} в пределах {self.range}'
+                f'Зональная {self.get_range_type_display().lower()} '
+                f'{self.burst} в пределах {self.range}'
             )
         raise ValueError('Wrong attack type')
 
@@ -582,9 +584,11 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
             f'{self.race} {self.klass} {self.level} уровня'
         )
 
-    # TODO these two next methods are shitshow, appeared to be parallel structures of race and class
-    # instead of complementing models. how to integrate npc instance to these instances and initialise them
-    # in race and class models respectively?
+    # TODO these two next methods are shitshow,
+    #  appeared to be parallel structures of race and class
+    #  instead of complementing models.
+    #  how to integrate npc instance to these instances and initialise them
+    #  in race and class models respectively?
 
     @cached_property
     def race_data_instance(self):
@@ -728,14 +732,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
             # current_element = None
             for parsed_expression_element in parsed_expression:
                 if parsed_expression_element in ('+', '-', '*', '/'):
-                    if parsed_expression_element == '+':
-                        current_operation = lambda x, y: x + y
-                    if parsed_expression_element == '-':
-                        current_operation = lambda x, y: x - y
-                    if parsed_expression_element == '*':
-                        current_operation = lambda x, y: x * y
-                    if parsed_expression_element == '/':
-                        current_operation = lambda x, y: x // y
+                    current_operation = parsed_expression_element
                     continue
                 if parsed_expression_element == PowersVariables.WPN:
                     if not weapon:
@@ -769,13 +766,16 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                     current_element = int(parsed_expression_element)
                 else:
                     current_element = self.power_attrs.get(parsed_expression_element)
-                if current_element:
-                    if current_operation:
-                        current_calculated_expression = current_operation(
-                            current_calculated_expression, current_element
-                        )
-                    else:
-                        current_calculated_expression = current_element
+                if current_operation == '+':
+                    current_calculated_expression += current_element
+                elif current_operation == '-':
+                    current_calculated_expression -= current_element
+                elif current_operation == '*':
+                    current_calculated_expression *= current_element
+                elif current_operation == '/':
+                    current_calculated_expression //= current_element
+                else:
+                    current_calculated_expression = current_element
             calculated_expressions.append(current_calculated_expression)
         result = template.format(*calculated_expressions)
         # TODO remove injection weakness, leaving only markdown tags

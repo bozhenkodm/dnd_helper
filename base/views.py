@@ -20,21 +20,6 @@ class NPCDetailView(DetailView):
         return context
 
 
-class NPCOldDetailView(DetailView):
-    model = NPC
-    template_name = 'base/npc_old_detail.html'
-
-    def get_context_data(self, **kwargs):
-        object = self.get_object()
-        context = super().get_context_data(**kwargs)
-        skills = (
-            (item[1], getattr(object, item[0].lower()))
-            for item in SkillsEnum.generate_choices()
-        )
-        context['skills'] = skills
-        return context
-
-
 class EncounterDetailView(DetailView):
     model = Encounter
 
