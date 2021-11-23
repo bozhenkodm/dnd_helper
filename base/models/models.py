@@ -716,7 +716,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
     def parse_string(
         self, string, weapon: Weapon = None, implement: Union[Weapon, Implement] = None
     ):
-        pattern = r'\$([^\s]{3,})'  # gets substing from '$' to next whitespace
+        pattern = r'\$([^\s]{3,})\b'  # gets substing from '$' to next whitespace
         expressions = re.findall(pattern, string)
         template = re.sub(
             pattern, '{}', string
@@ -729,8 +729,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
             parsed_expression = re.findall(r'[a-z]{3}|[+\-*/]|[0-9]{0,2}', expression)
             current_calculated_expression = 0
             current_operation = None
-            # current_element = None
-            for parsed_expression_element in parsed_expression:
+            for parsed_expression_element in parsed_expression[:-1]:  # last element is ''
                 if parsed_expression_element in ('+', '-', '*', '/'):
                     current_operation = parsed_expression_element
                     continue
