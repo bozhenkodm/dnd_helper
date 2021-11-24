@@ -224,6 +224,7 @@ taverners_races = (
     NPCRaceEnum.HALFELF,
     NPCRaceEnum.ELADRIN,
     NPCRaceEnum.DRAGONBORN,
+    NPCRaceEnum.DRAGONBORN,
     NPCRaceEnum.GOLIATH,
     NPCRaceEnum.GNOME,
     NPCRaceEnum.HALFORC,
