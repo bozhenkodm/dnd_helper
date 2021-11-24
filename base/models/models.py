@@ -938,20 +938,6 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
         return powers
 
 
-class Combatants(models.Model):
-    name = models.CharField(verbose_name='Участник сцены', max_length=50, null=False)
-    initiative = models.PositiveSmallIntegerField(verbose_name='Инициатива', default=0)
-    is_player = models.BooleanField(verbose_name='Игровой персонаж?', default=False)
-    number = models.PositiveSmallIntegerField(
-        verbose_name='Количество однотипных', default=1
-    )
-
-    def __str__(self):
-        if self.is_player or self.number<=1:
-            return self.name
-        return f'{self.name} №{self.number}'
-
-
 class Encounter(models.Model):
     class Meta:
         verbose_name = 'Сцена'
@@ -962,9 +948,6 @@ class Encounter(models.Model):
     )
     description = models.TextField(verbose_name='Описание', null=True, blank=True)
     npcs = models.ManyToManyField(NPC, verbose_name='Мастерские персонажи')
-    other_combatants = models.ManyToManyField(
-        Combatants, verbose_name='Другие участники сцены'
-    )
 
     def __str__(self):
         if self.short_description:
@@ -990,3 +973,18 @@ class Encounter(models.Model):
                     )
                 )
         return sorted(encounter, key=lambda x: x[1], reverse=True)
+
+
+class Combatants(models.Model):
+    name = models.CharField(verbose_name='Участник сцены', max_length=50, null=False)
+    encounter = models.ForeignKey(Encounter, verbose_name='Сцена', on_delete=models.CASCADE, null=True)
+    initiative = models.PositiveSmallIntegerField(verbose_name='Инициатива', default=0)
+    is_player = models.BooleanField(verbose_name='Игровой персонаж?', default=False)
+    number = models.PositiveSmallIntegerField(
+        verbose_name='Количество однотипных', default=1
+    )
+
+    def __str__(self):
+        if self.is_player or self.number<=1:
+            return self.name
+        return f'{self.name} №{self.number}'

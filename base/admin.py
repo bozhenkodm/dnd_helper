@@ -310,8 +310,8 @@ class NPCAdmin(admin.ModelAdmin):
             obj.powers.add(power)
 
 
-class CombatantsAdmin(admin.ModelAdmin):
-    pass
+class CombatantsInlineAdmin(admin.TabularInline):
+    model = Combatants
 
 
 class EncounterAdmin(admin.ModelAdmin):
@@ -319,10 +319,10 @@ class EncounterAdmin(admin.ModelAdmin):
         'short_description',
         # 'description',
         'npcs',
-        'other_combatants',
         'encounter_link',
     )
     readonly_fields = ('encounter_link',)
+    inlines = (CombatantsInlineAdmin,)
 
     def encounter_link(self, obj):
         return mark_safe(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
@@ -567,7 +567,6 @@ class FunctionalTemplateAdmin(admin.ModelAdmin):
 admin.site.register(Race, RaceAdmin)
 admin.site.register(Class, ClassAdmin)
 admin.site.register(NPC, NPCAdmin)
-admin.site.register(Combatants, CombatantsAdmin)
 admin.site.register(Encounter, EncounterAdmin)
 admin.site.register(Armor, ArmorAdmin)
 admin.site.register(WeaponType, WeaponTypeAdmin)
