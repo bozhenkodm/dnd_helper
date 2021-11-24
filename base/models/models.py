@@ -309,6 +309,11 @@ class Power(models.Model):
         null=True,
         blank=True,
     )
+    available_weapon_types = models.ManyToManyField(
+        WeaponType,
+        verbose_name='Требования к оружию',
+        help_text='для талантов с оружием',
+    )
     range_type = models.CharField(
         verbose_name='Дальность',
         choices=PowerRangeTypeEnum.generate_choices(is_sorted=False),
@@ -729,7 +734,9 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
             parsed_expression = re.findall(r'[a-z]{3}|[+\-*/]|[0-9]{0,2}', expression)
             current_calculated_expression = 0
             current_operation = None
-            for parsed_expression_element in parsed_expression[:-1]:  # last element is ''
+            for parsed_expression_element in parsed_expression[
+                :-1
+            ]:  # last element is ''
                 if parsed_expression_element in ('+', '-', '*', '/'):
                     current_operation = parsed_expression_element
                     continue
@@ -795,7 +802,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
     def powers_calculated(self):
         powers = []
         if self.functional_template:
-            for power in self.functional_template.powers.all():
+            for power in self.functional_template.powers.filter(level=0):
                 powers.append(
                     dict(
                         name=power.name,
@@ -814,7 +821,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                         ],
                     )
                 )
-        for power in self.race.powers.all():
+        for power in self.race.powers.filter(level=0):
             powers.append(
                 dict(
                     name=power.name,
@@ -833,8 +840,16 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                     ],
                 )
             )
+        # for power in self.klass.powers.filter(level=0):
+
         for power in self.powers.filter(accessory_type=AccessoryTypeEnum.WEAPON.name):
-            for weapon in self.weapons.all():
+            if power.available_weapon_types.count():
+                weapon_queryset = self.weapons.filter(
+                    weapon_type__in=power.available_weapon_types.all()
+                )
+            else:
+                weapon_queryset = self.weapons.all()
+            for weapon in weapon_queryset:
                 powers.append(
                     dict(
                         name=power.name,
@@ -923,6 +938,20 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
         return powers
 
 
+class Combatants(models.Model):
+    name = models.CharField(verbose_name='Участник сцены', max_length=50, null=False)
+    initiative = models.PositiveSmallIntegerField(verbose_name='Инициатива', default=0)
+    is_player = models.BooleanField(verbose_name='Игровой персонаж?', default=False)
+    number = models.PositiveSmallIntegerField(
+        verbose_name='Количество однотипных', default=1
+    )
+
+    def __str__(self):
+        if self.is_player or self.number<=1:
+            return self.name
+        return f'{self.name} №{self.number}'
+
+
 class Encounter(models.Model):
     class Meta:
         verbose_name = 'Сцена'
@@ -933,6 +962,9 @@ class Encounter(models.Model):
     )
     description = models.TextField(verbose_name='Описание', null=True, blank=True)
     npcs = models.ManyToManyField(NPC, verbose_name='Мастерские персонажи')
+    other_combatants = models.ManyToManyField(
+        Combatants, verbose_name='Другие участники сцены'
+    )
 
     def __str__(self):
         if self.short_description:
@@ -942,3 +974,19 @@ class Encounter(models.Model):
     @property
     def url(self):
         return reverse('encounter', kwargs={'pk': self.pk})
+
+    def roll_initiative(self):
+        encounter = []
+        for npc in self.npcs.all():
+            encounter.append((npc.name, npc.initiative + DiceIntEnum.D20.roll()))
+        for combatant in self.other_combatants.all():
+            initiative = combatant.initiative + DiceIntEnum.D20.roll()
+            for i in range(combatant.number):
+                encounter.append(
+                    (
+                        f'{combatant}',
+                        initiative
+                        + (DiceIntEnum.D20.roll() if combatant.is_player else 0),
+                    )
+                )
+        return sorted(encounter, key=lambda x: x[1], reverse=True)

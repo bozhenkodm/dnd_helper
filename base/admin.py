@@ -15,10 +15,12 @@ from base.constants.constants import (
     NPCRaceEnum,
     PowerFrequencyEnum,
     PowerPropertyTitle,
+    PowerRangeTypeEnum,
     SkillsEnum,
 )
 from base.models import NPC, Armor, Class, Encounter, Race
 from base.models.models import (
+    Combatants,
     FunctionalTemplate,
     Implement,
     Power,
@@ -103,28 +105,44 @@ class ClassAdmin(AdminMixin, admin.ModelAdmin):
 
 class NPCAdmin(admin.ModelAdmin):
     fields = [
-        'name',
+        (
+            'name',
+            'sex',
+        ),
         'npc_link',
         'description',
-        'race',
-        'klass',
-        'subclass',
-        'functional_template',
-        'sex',
+        (
+            'race',
+            'functional_template',
+        ),
+        (
+            'klass',
+            'subclass',
+        ),
         'level',
-        'base_strength',
-        'base_constitution',
-        'base_dexterity',
-        'base_intelligence',
-        'base_wisdom',
-        'base_charisma',
+        (
+            'base_strength',
+            'base_constitution',
+            'base_dexterity',
+        ),
+        (
+            'base_intelligence',
+            'base_wisdom',
+            'base_charisma',
+        ),
         'var_bonus_attr',
-        'mandatory_skills',
-        'trained_skills',
-        'armor',
-        'shield',
-        'weapons',
-        'implements',
+        (
+            'mandatory_skills',
+            'trained_skills',
+        ),
+        (
+            'armor',
+            'shield',
+        ),
+        (
+            'weapons',
+            'implements',
+        ),
         'powers',
     ]
     readonly_fields = [
@@ -210,19 +228,28 @@ class NPCAdmin(admin.ModelAdmin):
     def get_fields(self, request, obj=None):
         if not obj:
             return (
-                'name',
+                (
+                    'name',
+                    'sex',
+                ),
                 'description',
-                'race',
-                'klass',
-                'sex',
+                (
+                    'race',
+                    'klass',
+                    'functional_template',
+                ),
                 'level',
                 'generated_attributes',
-                'base_strength',
-                'base_constitution',
-                'base_dexterity',
-                'base_intelligence',
-                'base_wisdom',
-                'base_charisma',
+                (
+                    'base_strength',
+                    'base_constitution',
+                    'base_dexterity',
+                ),
+                (
+                    'base_intelligence',
+                    'base_wisdom',
+                    'base_charisma',
+                ),
             )
         result = self.fields
         level_attrs_bonuses = {
@@ -283,11 +310,16 @@ class NPCAdmin(admin.ModelAdmin):
             obj.powers.add(power)
 
 
+class CombatantsAdmin(admin.ModelAdmin):
+    pass
+
+
 class EncounterAdmin(admin.ModelAdmin):
     fields = (
         'short_description',
-        'description',
+        # 'description',
         'npcs',
+        'other_combatants',
         'encounter_link',
     )
     readonly_fields = ('encounter_link',)
@@ -388,6 +420,7 @@ class PowerAdmin(admin.ModelAdmin):
     inlines = (PowerPropertyInline,)
     readonly_fields = ('syntax',)
     ordering = ('klass', 'level', 'frequency')
+    autocomplete_fields = ('available_weapon_types',)
     save_as = True
 
     def syntax(self, obj):
@@ -507,12 +540,14 @@ class PowerAdmin(admin.ModelAdmin):
             property.save()
         for property in obj.properties.filter(title=PowerPropertyTitle.TARGET.name):
             if not property.description:
-                property.description = 'Одно существо'
-            property.save()
+                property.description = PowerRangeTypeEnum[
+                    property.power.range_type
+                ].default_target()
+                property.save()
         for property in obj.properties.filter(title=PowerPropertyTitle.MISS.name):
             if not property.description:
                 property.description = 'Половина урона'
-            property.save()
+                property.save()
 
 
 class PowerInline(admin.StackedInline):
@@ -532,6 +567,7 @@ class FunctionalTemplateAdmin(admin.ModelAdmin):
 admin.site.register(Race, RaceAdmin)
 admin.site.register(Class, ClassAdmin)
 admin.site.register(NPC, NPCAdmin)
+admin.site.register(Combatants, CombatantsAdmin)
 admin.site.register(Encounter, EncounterAdmin)
 admin.site.register(Armor, ArmorAdmin)
 admin.site.register(WeaponType, WeaponTypeAdmin)
