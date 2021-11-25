@@ -947,7 +947,10 @@ class Encounter(models.Model):
         max_length=30, verbose_name='Краткое описание', null=True, blank=True
     )
     description = models.TextField(verbose_name='Описание', null=True, blank=True)
-    npcs = models.ManyToManyField(NPC, verbose_name='Мастерские персонажи')
+    roll_for_players = models.BooleanField(
+        verbose_name='Кидать инициативу за игроков?', default=False
+    )
+    npcs = models.ManyToManyField(NPC, verbose_name='Мастерские персонажи', blank=True)
 
     def __str__(self):
         if self.short_description:
@@ -961,23 +964,25 @@ class Encounter(models.Model):
     def roll_initiative(self):
         encounter = []
         for npc in self.npcs.all():
-            encounter.append((npc.name, npc.initiative + DiceIntEnum.D20.roll()))
-        for combatant in self.other_combatants.all():
-            initiative = combatant.initiative + DiceIntEnum.D20.roll()
+            encounter.append((npc.name, npc.initiative + DiceIntEnum.D20.roll(), True))
+        for combatant in self.combatants.all():
+            initiative = combatant.initiative
+            if self.roll_for_players or not combatant.is_player:
+                initiative += DiceIntEnum.D20.roll()
             for i in range(combatant.number):
-                encounter.append(
-                    (
-                        f'{combatant}',
-                        initiative
-                        + (DiceIntEnum.D20.roll() if combatant.is_player else 0),
-                    )
-                )
-        return sorted(encounter, key=lambda x: x[1], reverse=True)
+                encounter.append((f'{combatant}', initiative, False))
+        return sorted(encounter, key=lambda x: (x[1], not x[2], x[0]), reverse=True)
 
 
 class Combatants(models.Model):
     name = models.CharField(verbose_name='Участник сцены', max_length=50, null=False)
-    encounter = models.ForeignKey(Encounter, verbose_name='Сцена', on_delete=models.CASCADE, null=True)
+    encounter = models.ForeignKey(
+        Encounter,
+        verbose_name='Сцена',
+        on_delete=models.CASCADE,
+        null=True,
+        related_name='combatants',
+    )
     initiative = models.PositiveSmallIntegerField(verbose_name='Инициатива', default=0)
     is_player = models.BooleanField(verbose_name='Игровой персонаж?', default=False)
     number = models.PositiveSmallIntegerField(
@@ -985,6 +990,6 @@ class Combatants(models.Model):
     )
 
     def __str__(self):
-        if self.is_player or self.number<=1:
+        if self.is_player or self.number <= 1:
             return self.name
         return f'{self.name} №{self.number}'
