@@ -25,7 +25,8 @@
 {% for combatant in object.roll_initiative %}
     <div class="pagenotbreak"  style="clear: left">
     <div class="npc-line">
-        <div style="float: left; width: 90%"><span><b>{{ combatant.0 }}</b></span></div>
+        <div style="float: left; width: 5%"><span><b>{{ forloop.counter }}</b></span></div>
+        <div style="float: left; width: 85%"><span><b>{{ combatant.0 }}</b></span></div>
         <div style="float: right; width: 10%"><span style="float: right">{{ combatant.1 }} </span></div>
     </div>
     <br><hr>
