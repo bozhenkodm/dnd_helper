@@ -131,10 +131,8 @@ class NPCAdmin(admin.ModelAdmin):
             'base_charisma',
         ),
         'var_bonus_attr',
-        (
             'mandatory_skills',
             'trained_skills',
-        ),
         (
             'armor',
             'shield',
@@ -151,6 +149,7 @@ class NPCAdmin(admin.ModelAdmin):
         'generated_attributes',
     ]
     autocomplete_fields = ('weapons', 'implements')
+    search_fields = ('name',)
     list_filter = ('race', 'klass')
     save_as = True
 
@@ -315,16 +314,14 @@ class CombatantsInlineAdmin(admin.TabularInline):
 
 
 class EncounterAdmin(admin.ModelAdmin):
-    fields = (
-        'short_description',
-        # 'description',
-        'npcs',
-        'encounter_link',
-    )
+    exclude = ('description',)
     readonly_fields = ('encounter_link',)
     inlines = (CombatantsInlineAdmin,)
+    autocomplete_fields = ('npcs',)
 
     def encounter_link(self, obj):
+        if not obj.id:
+            return '-'
         return mark_safe(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
 
     encounter_link.short_description = 'Страница сцены'
