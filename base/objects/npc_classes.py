@@ -321,7 +321,7 @@ class FighterClass(NPCClass):
                 self.npc.shield,
                 len(weapons := tuple(self.npc.weapons.all())) != 1,
                 not weapons[0].weapon_type.data_instance.category.is_melee,
-                weapons[0].weapon_type.data_instance.handenness
+                weapons[0].weapon_type.data_instance.handedness
                 == WeaponHandednessEnum.TWO,
             )
         ):
@@ -356,7 +356,7 @@ class FighterClass(NPCClass):
             ):
                 return result + 1
         if self.npc.subclass == self.SubclassEnum.GUARDIAN:
-            if weapon.weapon_type.data_instance.handenness != WeaponHandednessEnum.TWO:
+            if weapon.weapon_type.data_instance.handedness != WeaponHandednessEnum.TWO:
                 return result + 1
         if self.npc.subclass == self.SubclassEnum.TEMPPEST:
             if (
@@ -379,6 +379,14 @@ class WizardClass(NPCClass):
         history=5, diplomacy=5, dungeoneering=5, nature=5, insight=5, religion=5
     )
     will = 2
+
+    class SubclassEnum(IntDescriptionSubclassEnum):
+        WAND_OF_ACCURACY = 1, 'Меткость с волшебной палочкой'
+        STAFF_OF_DEFENCT = 2, 'Защита с посохом'
+        ORB_OF_IMPOSITION = 3, 'Наказание со сферой'
+        # ORB_OF_DECEPTION = 4, ''
+        # TOME_OF_BINDING = 5, ''
+        # TOME_OF_READINESS = 6, ''
 
 
 class DruidClass(NPCClass):
@@ -843,3 +851,15 @@ class MonkClass(NPCClass):
         if self.npc.subclass == self.SubclassEnum.STONE_FIST:
             return self.npc._tier + 2
         return 1
+
+
+class WarpriestClass(PriestClass):
+    slug = NPCClassIntEnum.WARPRIEST
+    power_source = PowerSourceEnum.DIVINE
+    available_shield_types = (
+        ShieldTypeEnum.LIGHT,
+        ShieldTypeEnum.HEAVY,
+    )
+    available_implement_types = (HolySymbol,)
+    fortitude = 1
+    will = 1

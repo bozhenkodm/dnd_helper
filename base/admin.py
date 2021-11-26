@@ -131,8 +131,8 @@ class NPCAdmin(admin.ModelAdmin):
             'base_charisma',
         ),
         'var_bonus_attr',
-            'mandatory_skills',
-            'trained_skills',
+        'mandatory_skills',
+        'trained_skills',
         (
             'armor',
             'shield',

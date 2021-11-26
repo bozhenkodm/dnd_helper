@@ -317,6 +317,11 @@ class HumanRace(Race):
 
 class ShadarKaiRace(Race):
     slug = NPCRaceEnum.SHADAR_KAI
+    const_ability_bonus = Abilities(dexterity=2)
+    var_ability_bonus = Abilities(intelligence=2, wisdom=2)
+    vision = VisionEnum.TWILIGHT
+    skill_bonuses = Skills(acrobatics=2, stealth=2)
+    fortitude = 1
 
 
 class HobgoblinRace(Race):

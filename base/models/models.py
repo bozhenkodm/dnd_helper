@@ -313,6 +313,7 @@ class Power(models.Model):
         WeaponType,
         verbose_name='Требования к оружию',
         help_text='для талантов с оружием',
+        blank=True,
     )
     range_type = models.CharField(
         verbose_name='Дальность',

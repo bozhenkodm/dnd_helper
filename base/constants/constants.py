@@ -114,6 +114,7 @@ class NPCClassIntEnum(IntDescriptionEnum):
     VAMPIRE = 35, 'Вампир'
     BARBARIAN = 40, 'Варвар'
     WARLORD = 50, 'Военачальник'
+    WARPRIEST = 55, 'Военный священник (жрец)'
     FIGHTER = 60, 'Воин'
     WIZARD = 70, 'Волшебник'
     DRUID = 80, 'Друид'
