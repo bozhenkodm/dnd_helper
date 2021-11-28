@@ -1033,7 +1033,6 @@ class Encounter(models.Model):
                         number=i + 1,
                     )
                 )
-        print(encounter)
         return sorted(
             encounter,
             key=lambda x: (x.initiative, not x.is_player, x.name),
