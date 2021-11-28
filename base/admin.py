@@ -21,8 +21,10 @@ from base.forms import NPCModelForm
 from base.models import NPC, Armor, Class, Encounter, Race
 from base.models.models import (
     Combatants,
+    CombatantsPC,
     FunctionalTemplate,
     Implement,
+    PlayerCharacters,
     Power,
     PowerProperty,
     Weapon,
@@ -268,10 +270,17 @@ class CombatantsInlineAdmin(admin.TabularInline):
     model = Combatants
 
 
+class CombatantsPCSInlineAdmin(admin.TabularInline):
+    model = CombatantsPC
+
+
 class EncounterAdmin(admin.ModelAdmin):
     exclude = ('description',)
     readonly_fields = ('encounter_link',)
-    inlines = (CombatantsInlineAdmin,)
+    inlines = (
+        CombatantsPCSInlineAdmin,
+        CombatantsInlineAdmin,
+    )
     autocomplete_fields = ('npcs',)
 
     def encounter_link(self, obj):
@@ -516,6 +525,15 @@ class FunctionalTemplateAdmin(admin.ModelAdmin):
     inlines = (PowerInline,)
 
 
+class PlayerCharactersAdmin(admin.ModelAdmin):
+    fields = (
+        'name',
+        ('armor_class', 'fortitude', 'reflex', 'will'),
+        ('passive_perception', 'passive_insight'),
+        ('initiative'),
+    )
+
+
 admin.site.register(Race, RaceAdmin)
 admin.site.register(Class, ClassAdmin)
 admin.site.register(NPC, NPCAdmin)
@@ -526,6 +544,7 @@ admin.site.register(Weapon, WeaponAdmin)
 admin.site.register(Implement, ImplementAdmin)
 admin.site.register(Power, PowerAdmin)
 admin.site.register(FunctionalTemplate, FunctionalTemplateAdmin)
+admin.site.register(PlayerCharacters, PlayerCharactersAdmin)
 
 admin.site.unregister(Group)
 admin.site.unregister(User)

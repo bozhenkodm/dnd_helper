@@ -27,7 +27,6 @@ from base.constants.constants import (
     ShieldTypeEnum,
     SkillsEnum,
 )
-from base.dice import DiceRoll
 from base.models.mixins.abilities import AttributeMixin
 from base.models.mixins.defences import DefenceMixin
 from base.models.mixins.skills import SkillMixin
@@ -37,6 +36,8 @@ from base.objects import (
     race_classes,
     weapon_types_classes,
 )
+from base.objects.dice import DiceRoll
+from base.objects.encounter import EncounterLine
 
 
 class Armor(models.Model):
@@ -777,7 +778,9 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                 elif current_operation == '-':
                     current_calculated_expression -= current_element
                 elif current_operation == '*':
-                    current_calculated_expression = current_calculated_expression * current_element
+                    current_calculated_expression = (
+                        current_calculated_expression * current_element
+                    )
                 elif current_operation == '/':
                     current_calculated_expression //= current_element
                 else:
@@ -938,6 +941,28 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
         return powers
 
 
+class PlayerCharacters(models.Model):
+    class Meta:
+        verbose_name = 'Игровой персонаж'
+        verbose_name_plural = 'Игровые персонажи'
+
+    name = models.CharField(verbose_name='Имя', max_length=50)
+    armor_class = models.PositiveSmallIntegerField(verbose_name='КД', null=False)
+    fortitude = models.PositiveSmallIntegerField(verbose_name='Стойкость', null=False)
+    reflex = models.PositiveSmallIntegerField(verbose_name='Реакция', null=False)
+    will = models.PositiveSmallIntegerField(verbose_name='Воля', null=False)
+    initiative = models.PositiveSmallIntegerField(verbose_name='Инициатива', default=0)
+    passive_perception = models.PositiveSmallIntegerField(
+        verbose_name='Пассивная внимательность', default=0
+    )
+    passive_insight = models.PositiveSmallIntegerField(
+        verbose_name='Пассивная проницательность', default=0
+    )
+
+    def __str__(self):
+        return f'{self.name}'
+
+
 class Encounter(models.Model):
     class Meta:
         verbose_name = 'Сцена'
@@ -963,15 +988,57 @@ class Encounter(models.Model):
 
     def roll_initiative(self):
         encounter = []
-        for npc in self.npcs.all():
-            encounter.append((npc.name, npc.initiative + DiceIntEnum.D20.roll(), True))
-        for combatant in self.combatants.all():
+        for combatant in self.combatants_pcs.all():
+            combatant: PlayerCharacters
             initiative = combatant.initiative
-            if self.roll_for_players or not combatant.is_player:
+            if self.roll_for_players:
                 initiative += DiceIntEnum.D20.roll()
+            encounter.append(
+                EncounterLine(
+                    name=combatant.pc.name,
+                    initiative=initiative,
+                    ac=combatant.pc.armor_class,
+                    fortitude=combatant.pc.fortitude,
+                    reflex=combatant.pc.reflex,
+                    will=combatant.pc.will,
+                    is_player=True,
+                    number=0,
+                )
+            )
+        for npc in self.npcs.all():
+            encounter.append(
+                EncounterLine(
+                    name=npc.name,
+                    initiative=npc.initiative + DiceIntEnum.D20.roll(),
+                    ac=npc.armor_class,
+                    fortitude=npc.fortitude,
+                    reflex=npc.reflex,
+                    will=npc.will,
+                    is_player=False,
+                    number=0,
+                )
+            )
+        for combatant in self.combatants.all():
+            initiative = combatant.initiative + DiceIntEnum.D20.roll()
             for i in range(combatant.number):
-                encounter.append((f'{combatant}', initiative, False))
-        return sorted(encounter, key=lambda x: (x[1], not x[2], x[0]), reverse=True)
+                encounter.append(
+                    EncounterLine(
+                        name=combatant.name,
+                        initiative=initiative,
+                        ac=combatant.armor_class,
+                        fortitude=combatant.fortitude,
+                        reflex=combatant.reflex,
+                        will=combatant.will,
+                        is_player=False,
+                        number=i + 1,
+                    )
+                )
+        print(encounter)
+        return sorted(
+            encounter,
+            key=lambda x: (x.initiative, not x.is_player, x.name),
+            reverse=True,
+        )
 
 
 class Combatants(models.Model):
@@ -983,13 +1050,28 @@ class Combatants(models.Model):
         null=True,
         related_name='combatants',
     )
+    armor_class = models.PositiveSmallIntegerField(verbose_name='КД', default=0)
+    fortitude = models.PositiveSmallIntegerField(verbose_name='Стойкость', default=0)
+    reflex = models.PositiveSmallIntegerField(verbose_name='Реакция', default=0)
+    will = models.PositiveSmallIntegerField(verbose_name='Воля', default=0)
     initiative = models.PositiveSmallIntegerField(verbose_name='Инициатива', default=0)
-    is_player = models.BooleanField(verbose_name='Игровой персонаж?', default=False)
     number = models.PositiveSmallIntegerField(
         verbose_name='Количество однотипных', default=1
     )
 
     def __str__(self):
-        if self.is_player or self.number <= 1:
-            return self.name
-        return f'{self.name} №{self.number}'
+        return self.name
+
+
+class CombatantsPC(models.Model):
+    pc = models.ForeignKey(
+        PlayerCharacters, verbose_name='Игровой персонаж', on_delete=models.CASCADE
+    )
+    encounter = models.ForeignKey(
+        Encounter,
+        verbose_name='Сцена',
+        on_delete=models.CASCADE,
+        null=True,
+        related_name='combatants_pcs',
+    )
+    initiative = models.PositiveSmallIntegerField(verbose_name='Инициатива', default=0)
