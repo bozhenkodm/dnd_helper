@@ -54,7 +54,7 @@ class IntDescriptionEnum(IntEnum):
 
 class IntDescriptionSubclassEnum(IntDescriptionEnum):
     @classmethod
-    def generate_choices(cls):
+    def generate_choices(cls, is_string_values=False):
         return sorted(
             [(item.value, item.description) for item in cls] + [(0, '---------')],
             key=lambda x: x[0],

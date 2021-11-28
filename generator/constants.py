@@ -230,13 +230,13 @@ taverners_races = (
     NPCRaceEnum.HALFORC,
     NPCRaceEnum.SHIFTER_RAZORCLAW,
     NPCRaceEnum.SHIFTER_LONGTEETH,
-    NPCRaceEnum.DEVA,
+    # NPCRaceEnum.DEVA,
     NPCRaceEnum.KALASHTAR,
-    NPCRaceEnum.DOPPELGANGER,
-    NPCRaceEnum.WARFORGED,
+    # NPCRaceEnum.DOPPELGANGER,
+    # NPCRaceEnum.WARFORGED,
 )
 
-vovels = 'аеиоуыэюя'
+vovels = 'аеиоуэя'
 consolants = 'бвгджзклмнпрстфхцчшщ'
 
 

@@ -250,7 +250,6 @@ class Power(models.Model):
     )
     subclass = models.SmallIntegerField(
         verbose_name='Подкласс',
-        choices=IntDescriptionSubclassEnum.generate_choices(),
         default=0,
     )
     race = models.ForeignKey(
@@ -778,7 +777,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                 elif current_operation == '-':
                     current_calculated_expression -= current_element
                 elif current_operation == '*':
-                    current_calculated_expression *= current_element
+                    current_calculated_expression = current_calculated_expression * current_element
                 elif current_operation == '/':
                     current_calculated_expression //= current_element
                 else:
@@ -789,12 +788,12 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
         return mark_safe('<br>'.join(result.split('\n')))
 
     def valid_properties(self, power: Power):
-        if power.frequency == PowerFrequencyEnum.PASSIVE:
-            return ()
+        # if power.frequency == PowerFrequencyEnum.PASSIVE:
+        #     return ()
         properties = {}
         for prop in power.properties.filter(
             level__lte=self.level, subclass__in=(self.subclass, 0)
-        ):
+        ).order_by('-subclass'):
             key = f'{prop.title},{prop.order}'
             if key not in properties or properties[key].level < prop.level:
                 properties[key] = prop

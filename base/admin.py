@@ -10,7 +10,6 @@ from django.utils.safestring import mark_safe
 from base.constants.base import BaseCapitalizedEnum, IntDescriptionSubclassEnum
 from base.constants.constants import (
     AccessoryTypeEnum,
-    AttributeEnum,
     NPCClassIntEnum,
     NPCRaceEnum,
     PowerFrequencyEnum,
@@ -18,6 +17,7 @@ from base.constants.constants import (
     PowerRangeTypeEnum,
     SkillsEnum,
 )
+from base.forms import NPCModelForm
 from base.models import NPC, Armor, Class, Encounter, Race
 from base.models.models import (
     Combatants,
@@ -110,7 +110,7 @@ class NPCAdmin(admin.ModelAdmin):
             'sex',
         ),
         'npc_link',
-        'description',
+        # 'description',
         (
             'race',
             'functional_template',
@@ -151,41 +151,8 @@ class NPCAdmin(admin.ModelAdmin):
     autocomplete_fields = ('weapons', 'implements')
     search_fields = ('name',)
     list_filter = ('race', 'klass')
+    form = NPCModelForm
     save_as = True
-
-    def formfield_for_choice_field(self, db_field, request, **kwargs):
-        object_id = request.resolver_match.kwargs.get('object_id')
-        if db_field.name == 'var_bonus_attr':
-            if object_id:
-                instance = self.model.objects.get(id=object_id)
-                # TODO temporary (?) solution until npc.var_bonus_attr refactored
-                # getting list of choices
-                # according to var_ability_bonus in race dataclass
-                choices = [
-                    (key.upper(), AttributeEnum[key.upper()].value)
-                    for key, value in asdict(
-                        instance.race_data_instance.var_ability_bonus
-                    ).items()
-                    if value
-                ]
-            else:
-                choices = ()
-
-            kwargs['choices'] = choices
-        if db_field.name == 'trained_skills':
-            if object_id:
-                instance = self.model.objects.get(id=object_id)
-                choices = instance.klass_data_instance.trainable_skills
-                choices = (
-                    (key.upper(), SkillsEnum[key.upper()].value)
-                    for key, value in asdict(choices).items()
-                    if value
-                )
-            else:
-                choices = ()
-            kwargs['choices'] = choices
-
-        return super().formfield_for_choice_field(db_field, request, **kwargs)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'race':
@@ -195,18 +162,6 @@ class NPCAdmin(admin.ModelAdmin):
         if db_field.name == 'klass':
             kwargs['queryset'] = Class.objects.order_by('name')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
-    def formfield_for_manytomany(self, db_field, request, **kwargs):
-        object_id = request.resolver_match.kwargs.get('object_id', 0)
-        try:
-            instance = self.model.objects.get(id=object_id)
-        except self.model.DoesNotExist:
-            instance = None
-        if db_field.name == 'powers':
-            kwargs['queryset'] = Power.objects.filter(
-                klass=instance.klass, level__lte=instance.level
-            ).order_by('level')
-        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name == 'subclass':

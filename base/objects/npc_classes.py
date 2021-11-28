@@ -350,7 +350,7 @@ class FighterClass(NPCClass):
         if self.npc.subclass == self.SubclassEnum.GREAT_WEAPON:
             if (
                 not self.npc.shield
-                and weapon.weapon_type.data_instance.handenness
+                and weapon.weapon_type.data_instance.handedness
                 != WeaponHandednessEnum.ONE
                 and self.npc.weapons.count() == 1
             ):
