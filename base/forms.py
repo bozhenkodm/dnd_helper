@@ -1,9 +1,10 @@
 from dataclasses import asdict
 
 from django import forms
+from django.db import models
 from multiselectfield import MultiSelectFormField
 
-from base.constants.constants import AttributeEnum, SexEnum, SkillsEnum
+from base.constants.constants import AttributeEnum, SexEnum, SkillsEnum, PowerFrequencyEnum
 from base.models import NPC
 from base.models.models import Power
 
@@ -43,5 +44,12 @@ class NPCModelForm(forms.ModelForm):
             self.fields['powers'] = forms.ModelMultipleChoiceField(
                 queryset=Power.objects.filter(
                     klass=self.instance.klass, level__lte=self.instance.level
-                ).order_by('level')
+                ).annotate(
+                    frequency_display=models.Case(
+                        models.When(frequency=PowerFrequencyEnum.PASSIVE.name, then=models.Value(0)),
+                        models.When(frequency=PowerFrequencyEnum.AT_WILL.name, then=models.Value(1)),
+                        models.When(frequency=PowerFrequencyEnum.ENCOUNTER.name, then=models.Value(2)),
+                        models.When(frequency=PowerFrequencyEnum.DAYLY.name, then=models.Value(3)),
+                    )
+                ).order_by('level', 'frequency_display')
             )
