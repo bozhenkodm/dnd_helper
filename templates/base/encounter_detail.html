@@ -22,21 +22,36 @@
 <body>
 
 <div class="pagenotbreak" style="width: 1000px; font-size: large">
+<table style="width: 1000px; font-size: large" border="1">
+    <colgroup>
+       <col span="1" style="width: 5%;">
+       <col span="1" style="width: 20%;">
+       <col span="1" style="width: 70%;">
+       <col span="1" style="width: 5%;">
+    </colgroup>
+    <tr>
+    <th>№</th>
+    <th>Имя</th>
+    <th>Ходы</th>
+    <th></th>
+  </tr>
 {% for combatant in object.roll_initiative %}
-    <div class="pagenotbreak"  style="clear: left">
-    <div class="npc-line">
-        <div style="float: left; width: 5%"><span><b>{{ forloop.counter }}</b></span></div>
-        <div style="float: left; width: 85%">
-            <span><b>{{ combatant.full_name }}</b></span>
-            {% if combatant.display_defences %}
-            <span>КД: {{combatant.ac}}, Ст: {{combatant.fortitude}}, Р: {{combatant.reflex}}, В: {{combatant.will}} </span>
-            {% endif %}
-        </div>
-        <div style="float: right; width: 10%"><span style="float: right">{{ combatant.initiative }} </span></div>
-    </div>
-    <br><hr>
-    </div>
+    <tr>
+<!--    <div class="npc-line">-->
+    <td><span><b>{{ forloop.counter }}</b></span></td>
+    <td><span><b>{{ combatant.full_name }}</b></span><br>
+    {% if combatant.display_defences %}
+        <span>КД: {{combatant.ac}}, Ст: {{combatant.fortitude}}, <br>Р: {{combatant.reflex}}, В: {{combatant.will}} </span>
+        {% endif %}
+    </td>
+
+    <td></td>
+    <td><span style="float: right">{{ combatant.initiative }} </span></td>
+<!--    </div>-->
+<!--    <br><hr>-->
 {% endfor %}
+</table>
+
 </div>
 
 
