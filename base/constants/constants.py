@@ -231,19 +231,6 @@ class DiceIntEnum(IntDescriptionEnum):
         return sum(randint(1, self) for _ in range(dice_number))
 
 
-class WeaponPropertyEnum(BaseCapitalizedEnum):
-    VERSATILE = 'Универсальное'
-    LIGHT_THROWN = 'Лёгкое метательное'
-    OFF_HAND = 'Дополнительное'
-    HEAVY_THROWN = 'Тяжелое метательное'
-    HIGH_CRIT = 'Высококритичное'
-    REACH = 'Досягаемость'
-
-    LOAD_FREE = 'Зарядка свободным'
-    LOAD_MINOR = 'Зарядка малым'
-    SMALL = 'Маленький'
-
-
 class WeaponHandednessEnum(BaseCapitalizedEnum):
     ONE = 'Одноручное'
     TWO = 'Двуручное'

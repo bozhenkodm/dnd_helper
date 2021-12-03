@@ -14,6 +14,10 @@
 .attr-header {
     background-color: lightgray; -webkit-print-color-adjust: exact;
 }
+.border {
+    border: 2px solid black;
+    border-collapse: collapse
+}
 </style>
 <head>
     <meta charset="UTF-8">
@@ -22,31 +26,31 @@
 <body>
 
 <div class="pagenotbreak" style="width: 1000px; font-size: large">
-<table style="width: 1000px; font-size: large" border="1">
+<table class="border" style="width: 1000px; font-size: large">
     <colgroup>
        <col span="1" style="width: 5%;">
        <col span="1" style="width: 20%;">
        <col span="1" style="width: 70%;">
        <col span="1" style="width: 5%;">
     </colgroup>
-    <tr>
-    <th>№</th>
-    <th>Имя</th>
-    <th>Ходы</th>
-    <th></th>
+    <tr class="border">
+    <th class="border">№</th>
+    <th class="border">Имя</th>
+    <th class="border">Ходы</th>
+    <th class="border"></th>
   </tr>
 {% for combatant in object.roll_initiative %}
-    <tr>
+    <tr class="border">
 <!--    <div class="npc-line">-->
-    <td><span><b>{{ forloop.counter }}</b></span></td>
-    <td><span><b>{{ combatant.full_name }}</b></span><br>
+    <td class="border"><span><b>{{ forloop.counter }}</b></span></td>
+    <td class="border"><span><b>{{ combatant.full_name }}</b></span><br>
     {% if combatant.display_defences %}
-        <span>КД: {{combatant.ac}}, Ст: {{combatant.fortitude}}, <br>Р: {{combatant.reflex}}, В: {{combatant.will}} </span>
-        {% endif %}
+    <span style="font-size: small"><b>КД</b>: {{combatant.ac}}, <b>Ст</b>: {{combatant.fortitude}}, <b>Р</b>: {{combatant.reflex}}, <b>В</b>: {{combatant.will}} </span>
+    {% endif %}
     </td>
 
     <td></td>
-    <td><span style="float: right">{{ combatant.initiative }} </span></td>
+    <td class="border"><span style="float: right">{{ combatant.initiative }} </span></td>
 <!--    </div>-->
 <!--    <br><hr>-->
 {% endfor %}
