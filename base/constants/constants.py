@@ -103,9 +103,6 @@ class NPCRaceEnum(BaseCapitalizedEnum):
     ELADRIN = 'Эладрин'
     ELF = 'Эльф'
 
-    def is_shifter(self):
-        return self in (self.SHIFTER_LONGTEETH, self.SHIFTER_RAZORCLAW)
-
 
 class NPCClassIntEnum(IntDescriptionEnum):
     INVOKER = 10, 'Апостол'

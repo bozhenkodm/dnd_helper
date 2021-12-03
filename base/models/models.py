@@ -184,6 +184,7 @@ class Class(models.Model):
     class Meta:
         verbose_name = 'Класс'
         verbose_name_plural = 'Классы'
+        ordering = ('name',)
 
     name = models.SmallIntegerField(
         verbose_name='Название', choices=NPCClassIntEnum.generate_choices(), unique=True
@@ -889,7 +890,8 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                                     **{
                                         'title': property.get_displayed_title(),
                                         'description': self.parse_string(
-                                            property.get_displayed_description(), weapon=weapon
+                                            property.get_displayed_description(),
+                                            weapon=weapon,
                                         ),
                                         'debug': property.description,
                                     }
@@ -916,7 +918,8 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                                     **{
                                         'title': property.get_displayed_title(),
                                         'description': self.parse_string(
-                                            property.get_displayed_description(), implement=implement
+                                            property.get_displayed_description(),
+                                            implement=implement,
                                         ),
                                         'debug': property.description,
                                     }

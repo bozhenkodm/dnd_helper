@@ -105,6 +105,21 @@ class ClassAdmin(AdminMixin, admin.ModelAdmin):
     available_implements.short_description = 'Владение инструментами'
 
 
+class RaceListFilter(admin.SimpleListFilter):
+    title = 'Раса'
+    parameter_name = 'race'
+
+    def lookups(self, request, model_admin):
+        return Race.objects.annotate(
+            name_order=NPCRaceEnum.generate_order_case(),
+            verbose_name=NPCRaceEnum.generate_case()
+        ).values_list('name', 'verbose_name').order_by('name_order')
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(race__name=self.value())
+
+
 class NPCAdmin(admin.ModelAdmin):
     fields = [
         (
@@ -152,7 +167,7 @@ class NPCAdmin(admin.ModelAdmin):
     ]
     autocomplete_fields = ('weapons', 'implements')
     search_fields = ('name',)
-    list_filter = ('race', 'klass')
+    list_filter = (RaceListFilter, 'klass')
     form = NPCModelForm
     save_as = True
 
