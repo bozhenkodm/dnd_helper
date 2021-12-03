@@ -608,6 +608,7 @@ class RunepriestClass(NPCClass):
         ArmorTypeIntEnum.SCALE,
     )
     available_shield_types = (ShieldTypeEnum.LIGHT,)
+    trainable_skills = Skills(athletics=5, thievery=5, endurance=5, history=5, arcana=5, insight=5, religion=5, heal=5)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         WRATHFUL_HAMMER = 1, 'Мстительный молот'

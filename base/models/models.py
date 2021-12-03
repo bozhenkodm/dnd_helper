@@ -807,7 +807,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
         for prop in power.properties.filter(
             level__lte=self.level, subclass__in=(self.subclass, 0)
         ).order_by('-subclass'):
-            key = f'{prop.title},{prop.order}'
+            key = f'{prop.get_displayed_title()},{prop.order}'
             if key not in properties or properties[key].level < prop.level:
                 properties[key] = prop
         return sorted(properties.values(), key=lambda x: x and x.order)
@@ -829,9 +829,9 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                             properties=[
                                 PowerPropertyDisplay(
                                     **{
-                                        'title': property.get_title_display(),
+                                        'title': property.get_displayed_title(),
                                         'description': self.parse_string(
-                                            property.description,
+                                            property.get_displayed_description(),
                                         ),
                                         'debug': property.description,
                                     }
@@ -853,9 +853,9 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                         properties=[
                             PowerPropertyDisplay(
                                 **{
-                                    'title': property.get_title_display(),
+                                    'title': property.get_displayed_title(),
                                     'description': self.parse_string(
-                                        property.description,
+                                        property.get_displayed_description(),
                                     ),
                                     'debug': property.description,
                                 }
@@ -887,9 +887,9 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                             properties=[
                                 PowerPropertyDisplay(
                                     **{
-                                        'title': property.get_title_display(),
+                                        'title': property.get_displayed_title(),
                                         'description': self.parse_string(
-                                            property.description, weapon=weapon
+                                            property.get_displayed_description(), weapon=weapon
                                         ),
                                         'debug': property.description,
                                     }
@@ -916,7 +916,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                                     **{
                                         'title': property.get_displayed_title(),
                                         'description': self.parse_string(
-                                            property.description, implement=implement
+                                            property.get_displayed_description(), implement=implement
                                         ),
                                         'debug': property.description,
                                     }
@@ -972,9 +972,9 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                         properties=[
                             PowerPropertyDisplay(
                                 **{
-                                    'title': property.get_title_display(),
+                                    'title': property.get_displayed_title(),
                                     'description': self.parse_string(
-                                        property.description
+                                        property.get_displayed_description()
                                     ),
                                     'debug': property.description,
                                 }

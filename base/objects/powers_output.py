@@ -1,9 +1,3 @@
-# (
-#                         name=power.name,
-#                         keywords=power.keywords,
-#                         accessory_text=str(implement),
-#                         description=self.parse_string(power.description),
-#                     )
 from dataclasses import dataclass
 
 
