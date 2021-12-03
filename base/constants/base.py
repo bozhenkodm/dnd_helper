@@ -20,6 +20,15 @@ class BaseCapitalizedEnum(str, Enum):
         return models.Case(*whens, output_field=models.CharField())
 
     @classmethod
+    def generate_order_case(cls, field='name'):
+        kwargs = (
+            {field: item.name, 'then': models.Value(index)}
+            for index, item in enumerate(cls)
+        )
+        whens = (models.When(**kws) for kws in kwargs)
+        return models.Case(*whens, output_field=models.IntegerField())
+
+    @classmethod
     def max_length(cls):
         return max(len(item.name) for item in cls)
 

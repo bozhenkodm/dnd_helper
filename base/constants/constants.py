@@ -361,3 +361,4 @@ class PowerPropertyTitle(BaseCapitalizedEnum):
     TARGET = 'Цель'
     SUSTAIN_MINOR = 'Поддержка малым'
     SUSTAIN_STANDARD = 'Поддержка стандартным'
+    OTHER = 'Другое'
