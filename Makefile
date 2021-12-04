@@ -16,3 +16,6 @@ format:
 
 shell:
 	poetry run python manage.py shell -i ipython
+
+npc:
+	poetry run python manage.py npc

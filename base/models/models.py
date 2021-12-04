@@ -39,7 +39,7 @@ from base.objects import (
     weapon_types_classes,
 )
 from base.objects.dice import DiceRoll
-from base.objects.encounter import EncounterLine
+from base.objects.encounter_output import EncounterLine
 from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
 
 
@@ -204,6 +204,7 @@ class FunctionalTemplate(models.Model):
     class Meta:
         verbose_name = 'Функциональный шаблон'
         verbose_name_plural = 'Функциональные шаблоны'
+        ordering = ('title',)
 
     title = models.CharField(max_length=50, null=False, verbose_name='Название')
     min_level = models.SmallIntegerField(verbose_name='Минимальный уровень', default=0)

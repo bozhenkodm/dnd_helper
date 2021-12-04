@@ -343,6 +343,4 @@ class PowerPropertyTitle(BaseCapitalizedEnum):
     TRIGGER = 'Триггер'
     SPECIAL = 'Особенность'
     TARGET = 'Цель'
-    SUSTAIN_MINOR = 'Поддержка малым'
-    SUSTAIN_STANDARD = 'Поддержка стандартным'
     OTHER = 'Другое'

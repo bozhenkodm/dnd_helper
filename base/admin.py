@@ -2,6 +2,7 @@
 from dataclasses import asdict
 from random import randint
 
+from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import Group, User
 from django.db import models
@@ -110,10 +111,14 @@ class RaceListFilter(admin.SimpleListFilter):
     parameter_name = 'race'
 
     def lookups(self, request, model_admin):
-        return Race.objects.annotate(
-            name_order=NPCRaceEnum.generate_order_case(),
-            verbose_name=NPCRaceEnum.generate_case()
-        ).values_list('name', 'verbose_name').order_by('name_order')
+        return (
+            Race.objects.annotate(
+                name_order=NPCRaceEnum.generate_order_case(),
+                verbose_name=NPCRaceEnum.generate_case(),
+            )
+            .values_list('name', 'verbose_name')
+            .order_by('name_order')
+        )
 
     def queryset(self, request, queryset):
         if self.value():
@@ -290,8 +295,13 @@ class CombatantsPCSInlineAdmin(admin.TabularInline):
 
 
 class EncounterAdmin(admin.ModelAdmin):
-    exclude = ('description',)
-    readonly_fields = ('encounter_link',)
+    fields = (
+        'short_description',
+        'roll_for_players',
+        ('npcs', 'npc_links'),
+        'encounter_link',
+    )
+    readonly_fields = ('encounter_link', 'npc_links')
     inlines = (
         CombatantsPCSInlineAdmin,
         CombatantsInlineAdmin,
@@ -304,6 +314,18 @@ class EncounterAdmin(admin.ModelAdmin):
         return mark_safe(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
 
     encounter_link.short_description = 'Страница сцены'
+
+    def npc_links(self, obj):
+        if not obj.npcs.count():
+            return '-'
+        return mark_safe(
+            '<br>'.join(
+                f'<a href="{npc.url}" target="_blank">{npc}</a>'
+                for npc in obj.npcs.all()
+            )
+        )
+
+    npc_links.short_description = 'Страницы персонажей'
 
 
 class ArmorAdmin(admin.ModelAdmin):
@@ -365,6 +387,9 @@ class ImplementAdmin(admin.ModelAdmin):
 
 class PowerPropertyInline(admin.TabularInline):
     model = PowerProperty
+    formfield_overrides = {
+        models.TextField: {'widget': forms.Textarea(attrs={'rows': 4, 'cols': 60})},
+    }
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name == 'subclass':
@@ -392,7 +417,7 @@ class PowerPropertyInline(admin.TabularInline):
 
 
 class PowerAdmin(admin.ModelAdmin):
-    list_filter = ('frequency', 'klass', 'race', 'functional_template')
+    list_filter = ('frequency', 'klass', RaceListFilter, 'functional_template')
     inlines = (PowerPropertyInline,)
     readonly_fields = ('syntax',)
     ordering = ('klass', 'level', 'frequency')
@@ -401,25 +426,25 @@ class PowerAdmin(admin.ModelAdmin):
 
     def syntax(self, obj):
         return '''
-        str - модификатор силы
-        con - модификатор телосложения
-        dex - модификатор ловкости
-        int - модификатор интеллекта
-        wis - модификатор мудрости
-        cha - модификатор харизмы
-        wpn - урон от оружия (кубы + бонус зачарования)
-        lvl - уровень персонажа
-        dmg - бонус урона (= бонусу за уровень + бонусу урона от класса)
-        atk - бонус атаки (= бонусу за уровень + пол уровня + бонус атаки от класса)
+str - модификатор силы
+con - модификатор телосложения
+dex - модификатор ловкости
+int - модификатор интеллекта
+wis - модификатор мудрости
+cha - модификатор харизмы
+wpn - урон от оружия (кубы + бонус зачарования)
+lvl - уровень персонажа
+dmg - бонус урона (= бонусу за уровень + бонусу урона от класса)
+atk - бонус атаки (= бонусу за уровень + пол уровня + бонус атаки от класса)
 
-        Выражения начинаются со знака $.
-        поддерживаются операции +, -, *, / с целыми числами.
-        Операции выполняются по порядку написания,
-        игнорируя арифметический порядок действий
-        (лень возиться со стеками и польской записью)
-        Атака по умолчанию $[ATTACK_ATTRIBUTE]+atk+[power.attack_bonus]
-        Урон по умолчанию $wpn+dmg / $[damage_dice]+dmg
-        '''
+Выражения начинаются со знака $.
+поддерживаются операции +, -, *, / с целыми числами.
+Операции выполняются по порядку написания,
+игнорируя арифметический порядок действий
+(лень возиться со стеками и польской записью)
+Атака по умолчанию $[ATTACK_ATTRIBUTE]+atk+[power.attack_bonus]
+Урон по умолчанию $wpn+dmg / $[damage_dice]+dmg
+'''
 
     syntax.short_description = 'Синтаксис'
 
