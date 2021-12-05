@@ -6,7 +6,7 @@ INITIAL_DEFENCE_VALUE = 10
 class DefenceMixin:
     @property
     def _shield_bonus(self):
-        if not self.shield or self.shield not in self.klass.available_shield_types:
+        if not self.shield or self.shield not in [s.name for s in self.klass_data_instance.available_shield_types]:
             return 0
         if self.shield == ShieldTypeEnum.LIGHT.name:
             return 1

@@ -189,12 +189,6 @@ class Class(models.Model):
     name = models.SmallIntegerField(
         verbose_name='Название', choices=NPCClassIntEnum.generate_choices(), unique=True
     )
-    available_shield_types = MultiSelectField(
-        verbose_name='Ношение щитов',
-        choices=ShieldTypeEnum.generate_choices(),
-        blank=True,
-        null=True,
-    )
 
     def __str__(self):
         return NPCClassIntEnum(self.name).description
@@ -1039,19 +1033,20 @@ class Encounter(models.Model):
     def roll_initiative(self):
         encounter = []
         for combatant in self.combatants_pcs.all():
-            combatant: PlayerCharacters
-            initiative = combatant.initiative
             if self.roll_for_players:
-                initiative += DiceIntEnum.D20.roll()
+                initiative = combatant.pc.initiative + DiceIntEnum.D20.roll()
+            else:
+                initiative = combatant.initiative
+
             encounter.append(
                 EncounterLine(
                     name=combatant.pc.name,
-                    initiative=initiative,
+                    initiative=initiative
+                    + 0.1,  # Player characters have higher initiative than npc
                     ac=combatant.pc.armor_class,
                     fortitude=combatant.pc.fortitude,
                     reflex=combatant.pc.reflex,
                     will=combatant.pc.will,
-                    is_player=True,
                     number=0,
                 )
             )
@@ -1064,7 +1059,6 @@ class Encounter(models.Model):
                     fortitude=npc.fortitude,
                     reflex=npc.reflex,
                     will=npc.will,
-                    is_player=False,
                     number=0,
                 )
             )
@@ -1079,18 +1073,21 @@ class Encounter(models.Model):
                         fortitude=combatant.fortitude,
                         reflex=combatant.reflex,
                         will=combatant.will,
-                        is_player=False,
                         number=i + 1,
                     )
                 )
         return sorted(
             encounter,
-            key=lambda x: (x.initiative, not x.is_player, x.name),
+            key=lambda x: (x.initiative, x.name),
             reverse=True,
         )
 
 
 class Combatants(models.Model):
+    class Meta:
+        verbose_name = 'Участник сцены (Монстрятник)'
+        verbose_name_plural = 'Участники сцены (Монстрятник)'
+
     name = models.CharField(verbose_name='Участник сцены', max_length=50, null=False)
     encounter = models.ForeignKey(
         Encounter,
@@ -1113,6 +1110,10 @@ class Combatants(models.Model):
 
 
 class CombatantsPC(models.Model):
+    class Meta:
+        verbose_name = 'Участник сцены (ИП)'
+        verbose_name_plural = 'Участники сцены (ИП)'
+
     pc = models.ForeignKey(
         PlayerCharacters, verbose_name='Игровой персонаж', on_delete=models.CASCADE
     )

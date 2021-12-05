@@ -121,8 +121,8 @@ _weapon_types_tuple = (
     weapon_types.Quaterstaff,
     weapon_types.Rapier,
     weapon_types.RepeatingCrossbow,
-    weapon_types.RitualDagger,  # warlock implements
-    weapon_types.RitualSickle,  # warlock implements
+    weapon_types.RitualDagger,  # warlock implement
+    weapon_types.RitualSickle,  # warlock implement
     weapon_types.Scimitar,
     weapon_types.Scourge,
     weapon_types.Scythe,

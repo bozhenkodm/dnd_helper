@@ -1,3 +1,5 @@
+from dataclasses import asdict
+
 from base.constants.constants import SkillsEnum
 from base.objects.skills import Skills
 
@@ -113,12 +115,23 @@ class SkillMixin:
     @property
     def trained_skills_text(self):
         return list(
-            f'{SkillsEnum[skill].value} + {self._calculate_skill(SkillsEnum[skill])}'
+            f'{SkillsEnum[skill].value} +{self._calculate_skill(SkillsEnum[skill])}'
             for skill in self.trained_skills
+            + [
+                key.upper()
+                for key, value in asdict(
+                    self.klass_data_instance.mandatory_skills
+                ).items()
+                if value
+            ]
         )
+
+    # SkillsEnum[key.upper()]
+    # for key, value in asdict(obj.klass_data_instance.mandatory_skills).items()
+    #     if value
 
     @property
     def skills_text(self):
         return list(
-            f'{skill.value} + {self._calculate_skill(skill)}' for skill in SkillsEnum
+            f'{skill.value} +{self._calculate_skill(skill)}' for skill in SkillsEnum
         )

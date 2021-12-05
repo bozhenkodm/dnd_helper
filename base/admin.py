@@ -72,7 +72,7 @@ class ClassAdmin(AdminMixin, admin.ModelAdmin):
     ENUM = NPCClassIntEnum
 
     def available_armor_types(self, obj):
-        if not obj:
+        if not obj.id:
             return '-'
         return ', '.join(
             armor_type.description
@@ -82,7 +82,7 @@ class ClassAdmin(AdminMixin, admin.ModelAdmin):
     available_armor_types.short_description = 'Ношение брони'
 
     def available_weapons(self, obj):
-        if not obj:
+        if not obj.id:
             return '-'
         return ', '.join(
             [
@@ -98,6 +98,8 @@ class ClassAdmin(AdminMixin, admin.ModelAdmin):
     available_weapons.short_description = 'Владение оружием'
 
     def available_implements(self, obj):
+        if not obj.id:
+            return '-'
         return ', '.join(
             armor_type.name
             for armor_type in npc_klasses[obj.name].available_implement_types
@@ -211,9 +213,9 @@ class NPCAdmin(admin.ModelAdmin):
                 'description',
                 (
                     'race',
-                    'klass',
                     'functional_template',
                 ),
+                'klass',
                 'level',
                 'generated_attributes',
                 (
