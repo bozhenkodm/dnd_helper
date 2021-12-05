@@ -23,11 +23,6 @@ class NPCDetailView(DetailView):
 class EncounterDetailView(DetailView):
     model = Encounter
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        skills = {item.name: item.value for item in SkillsEnum}
-        context['skills'] = skills
-        return context
 
 
 class MainView(TemplateView):

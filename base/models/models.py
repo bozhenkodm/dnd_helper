@@ -449,12 +449,12 @@ class PowerProperty(models.Model):
     def get_displayed_title(self):
         if self.title != PowerPropertyTitle.OTHER.name:
             return self.get_title_display()
-        return self.description.split('.')[0]
+        return self.description.split(':')[0]
 
     def get_displayed_description(self):
         if self.title != PowerPropertyTitle.OTHER.name:
             return self.description
-        return '.'.join(self.description.split('.')[1:])
+        return '.'.join(self.description.split(':')[1:])
 
     def __str__(self):
         return f'{self.title} {self.description} {self.level}'
@@ -1124,4 +1124,4 @@ class CombatantsPC(models.Model):
         null=True,
         related_name='combatants_pcs',
     )
-    initiative = models.PositiveSmallIntegerField(verbose_name='Инициатива', default=0)
+    initiative = models.FloatField(verbose_name='Инициатива', default=0)
