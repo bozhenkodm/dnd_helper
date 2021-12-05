@@ -22,16 +22,19 @@ class TavernView(TemplateView):
     template_name = 'generator/tavern.html'
 
     def get_context_data(self, **kwargs):
+        print('1'*88)
+        print(self.request.GET)
         context = super().get_context_data(**kwargs)
         tavern = (
             f'{random.choice(adjectives.split()).capitalize()}'
             f' {random.choice(nouns.split()).capitalize()}'
         )
         context['tavern'] = tavern
+        sex = self.request.GET.get('sex')
         race = kwargs.get('race')
         if race:
             race = race.upper()
-        taverner = NPCName.generate_taverner(race)
+        taverner = NPCName.generate_taverner(race, sex)
         context['taverner_first_name'] = taverner['first_name']
         context['taverner_last_name'] = taverner['last_name']
         context['taverner_sex'] = taverner['sex']

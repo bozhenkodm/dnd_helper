@@ -41,13 +41,16 @@ class NPCName(models.Model):
         )
 
     @classmethod
-    def generate_taverner(cls, race=None) -> dict:
+    def generate_taverner(cls, race=None, sex=None) -> dict:
         if not race:
             race = random.choice(taverners_races)
         else:
             race = NPCRaceEnum[race]
         race = Race.objects.get(name=race.name)
-        sex = random.choice((SexEnum.M, SexEnum.F))
+        try:
+            sex = SexEnum[sex.upper()]
+        except KeyError:
+            sex = random.choice((SexEnum.M, SexEnum.F))
         first_names = cls.objects.filter(
             sex__in=(sex.name, SexEnum.N.name), name_type=cls.FIRST_NAME, race=race
         ).values_list('name', flat=True)
