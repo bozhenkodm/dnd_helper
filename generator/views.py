@@ -22,8 +22,6 @@ class TavernView(TemplateView):
     template_name = 'generator/tavern.html'
 
     def get_context_data(self, **kwargs):
-        print('1'*88)
-        print(self.request.GET)
         context = super().get_context_data(**kwargs)
         tavern = (
             f'{random.choice(adjectives.split()).capitalize()}'

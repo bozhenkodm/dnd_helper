@@ -23,7 +23,6 @@ class EncounterDetailView(DetailView):
     model = Encounter
 
 
-
 class MainView(TemplateView):
     template_name = 'base/main.html'
 
