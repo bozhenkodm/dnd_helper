@@ -210,6 +210,13 @@ class VampireClass(NPCClass):
             result += 2
         return result
 
+    @property
+    def damage_bonus(self):
+        base_bonus = super().damage_bonus + self.npc.cha_mod
+        if self.npc.level < 5:
+            return base_bonus
+        return base_bonus + (self.npc.level - 5) // 10 * 2 + 2
+
 
 class BarbarianClass(NPCClass):
     slug = NPCClassIntEnum.BARBARIAN
@@ -517,6 +524,11 @@ class SwordmageClass(NPCClass):
         athletics=5, endurance=5, intimidate=5, history=5, diplomacy=5, insight=5
     )
     will = 2
+
+    class SubclassEnum(IntDescriptionSubclassEnum):
+        ASSAULT_AEGIS = 1, 'Эгида атаки'
+        SHIELDING_AEGIS = 2, 'Эгида защиты'
+        ENSNAREMENT_AEGIS = 3, 'Эгида западни'
 
     @property
     def armor_class_bonus(self):
