@@ -49,7 +49,7 @@ class NPCName(models.Model):
         race = Race.objects.get(name=race.name)
         try:
             sex = SexEnum[sex.upper()]
-        except KeyError:
+        except (KeyError, AttributeError):
             sex = random.choice((SexEnum.M, SexEnum.F))
         first_names = cls.objects.filter(
             sex__in=(sex.name, SexEnum.N.name), name_type=cls.FIRST_NAME, race=race
