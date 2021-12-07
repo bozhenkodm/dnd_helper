@@ -10,15 +10,6 @@ from base.constants.constants import (
     WeaponCategoryIntEnum,
     WeaponHandednessEnum,
 )
-from base.objects.implement_types import (
-    HolySymbol,
-    ImplementType,
-    KiFocus,
-    Rod,
-    Sphere,
-    Totem,
-    Wand,
-)
 from base.objects.skills import Skills
 from base.objects.weapon_types import (
     AnnihilationBlade,
@@ -26,17 +17,24 @@ from base.objects.weapon_types import (
     Dagger,
     ExquisiteAgonyScourge,
     HandCrossbow,
+    HolySymbol,
+    ImplementType,
+    KiFocus,
     Longspear,
     LongSword,
     Quaterstaff,
     RitualDagger,
     RitualSickle,
+    Rod,
     Scimitar,
     ShortSword,
     Shuriken,
     Sling,
     Spear,
+    Sphere,
+    Totem,
     UnarmedMonkStrile,
+    Wand,
     WeaponType,
     WinterMourningBlade,
 )

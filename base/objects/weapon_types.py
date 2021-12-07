@@ -18,7 +18,6 @@ class WeaponType:
     group: ClassVar[Union[Sequence[WeaponGroupEnum], WeaponGroupEnum]]
     category: ClassVar[WeaponCategoryIntEnum]
     damage_dice: ClassVar[DiceIntEnum]
-    # properties: ClassVar[tuple[WeaponPropertyEnum]]
     handedness: ClassVar[WeaponHandednessEnum] = WeaponHandednessEnum.ONE
     name: ClassVar[str] = None
     prof_bonus: ClassVar[int] = 2
@@ -75,6 +74,18 @@ class WeaponType:
         if isinstance(cls.group, Sequence):
             return group in cls.group
         return group == cls.group
+
+
+class ImplementType(WeaponType):
+    name: ClassVar[str] = None
+    slug: ClassVar[str] = None
+    category = WeaponCategoryIntEnum.SIMPLE
+    damage_dice = None
+    handedness = WeaponHandednessEnum.ONE
+    prof_bonus = 0
+    range: ClassVar[int] = 0
+    is_implement = False
+    is_off_hand: ClassVar[bool] = True
 
 
 class LongSword(WeaponType):
@@ -673,3 +684,33 @@ class RitualSickle(Sickle):
 # Double flail 	AV 	+2 	1d8/1d8 Flail 	Double weapon, defensive, off-hand
 # Double sword 	AV 	+3 	1d6/1d6 Light blade 	Double weapon, defensive, off-hand
 # Urgrosh 	AV 	+2 	1d12/1d6 Axe, spear 	Double weapon, defensive, off-hand
+
+
+class KiFocus(WeaponType):
+    name = 'Фокусировка ци'
+    slug = 'ki_focus'
+
+
+class Totem(ImplementType):
+    name = 'Тотем'
+    slug = 'totem'
+
+
+class Wand(ImplementType):
+    name = 'Волшебная палочка'
+    slug = 'wand'
+
+
+class Rod(ImplementType):
+    name = 'Жезл'
+    slug = 'rod'
+
+
+class HolySymbol(ImplementType):
+    name = 'Символ веры'
+    slug = 'holy_symbol'
+
+
+class Sphere(ImplementType):
+    name = 'Сфера'
+    slug = 'sphere'

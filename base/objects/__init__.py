@@ -1,4 +1,5 @@
-from base.objects import implement_types, npc_classes, races, weapon_types
+import base.objects.weapon_types
+from base.objects import npc_classes, races, weapon_types
 
 races_tuple = (
     # races.BladelingRace,  # too exotic for now
@@ -151,12 +152,13 @@ weapon_types_classes = {cls.slug: cls for cls in weapon_types_tuple}
 implement_types_classes = {
     cls.slug: cls
     for cls in (
-        implement_types.Wand,
-        implement_types.Rod,
-        implement_types.Totem,
-        implement_types.HolySymbol,
-        implement_types.KiFocus,
-        implement_types.Sphere,
+        weapon_types.Wand,
+        weapon_types.Rod,
+        weapon_types.Quaterstaff,
+        weapon_types.Totem,
+        weapon_types.HolySymbol,
+        weapon_types.KiFocus,
+        weapon_types.Sphere,
     )
 }
 implement_types_classes.update(

@@ -480,7 +480,7 @@ atk - бонус атаки (= бонусу за уровень + пол уро�
                 'subclass',
                 'functional_template',
             )
-        result = super().get_fields(request, obj)
+        result = super().get_fields(request, obj)[:]
         if obj.klass:
             result.insert(3, ('klass', 'subclass'))
         if obj.race:
