@@ -3,9 +3,10 @@ from dataclasses import asdict
 from django import forms
 from multiselectfield import MultiSelectFormField
 
-from base.constants.constants import AttributeEnum, SexEnum, SkillsEnum
+from base.constants.constants import AttributeEnum, NPCClassIntEnum, SexEnum, SkillsEnum
 from base.models import NPC
-from base.models.models import Power
+from base.models.models import Class, Power, WeaponType
+from base.objects import weapon_types_tuple
 
 
 class NPCModelForm(forms.ModelForm):
@@ -45,3 +46,39 @@ class NPCModelForm(forms.ModelForm):
                 .filter(klass=self.instance.klass, level__lte=self.instance.level)
                 .order_by('level', 'frequency_order')
             )
+
+
+class ClassForm(forms.ModelForm):
+    class Meta:
+        model = Class
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.id:
+            existing_classes = set(
+                self._meta.model.objects.values_list('name', flat=True)
+            )
+            self.fields['name'] = forms.ChoiceField(
+                choices=[
+                    item
+                    for item in NPCClassIntEnum.generate_choices()
+                    if item[0] not in existing_classes
+                ],
+                label='Название класса',
+            )
+
+
+class WeaponTypeForm(forms.ModelForm):
+    class Meta:
+        model = WeaponType
+        fields = '__all__'
+
+    slug = forms.ChoiceField(
+        choices=[
+            (cls.slug, f'{cls.name}')
+            for cls in weapon_types_tuple
+            if cls.slug not in set(WeaponType.objects.values_list('slug', flat=True))
+        ],
+        label='Название',
+    )

@@ -78,7 +78,7 @@ npc_klasses = {
     )
 }
 
-_weapon_types_tuple = (
+weapon_types_tuple = (
     weapon_types.AnnihilationBlade,  # hexblade weapon
     weapon_types.BastardSword,
     weapon_types.Battleaxe,
@@ -146,7 +146,7 @@ _weapon_types_tuple = (
     weapon_types.WinterMourningBlade,  # hexblade weapon
 )
 
-weapon_types_classes = {cls.slug: cls for cls in _weapon_types_tuple}
+weapon_types_classes = {cls.slug: cls for cls in weapon_types_tuple}
 
 implement_types_classes = {
     cls.slug: cls
@@ -160,5 +160,5 @@ implement_types_classes = {
     )
 }
 implement_types_classes.update(
-    {cls.slug: cls for cls in _weapon_types_tuple if cls.is_implement}
+    {cls.slug: cls for cls in weapon_types_tuple if cls.is_implement}
 )

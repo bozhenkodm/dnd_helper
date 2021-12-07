@@ -8,11 +8,14 @@ from base.models import Class, Race
 class Command(BaseCommand):
     help = 'Gets random npc'
 
-    # def add_arguments(self, parser):
-    #     parser.add_argument('poll_ids', nargs='+', type=int)
+    def add_arguments(self, parser):
+        parser.add_argument('--all', type=bool)
 
     def handle(self, *args, **options):
-        race = choice(Race.objects.all())
+        if options.get('all'):
+            race = choice(Race.objects.all())
+        else:
+            race = choice(Race.objects.filter(is_sociable=True))
         klass = choice(Class.objects.all())
         self.stdout.write(
             self.style.SUCCESS(

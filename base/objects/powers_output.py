@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 
 
 @dataclass
@@ -16,3 +16,6 @@ class PowerDisplay:
     description: str
     frequency_order: int
     properties: list[PowerPropertyDisplay]
+
+    def asdict(self):
+        return asdict(self)

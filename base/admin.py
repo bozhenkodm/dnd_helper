@@ -1,4 +1,3 @@
-# TODO handle new dataclasses in django admin
 from dataclasses import asdict
 from random import randint
 
@@ -8,17 +7,16 @@ from django.contrib.auth.models import Group, User
 from django.db import models
 from django.utils.safestring import mark_safe
 
-from base.constants.base import BaseCapitalizedEnum, IntDescriptionSubclassEnum
+from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
     AccessoryTypeEnum,
-    NPCClassIntEnum,
     NPCRaceEnum,
     PowerFrequencyEnum,
     PowerPropertyTitle,
     PowerRangeTypeEnum,
     SkillsEnum,
 )
-from base.forms import NPCModelForm
+from base.forms import ClassForm, NPCModelForm, WeaponTypeForm
 from base.models import NPC, Armor, Class, Encounter, Race
 from base.models.models import (
     Combatants,
@@ -34,42 +32,31 @@ from base.models.models import (
 from base.objects import implement_types_classes, npc_klasses
 
 
-class AdminMixin:
-    enable_nav_sidebar = False
-
-    ENUM = BaseCapitalizedEnum
-    field_name = 'name'
-
-    def formfield_for_choice_field(self, db_field, request, **kwargs):
-        object_id = request.resolver_match.kwargs.get('object_id')
-        if not object_id and db_field.name == self.field_name:
-            existing_races = self.model.objects.values_list(self.field_name, flat=True)
-            choices = self.ENUM.generate_choices()
-            kwargs['choices'] = (
-                item for item in choices if item[0] not in existing_races
-            )
-        return super().formfield_for_choice_field(db_field, request, **kwargs)
-
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.order_by(self.field_name)
-
-
 class RaceAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request).annotate(title=NPCRaceEnum.generate_case())
         return qs.order_by('title')
 
 
-class ClassAdmin(AdminMixin, admin.ModelAdmin):
+class ClassAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     readonly_fields = (
         'available_armor_types',
+        'available_shields',
         'available_weapons',
         'available_implements',
     )
     save_on_top = True
-    ENUM = NPCClassIntEnum
+    form = ClassForm
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def get_readonly_fields(self, request, obj=None):
+        base = super().get_readonly_fields(request, obj)
+        if obj and obj.id:
+            return ('name',) + base
+        return base
 
     def available_armor_types(self, obj):
         if not obj.id:
@@ -80,6 +67,15 @@ class ClassAdmin(AdminMixin, admin.ModelAdmin):
         )
 
     available_armor_types.short_description = 'Ношение брони'
+
+    def available_shields(self, obj):
+        if not obj.id or not npc_klasses[obj.name].available_shield_types:
+            return '-'
+        return ', '.join(
+            shield.value for shield in npc_klasses[obj.name].available_shield_types
+        )
+
+    available_shields.short_description = 'Ношение щитов'
 
     def available_weapons(self, obj):
         if not obj.id:
@@ -339,6 +335,7 @@ class WeaponTypeAdmin(admin.ModelAdmin):
     list_display = ('name',)
     search_fields = ('name',)
     save_as = True
+    form = WeaponTypeForm
 
 
 class WeaponAdmin(admin.ModelAdmin):
@@ -419,6 +416,20 @@ class PowerPropertyInline(admin.TabularInline):
 
 
 class PowerAdmin(admin.ModelAdmin):
+    fields = [
+        'name',
+        'description',
+        ('frequency', 'action_type'),
+        # ('klass',    'subclass'),
+        # 'race',
+        # 'functional_template',
+        'level',
+        ('attack_attribute', 'defence', 'attack_bonus'),
+        ('effect_type', 'damage_type'),
+        ('dice_number', 'damage_dice'),
+        ('accessory_type', 'available_weapon_types'),
+        ('range_type', 'range', 'burst'),
+    ]
     list_filter = ('frequency', 'klass', RaceListFilter, 'functional_template')
     inlines = (PowerPropertyInline,)
     readonly_fields = ('syntax',)
@@ -464,22 +475,18 @@ atk - бонус атаки (= бонусу за уровень + пол уро�
             return (
                 'name',
                 'description',
-                'frequency',
                 'race',
                 'klass',
                 'subclass',
                 'functional_template',
-                'level',
             )
         result = super().get_fields(request, obj)
-        owner_fields = {'race', 'klass', 'functional_template'}
-        for field in owner_fields:
-            if getattr(obj, field):
-                for obsolete_field in owner_fields - {field}:
-                    result.remove(obsolete_field)
-                if field != 'klass' and 'subclass' in result:
-                    result.remove('subclass')
-                break
+        if obj.klass:
+            result.insert(3, ('klass', 'subclass'))
+        if obj.race:
+            result.insert(3, 'race')
+        if obj.functional_template:
+            result.insert(3, 'functional_template')
         return result
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
