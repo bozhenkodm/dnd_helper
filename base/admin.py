@@ -22,14 +22,13 @@ from base.models.models import (
     Combatants,
     CombatantsPC,
     FunctionalTemplate,
-    Implement,
     PlayerCharacters,
     Power,
     PowerProperty,
     Weapon,
     WeaponType,
 )
-from base.objects import implement_types_classes, npc_klasses
+from base.objects import npc_klasses
 
 
 class RaceAdmin(admin.ModelAdmin):
@@ -164,10 +163,7 @@ class NPCAdmin(admin.ModelAdmin):
             'armor',
             'shield',
         ),
-        (
-            'weapons',
-            'implements',
-        ),
+        'weapons',
         # ('primary_hand', 'secondary_hand'),
         'powers',
     ]
@@ -176,7 +172,7 @@ class NPCAdmin(admin.ModelAdmin):
         'mandatory_skills',
         'generated_attributes',
     ]
-    autocomplete_fields = ('weapons', 'implements')
+    autocomplete_fields = ('weapons',)
     search_fields = ('name',)
     list_filter = (RaceListFilter, 'klass')
     form = NPCModelForm
@@ -399,22 +395,6 @@ class WeaponAdmin(admin.ModelAdmin):
     damage.short_description = 'Урон'
 
 
-class ImplementAdmin(admin.ModelAdmin):
-    search_fields = ('name',)
-
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name == 'slug':
-            db_field.choices = sorted(
-                (
-                    (slug, implement_type.name)
-                    for slug, implement_type in implement_types_classes.items()
-                ),
-                key=lambda x: x[1],
-            )
-
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
-
-
 class PowerPropertyInline(admin.TabularInline):
     model = PowerProperty
     formfield_overrides = {
@@ -615,7 +595,6 @@ admin.site.register(Encounter, EncounterAdmin)
 admin.site.register(Armor, ArmorAdmin)
 admin.site.register(WeaponType, WeaponTypeAdmin)
 admin.site.register(Weapon, WeaponAdmin)
-admin.site.register(Implement, ImplementAdmin)
 admin.site.register(Power, PowerAdmin)
 admin.site.register(FunctionalTemplate, FunctionalTemplateAdmin)
 admin.site.register(PlayerCharacters, PlayerCharactersAdmin)

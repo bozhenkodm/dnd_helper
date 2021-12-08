@@ -38,7 +38,7 @@
         {% if power.description %}<div>{{power.description}}</div>{% endif %}
         {% for property in power.properties %}
         <div><i>{{property.title}}</i>: {{property.description}}</div>
-<!--    <div>{{property.debug}}</div>-->
+    <div>{{property.debug}}</div>
         {% endfor %}
     {% endfor%}
     <div class="npc-line attr-header"><span><b>Навыки:</b> {{ object.trained_skills_text|join:", " }}</span></div>

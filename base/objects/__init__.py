@@ -154,18 +154,3 @@ weapon_types_tuple = (
 )
 
 weapon_types_classes = {cls.slug: cls for cls in weapon_types_tuple}
-
-implement_types_classes = {
-    cls.slug: cls
-    for cls in (
-        weapon_types.Wand,
-        weapon_types.Rod,
-        weapon_types.Totem,
-        weapon_types.HolySymbol,
-        weapon_types.KiFocus,
-        weapon_types.Sphere,
-    )
-}
-implement_types_classes.update(
-    {cls.slug: cls for cls in weapon_types_tuple if cls.is_implement}
-)

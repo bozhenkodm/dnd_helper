@@ -1,6 +1,5 @@
 import re
 from functools import cached_property
-from typing import Union
 
 from django.db import models
 from django.urls import reverse
@@ -31,12 +30,7 @@ from base.managers import PowerManager
 from base.models.mixins.abilities import AttributeMixin
 from base.models.mixins.defences import DefenceMixin
 from base.models.mixins.skills import SkillMixin
-from base.objects import (
-    implement_types_classes,
-    npc_klasses,
-    race_classes,
-    weapon_types_classes,
-)
+from base.objects import npc_klasses, race_classes, weapon_types_classes
 from base.objects.dice import DiceRoll
 from base.objects.encounter_output import EncounterLine
 from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
@@ -138,25 +132,6 @@ class Weapon(models.Model):
     @property
     def prof_bonus(self):
         return self.weapon_type.data_instance.prof_bonus
-
-
-class Implement(models.Model):
-    class Meta:
-        verbose_name = 'Инструмент'
-        verbose_name_plural = 'Инструменты'
-
-    slug = models.CharField(verbose_name='Тип инструмента', max_length=20)
-    name = models.CharField(verbose_name='Название', max_length=20)
-    enchantment = models.SmallIntegerField(verbose_name='Улучшение', default=0)
-
-    @property
-    def implement_type(self):
-        return implement_types_classes[self.slug]()
-
-    def __str__(self):
-        if self.name == self.implement_type.name:
-            return f'{self.name}, +{self.enchantment}'
-        return f'{self.name}, {self.implement_type.name}, +{self.enchantment}'
 
 
 class Race(models.Model):
@@ -583,10 +558,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
         null=True,
         blank=True,
     )
-    weapons = models.ManyToManyField(Weapon, verbose_name='Оружие', blank=True)
-    implements = models.ManyToManyField(
-        Implement, verbose_name='Инструменты', blank=True
-    )
+    weapons = models.ManyToManyField(Weapon, verbose_name='Вооружение', blank=True)
     primary_hand = models.ForeignKey(
         Weapon,
         verbose_name='Основная рука',
@@ -712,9 +684,9 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
             )
         )
 
-    def is_implement_proficient(self, implement):
+    def is_implement_proficient(self, weapon):
         return (
-            type(implement.implement_type)
+            type(weapon.weapon_type.data_instance)
             in self.klass_data_instance.available_implement_types
         )
 
@@ -724,7 +696,6 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
             filter(
                 None,
                 list(str(weapon) for weapon in self.weapons.all())
-                + list(str(implement) for implement in self.implements.all())
                 + [str(self.armor)]
                 + [self.get_shield_display()],
             )
@@ -742,9 +713,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
             PowersVariables.LVL: self.level,
         }
 
-    def parse_string(
-        self, string, weapon: Weapon = None, implement: Union[Weapon, Implement] = None
-    ):
+    def parse_string(self, string, weapon: Weapon = None):
         pattern = r'\$([^\s]{3,})\b'  # gets substing from '$' to next whitespace
         expressions = re.findall(pattern, string)
         template = re.sub(
@@ -775,10 +744,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                         self.klass_data_instance.attack_bonus(weapon)
                         # armament enchantment
                         + min(
-                            max(
-                                weapon and weapon.enchantment or 0,
-                                implement and implement.enchantment or 0,
-                            ),
+                            weapon and weapon.enchantment or 0,
                             self._magic_threshold,
                         )
                         # power attack bonus should be added
@@ -786,10 +752,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                     )
                 elif parsed_expression_element == PowersVariables.DMG:
                     current_element = self.klass_data_instance.damage_bonus + min(
-                        max(
-                            weapon and weapon.enchantment or 0,
-                            implement and implement.enchantment or 0,
-                        ),
+                        weapon and weapon.enchantment or 0,
                         self._magic_threshold,
                     )
                 elif parsed_expression_element.isdigit():
@@ -909,40 +872,14 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
         for power in self.powers.ordered_by_frequency().filter(
             accessory_type=AccessoryTypeEnum.IMPLEMENT.name
         ):
-            for implement in self.implements.all():
-                powers.append(
-                    PowerDisplay(
-                        name=power.name,
-                        keywords=power.keywords,
-                        accessory_text=str(implement),
-                        description=self.parse_string(power.description),
-                        frequency_order=power.frequency_order,
-                        properties=[
-                            PowerPropertyDisplay(
-                                **{
-                                    'title': property.get_displayed_title(),
-                                    'description': self.parse_string(
-                                        property.get_displayed_description(),
-                                        implement=implement,
-                                    ),
-                                    'debug': property.description,
-                                }
-                            )
-                            for property in self.valid_properties(power)
-                        ],
-                    ).asdict()
-                )
             for weapon in self.weapons.all():
-                if (
-                    type(weapon.weapon_type.data_instance)
-                    not in self.klass_data_instance.available_implement_types
-                ):
+                if not self.is_implement_proficient(weapon):
                     continue
                 powers.append(
                     PowerDisplay(
                         name=power.name,
                         keywords=power.keywords,
-                        accessory_text=f'{weapon} - инструмент',
+                        accessory_text=f'{weapon}',
                         description=self.parse_string(power.description),
                         frequency_order=power.frequency_order,
                         properties=[
@@ -951,7 +888,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                                     'title': property.get_displayed_title(),
                                     'description': self.parse_string(
                                         property.get_displayed_description(),
-                                        implement=weapon,
+                                        weapon=weapon,
                                     ),
                                     'debug': property.description,
                                 }
