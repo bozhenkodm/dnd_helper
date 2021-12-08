@@ -265,6 +265,7 @@ class PowerDamageTypeEnum(BaseCapitalizedEnum):
     PSYCHIC = 'Психическая энергия'
     RADIANT = 'Излучение'
     THUNDER = 'Звук'
+    FORCE = 'Силовое поле'
 
 
 class PowerEffectTypeEnum(BaseCapitalizedEnum):

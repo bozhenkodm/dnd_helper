@@ -587,6 +587,22 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
     implements = models.ManyToManyField(
         Implement, verbose_name='Инструменты', blank=True
     )
+    primary_hand = models.ForeignKey(
+        Weapon,
+        verbose_name='Основная рука',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='in_primary_hands',
+    )
+    secondary_hand = models.ForeignKey(
+        Weapon,
+        verbose_name='Вторичная рука',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='in_secondary_hands',
+    )
 
     powers = models.ManyToManyField(Power, blank=True)
 

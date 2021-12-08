@@ -1,4 +1,3 @@
-import base.objects.weapon_types
 from base.objects import npc_classes, races, weapon_types
 
 races_tuple = (
@@ -145,6 +144,13 @@ weapon_types_tuple = (
     weapon_types.Waraxe,
     weapon_types.Warhammer,
     weapon_types.WinterMourningBlade,  # hexblade weapon
+    # pure implements
+    weapon_types.Wand,
+    weapon_types.Rod,
+    weapon_types.Totem,
+    weapon_types.HolySymbol,
+    weapon_types.KiFocus,
+    weapon_types.Sphere,
 )
 
 weapon_types_classes = {cls.slug: cls for cls in weapon_types_tuple}
@@ -154,7 +160,6 @@ implement_types_classes = {
     for cls in (
         weapon_types.Wand,
         weapon_types.Rod,
-        weapon_types.Quaterstaff,
         weapon_types.Totem,
         weapon_types.HolySymbol,
         weapon_types.KiFocus,

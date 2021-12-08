@@ -33,9 +33,16 @@ from base.objects import implement_types_classes, npc_klasses
 
 
 class RaceAdmin(admin.ModelAdmin):
+    fields = ('name', 'is_sociable')
+
     def get_queryset(self, request):
         qs = super().get_queryset(request).annotate(title=NPCRaceEnum.generate_case())
         return qs.order_by('title')
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj and obj.id:
+            return ('name',)
+        return ()
 
 
 class ClassAdmin(admin.ModelAdmin):
@@ -161,6 +168,7 @@ class NPCAdmin(admin.ModelAdmin):
             'weapons',
             'implements',
         ),
+        # ('primary_hand', 'secondary_hand'),
         'powers',
     ]
     readonly_fields = [
@@ -334,8 +342,31 @@ class WeaponTypeAdmin(admin.ModelAdmin):
     ordering = ('name',)
     list_display = ('name',)
     search_fields = ('name',)
+    readonly_fields = (
+        'category',
+        'group',
+        'damage',
+    )
     save_as = True
     form = WeaponTypeForm
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def category(self, obj):
+        return obj.data_instance.category.description
+
+    category.short_description = 'Категория оружия'
+
+    def group(self, obj):
+        return obj.data_instance.group.value
+
+    group.short_description = 'Группа оружия'
+
+    def damage(self, obj):
+        return obj.data_instance.damage()
+
+    damage.short_description = 'Урон'
 
 
 class WeaponAdmin(admin.ModelAdmin):
@@ -477,7 +508,7 @@ atk - бонус атаки (= бонусу за уровень + пол уро�
                 'description',
                 'race',
                 'klass',
-                'subclass',
+                # 'subclass',
                 'functional_template',
             )
         result = super().get_fields(request, obj)[:]
@@ -560,18 +591,12 @@ atk - бонус атаки (= бонусу за уровень + пол уро�
                 property.save()
 
 
-class PowerInline(admin.StackedInline):
-    exclude = ('race', 'klass', 'level', 'attack_attribute', 'defence')
-    model = Power
-
-
-class PowerTargetAdmin(admin.ModelAdmin):
-    ordering = ('target',)
-    search_fields = ('target',)
-
-
 class FunctionalTemplateAdmin(admin.ModelAdmin):
-    inlines = (PowerInline,)
+    fields = (
+        ('title', 'min_level'),
+        ('armor_class_bonus', 'fortitude_bonus', 'reflex_bonus', 'will_bonus'),
+        ('save_bonus', 'action_points_bonus', 'hit_points_per_level'),
+    )
 
 
 class PlayerCharactersAdmin(admin.ModelAdmin):

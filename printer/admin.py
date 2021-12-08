@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 from printer.models import PrintableObject, PrintableObjectItems
 
 
-class PrintableObjectItemsAdmin(admin.StackedInline):
+class PrintableObjectItemsAdmin(admin.TabularInline):
     model = PrintableObjectItems
 
 
