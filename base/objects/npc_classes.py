@@ -71,9 +71,9 @@ class NPCClass:
     def hit_points_bonus(self):
         return 0
 
-    def attack_bonus(self, weapon=None):
+    def attack_bonus(self, weapon=None, is_implement: bool = False):
         level_bonus = self.npc._level_bonus + self.npc.half_level
-        if weapon and self.npc.is_weapon_proficient(weapon=weapon):
+        if weapon and not is_implement and self.npc.is_weapon_proficient(weapon=weapon):
             return level_bonus + weapon.prof_bonus
         return level_bonus
 

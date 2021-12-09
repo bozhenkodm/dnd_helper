@@ -326,6 +326,21 @@ class Power(models.Model):
     def damage(self):
         return f'{self.dice_number}{self.get_damage_dice_display()}'
 
+    def category(self, weapon: Weapon = None):
+        if self.functional_template:
+            return self.functional_template.name
+        if self.race:
+            return self.race.get_name_display()
+        if self.accessory_type and weapon:
+            return str(weapon)
+        if self.level % 2 == 0 and self.level > 0:
+            return 'Приём'
+        if self.frequency == PowerFrequencyEnum.PASSIVE.name:
+            return 'Пассивный'
+        if self.klass:
+            return self.klass.get_name_display()
+        raise ValueError('Power unproperly configured')
+
     @property
     def attack_type(self):
         # PowerRangeTypeEnum.MELEE_TOUCH.name,
@@ -713,7 +728,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
             PowersVariables.LVL: self.level,
         }
 
-    def parse_string(self, string, weapon: Weapon = None):
+    def parse_string(self, string, weapon: Weapon = None, is_implement: bool = False):
         pattern = r'\$([^\s]{3,})\b'  # gets substing from '$' to next whitespace
         expressions = re.findall(pattern, string)
         template = re.sub(
@@ -741,7 +756,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                     )
                 elif parsed_expression_element == PowersVariables.ATK:
                     current_element = (
-                        self.klass_data_instance.attack_bonus(weapon)
+                        self.klass_data_instance.attack_bonus(weapon, is_implement)
                         # armament enchantment
                         + min(
                             weapon and weapon.enchantment or 0,
@@ -797,7 +812,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                     PowerDisplay(
                         name=power.name,
                         keywords=power.keywords,
-                        accessory_text=self.functional_template.title,
+                        category=power.category(),
                         description=self.parse_string(power.description),
                         frequency_order=power.frequency_order,
                         properties=[
@@ -819,7 +834,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                 PowerDisplay(
                     name=power.name,
                     keywords=power.keywords,
-                    accessory_text=self.race.get_name_display(),
+                    category=power.category(),
                     description=self.parse_string(power.description),
                     frequency_order=power.frequency_order,
                     properties=[
@@ -851,7 +866,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                     PowerDisplay(
                         name=power.name,
                         keywords=power.keywords,
-                        accessory_text=str(weapon),
+                        category=power.category(weapon),
                         description=self.parse_string(power.description),
                         frequency_order=power.frequency_order,
                         properties=[
@@ -879,7 +894,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                     PowerDisplay(
                         name=power.name,
                         keywords=power.keywords,
-                        accessory_text=f'{weapon}',
+                        category=power.category(weapon),
                         description=self.parse_string(power.description),
                         frequency_order=power.frequency_order,
                         properties=[
@@ -888,7 +903,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                                     'title': property.get_displayed_title(),
                                     'description': self.parse_string(
                                         property.get_displayed_description(),
-                                        weapon=weapon,
+                                        weapon=weapon, is_implement=True
                                     ),
                                     'debug': property.description,
                                 }
@@ -904,9 +919,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                 PowerDisplay(
                     name=power.name,
                     keywords=power.keywords,
-                    accessory_text='Пассивный'
-                    if power.frequency == PowerFrequencyEnum.PASSIVE.name
-                    else 'Приём',
+                    category=power.category(),
                     description=self.parse_string(power.description),
                     frequency_order=power.frequency_order,
                     properties=[

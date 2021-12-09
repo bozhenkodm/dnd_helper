@@ -12,7 +12,7 @@ class PowerPropertyDisplay:
 class PowerDisplay:
     name: str
     keywords: str
-    accessory_text: str
+    category: str
     description: str
     frequency_order: int
     properties: list[PowerPropertyDisplay]
