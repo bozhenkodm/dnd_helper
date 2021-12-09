@@ -11,3 +11,9 @@ class PowerQueryset(models.QuerySet):
 
     def ordered_by_frequency(self):
         return self.with_frequency_order().order_by('frequency_order')
+
+    def annotate_weapon(self, weapon):
+        return self.annotate(
+            weapon_name=weapon.name,
+
+        )

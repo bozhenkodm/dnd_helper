@@ -799,34 +799,15 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
         return sorted(properties.values(), key=lambda x: x and x.order)
 
     def powers_calculated(self):
-        powers = []
         powers_qs = self.race.powers.filter(level=0)
-        powers_qs.union(
-                self.powers.filter(
-                    models.Q(accessory_type__isnull=True) | models.Q(accessory_type='')
-                )
-            )
+        powers_qs |= self.powers.filter(
+            models.Q(accessory_type__isnull=True) | models.Q(accessory_type='')
+        )
         if self.functional_template:
-            powers_qs.union(self.functional_template.powers.filter(level=0))
+            powers_qs |= self.functional_template.powers.filter(level=0)
 
-        for power in Power.objects.filter(
-            # TODO refactor this query
-            models.Q(
-                id__in=self.functional_template.powers.values_list(
-                    'id', flat=True
-                ).filter(level=0)
-                if self.functional_template
-                else ()
-            )
-            | models.Q(
-                id__in=self.race.powers.values_list('id', flat=True).filter(level=0)
-            )
-            | models.Q(
-                id__in=self.powers.values_list('id', flat=True).filter(
-                    models.Q(accessory_type__isnull=True) | models.Q(accessory_type='')
-                )
-            )
-        ).ordered_by_frequency():
+        powers = []
+        for power in powers_qs.ordered_by_frequency():
             powers.append(
                 PowerDisplay(
                     name=power.name,
