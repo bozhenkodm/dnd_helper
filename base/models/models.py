@@ -26,7 +26,7 @@ from base.constants.constants import (
     ShieldTypeEnum,
     SkillsEnum,
 )
-from base.managers import PowerManager
+from base.managers import PowerQueryset
 from base.models.mixins.abilities import AttributeMixin
 from base.models.mixins.defences import DefenceMixin
 from base.models.mixins.skills import SkillMixin
@@ -201,7 +201,7 @@ class Power(models.Model):
         verbose_name_plural = 'Таланты'
         # base_manager_name = 'PowerManager'
 
-    objects = PowerManager()
+    objects = PowerQueryset.as_manager()
 
     name = models.CharField(verbose_name='Название', max_length=100)
     description = models.TextField(verbose_name='Описание', null=True, blank=True)
@@ -407,10 +407,6 @@ class Power(models.Model):
                 if type_ != PowerEffectTypeEnum.NONE.name
             ),
         )
-
-    @property
-    def is_utility(self):
-        return self.klass and not self.accessory_type
 
 
 class PowerProperty(models.Model):
@@ -804,32 +800,33 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
 
     def powers_calculated(self):
         powers = []
-        if self.functional_template:
-            for power in self.functional_template.powers.ordered_by_frequency().filter(
-                level=0
-            ):
-                powers.append(
-                    PowerDisplay(
-                        name=power.name,
-                        keywords=power.keywords,
-                        category=power.category(),
-                        description=self.parse_string(power.description),
-                        frequency_order=power.frequency_order,
-                        properties=[
-                            PowerPropertyDisplay(
-                                **{
-                                    'title': property.get_displayed_title(),
-                                    'description': self.parse_string(
-                                        property.get_displayed_description(),
-                                    ),
-                                    'debug': property.description,
-                                }
-                            )
-                            for property in self.valid_properties(power)
-                        ],
-                    ).asdict()
+        powers_qs = self.race.powers.filter(level=0)
+        powers_qs.union(
+                self.powers.filter(
+                    models.Q(accessory_type__isnull=True) | models.Q(accessory_type='')
                 )
-        for power in self.race.powers.ordered_by_frequency().filter(level=0):
+            )
+        if self.functional_template:
+            powers_qs.union(self.functional_template.powers.filter(level=0))
+
+        for power in Power.objects.filter(
+            # TODO refactor this query
+            models.Q(
+                id__in=self.functional_template.powers.values_list(
+                    'id', flat=True
+                ).filter(level=0)
+                if self.functional_template
+                else ()
+            )
+            | models.Q(
+                id__in=self.race.powers.values_list('id', flat=True).filter(level=0)
+            )
+            | models.Q(
+                id__in=self.powers.values_list('id', flat=True).filter(
+                    models.Q(accessory_type__isnull=True) | models.Q(accessory_type='')
+                )
+            )
+        ).ordered_by_frequency():
             powers.append(
                 PowerDisplay(
                     name=power.name,
@@ -839,19 +836,16 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                     frequency_order=power.frequency_order,
                     properties=[
                         PowerPropertyDisplay(
-                            **{
-                                'title': property.get_displayed_title(),
-                                'description': self.parse_string(
-                                    property.get_displayed_description(),
-                                ),
-                                'debug': property.description,
-                            }
+                            title=property.get_displayed_title(),
+                            description=self.parse_string(
+                                property.get_displayed_description()
+                            ),
+                            debug=property.get_displayed_description(),
                         )
                         for property in self.valid_properties(power)
                     ],
                 ).asdict()
             )
-
         for power in self.powers.ordered_by_frequency().filter(
             accessory_type=AccessoryTypeEnum.WEAPON.name
         ):
@@ -903,7 +897,8 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                                     'title': property.get_displayed_title(),
                                     'description': self.parse_string(
                                         property.get_displayed_description(),
-                                        weapon=weapon, is_implement=True
+                                        weapon=weapon,
+                                        is_implement=True,
                                     ),
                                     'debug': property.description,
                                 }
@@ -912,30 +907,6 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                         ],
                     ).asdict()
                 )
-        for power in self.powers.ordered_by_frequency().filter(
-            models.Q(accessory_type__isnull=True) | models.Q(accessory_type='')
-        ):
-            powers.append(
-                PowerDisplay(
-                    name=power.name,
-                    keywords=power.keywords,
-                    category=power.category(),
-                    description=self.parse_string(power.description),
-                    frequency_order=power.frequency_order,
-                    properties=[
-                        PowerPropertyDisplay(
-                            **{
-                                'title': property.get_displayed_title(),
-                                'description': self.parse_string(
-                                    property.get_displayed_description()
-                                ),
-                                'debug': property.description,
-                            }
-                        )
-                        for property in self.valid_properties(power)
-                    ],
-                ).asdict()
-            )
         return sorted(powers, key=lambda x: x['frequency_order'])
 
 
