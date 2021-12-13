@@ -24,114 +24,114 @@ class SkillMixin:
             SkillsEnum.ENDURANCE,
             SkillsEnum.STEALTH,
         ):
-            result -= self.armor.skill_penalty
+            result -= abs(self.armor.skill_penalty)
         return result
+
+    @property
+    def skills(self) -> Skills:
+        half_level = Skills.init_with_const(SkillsEnum, self.half_level)
+        trained_skills = Skills.init_with_const([SkillsEnum[trained_skill] for trained_skill in self.trained_skills], 5)
+        race_bonus = self.race_data_instance.skill_bonuses
+        mandatory_skills = self.klass_data_instance.mandatory_skills
+        penalty = Skills.init_with_const(
+            (
+                SkillsEnum.ACROBATICS,
+                SkillsEnum.ATHLETICS,
+                SkillsEnum.THIEVERY,
+                SkillsEnum.ENDURANCE,
+                SkillsEnum.STEALTH,
+            ),
+            value=1
+        )
+        return half_level + trained_skills + mandatory_skills + race_bonus - penalty
 
     @property
     def acrobatics(self):
         """Акробатика"""
-        return self._calculate_skill(SkillsEnum.ACROBATICS)
+        return self.skills.acrobatics
 
     @property
     def arcana(self):
         """Магия"""
-        return self._calculate_skill(SkillsEnum.ARCANA)
+        return self.skills.arcana
 
     @property
     def athletics(self):
         """Атлетика"""
-        return self._calculate_skill(SkillsEnum.ATHLETICS)
+        return self.skills.athletics
 
     @property
     def bluff(self):
         """Обман"""
-        return self._calculate_skill(SkillsEnum.BLUFF)
+        return self.skills.bluff
 
     @property
     def diplomacy(self):
         """Переговоры"""
-        return self._calculate_skill(SkillsEnum.DIPLOMACY)
+        return self.skills.diplomacy
 
     @property
     def dungeoneering(self):
         """Подземелья"""
-        return self._calculate_skill(SkillsEnum.DUNGEONEERING)
+        return self.skills.dungeoneering
 
     @property
     def endurance(self):
         """Выносливость"""
-        return self._calculate_skill(SkillsEnum.ENDURANCE)
+        return self.skills.endurance
 
     @property
     def heal(self):
         """Целительство"""
-        return self._calculate_skill(SkillsEnum.HEAL)
+        return self.skills.heal
 
     @property
     def history(self):
         """История"""
-        return self._calculate_skill(SkillsEnum.HISTORY)
+        return self.skills.history
 
     @property
     def insight(self):
         """Проницательность"""
-        return self._calculate_skill(SkillsEnum.INSIGHT)
+        return self.skills.insight
 
     @property
     def intimidate(self):
         """Запугивание"""
-        return self._calculate_skill(SkillsEnum.INTIMIDATE)
+        return self.skills.intimidate
 
     @property
     def nature(self):
         """Природа"""
-        return self._calculate_skill(SkillsEnum.NATURE)
+        return self.skills.nature
 
     @property
     def perception(self):
         """Внимательность"""
-        return self._calculate_skill(SkillsEnum.PERCEPTION)
+        return self.skills.perception
 
     @property
     def religion(self):
         """Религия"""
-        return self._calculate_skill(SkillsEnum.RELIGION)
+        return self.skills.religion
 
     @property
     def stealth(self):
         """Скрытность"""
-        return self._calculate_skill(SkillsEnum.STEALTH)
+        return self.skills.stealth
 
     @property
     def streetwise(self):
         """Знание_улиц"""
-        return self._calculate_skill(SkillsEnum.STREETWISE)
+        return self.skills.streetwise
 
     @property
     def thievery(self):
         """Воровство"""
-        return self._calculate_skill(SkillsEnum.THIEVERY)
-
-    @property
-    def trained_skills_text(self):
-        return list(
-            f'{SkillsEnum[skill].value} +{self._calculate_skill(SkillsEnum[skill])}'
-            for skill in self.trained_skills
-            + [
-                key.upper()
-                for key, value in asdict(
-                    self.klass_data_instance.mandatory_skills
-                ).items()
-                if value
-            ]
-        )
-
-    # SkillsEnum[key.upper()]
-    # for key, value in asdict(obj.klass_data_instance.mandatory_skills).items()
-    #     if value
+        return self.skills.thievery
 
     @property
     def skills_text(self):
         return list(
-            f'{skill.value} +{self._calculate_skill(skill)}' for skill in SkillsEnum
+            f'{SkillsEnum[skill.upper()].value} +{value}' for skill, value in asdict(self.skills).items()
         )
