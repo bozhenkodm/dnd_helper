@@ -24,8 +24,6 @@ class WeaponType:
     dice_number: ClassVar[int] = 1
     range: ClassVar[int] = 0
 
-    is_implement: ClassVar[bool] = False
-
     # properties
     brutal: ClassVar[int] = 0
     is_off_hand: ClassVar[bool] = False
@@ -79,12 +77,11 @@ class WeaponType:
 class ImplementType(WeaponType):
     name: ClassVar[str] = None
     slug: ClassVar[str] = None
-    category = WeaponCategoryIntEnum.SIMPLE
+    category = WeaponCategoryIntEnum.IMPLEMENT
     damage_dice = None
     handedness = WeaponHandednessEnum.ONE
     prof_bonus = 0
     range: ClassVar[int] = 0
-    is_implement = False
     is_off_hand: ClassVar[bool] = True
 
 
@@ -199,7 +196,6 @@ class Quaterstaff(WeaponType):
     category = WeaponCategoryIntEnum.SIMPLE
     handedness = WeaponHandednessEnum.TWO
     damage_dice = DiceIntEnum.D8
-    is_implement = True
 
 
 class Scythe(WeaponType):
@@ -457,7 +453,6 @@ class Kukri(Dagger):
     is_off_hand = True
     range = 0
     prof_bonus = 2
-    is_implement = False
 
 
 class ParryingDagger(Dagger):
@@ -469,7 +464,6 @@ class ParryingDagger(Dagger):
     is_defensive = True
     range = 0
     prof_bonus = 2
-    is_implement = False
 
 
 class Tratnyr(WeaponType):
@@ -672,12 +666,10 @@ class UnarmedMonkStrile(WeaponType):
 
 class RitualDagger(Dagger):
     name = 'Ритуальный кинжал'
-    is_implement = True
 
 
 class RitualSickle(Sickle):
     name = 'Ритуальный серп'
-    is_implement = True
 
 
 # Double axe 	AV 	+2 	1d10/1d10  	Axe 	Double weapon, off-hand
@@ -686,7 +678,7 @@ class RitualSickle(Sickle):
 # Urgrosh 	AV 	+2 	1d12/1d6 Axe, spear 	Double weapon, defensive, off-hand
 
 
-class KiFocus(WeaponType):
+class KiFocus(ImplementType):
     name = 'Фокусировка ци'
     slug = 'ki_focus'
 

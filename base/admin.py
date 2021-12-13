@@ -52,7 +52,6 @@ class ClassAdmin(admin.ModelAdmin):
         'available_weapons',
         'available_implements',
     )
-    save_on_top = True
     form = ClassForm
 
     def has_change_permission(self, request, obj=None):
@@ -346,20 +345,41 @@ class WeaponTypeAdmin(admin.ModelAdmin):
     save_as = True
     form = WeaponTypeForm
 
+    def get_fields(self, request, obj=None):
+        if obj and obj.id:
+            return (
+                'category',
+                'group',
+                'damage',
+            )
+        return (
+            'name',
+            'slug',
+            'category',
+            'group',
+            'damage',
+        )
+
     def has_change_permission(self, request, obj=None):
         return False
 
     def category(self, obj):
+        if not obj.id:
+            return '-'
         return obj.data_instance.category.description
 
     category.short_description = 'Категория оружия'
 
     def group(self, obj):
+        if not obj.id:
+            return '-'
         return obj.data_instance.group.value
 
     group.short_description = 'Группа оружия'
 
     def damage(self, obj):
+        if not obj.id:
+            return '-'
         return obj.data_instance.damage()
 
     damage.short_description = 'Урон'

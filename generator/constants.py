@@ -214,6 +214,7 @@ taverners_races = (
     NPCRaceEnum.ELF,
     NPCRaceEnum.HALFLING,
     NPCRaceEnum.DWARF,
+    NPCRaceEnum.DWARF,
     NPCRaceEnum.HUMAN,
     NPCRaceEnum.HUMAN,
     NPCRaceEnum.HUMAN,
@@ -232,6 +233,7 @@ taverners_races = (
     # NPCRaceEnum.SHIFTER_LONGTEETH,
     # NPCRaceEnum.DEVA,
     NPCRaceEnum.KALASHTAR,
+    NPCRaceEnum.MUL,
     # NPCRaceEnum.DOPPELGANGER,
     # NPCRaceEnum.WARFORGED,
 )

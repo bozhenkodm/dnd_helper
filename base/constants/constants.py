@@ -42,7 +42,8 @@ class PowersVariables(str, Enum):
     LVL = auto()
     DMG = auto()  # damage bonus
     ATK = auto()  # attack bonus =
-    # (class bonus + half level + level bonus + enchantment. NOT POWER BONUS)
+    # (class bonus + half level + level bonus + enchantment. NOT POWER ATTACK BONUS)
+    EHT = auto()  # armament enchantment
 
 
 class SizeEnum(BaseCapitalizedEnum):
@@ -212,6 +213,7 @@ class WeaponCategoryIntEnum(IntDescriptionEnum):
     SIMPLE_RANGED = 4, 'Простое дальнобойное'
     MILITARY_RANGED = 5, 'Воинское дальнобойное'
     SUPERIOR_RANGED = 6, 'Превосходное дальнобойное'
+    IMPLEMENT = 7, 'Инструмент'
 
     @property
     def is_melee(self):

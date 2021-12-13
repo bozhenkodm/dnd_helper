@@ -26,7 +26,7 @@ from base.constants.constants import (
     ShieldTypeEnum,
     SkillsEnum,
 )
-from base.managers import PowerQueryset
+from base.managers import PowerQueryset, WeaponTypeQuerySet
 from base.models.mixins.abilities import AttributeMixin
 from base.models.mixins.defences import DefenceMixin
 from base.models.mixins.skills import SkillMixin
@@ -41,7 +41,7 @@ class Armor(models.Model):
         verbose_name = 'Доспех'
         verbose_name_plural = 'Доспехи'
 
-    name = models.CharField(verbose_name='Название', max_length=20)
+    name = models.CharField(verbose_name='Название', max_length=100)
     armor_type = models.SmallIntegerField(
         verbose_name='Тип',
         choices=ArmorTypeIntEnum.generate_choices(),
@@ -73,6 +73,8 @@ class WeaponType(models.Model):
     class Meta:
         verbose_name = 'Тип оружия'
         verbose_name_plural = 'Типы оружия'
+
+    objects = WeaponTypeQuerySet.as_manager()
 
     name = models.CharField(verbose_name='Название', max_length=20, unique=True)
     slug = models.CharField(verbose_name='Slug', max_length=20, unique=True)
@@ -328,7 +330,7 @@ class Power(models.Model):
 
     def category(self, weapon: Weapon = None):
         if self.functional_template:
-            return self.functional_template.name
+            return self.functional_template.title
         if self.race:
             return self.race.get_name_display()
         if self.accessory_type and weapon:
@@ -762,7 +764,13 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                         # to string when creating power property
                     )
                 elif parsed_expression_element == PowersVariables.DMG:
+                    # TODO separate damage bonus and enchantment
                     current_element = self.klass_data_instance.damage_bonus + min(
+                        weapon and weapon.enchantment or 0,
+                        self._magic_threshold,
+                    )
+                elif parsed_expression_element == PowersVariables.EHT:
+                    current_element = min(
                         weapon and weapon.enchantment or 0,
                         self._magic_threshold,
                     )
@@ -837,6 +845,8 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
             else:
                 weapon_queryset = self.weapons.all()
             for weapon in weapon_queryset:
+                if weapon.weapon_type.data_instance.damage_dice is None:
+                    continue
                 powers.append(
                     PowerDisplay(
                         name=power.name,

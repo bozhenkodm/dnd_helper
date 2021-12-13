@@ -348,7 +348,7 @@ class FighterClass(NPCClass):
             result += 2
         return result
 
-    def attack_bonus(self, weapon=None):
+    def attack_bonus(self, weapon=None, is_implement=False):
         result = super(FighterClass, self).attack_bonus(weapon)
         if not weapon:
             return result
@@ -595,7 +595,7 @@ class RogueClass(NPCClass):
         RUFFAIN = 3, 'Верзила'
         SNEAK = 4, 'Скрытник'
 
-    def attack_bonus(self, weapon=None):
+    def attack_bonus(self, weapon=None, is_implement=False):
         if not weapon:
             return super().attack_bonus()
         base_bonus = super().attack_bonus(weapon=weapon)
