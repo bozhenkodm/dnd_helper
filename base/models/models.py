@@ -13,6 +13,7 @@ from base.constants.constants import (
     AttributeEnum,
     DefenceTypeEnum,
     DiceIntEnum,
+    MagicItemCategory,
     NPCClassIntEnum,
     NPCRaceEnum,
     PowerActionTypeEnum,
@@ -36,29 +37,90 @@ from base.objects.encounter_output import EncounterLine
 from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
 
 
-class Armor(models.Model):
+class MagicItem(models.Model):
+    class Meta:
+        verbose_name = 'Магический предмет'
+        verbose_name_plural = 'Магические предметы'
+
+    name = models.CharField(verbose_name='Название', max_length=100)
+    min_level = models.PositiveSmallIntegerField(
+        verbose_name='Минимальный уровень', default=1
+    )
+    step = models.PositiveSmallIntegerField('Шаг повышения уровня', default=5)
+    category = models.CharField(
+        verbose_name='Категория',
+        choices=MagicItemCategory.generate_choices(is_sorted=False),
+        default=MagicItemCategory.COMMON.name,
+        max_length=MagicItemCategory.max_length(),
+    )
+    picture = models.ImageField(verbose_name='Картинка', null=True, upload_to='items')
+    source = models.CharField(
+        verbose_name='Источник',
+        max_length=20,
+        help_text='Книга и страница',
+        null=True,
+        blank=True,
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class ItemAbstract(models.Model):
+    class Meta:
+        abstract = True
+
+    magic_item = models.ForeignKey(
+        MagicItem,
+        verbose_name='Магический предмет',
+        null=True,
+        on_delete=models.CASCADE,
+        blank=True,
+    )
+    level = models.SmallIntegerField(verbose_name='Уровень', default=0)
+
+    @property
+    def enchantment(self):
+        if not self.magic_item:
+            return 0
+        return (self.level - 1) // 5 + 1
+
+
+class Armor(ItemAbstract):
     class Meta:
         verbose_name = 'Доспех'
         verbose_name_plural = 'Доспехи'
 
-    name = models.CharField(verbose_name='Название', max_length=100)
     armor_type = models.SmallIntegerField(
         verbose_name='Тип',
         choices=ArmorTypeIntEnum.generate_choices(),
     )
-    armor_class = models.SmallIntegerField(verbose_name='Класс доспеха', default=0)
-    enchantment = models.SmallIntegerField(verbose_name='Улучшение', default=0)
+    bonus_armor_class = models.SmallIntegerField(
+        verbose_name='Дополнительный класс доспеха',
+        default=0,
+        help_text='Для магических доспехов высоких уровней',
+    )
     speed_penalty = models.SmallIntegerField(verbose_name='Штраф скорости', default=0)
     skill_penalty = models.SmallIntegerField(verbose_name='Штраф навыков', default=0)
 
     def __str__(self):
-        if self.name == ArmorTypeIntEnum(self.armor_type).description:
-            return f'{self.name}, +{self.enchantment}'
-        return (
-            f'{self.name},'
-            f' {ArmorTypeIntEnum(self.armor_type).description},'
-            f' +{self.enchantment}'
-        )
+        return f'{self.name}, +{self.enchantment}'
+
+    @property
+    def armor_class(self):
+        return self.armor_type + self.bonus_armor_class
+
+    @property
+    def name(self):
+        if not self.magic_item:
+            return self.get_armor_type_display()
+        return f'{self.get_armor_type_display()}, {self.magic_item.name}'
+
+    @property
+    def price(self):
+        if not self.level:
+            return 0
+        return (200 + (self.level % 5) * 160) * (5 ** (self.level // 5))
 
     @property
     def is_light(self):
@@ -93,7 +155,7 @@ class WeaponType(models.Model):
         )
 
 
-class Weapon(models.Model):
+class Weapon(ItemAbstract):
     class Meta:
         verbose_name = 'Оружие'
         verbose_name_plural = 'Оружие'
@@ -102,12 +164,16 @@ class Weapon(models.Model):
         WeaponType, verbose_name='Тип оружия', on_delete=models.CASCADE, null=False
     )
     name = models.CharField(verbose_name='Название', max_length=20)
-    enchantment = models.SmallIntegerField(verbose_name='Улучшение', default=0)
+    enchantment_old = models.SmallIntegerField(verbose_name='Улучшение', default=0)
 
     def __str__(self):
         if self.name == self.weapon_type.name:
             return f'{self.name}, +{self.enchantment}'
         return f'{self.name}, {self.weapon_type}, +{self.enchantment}'
+
+    @property
+    def enchantment(self):
+        return super().enchantment or self.enchantment_old
 
     @property
     def damage(self):
@@ -248,6 +314,14 @@ class Power(models.Model):
         null=True,
         related_name='powers',
     )
+    magic_item = models.ForeignKey(
+        MagicItem,
+        verbose_name='Магический предмет',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='powers',
+    )
     level = models.SmallIntegerField(verbose_name='Уровень', default=0)
     attack_attribute = models.CharField(
         verbose_name='Атакующая характеристика',
@@ -329,6 +403,8 @@ class Power(models.Model):
         return f'{self.dice_number}{self.get_damage_dice_display()}'
 
     def category(self, weapon: Weapon = None):
+        if self.magic_item:
+            return self.magic_item.name
         if self.functional_template:
             return self.functional_template.title
         if self.race:
@@ -467,7 +543,6 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
     )
     subclass = models.SmallIntegerField(
         verbose_name='Подкласс',
-        choices=IntDescriptionSubclassEnum.generate_choices(),
         default=0,
     )
     functional_template = models.ForeignKey(
@@ -726,7 +801,9 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
             PowersVariables.LVL: self.level,
         }
 
-    def parse_string(self, string, weapon: Weapon = None, is_implement: bool = False):
+    def parse_string(
+        self, string, weapon: Weapon = None, is_implement: bool = False, item=None
+    ):
         pattern = r'\$([^\s]{3,})\b'  # gets substing from '$' to next whitespace
         expressions = re.findall(pattern, string)
         template = re.sub(
@@ -774,6 +851,8 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                         weapon and weapon.enchantment or 0,
                         self._magic_threshold,
                     )
+                elif parsed_expression_element == PowersVariables.ITL:
+                    current_element = item.level
                 elif parsed_expression_element.isdigit():
                     current_element = int(parsed_expression_element)
                 else:
@@ -898,6 +977,31 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                         ],
                     ).asdict()
                 )
+        if self.armor.magic_item:
+            for power in self.armor.magic_item.powers.ordered_by_frequency():
+                powers.append(
+                    PowerDisplay(
+                        name=power.name,
+                        keywords=power.keywords,
+                        category=power.category(),
+                        description=self.parse_string(power.description),
+                        frequency_order=power.frequency_order,
+                        properties=[
+                            PowerPropertyDisplay(
+                                **{
+                                    'title': property.get_displayed_title(),
+                                    'description': self.parse_string(
+                                        property.get_displayed_description(),
+                                        item=self.armor,
+                                    ),
+                                    'debug': property.description,
+                                }
+                            )
+                            for property in self.valid_properties(power)
+                        ],
+                    ).asdict()
+                )
+
         return sorted(powers, key=lambda x: x['frequency_order'])
 
 

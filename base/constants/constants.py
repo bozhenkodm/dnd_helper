@@ -44,6 +44,7 @@ class PowersVariables(str, Enum):
     ATK = auto()  # attack bonus =
     # (class bonus + half level + level bonus + enchantment. NOT POWER ATTACK BONUS)
     EHT = auto()  # armament enchantment
+    ITL = auto()  # item level
 
 
 class SizeEnum(BaseCapitalizedEnum):
@@ -174,12 +175,12 @@ class SkillsEnum(BaseCapitalizedEnum):
 
 
 class ArmorTypeIntEnum(IntDescriptionEnum):
-    CLOTH = 10, 'Тканевый'
-    LEATHER = 20, 'Кожаный'
-    HIDE = 30, 'Шкурный'
-    CHAINMAIL = 40, 'Кольчуга'
-    SCALE = 50, 'Чешуйчатый'
-    PLATE = 60, 'Латный'
+    CLOTH = 0, 'Тканевый'
+    LEATHER = 2, 'Кожаный'
+    HIDE = 3, 'Шкурный'
+    CHAINMAIL = 6, 'Кольчуга'
+    SCALE = 7, 'Чешуйчатый'
+    PLATE = 8, 'Латный'
 
 
 class ShieldTypeEnum(BaseCapitalizedEnum):
@@ -347,3 +348,9 @@ class PowerPropertyTitle(BaseCapitalizedEnum):
     SPECIAL = 'Особенность'
     TARGET = 'Цель'
     OTHER = 'Другое'
+
+
+class MagicItemCategory(BaseCapitalizedEnum):
+    COMMON = 'Обычный'
+    UNCOMMON = 'Необычный'
+    RARE = 'Редкий'

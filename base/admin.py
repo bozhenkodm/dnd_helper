@@ -10,18 +10,20 @@ from django.utils.safestring import mark_safe
 from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
     AccessoryTypeEnum,
+    ArmorTypeIntEnum,
     NPCRaceEnum,
     PowerFrequencyEnum,
     PowerPropertyTitle,
     PowerRangeTypeEnum,
     SkillsEnum,
 )
-from base.forms import ClassForm, NPCModelForm, WeaponTypeForm
+from base.forms import ArmorForm, ClassForm, NPCModelForm, WeaponForm, WeaponTypeForm
 from base.models import NPC, Armor, Class, Encounter, Race
 from base.models.models import (
     Combatants,
     CombatantsPC,
     FunctionalTemplate,
+    MagicItem,
     PlayerCharacters,
     Power,
     PowerProperty,
@@ -135,7 +137,6 @@ class NPCAdmin(admin.ModelAdmin):
             'sex',
         ),
         'npc_link',
-        # 'description',
         (
             'race',
             'functional_template',
@@ -186,22 +187,6 @@ class NPCAdmin(admin.ModelAdmin):
             kwargs['queryset'] = Class.objects.order_by('name')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name == 'subclass':
-            object_id = request.resolver_match.kwargs.get('object_id', 0)
-            try:
-                instance = self.model.objects.get(id=object_id)
-            except self.model.DoesNotExist:
-                pass
-            else:
-                if subclass_enum := getattr(
-                    instance.klass_data_instance, 'SubclassEnum', None
-                ):
-                    choices = subclass_enum.generate_choices()
-                    db_field.choices = choices
-
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
-
     def get_fields(self, request, obj=None):
         if not obj:
             return (
@@ -228,7 +213,7 @@ class NPCAdmin(admin.ModelAdmin):
                     'base_charisma',
                 ),
             )
-        result = self.fields
+        result = self.fields[:]
         level_attrs_bonuses = {
             4: 'level4_bonus_attrs',
             8: 'level8_bonus_attrs',
@@ -330,7 +315,36 @@ class EncounterAdmin(admin.ModelAdmin):
 
 
 class ArmorAdmin(admin.ModelAdmin):
-    ordering = ('name',)
+    fields = (
+        'armor_type',
+        'armor_class',
+        'bonus_armor_class',
+        'speed_penalty',
+        'skill_penalty',
+        'magic_item',
+        'level',
+    )
+    readonly_fields = ('armor_class',)
+    form = ArmorForm
+
+    def armor_class(self, obj):
+        if not obj.id:
+            return '-'
+        return obj.armor_class
+
+    armor_class.short_description = 'Класс доспеха'
+
+    def get_queryset(self, request):
+        return (
+            super(ArmorAdmin, self)
+            .get_queryset(request)
+            .annotate(
+                displayed_name=ArmorTypeIntEnum.generate_value_description_case(
+                    field='armor_type'
+                )
+            )
+            .order_by('displayed_name', 'level')
+        )
 
 
 class WeaponTypeAdmin(admin.ModelAdmin):
@@ -387,8 +401,8 @@ class WeaponTypeAdmin(admin.ModelAdmin):
 
 class WeaponAdmin(admin.ModelAdmin):
     ordering = (
+        '-level',
         'name',
-        'enchantment',
     )
     readonly_fields = (
         'category',
@@ -398,6 +412,7 @@ class WeaponAdmin(admin.ModelAdmin):
     list_display = ('__str__',)
     search_fields = ('name',)
     autocomplete_fields = ('weapon_type',)
+    form = WeaponForm
 
     def category(self, obj):
         return obj.weapon_type.data_instance.category.description
@@ -450,16 +465,14 @@ class PowerAdmin(admin.ModelAdmin):
     fields = [
         'name',
         'description',
-        ('frequency', 'action_type'),
-        # ('klass',    'subclass'),
-        # 'race',
-        # 'functional_template',
         'level',
+        ('frequency', 'action_type'),
         ('attack_attribute', 'defence', 'attack_bonus'),
         ('effect_type', 'damage_type'),
         ('dice_number', 'damage_dice'),
         ('accessory_type', 'available_weapon_types'),
         ('range_type', 'range', 'burst'),
+        'syntax',
     ]
     list_filter = ('frequency', 'klass', RaceListFilter, 'functional_template')
     inlines = (PowerPropertyInline,)
@@ -480,6 +493,8 @@ wpn - урон от оружия (кубы + бонус зачарования)
 lvl - уровень персонажа
 dmg - бонус урона (= бонусу за уровень + бонусу урона от класса)
 atk - бонус атаки (= бонусу за уровень + пол уровня + бонус атаки от класса)
+eht - зачарование оружия
+itl - бонус предмета, к которому принадлежит талант
 
 Выражения начинаются со знака $.
 поддерживаются операции +, -, *, / с целыми числами.
@@ -507,9 +522,9 @@ atk - бонус атаки (= бонусу за уровень + пол уро�
                 'name',
                 'description',
                 'race',
-                'klass',
-                # 'subclass',
+                ('klass', 'subclass'),
                 'functional_template',
+                'magic_item',
             )
         result = super().get_fields(request, obj)[:]
         if obj.klass:
@@ -518,6 +533,8 @@ atk - бонус атаки (= бонусу за уровень + пол уро�
             result.insert(3, 'race')
         if obj.functional_template:
             result.insert(3, 'functional_template')
+        if obj.magic_item:
+            result.insert(3, 'magic_item')
         return result
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
@@ -608,6 +625,17 @@ class PlayerCharactersAdmin(admin.ModelAdmin):
     )
 
 
+class MagicItemAdmin(admin.ModelAdmin):
+    fields = ('name', 'min_level', 'step', 'category', 'picture', 'image_tag', 'source')
+    readonly_fields = ('image_tag',)
+
+    def image_tag(self, obj):
+        return mark_safe(f'<img src="{obj.picture.url}" />')
+
+    image_tag.short_description = 'Картинка'
+    image_tag.allow_tags = True
+
+
 admin.site.register(Race, RaceAdmin)
 admin.site.register(Class, ClassAdmin)
 admin.site.register(NPC, NPCAdmin)
@@ -618,6 +646,7 @@ admin.site.register(Weapon, WeaponAdmin)
 admin.site.register(Power, PowerAdmin)
 admin.site.register(FunctionalTemplate, FunctionalTemplateAdmin)
 admin.site.register(PlayerCharacters, PlayerCharactersAdmin)
+admin.site.register(MagicItem, MagicItemAdmin)
 
 admin.site.unregister(Group)
 admin.site.unregister(User)

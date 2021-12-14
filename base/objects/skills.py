@@ -66,7 +66,6 @@ class Skills:
             self.thievery - other.thievery,
         )
 
-
     @classmethod
     def init_with_const(cls, skills: Sequence[SkillsEnum], value: int) -> "Skills":
         return Skills(**{skill.lname: value for skill in skills})

@@ -601,7 +601,8 @@ class RogueClass(NPCClass):
         base_bonus = super().attack_bonus(weapon=weapon)
         wt_data_instance = weapon.weapon_type.data_instance
         if type(wt_data_instance) in self.available_weapon_types and isinstance(
-            wt_data_instance, Dagger
+            wt_data_instance,
+            (Dagger, Sling, HandCrossbow),  # should choose either dagger or ranged
         ):
             return base_bonus + 1
         return base_bonus

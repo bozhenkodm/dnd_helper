@@ -60,6 +60,14 @@ class IntDescriptionEnum(IntEnum):
         whens = (models.When(**kws) for kws in kwargs)
         return models.Case(*whens, output_field=models.CharField())
 
+    @classmethod
+    def generate_value_description_case(cls, field='name'):
+        kwargs = (
+            {field: item.value, 'then': models.Value(item.description)} for item in cls
+        )
+        whens = (models.When(**kws) for kws in kwargs)
+        return models.Case(*whens, output_field=models.CharField())
+
 
 class IntDescriptionSubclassEnum(IntDescriptionEnum):
     @classmethod

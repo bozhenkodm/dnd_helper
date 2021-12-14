@@ -6,31 +6,11 @@ from base.objects.skills import Skills
 
 class SkillMixin:
     @property
-    def _trained_skills_bonuses(self) -> Skills:
-        # TODO refactor with Skills.intersect method
-        return Skills(**{key.lower(): 5 for key in list(self.trained_skills)})
-
-    def _calculate_skill(self, skill: SkillsEnum) -> int:
-        attribute = getattr(self, skill.get_base_attribute().lname)
-        result = (
-            self.half_level
-            + self._modifier(attribute)
-            + getattr(self._trained_skills_bonuses, skill.lname)
-        )
-        if skill in (
-            SkillsEnum.ACROBATICS,
-            SkillsEnum.ATHLETICS,
-            SkillsEnum.THIEVERY,
-            SkillsEnum.ENDURANCE,
-            SkillsEnum.STEALTH,
-        ):
-            result -= abs(self.armor.skill_penalty)
-        return result
-
-    @property
     def skills(self) -> Skills:
         half_level = Skills.init_with_const(SkillsEnum, self.half_level)
-        trained_skills = Skills.init_with_const([SkillsEnum[trained_skill] for trained_skill in self.trained_skills], 5)
+        trained_skills = Skills.init_with_const(
+            [SkillsEnum[trained_skill] for trained_skill in self.trained_skills], 5
+        )
         race_bonus = self.race_data_instance.skill_bonuses
         mandatory_skills = self.klass_data_instance.mandatory_skills
         penalty = Skills.init_with_const(
@@ -41,7 +21,7 @@ class SkillMixin:
                 SkillsEnum.ENDURANCE,
                 SkillsEnum.STEALTH,
             ),
-            value=1
+            value=1,
         )
         return half_level + trained_skills + mandatory_skills + race_bonus - penalty
 
@@ -132,6 +112,10 @@ class SkillMixin:
 
     @property
     def skills_text(self):
-        return list(
-            f'{SkillsEnum[skill.upper()].value} +{value}' for skill, value in asdict(self.skills).items()
-        )
+        result = []
+        for skill, value in asdict(self.skills).items():
+            if skill.upper() in self.trained_skills:
+                result.append(f'{SkillsEnum[skill.upper()].value} +{value}')
+            else:
+                result.append(f'{SkillsEnum[skill.upper()].value[:3]} +{value}')
+        return sorted(result)

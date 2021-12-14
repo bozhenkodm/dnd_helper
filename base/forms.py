@@ -5,7 +5,7 @@ from multiselectfield import MultiSelectFormField
 
 from base.constants.constants import AttributeEnum, NPCClassIntEnum, SexEnum, SkillsEnum
 from base.models import NPC
-from base.models.models import Class, Power, WeaponType
+from base.models.models import Armor, Class, Power, Weapon, WeaponType
 from base.objects import weapon_types_tuple
 
 
@@ -46,6 +46,12 @@ class NPCModelForm(forms.ModelForm):
                 .filter(klass=self.instance.klass, level__lte=self.instance.level)
                 .order_by('level', 'frequency_order')
             )
+            if subclass_enum := getattr(
+                self.instance.klass_data_instance, 'SubclassEnum', None
+            ):
+                self.fields['subclass'] = forms.ChoiceField(
+                    choices=subclass_enum.generate_choices(), label='Подкласс'
+                )
 
 
 class ClassForm(forms.ModelForm):
@@ -82,3 +88,45 @@ class WeaponTypeForm(forms.ModelForm):
         ],
         label='Название',
     )
+
+
+class WeaponForm(forms.ModelForm):
+    class Meta:
+        model = Weapon
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.id and self.instance.magic_item:
+            self.fields['level'] = forms.ChoiceField(
+                choices=(
+                    (i, i)
+                    for i in range(
+                        self.instance.magic_item.min_level,
+                        31,
+                        self.instance.magic_item.step,
+                    )
+                ),
+                label='Уровень',
+            )
+
+
+class ArmorForm(forms.ModelForm):
+    class Meta:
+        model = Armor
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(ArmorForm, self).__init__(*args, **kwargs)
+        if self.instance.id and self.instance.magic_item:
+            self.fields['level'] = forms.ChoiceField(
+                choices=(
+                    (i, i)
+                    for i in range(
+                        self.instance.magic_item.min_level,
+                        31,
+                        self.instance.magic_item.step,
+                    )
+                ),
+                label='Уровень',
+            )
