@@ -6,6 +6,17 @@ from base.objects.skills import Skills
 
 class SkillMixin:
     @property
+    def skill_mod_bonus(self):
+        return Skills(
+            **{
+                skill.lname: getattr(
+                    self, f'{skill.get_base_attribute().name.lower()[:3]}_mod'
+                )
+                for skill in SkillsEnum
+            }
+        )
+
+    @property
     def skills(self) -> Skills:
         half_level = Skills.init_with_const(SkillsEnum, self.half_level)
         trained_skills = Skills.init_with_const(
@@ -23,7 +34,14 @@ class SkillMixin:
             ),
             value=1,
         )
-        return half_level + trained_skills + mandatory_skills + race_bonus - penalty
+        return (
+            half_level
+            + trained_skills
+            + mandatory_skills
+            + race_bonus
+            - penalty
+            + self.skill_mod_bonus
+        )
 
     @property
     def acrobatics(self):
@@ -113,9 +131,10 @@ class SkillMixin:
     @property
     def skills_text(self):
         result = []
+        ordinary_skills = self.skill_mod_bonus + Skills.init_with_const(
+            SkillsEnum, self.half_level
+        )
         for skill, value in asdict(self.skills).items():
-            if skill.upper() in self.trained_skills:
+            if getattr(ordinary_skills, skill) != value:
                 result.append(f'{SkillsEnum[skill.upper()].value} +{value}')
-            else:
-                result.append(f'{SkillsEnum[skill.upper()].value[:3]} +{value}')
         return sorted(result)

@@ -50,10 +50,12 @@ class MagicItem(models.Model):
     category = models.CharField(
         verbose_name='Категория',
         choices=MagicItemCategory.generate_choices(is_sorted=False),
-        default=MagicItemCategory.COMMON.name,
+        default=MagicItemCategory.UNCOMMON.name,
         max_length=MagicItemCategory.max_length(),
     )
-    picture = models.ImageField(verbose_name='Картинка', null=True, upload_to='items')
+    picture = models.ImageField(
+        verbose_name='Картинка', null=True, upload_to='items', blank=True
+    )
     source = models.CharField(
         verbose_name='Источник',
         max_length=20,
@@ -198,8 +200,12 @@ class Weapon(ItemAbstract):
         )
 
     @property
+    def data_instance(self):
+        return self.weapon_type.data_instance
+
+    @property
     def prof_bonus(self):
-        return self.weapon_type.data_instance.prof_bonus
+        return self.data_instance.prof_bonus
 
 
 class Race(models.Model):
@@ -402,15 +408,20 @@ class Power(models.Model):
     def damage(self):
         return f'{self.dice_number}{self.get_damage_dice_display()}'
 
-    def category(self, weapon: Weapon = None):
+    def category(self, primary_weapon: Weapon = None, secondary_weapon: Weapon = None):
         if self.magic_item:
             return self.magic_item.name
         if self.functional_template:
             return self.functional_template.title
         if self.race:
             return self.race.get_name_display()
-        if self.accessory_type and weapon:
-            return str(weapon)
+        if self.accessory_type in (
+            AccessoryTypeEnum.WEAPON,
+            AccessoryTypeEnum.IMPLEMENT,
+        ):
+            return str(primary_weapon)
+        if self.accessory_type == AccessoryTypeEnum.TWO_WEAPONS:
+            return f'{primary_weapon}, {secondary_weapon}'
         if self.level % 2 == 0 and self.level > 0:
             return 'Приём'
         if self.frequency == PowerFrequencyEnum.PASSIVE.name:
@@ -576,11 +587,9 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
     base_charisma = models.SmallIntegerField(
         verbose_name='Харизма (базовая)',
     )
-
     var_bonus_attr = models.CharField(
         verbose_name='Выборочный бонус характеристики',
         max_length=AttributeEnum.max_length(),
-        choices=AttributeEnum.generate_choices(is_sorted=False),
         null=True,
         blank=True,
     )
@@ -746,11 +755,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
 
     @property
     def initiative(self):
-        return (
-            self._modifier(self.dexterity)
-            + self.half_level
-            + self.race_data_instance.initiative
-        )
+        return self.dex_mod + self.half_level + self.race_data_instance.initiative
 
     @property
     def speed(self):
@@ -802,8 +807,13 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
         }
 
     def parse_string(
-        self, string, weapon: Weapon = None, is_implement: bool = False, item=None
-    ):
+        self,
+        string,
+        weapon: Weapon = None,
+        secondary_weapon: Weapon = None,
+        is_implement: bool = False,
+        item=None,
+    ):  # TODO something with function signature
         pattern = r'\$([^\s]{3,})\b'  # gets substing from '$' to next whitespace
         expressions = re.findall(pattern, string)
         template = re.sub(
@@ -817,9 +827,8 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
             parsed_expression = re.findall(r'[a-z]{3}|[+\-*/]|[0-9]{0,2}', expression)
             current_calculated_expression = 0
             current_operation = None
-            for parsed_expression_element in parsed_expression[
-                :-1
-            ]:  # last element is ''
+            for parsed_expression_element in parsed_expression[:-1]:
+                # iterating trough parsed_expression[:-1] because last element is ''
                 if parsed_expression_element in ('+', '-', '*', '/'):
                     current_operation = parsed_expression_element
                     continue
@@ -827,6 +836,12 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                     if not weapon:
                         raise ValueError('У данного таланта нет оружия')
                     current_element = weapon.damage_roll.treshhold(
+                        self._magic_threshold
+                    )
+                elif parsed_expression_element == PowersVariables.WPS:
+                    if not secondary_weapon:
+                        raise ValueError('У данного таланта нет дополнительного оружия')
+                    current_element = secondary_weapon.damage_roll.treshhold(
                         self._magic_threshold
                     )
                 elif parsed_expression_element == PowersVariables.ATK:
@@ -885,6 +900,28 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                 properties[key] = prop
         return sorted(properties.values(), key=lambda x: x and x.order)
 
+    def _primary_hand_properly_armed(self, power: Power) -> bool:
+        available_weapon_types = power.available_weapon_types.all()
+        if not available_weapon_types.count():
+            return True
+        if self.primary_hand.weapon_type in power.available_weapon_types.all():
+            return True
+        if (
+            power.accessory_type == AccessoryTypeEnum.WEAPON.name
+            and self.primary_hand.weapon_type.data_instance.damage_dice
+        ):
+            return True
+        if (
+            power.accessory_type == AccessoryTypeEnum.IMPLEMENT.name
+            and type(self.primary_hand.weapon_type.data_instance)
+            in self.klass_data_instance.available_implement_types
+        ):
+            return True
+        return False
+
+    def _secondary_hand_properly_armed(self, power: Power) -> bool:
+        return False
+
     def powers_calculated(self):
         powers_qs = self.race.powers.filter(level=0)
         powers_qs |= self.powers.filter(
@@ -917,20 +954,16 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
         for power in self.powers.ordered_by_frequency().filter(
             accessory_type=AccessoryTypeEnum.WEAPON.name
         ):
-            if power.available_weapon_types.count():
-                weapon_queryset = self.weapons.filter(
-                    weapon_type__in=power.available_weapon_types.all()
-                )
-            else:
-                weapon_queryset = self.weapons.all()
-            for weapon in weapon_queryset:
-                if weapon.weapon_type.data_instance.damage_dice is None:
-                    continue
+            if (
+                not power.available_weapon_types.count()
+                or self.primary_hand.weapon_type in power.available_weapon_types.all()
+                and self.primary_hand.weapon_type.data_instance.damage_dice
+            ):
                 powers.append(
                     PowerDisplay(
                         name=power.name,
                         keywords=power.keywords,
-                        category=power.category(weapon),
+                        category=power.category(self.primary_hand),
                         description=self.parse_string(power.description),
                         frequency_order=power.frequency_order,
                         properties=[
@@ -939,7 +972,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                                     'title': property.get_displayed_title(),
                                     'description': self.parse_string(
                                         property.get_displayed_description(),
-                                        weapon=weapon,
+                                        weapon=self.primary_hand,
                                     ),
                                     'debug': property.description,
                                 }
@@ -951,7 +984,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
         for power in self.powers.ordered_by_frequency().filter(
             accessory_type=AccessoryTypeEnum.IMPLEMENT.name
         ):
-            for weapon in self.weapons.all():
+            for weapon in filter(None, (self.primary_hand, self.secondary_hand)):
                 if not self.is_implement_proficient(weapon):
                     continue
                 powers.append(

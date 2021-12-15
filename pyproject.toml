@@ -19,7 +19,6 @@ black = "^20.8b1"
 isort = "^5.7.0"
 ipython = "^7.21.0"
 flake8 = "^4.0.0"
-mypy = "^0.910"
 
 [tool.black]
 include = '\.py$'

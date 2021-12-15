@@ -496,6 +496,7 @@ class Waraxe(WeaponType):
 class ExecutionAxe(WeaponType):
     name = 'Топор палача'
     group = WeaponGroupEnum.AXE
+    handedness = WeaponHandednessEnum.TWO
     category = WeaponCategoryIntEnum.SUPERIOR
     damage_dice = DiceIntEnum.D12
     brutal = 2
@@ -505,6 +506,7 @@ class ExecutionAxe(WeaponType):
 class Fullblade(WeaponType):
     name = 'Большой клинок'
     group = WeaponGroupEnum.HEAVY_BLADE
+    handedness = WeaponHandednessEnum.TWO
     category = WeaponCategoryIntEnum.SUPERIOR
     damage_dice = DiceIntEnum.D12
     prof_bonus = 3
@@ -514,6 +516,7 @@ class Fullblade(WeaponType):
 class Greatspear(WeaponType):
     name = 'Большое копьё'
     group = (WeaponGroupEnum.SPEAR, WeaponGroupEnum.POLEARM)
+    handedness = WeaponHandednessEnum.TWO
     category = WeaponCategoryIntEnum.SUPERIOR
     damage_dice = DiceIntEnum.D10
     prof_bonus = 3
@@ -524,6 +527,7 @@ class Mordenkrad(WeaponType):
     name = 'Морденкрад'
     group = WeaponGroupEnum.HAMMER
     category = WeaponCategoryIntEnum.SUPERIOR
+    handedness = WeaponHandednessEnum.TWO
     damage_dice = DiceIntEnum.D6
     dice_number = 2
     brutal = 1
@@ -533,6 +537,7 @@ class SpikedChain(WeaponType):
     name = 'Шипованная цепь'
     group = WeaponGroupEnum.FLAIL
     category = WeaponCategoryIntEnum.SUPERIOR
+    handedness = WeaponHandednessEnum.TWO
     damage_dice = DiceIntEnum.D4
     dice_number = 2
     prof_bonus = 3
@@ -560,6 +565,7 @@ class Sling(WeaponType):
 class Crossbow(WeaponType):
     name = 'Арбалет'
     group = WeaponGroupEnum.CROSSBOW
+    handedness = WeaponHandednessEnum.TWO
     category = WeaponCategoryIntEnum.SIMPLE_RANGED
     damage_dice = DiceIntEnum.D8
     range = 15
@@ -569,6 +575,7 @@ class Crossbow(WeaponType):
 class RepeatingCrossbow(WeaponType):
     name = 'Самозарядный арбалет'
     group = WeaponGroupEnum.CROSSBOW
+    handedness = WeaponHandednessEnum.TWO
     category = WeaponCategoryIntEnum.SIMPLE_RANGED
     damage_dice = DiceIntEnum.D8
     range = 10
@@ -578,6 +585,7 @@ class RepeatingCrossbow(WeaponType):
 class Longbow(WeaponType):
     name = 'Длинный лук'
     group = WeaponGroupEnum.BOW
+    handedness = WeaponHandednessEnum.TWO
     category = WeaponCategoryIntEnum.MILITARY_RANGED
     damage_dice = DiceIntEnum.D10
     range = 20
@@ -587,6 +595,7 @@ class Longbow(WeaponType):
 class Shortbow(WeaponType):
     name = 'Короткий лук'
     group = WeaponGroupEnum.BOW
+    handedness = WeaponHandednessEnum.TWO
     category = WeaponCategoryIntEnum.MILITARY_RANGED
     damage_dice = DiceIntEnum.D8
     range = 15
@@ -607,6 +616,7 @@ class Shuriken(WeaponType):
 class Greatbow(WeaponType):
     name = 'Большой лук'
     group = WeaponGroupEnum.BOW
+    handedness = WeaponHandednessEnum.TWO
     category = WeaponCategoryIntEnum.SUPERIOR_RANGED
     damage_dice = DiceIntEnum.D12
     is_load_free = True
@@ -616,6 +626,7 @@ class Greatbow(WeaponType):
 class SuperiorCrossbow(WeaponType):
     name = 'Превосходный арбалет'
     group = WeaponGroupEnum.CROSSBOW
+    handedness = WeaponHandednessEnum.TWO
     category = WeaponCategoryIntEnum.SUPERIOR_RANGED
     damage_dice = DiceIntEnum.D10
     is_load_minor = True

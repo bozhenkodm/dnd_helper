@@ -1,4 +1,5 @@
 from base.constants.constants import AttributeEnum
+from base.helpers import modifier
 from base.objects.abilities import Abilities
 
 
@@ -35,10 +36,6 @@ class AttributeMixin:
                 }
             )
         return result
-
-    @staticmethod
-    def _modifier(value):
-        return (value - 10) // 2
 
     @property
     def _tier_attrs_bonus(self) -> Abilities:
@@ -90,32 +87,32 @@ class AttributeMixin:
 
     @property
     def str_mod(self):
-        return self._modifier(self.strength)
+        return modifier(self.strength)
 
     @property
     def con_mod(self):
-        return self._modifier(self.constitution)
+        return modifier(self.constitution)
 
     @property
     def dex_mod(self):
-        return self._modifier(self.dexterity)
+        return modifier(self.dexterity)
 
     @property
     def int_mod(self):
-        return self._modifier(self.intelligence)
+        return modifier(self.intelligence)
 
     @property
     def wis_mod(self):
-        return self._modifier(self.wisdom)
+        return modifier(self.wisdom)
 
     @property
     def cha_mod(self):
-        return self._modifier(self.charisma)
+        return modifier(self.charisma)
 
     def get_attribute_text(self, attribute: AttributeEnum) -> str:
         attribute_value = getattr(self, attribute.lname)
-        modifier = self._modifier(attribute_value)
-        return f'{attribute.value[:3]} {attribute_value} ({modifier + self.half_level})'
+        mod = modifier(attribute_value)
+        return f'{attribute.value[:3]} {attribute_value} ({mod + self.half_level})'
 
     @property
     def attributes_texts(self) -> list:

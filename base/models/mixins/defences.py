@@ -1,4 +1,5 @@
 from base.constants.constants import NPCClassIntEnum, ShieldTypeEnum
+from base.helpers import modifier
 
 INITIAL_DEFENCE_VALUE = 10
 
@@ -37,7 +38,7 @@ class DefenceMixin:
     def fortitude(self):
         result = (
             self._defence_level_bonus
-            + max(self._modifier(self.strength), self._modifier(self.constitution))
+            + max(map(modifier, (self.strength, self.constitution)))
             + (
                 self.functional_template.fortitude_bonus
                 if self.functional_template
@@ -52,7 +53,7 @@ class DefenceMixin:
     def reflex(self):
         result = (
             self._defence_level_bonus
-            + max(self._modifier(self.dexterity), self._modifier(self.intelligence))
+            + max(map(modifier, (self.dexterity, self.intelligence)))
             + (self.functional_template.reflex_bonus if self.functional_template else 0)
             + self.race_data_instance.reflex
             + self.klass_data_instance.reflex
@@ -67,7 +68,7 @@ class DefenceMixin:
     def will(self):
         return (
             self._defence_level_bonus
-            + max(self._modifier(self.wisdom), self._modifier(self.charisma))
+            + max(map(modifier, (self.wisdom, self.charisma)))
             + (self.functional_template.will_bonus if self.functional_template else 0)
             + self.race_data_instance.will
             + self.klass_data_instance.will

@@ -39,6 +39,7 @@ class PowersVariables(str, Enum):
     WIS = auto()
     CHA = auto()
     WPN = auto()  # weapon damage dice
+    WPS = auto()  # secondary weapon damage dice
     LVL = auto()
     DMG = auto()  # damage bonus
     ATK = auto()  # attack bonus =
@@ -302,6 +303,8 @@ class PowerActionTypeEnum(BaseCapitalizedEnum):
 class AccessoryTypeEnum(BaseCapitalizedEnum):
     IMPLEMENT = 'Инструмент'
     WEAPON = 'Оружие'
+    TWO_WEAPONS = 'Два оружия'
+    # WEAPON_AND_IMPLEMENT = 'Оружие и инструмент'
 
 
 class DefenceTypeEnum(BaseCapitalizedEnum):

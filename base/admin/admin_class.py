@@ -1,12 +1,22 @@
+import io
+import subprocess
 from dataclasses import asdict
 from random import randint
 
 from django import forms
 from django.contrib import admin
-from django.contrib.auth.models import Group, User
+from django.core.files.images import ImageFile
 from django.db import models
 from django.utils.safestring import mark_safe
 
+from base.admin.forms import (
+    ArmorForm,
+    ClassForm,
+    MagicItemForm,
+    NPCModelForm,
+    WeaponForm,
+    WeaponTypeForm,
+)
 from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
     AccessoryTypeEnum,
@@ -17,19 +27,8 @@ from base.constants.constants import (
     PowerRangeTypeEnum,
     SkillsEnum,
 )
-from base.forms import ArmorForm, ClassForm, NPCModelForm, WeaponForm, WeaponTypeForm
-from base.models import NPC, Armor, Class, Encounter, Race
-from base.models.models import (
-    Combatants,
-    CombatantsPC,
-    FunctionalTemplate,
-    MagicItem,
-    PlayerCharacters,
-    Power,
-    PowerProperty,
-    Weapon,
-    WeaponType,
-)
+from base.models import Class, Race
+from base.models.models import Combatants, CombatantsPC, Power, PowerProperty
 from base.objects import npc_klasses
 
 
@@ -65,6 +64,7 @@ class ClassAdmin(admin.ModelAdmin):
             return ('name',) + base
         return base
 
+    @admin.display(description='Ношение брони')
     def available_armor_types(self, obj):
         if not obj.id:
             return '-'
@@ -73,8 +73,7 @@ class ClassAdmin(admin.ModelAdmin):
             for armor_type in npc_klasses[obj.name].available_armor_types
         )
 
-    available_armor_types.short_description = 'Ношение брони'
-
+    @admin.display(description='Ношение щитов')
     def available_shields(self, obj):
         if not obj.id or not npc_klasses[obj.name].available_shield_types:
             return '-'
@@ -82,8 +81,7 @@ class ClassAdmin(admin.ModelAdmin):
             shield.value for shield in npc_klasses[obj.name].available_shield_types
         )
 
-    available_shields.short_description = 'Ношение щитов'
-
+    @admin.display(description='Владение оружием')
     def available_weapons(self, obj):
         if not obj.id:
             return '-'
@@ -98,8 +96,7 @@ class ClassAdmin(admin.ModelAdmin):
             ]
         )
 
-    available_weapons.short_description = 'Владение оружием'
-
+    @admin.display(description='Владение инструментами')
     def available_implements(self, obj):
         if not obj.id:
             return '-'
@@ -107,8 +104,6 @@ class ClassAdmin(admin.ModelAdmin):
             armor_type.name
             for armor_type in npc_klasses[obj.name].available_implement_types
         )
-
-    available_implements.short_description = 'Владение инструментами'
 
 
 class RaceListFilter(admin.SimpleListFilter):
@@ -164,7 +159,7 @@ class NPCAdmin(admin.ModelAdmin):
             'shield',
         ),
         'weapons',
-        # ('primary_hand', 'secondary_hand'),
+        ('primary_hand', 'secondary_hand'),
         'powers',
     ]
     readonly_fields = [
@@ -172,7 +167,7 @@ class NPCAdmin(admin.ModelAdmin):
         'mandatory_skills',
         'generated_attributes',
     ]
-    autocomplete_fields = ('weapons',)
+    autocomplete_fields = ('weapons', 'primary_hand', 'secondary_hand')
     search_fields = ('name',)
     list_filter = (RaceListFilter, 'klass')
     form = NPCModelForm
@@ -233,11 +228,11 @@ class NPCAdmin(admin.ModelAdmin):
             readonly_fields.append('subclass')
         return readonly_fields
 
+    @admin.display(description='Лист персонажа')
     def npc_link(self, obj):
         return mark_safe(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
 
-    npc_link.short_description = 'Лист персонажа'
-
+    @admin.display(description='Сгенерированные атрибуты')
     def generated_attributes(self, obj):
         def generate_attribute():
             generated_sum = [randint(1, 6) for _ in range(4)]
@@ -245,16 +240,13 @@ class NPCAdmin(admin.ModelAdmin):
 
         return ', '.join(sorted([str(generate_attribute()) for _ in range(6)], key=int))
 
-    generated_attributes.short_description = 'Сгенерированные аттрибуты'
-
+    @admin.display(description='Тренированные навыки')
     def mandatory_skills(self, obj):
         return ', '.join(
             SkillsEnum[key.upper()]
             for key, value in asdict(obj.klass_data_instance.mandatory_skills).items()
             if value
         )
-
-    mandatory_skills.short_description = 'Тренированные навыки'
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
@@ -294,13 +286,13 @@ class EncounterAdmin(admin.ModelAdmin):
     )
     autocomplete_fields = ('npcs',)
 
+    @admin.display(description='Страница сцены')
     def encounter_link(self, obj):
         if not obj.id:
             return '-'
         return mark_safe(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
 
-    encounter_link.short_description = 'Страница сцены'
-
+    @admin.display(description='Страницы персонажей')
     def npc_links(self, obj):
         if not obj.npcs.count():
             return '-'
@@ -310,8 +302,6 @@ class EncounterAdmin(admin.ModelAdmin):
                 for npc in obj.npcs.all()
             )
         )
-
-    npc_links.short_description = 'Страницы персонажей'
 
 
 class ArmorAdmin(admin.ModelAdmin):
@@ -327,12 +317,11 @@ class ArmorAdmin(admin.ModelAdmin):
     readonly_fields = ('armor_class',)
     form = ArmorForm
 
+    @admin.display(description='Класс доспеха')
     def armor_class(self, obj):
         if not obj.id:
             return '-'
         return obj.armor_class
-
-    armor_class.short_description = 'Класс доспеха'
 
     def get_queryset(self, request):
         return (
@@ -377,26 +366,23 @@ class WeaponTypeAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         return False
 
+    @admin.display(description='Категория оружия')
     def category(self, obj):
         if not obj.id:
             return '-'
         return obj.data_instance.category.description
 
-    category.short_description = 'Категория оружия'
-
+    @admin.display(description='Группа оружия')
     def group(self, obj):
         if not obj.id:
             return '-'
         return obj.data_instance.group.value
 
-    group.short_description = 'Группа оружия'
-
+    @admin.display(description='Урон')
     def damage(self, obj):
         if not obj.id:
             return '-'
         return obj.data_instance.damage()
-
-    damage.short_description = 'Урон'
 
 
 class WeaponAdmin(admin.ModelAdmin):
@@ -410,24 +396,21 @@ class WeaponAdmin(admin.ModelAdmin):
         'damage',
     )
     list_display = ('__str__',)
-    search_fields = ('name',)
+    search_fields = ('name', 'weapon_type__name')
     autocomplete_fields = ('weapon_type',)
     form = WeaponForm
 
+    @admin.display(description='Категория оружия')
     def category(self, obj):
         return obj.weapon_type.data_instance.category.description
 
-    category.short_description = 'Категория оружия'
-
+    @admin.display(description='Группа оружия')
     def group(self, obj):
         return obj.weapon_type.data_instance.group.value
 
-    group.short_description = 'Группа оружия'
-
+    @admin.display(description='Урон')
     def damage(self, obj):
         return f'{obj.weapon_type.data_instance.damage()} + {obj.enchantment}'
-
-    damage.short_description = 'Урон'
 
 
 class PowerPropertyInline(admin.TabularInline):
@@ -481,6 +464,7 @@ class PowerAdmin(admin.ModelAdmin):
     autocomplete_fields = ('available_weapon_types',)
     save_as = True
 
+    @admin.display(description='Синтаксис')
     def syntax(self, obj):
         return '''
 str - модификатор силы
@@ -502,10 +486,8 @@ itl - бонус предмета, к которому принадлежит т
 игнорируя арифметический порядок действий
 (лень возиться со стеками и польской записью)
 Атака по умолчанию $[ATTACK_ATTRIBUTE]+atk+[power.attack_bonus]
-Урон по умолчанию $wpn+dmg / $[damage_dice]+dmg
+Урон по умолчанию $wpn+dmg / $[damage_dice]+dmg+[ATTACK_ATTRIBUTE]
 '''
-
-    syntax.short_description = 'Синтаксис'
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'race':
@@ -621,32 +603,35 @@ class PlayerCharactersAdmin(admin.ModelAdmin):
         'name',
         ('armor_class', 'fortitude', 'reflex', 'will'),
         ('passive_perception', 'passive_insight'),
-        ('initiative'),
+        'initiative',
     )
 
 
 class MagicItemAdmin(admin.ModelAdmin):
-    fields = ('name', 'min_level', 'step', 'category', 'picture', 'image_tag', 'source')
+    fields = (
+        'name',
+        'min_level',
+        'step',
+        'category',
+        'picture',
+        'upload_from_clipboard',
+        'image_tag',
+        'source',
+    )
     readonly_fields = ('image_tag',)
+    form = MagicItemForm
 
+    @admin.display(description='Картинка')
     def image_tag(self, obj):
         return mark_safe(f'<img src="{obj.picture.url}" />')
 
-    image_tag.short_description = 'Картинка'
-    image_tag.allow_tags = True
+    def save_model(self, request, obj, form, change):
+        super(MagicItemAdmin, self).save_model(request, obj, form, change)
+        if form.cleaned_data['upload_from_clipboard']:
+            bashCommand = 'xclip -selection clipboard -t image/png -o'
+            process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+            output, error = process.communicate()
 
-
-admin.site.register(Race, RaceAdmin)
-admin.site.register(Class, ClassAdmin)
-admin.site.register(NPC, NPCAdmin)
-admin.site.register(Encounter, EncounterAdmin)
-admin.site.register(Armor, ArmorAdmin)
-admin.site.register(WeaponType, WeaponTypeAdmin)
-admin.site.register(Weapon, WeaponAdmin)
-admin.site.register(Power, PowerAdmin)
-admin.site.register(FunctionalTemplate, FunctionalTemplateAdmin)
-admin.site.register(PlayerCharacters, PlayerCharactersAdmin)
-admin.site.register(MagicItem, MagicItemAdmin)
-
-admin.site.unregister(Group)
-admin.site.unregister(User)
+            image_field = ImageFile(io.BytesIO(output), name=f'MagicItem_{obj.id}.png')
+            obj.picture = image_field
+            obj.save()
