@@ -16,12 +16,8 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 from django.views.generic.base import RedirectView
-
-from base.views import EncounterDetailView, MainView, NPCDetailView
-from generator import views as generator_views
-from printer.views import PrintableObjectView
 
 favicon_view = RedirectView.as_view(url='/static/favicon.ico', permanent=True)
 
@@ -29,33 +25,7 @@ favicon_view = RedirectView.as_view(url='/static/favicon.ico', permanent=True)
 urlpatterns = [
     path('favicon.ico', favicon_view),
     path('admin/', admin.site.urls),
-    path('', MainView.as_view(), name='main_view'),
-    path(
-        'generator/main',
-        generator_views.GeneratorsMainView.as_view(),
-        name='generator_main',
-    ),
-    path(
-        'generator/tavern',
-        generator_views.TavernView.as_view(),
-        name='generator_tavern',
-    ),
-    path(
-        'generator/tavern/<race>',
-        generator_views.TavernView.as_view(),
-        name='generator_tavern',
-    ),
-    path(
-        'generator/fantasy_name',
-        generator_views.FantasyNameView.as_view(),
-        name='generator_fantasy_name',
-    ),
-    path(
-        'generator/random_name',
-        generator_views.RandomNameView.as_view(),
-        name='random_fantasy_name',
-    ),
-    path('npc/detail/<pk>', NPCDetailView.as_view(), name='npc'),
-    path('encounter/detail/<pk>', EncounterDetailView.as_view(), name='encounter'),
-    path('printer/detail/<pk>', PrintableObjectView.as_view(), name='printer'),
+    path('', include('base.urls')),
+    path('generator/', include('generator.urls')),
+    path('pronter/', include('pronter.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
