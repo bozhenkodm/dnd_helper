@@ -7,12 +7,13 @@ from multiselectfield import MultiSelectFormField
 from base.constants.constants import (
     AttributeEnum,
     NPCClassIntEnum,
+    NPCRaceEnum,
     SexEnum,
     SkillsEnum,
     WeaponHandednessEnum,
 )
 from base.models import NPC
-from base.models.models import Armor, Class, MagicItem, Power, Weapon, WeaponType
+from base.models.models import Armor, Class, MagicItem, Power, Race, Weapon, WeaponType
 from base.objects import weapon_types_tuple
 
 
@@ -54,7 +55,6 @@ class NPCModelForm(forms.ModelForm):
                 .filter(klass=self.instance.klass, level__lte=self.instance.level)
                 .order_by('level', 'frequency_order'),
                 label='Таланты',
-
             )
             if subclass_enum := getattr(
                 self.instance.klass_data_instance, 'SubclassEnum', None
@@ -137,6 +137,27 @@ class ClassForm(forms.ModelForm):
                     item
                     for item in NPCClassIntEnum.generate_choices()
                     if item[0] not in existing_classes
+                ],
+                label='Название класса',
+            )
+
+
+class RaceForm(forms.ModelForm):
+    class Meta:
+        model = Race
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.id:
+            existing_races = set(
+                self._meta.model.objects.values_list('name', flat=True)
+            )
+            self.fields['name'] = forms.ChoiceField(
+                choices=[
+                    item
+                    for item in NPCRaceEnum.generate_choices()
+                    if item[0] not in existing_races
                 ],
                 label='Название класса',
             )

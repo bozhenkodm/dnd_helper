@@ -1,5 +1,3 @@
-from base.constants.constants import NPCRaceEnum
-
 adjectives = '''
 лукавый
 сердитый
