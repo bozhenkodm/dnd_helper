@@ -27,5 +27,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('base.urls')),
     path('generator/', include('generator.urls')),
-    path('pronter/', include('pronter.urls')),
+    path('printer/', include('printer.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

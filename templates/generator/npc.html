@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Генератор npc</title>
+</head>
+<body>
+    <div align="center">
+        <h3>{{ first_name }} {{ last_name }}, {% if sex == 'F' %}(Ж){% elif sex == N %}(Н/Д){% else %}(M){% endif %}, {{ race }}</h3>
+        <p></p>
+        <a href="{{ npc_create_link }}" target="_blank">Создать NPC</a><br/>
+    </div>
+    <div>
+        <h4>
+            {% for link in links %}
+                <a href="{{ link.1 }}">{{ link.0 }}</a> (<a href="{{ link.1 }}?sex=M">M</a> / <a href="{{ link.1 }}?sex=F">Ж</a>)<br/>
+            {% endfor %}
+        </h4>
+    </div>
+</body>
+</html>

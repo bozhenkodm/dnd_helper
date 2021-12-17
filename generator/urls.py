@@ -3,6 +3,7 @@ from django.urls import path
 from generator.views import (
     FantasyNameView,
     GeneratorsMainView,
+    NpcGeneratorView,
     RandomNameView,
     TavernView,
 )
@@ -19,9 +20,14 @@ urlpatterns = [
         name='generator_tavern',
     ),
     path(
-        'tavern/<race>',
-        TavernView.as_view(),
-        name='generator_tavern',
+        'npc/',
+        NpcGeneratorView.as_view(),
+        name='generator_npc',
+    ),
+    path(
+        'npc/<race>',
+        NpcGeneratorView.as_view(),
+        name='generator_npc',
     ),
     path(
         'fantasy_name',

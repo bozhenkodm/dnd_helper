@@ -18,6 +18,41 @@ class GeneratorsMainView(TemplateView):
         return context
 
 
+class NpcGeneratorView(TemplateView):
+    template_name = 'generator/npc.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        sex = self.request.GET.get('sex')
+        race = kwargs.get('race')
+        if race:
+            race = race.upper()
+        npc = NPCName.generate_npc(race, sex)
+        context['first_name'] = npc['first_name']
+        context['last_name'] = npc['last_name']
+        context['sex'] = npc['sex']
+        context['race'] = npc['race'].get_name_display()
+        context['links'] = [
+            ('Все расы', reverse('generator_npc'))
+        ] + NPCName.generate_links()
+
+        query_params = {
+            'name': ' '.join((npc['first_name'], npc['last_name']))
+            if npc['last_name']
+            else npc['first_name'],
+            'sex': npc['sex'],
+            'race': npc['race'].id,
+        }
+
+        context['npc_create_link'] = (
+            reverse('admin:base_npc_add')
+            + '?'
+            + '&'.join((f'{name}={value}' for name, value in query_params.items()))
+        )
+
+        return context
+
+
 class TavernView(TemplateView):
     template_name = 'generator/tavern.html'
 
@@ -28,22 +63,6 @@ class TavernView(TemplateView):
             f' {random.choice(nouns.split()).capitalize()}'
         )
         context['tavern'] = tavern
-        sex = self.request.GET.get('sex')
-        race = kwargs.get('race')
-        if race:
-            race = race.upper()
-        taverner = NPCName.generate_taverner(race, sex)
-        context['taverner_first_name'] = taverner['first_name']
-        context['taverner_last_name'] = taverner['last_name']
-        context['taverner_sex'] = taverner['sex']
-        context['taverner_race'] = taverner['race']
-        context['links'] = [('Все расы', reverse('generator_tavern'))] + [
-            (
-                race.value,
-                reverse('generator_tavern', kwargs={'race': race.name.lower()}),
-            )
-            for race in NPCName.generate_links()
-        ]
         return context
 
 

@@ -34,6 +34,7 @@ from base.objects import npc_klasses
 
 class RaceAdmin(admin.ModelAdmin):
     fields = ('name', 'is_sociable')
+    list_filter = ('is_sociable',)
 
     def get_queryset(self, request):
         qs = super().get_queryset(request).annotate(title=NPCRaceEnum.generate_case())

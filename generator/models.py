@@ -1,8 +1,9 @@
 import random
 
 from django.db import models
+from django.urls import reverse
 
-from base.constants.constants import NPCRaceEnum, SexEnum
+from base.constants.constants import SexEnum
 from base.models import Race
 from generator.constants import taverners_races
 
@@ -41,12 +42,12 @@ class NPCName(models.Model):
         )
 
     @classmethod
-    def generate_taverner(cls, race=None, sex=None) -> dict:
+    def generate_npc(cls, race=None, sex=None) -> dict:
+        # TODO remove connection with Race somehow
         if not race:
-            race = random.choice(taverners_races)
+            race = random.choice(Race.objects.filter(is_sociable=True))
         else:
-            race = NPCRaceEnum[race]
-        race = Race.objects.get(name=race.name)
+            race = Race.objects.get(name=race)
         try:
             sex = SexEnum[sex.upper()]
         except (KeyError, AttributeError):
@@ -63,9 +64,19 @@ class NPCName(models.Model):
             'first_name': first_name,
             'last_name': last_name,
             'sex': sex.name,
-            'race': race.get_name_display(),
+            'race': race,
         }
 
     @staticmethod
     def generate_links():
-        return sorted((race for race in set(taverners_races)), key=lambda x: x.value)
+        races = Race.objects.filter(is_sociable=True)
+        return sorted(
+            (
+                (
+                    race.get_name_display(),
+                    reverse('generator_npc', kwargs={'race': race.name.lower()}),
+                )
+                for race in races
+            ),
+            key=lambda x: x[0],
+        )

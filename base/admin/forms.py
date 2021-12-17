@@ -52,7 +52,9 @@ class NPCModelForm(forms.ModelForm):
             self.fields['powers'] = forms.ModelMultipleChoiceField(
                 queryset=Power.objects.with_frequency_order()
                 .filter(klass=self.instance.klass, level__lte=self.instance.level)
-                .order_by('level', 'frequency_order')
+                .order_by('level', 'frequency_order'),
+                label='Таланты',
+
             )
             if subclass_enum := getattr(
                 self.instance.klass_data_instance, 'SubclassEnum', None
