@@ -5,7 +5,6 @@ from django.urls import reverse
 
 from base.constants.constants import SexEnum
 from base.models import Race
-from generator.constants import taverners_races
 
 
 class NPCName(models.Model):

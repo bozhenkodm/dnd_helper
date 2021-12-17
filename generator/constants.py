@@ -207,37 +207,6 @@ nouns = '''
 '''
 
 
-taverners_races = (
-    NPCRaceEnum.TIEFLING,
-    NPCRaceEnum.ELF,
-    NPCRaceEnum.ELF,
-    NPCRaceEnum.ELF,
-    NPCRaceEnum.HALFLING,
-    NPCRaceEnum.DWARF,
-    NPCRaceEnum.DWARF,
-    NPCRaceEnum.HUMAN,
-    NPCRaceEnum.HUMAN,
-    NPCRaceEnum.HUMAN,
-    NPCRaceEnum.HUMAN,
-    NPCRaceEnum.HALFELF,
-    NPCRaceEnum.HALFELF,
-    NPCRaceEnum.HALFELF,
-    NPCRaceEnum.HALFELF,
-    NPCRaceEnum.ELADRIN,
-    NPCRaceEnum.DRAGONBORN,
-    NPCRaceEnum.DRAGONBORN,
-    NPCRaceEnum.GOLIATH,
-    NPCRaceEnum.GNOME,
-    NPCRaceEnum.HALFORC,
-    # NPCRaceEnum.SHIFTER_RAZORCLAW,
-    # NPCRaceEnum.SHIFTER_LONGTEETH,
-    # NPCRaceEnum.DEVA,
-    NPCRaceEnum.KALASHTAR,
-    NPCRaceEnum.MUL,
-    # NPCRaceEnum.DOPPELGANGER,
-    # NPCRaceEnum.WARFORGED,
-)
-
 vovels = 'аеиоуэя'
 consolants = 'бвгджзклмнпрстфхцчшщ'
 
