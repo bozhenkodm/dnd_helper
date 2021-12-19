@@ -39,7 +39,7 @@ class AttributeMixin:
 
     @property
     def _tier_attrs_bonus(self) -> Abilities:
-        return Abilities(**{attribute.lname: self._tier for attribute in AttributeEnum})
+        return Abilities(**{attribute.lvalue: self._tier for attribute in AttributeEnum})
 
     @property
     def _base_abilities(self) -> Abilities:
@@ -59,7 +59,7 @@ class AttributeMixin:
             + self._level_attr_bonuses
             + self._base_abilities
         )
-        return getattr(abilities, attribute.lname)
+        return getattr(abilities, attribute.lvalue)
 
     @property
     def strength(self):
@@ -110,7 +110,7 @@ class AttributeMixin:
         return modifier(self.charisma)
 
     def get_attribute_text(self, attribute: AttributeEnum) -> str:
-        attribute_value = getattr(self, attribute.lname)
+        attribute_value = getattr(self, attribute.lvalue)
         mod = modifier(attribute_value)
         return f'{attribute.value[:3]} {attribute_value} ({mod + self.half_level})'
 

@@ -9,7 +9,7 @@ class SkillMixin:
     def skill_mod_bonus(self):
         return Skills(
             **{
-                skill.lname: getattr(
+                skill.lvalue: getattr(
                     self, f'{skill.get_base_attribute().name.lower()[:3]}_mod'
                 )
                 for skill in SkillsEnum

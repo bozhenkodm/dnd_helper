@@ -44,10 +44,6 @@ class BaseNameValueDescriptionEnum(str, Enum):
         return max(len(item.name) for item in cls)
 
     @property
-    def lname(self):
-        return self.name.lower()
-
-    @property
     def lvalue(self):
         return self.value.lower()
 

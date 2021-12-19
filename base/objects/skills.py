@@ -68,10 +68,10 @@ class Skills:
 
     @classmethod
     def init_with_const(cls, skills: Sequence[SkillsEnum], value: int) -> "Skills":
-        return Skills(**{skill.lname: value for skill in skills})
+        return Skills(**{skill.lvalue: value for skill in skills})
 
     def intersect(self, skills: Sequence[SkillsEnum]) -> "Skills":
         # return new instance with items that only present in skills
         return Skills(
-            **{skill.lname: getattr(self, skill.lname, 0) for skill in skills}
+            **{skill.lvalue: getattr(self, skill.lvalue, 0) for skill in skills}
         )
