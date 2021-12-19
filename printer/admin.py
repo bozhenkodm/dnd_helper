@@ -19,7 +19,7 @@ class PrintableObjectAdmin(admin.ModelAdmin):
     readonly_fields = ('link',)
     inlines = (PrintableObjectItemsAdmin,)
 
-    @admin.display(description='Лист для печати')
+    @admin.display(description='Лист для печати', ordering='id')
     def link(self, obj):
         if not obj or not obj.id:
             return '-'
@@ -48,7 +48,6 @@ class EncounterIconsAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
         # TODO make a mixin with this method
-        print(form.cleaned_data)
         if form.cleaned_data['upload_from_clipboard']:
             bashCommand = 'xclip -selection clipboard -t image/png -o'
             process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
@@ -58,7 +57,7 @@ class EncounterIconsAdmin(admin.ModelAdmin):
             obj.base_image = image_field
             obj.save()
 
-    @admin.display(description='Иконки с цифрами')
+    @admin.display(description='Иконки с цифрами', ordering='id')
     def link(self, obj):
         if not obj or not obj.id:
             return '-'

@@ -416,11 +416,11 @@ class Power(models.Model):
         if self.race:
             return self.race.get_name_display()
         if self.accessory_type in (
-            AccessoryTypeEnum.WEAPON,
-            AccessoryTypeEnum.IMPLEMENT,
+            AccessoryTypeEnum.WEAPON.name,
+            AccessoryTypeEnum.IMPLEMENT.name,
         ):
             return str(primary_weapon)
-        if self.accessory_type == AccessoryTypeEnum.TWO_WEAPONS:
+        if self.accessory_type == AccessoryTypeEnum.TWO_WEAPONS.name:
             return f'{primary_weapon}, {secondary_weapon}'
         if self.level % 2 == 0 and self.level > 0:
             return 'Приём'

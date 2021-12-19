@@ -64,6 +64,8 @@ class NPCModelForm(forms.ModelForm):
                 )
 
     def clean(self):
+        if not self.instance.id:
+            return super(NPCModelForm, self).clean()
         if self.cleaned_data['secondary_hand'] and self.cleaned_data['shield']:
             error = ValidationError('Нельзя удержать в одной руке оружие и щит')
             self.add_error('shield', error)
@@ -226,5 +228,5 @@ class MagicItemForm(forms.ModelForm):
         fields = '__all__'
 
     upload_from_clipboard = forms.BooleanField(
-        required=False, label='Загрузить из буфера обмена', initial=True
+        required=False, label='Загрузить из буфера обмена', initial=False
     )

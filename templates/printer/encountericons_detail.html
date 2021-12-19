@@ -58,11 +58,11 @@
 <body>
 {% with ''|center:object.number as range %}
 {% for _ in range %}
- <div class="container" style="clear: right">
+ <div class="container">
   <img src="{{object.base_image.url}}" alt="Snow" style="width:100%;">
   <div class="{{ object.get_number_position_display }}">{{ forloop.counter }}</div>
 </div>
-<br>
+<!--<br>-->
 {% endfor %}
 {% endwith %}
 </body>
