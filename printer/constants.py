@@ -1,24 +1,24 @@
 from enum import auto
 
-from base.constants.base import BaseCapitalizedEnum
+from base.constants.base import BaseNameValueDescriptionEnum
 
 
-class PrintableObjectType(BaseCapitalizedEnum):
-    ITEM = 'Магический предмет'
-    AT_WILL = 'Неограниченный талант'
-    ENCOUNTER = 'Талант на сцену'
-    DAYLY = 'Талант на день'
+class PrintableObjectType(BaseNameValueDescriptionEnum):
+    ITEM = 'ITEM', 'Магический предмет'
+    AT_WILL = 'AT_WILL', 'Неограниченный талант'
+    ENCOUNTER = 'ENCOUNTER', 'Талант на сцену'
+    DAYLY = 'DAYLY', 'Талант на день'
 
 
-class ColorsStyle(BaseCapitalizedEnum):
-    RED = auto()
-    BLACK = auto()
-    WHITE = auto()
+class ColorsStyle(BaseNameValueDescriptionEnum):
+    RED = 'RED', 'Red'
+    BLACK = 'BLACK', 'Black'
+    WHITE = 'WHITE', 'White'
 
 
-class Position(BaseCapitalizedEnum):
-    BOTTOM_LEFT = 'bottom-left'
-    TOP_LEFT = 'top-left'
-    BOTTOM_RIGHT = 'bottom-right'
-    TOP_RIGHT = 'top-right'
-    CENTER = 'center'
+class Position(BaseNameValueDescriptionEnum):
+    BOTTOM_LEFT = 'BOTTOM_LEFT', 'bottom-left'
+    TOP_LEFT = 'TOP_LEFT', 'top-left'
+    BOTTOM_RIGHT = 'BOTTOM_RIGHT', 'bottom-right'
+    TOP_RIGHT = 'TOP_RIGHT', 'top-right'
+    CENTER = 'CENTER', 'center'

@@ -1,31 +1,22 @@
 from enum import Enum, auto
 from random import randint
 
-from base.constants.base import BaseCapitalizedEnum, IntDescriptionEnum
+from base.constants.base import BaseNameValueDescriptionEnum, IntDescriptionEnum
 
 
-class SexEnum(BaseCapitalizedEnum):
-    M = 'Муж'
-    F = 'Жен'
-    N = 'Н/Д'
+class SexEnum(BaseNameValueDescriptionEnum):
+    M = 'M', 'Муж'
+    F = 'F', 'Жен'
+    N = 'N', 'Н/Д'
 
 
-class AttributeEnum(BaseCapitalizedEnum):
-    STRENGTH = 'Сила'
-    CONSTITUTION = 'Телосложение'
-    DEXTERITY = 'Ловкость'
-    INTELLIGENCE = 'Интеллект'
-    WISDOM = 'Мудрость'
-    CHARISMA = 'Харизма'
-
-
-class AttributeIntEnum(IntDescriptionEnum):
-    STRENGTH = 1, 'Сила'
-    CONSTITUTION = 2, 'Телосложение'
-    DEXTERITY = 3, 'Ловкость'
-    INTELLIGENCE = 4, 'Интеллект'
-    WISDOM = 5, 'Мудрость'
-    CHARISMA = 6, 'Харизма'
+class AttributeEnum(BaseNameValueDescriptionEnum):
+    STRENGTH = 'STRENGTH', 'Сила'
+    CONSTITUTION = 'CONSTITUTION', 'Телосложение'
+    DEXTERITY = 'DEXTERITY', 'Ловкость'
+    INTELLIGENCE = 'INTELLIGENCE', 'Интеллект'
+    WISDOM = 'WISDOM', 'Мудрость'
+    CHARISMA = 'CHARISMA', 'Харизма'
 
 
 class PowersVariables(str, Enum):
@@ -48,63 +39,63 @@ class PowersVariables(str, Enum):
     ITL = auto()  # item level
 
 
-class SizeEnum(BaseCapitalizedEnum):
-    TINY = 'Крошечный'
-    SMALL = 'Маленький'
-    AVERAGE = 'Средний'
-    BIG = 'Большой'
-    LARGE = 'Огромный'
+class SizeEnum(BaseNameValueDescriptionEnum):
+    TINY = 'TINY', 'Крошечный'
+    SMALL = 'SMALL', 'Маленький'
+    AVERAGE = 'AVERAGE', 'Средний'
+    BIG = 'BIG', 'Большой'
+    LARGE = 'LARGE', 'Огромный'
 
 
-class VisionEnum(BaseCapitalizedEnum):
-    NORMAL = 'Обычное'
-    TWILIGHT = 'Сумеречное'
-    DARK = 'Тёмное'
+class VisionEnum(BaseNameValueDescriptionEnum):
+    NORMAL = 'NORMAL', 'Обычное'
+    TWILIGHT = 'TWILIGHT', 'Сумеречное'
+    DARK = 'DARK', 'Тёмное'
 
 
-class NPCRaceEnum(BaseCapitalizedEnum):
-    BUGBEAR = 'Багбир'
-    VRYLOKA = 'Врылока'
-    HAMADRYAD = 'Гамадриада'
-    GITHZERAI = 'Гитзерай'
-    GNOME = 'Гном'
-    GNOLL = 'Гнолл'
-    GOBLIN = 'Гоблин'
-    GOLIATH = 'Голиаф'
-    DWARF = 'Дварф'
-    DEVA = 'Дев'
-    GENASI_EARTHSOUL = 'Дженази, земля'
-    GENASI_FIRESOUL = 'Дженази, огонь'
-    GENASI_STORMSOUL = 'Дженази, шторм'
-    GENASI_WATERSOUL = 'Дженази, вода'
-    GENASI_WINDSOUL = 'Дженази, ветер'
-    WILDEN = 'Дикарь'
-    DOPPELGANGER = 'Доппельгангер'
-    DRAGONBORN = 'Драконорожденный'
-    DROW = 'Дроу'
-    DUERGAR = 'Дуэргар'
-    KALASHTAR = 'Калаштар'
-    KENKU = 'Кенку'
-    KOBOLD = 'Кобольд'
-    WARFORGED = 'Кованый'
-    BLADELING = 'Лезвие'
-    MINOTAUR = 'Минотавр'
-    MUL = 'Мул'
-    ORC = 'Орк'
-    HALFELF = 'Полуэльф'
-    HALFLING = 'Полурослик'
-    HALFORC = 'Полуорк'
-    PIXIE = 'Пикси'
-    SATYR = 'Сатир'
-    TIEFLING = 'Тифлинг'
-    THRI_KREEN = 'Три-крин'
-    HOBGOBLIN = 'Хобгоблин'
-    HUMAN = 'Человек'
-    SHADAR_KAI = 'Шадар-Кай'
-    SHIFTER_RAZORCLAW = 'Шифтер, бритволапый'
-    SHIFTER_LONGTEETH = 'Шифтер, длиннозубый'
-    ELADRIN = 'Эладрин'
-    ELF = 'Эльф'
+class NPCRaceEnum(BaseNameValueDescriptionEnum):
+    BUGBEAR = 'BUGBEAR', 'Багбир'
+    VRYLOKA = 'VRYLOKA', 'Врылока'
+    HAMADRYAD = 'HAMADRYAD', 'Гамадриада'
+    GITHZERAI = 'GITHZERAI', 'Гитзерай'
+    GNOME = 'GNOME', 'Гном'
+    GNOLL = 'GNOLL', 'Гнолл'
+    GOBLIN = 'GOBLIN', 'Гоблин'
+    GOLIATH = 'GOLIATH', 'Голиаф'
+    DWARF = 'DWARF', 'Дварф'
+    DEVA = 'DEVA', 'Дев'
+    GENASI_EARTHSOUL = 'GENASI_EARTHSOUL', 'Дженази, земля'
+    GENASI_FIRESOUL = 'GENASI_FIRESOUL', 'Дженази, огонь'
+    GENASI_STORMSOUL = 'GENASI_STORMSOUL', 'Дженази, шторм'
+    GENASI_WATERSOUL = 'GENASI_WATERSOUL', 'Дженази, вода'
+    GENASI_WINDSOUL = 'GENASI_WINDSOUL', 'Дженази, ветер'
+    WILDEN = 'WILDEN', 'Дикарь'
+    DOPPELGANGER = 'DOPPELGANGER', 'Доппельгангер'
+    DRAGONBORN = 'DRAGONBORN', 'Драконорожденный'
+    DROW = 'DROW', 'Дроу'
+    DUERGAR = 'DUERGAR', 'Дуэргар'
+    KALASHTAR = 'KALASHTAR', 'Калаштар'
+    KENKU = 'KENKU', 'Кенку'
+    KOBOLD = 'KOBOLD', 'Кобольд'
+    WARFORGED = 'WARFORGED', 'Кованый'
+    BLADELING = 'BLADELING', 'Лезвие'
+    MINOTAUR = 'MINOTAUR', 'Минотавр'
+    MUL = 'MUL', 'Мул'
+    ORC = 'ORC', 'Орк'
+    HALFELF = 'HALFELF', 'Полуэльф'
+    HALFLING = 'HALFLING', 'Полурослик'
+    HALFORC = 'HALFORC', 'Полуорк'
+    PIXIE = 'PIXIE', 'Пикси'
+    SATYR = 'SATYR', 'Сатир'
+    TIEFLING = 'TIEFLING', 'Тифлинг'
+    THRI_KREEN = 'THRI_KREEN', 'Три-крин'
+    HOBGOBLIN = 'HOBGOBLIN', 'Хобгоблин'
+    HUMAN = 'HUMAN', 'Человек'
+    SHADAR_KAI = 'SHADAR_KAI', 'Шадар-Кай'
+    SHIFTER_RAZORCLAW = 'SHIFTER_RAZORCLAW', 'Шифтер, бритволапый'
+    SHIFTER_LONGTEETH = 'SHIFTER_LONGTEETH', 'Шифтер, длиннозубый'
+    ELADRIN = 'ELADRIN', 'Эладрин'
+    ELF = 'ELF', 'Эльф'
 
 
 class NPCClassIntEnum(IntDescriptionEnum):
@@ -135,24 +126,24 @@ class NPCClassIntEnum(IntDescriptionEnum):
     SHAMAN = 200, 'Шаман'
 
 
-class SkillsEnum(BaseCapitalizedEnum):
-    ACROBATICS = 'Акробатика'
-    ARCANA = 'Магия'
-    ATHLETICS = 'Атлетика'
-    BLUFF = 'Обман'
-    DIPLOMACY = 'Переговоры'
-    DUNGEONEERING = 'Подземелья'
-    ENDURANCE = 'Выносливость'
-    HEAL = 'Целительство'
-    HISTORY = 'История'
-    INSIGHT = 'Проницательность'
-    INTIMIDATE = 'Запугивание'
-    NATURE = 'Природа'
-    PERCEPTION = 'Внимательность'
-    RELIGION = 'Религия'
-    STEALTH = 'Скрытность'
-    STREETWISE = 'Знание улиц'
-    THIEVERY = 'Воровство'
+class SkillsEnum(BaseNameValueDescriptionEnum):
+    ACROBATICS = 'ACROBATICS', 'Акробатика'
+    ARCANA = 'ARCANA', 'Магия'
+    ATHLETICS = 'ATHLETICS', 'Атлетика'
+    BLUFF = 'BLUFF', 'Обман'
+    DIPLOMACY = 'DIPLOMACY', 'Переговоры'
+    DUNGEONEERING = 'DUNGEONEERING', 'Подземелья'
+    ENDURANCE = 'ENDURANCE', 'Выносливость'
+    HEAL = 'HEAL', 'Целительство'
+    HISTORY = 'HISTORY', 'История'
+    INSIGHT = 'INSIGHT', 'Проницательность'
+    INTIMIDATE = 'INTIMIDATE', 'Запугивание'
+    NATURE = 'NATURE', 'Природа'
+    PERCEPTION = 'PERCEPTION', 'Внимательность'
+    RELIGION = 'RELIGION', 'Религия'
+    STEALTH = 'STEALTH', 'Скрытность'
+    STREETWISE = 'STREETWISE', 'Знание улиц'
+    THIEVERY = 'THIEVERY', 'Воровство'
 
     def get_base_attribute(self):
         if self in (self.ACROBATICS, self.STEALTH, self.THIEVERY):
@@ -184,28 +175,28 @@ class ArmorTypeIntEnum(IntDescriptionEnum):
     PLATE = 8, 'Латный'
 
 
-class ShieldTypeEnum(BaseCapitalizedEnum):
-    LIGHT = 'Лёгкий щит'
-    HEAVY = 'Тяжелый щит'
+class ShieldTypeEnum(BaseNameValueDescriptionEnum):
+    LIGHT = 'LIGHT', 'Лёгкий щит'
+    HEAVY = 'HEAVY', 'Тяжелый щит'
 
 
-class WeaponGroupEnum(BaseCapitalizedEnum):
+class WeaponGroupEnum(BaseNameValueDescriptionEnum):
     # Рукопашное
-    AXE = 'Топор'
-    MACE = 'Булава'
-    LIGHT_BLADE = 'Лёгкий клинок'
-    SPEAR = 'Копьё'
-    STAFF = 'Посох'
-    FLAIL = 'Цеп'
-    HEAVY_BLADE = 'Тяжелый клинок'
-    HAMMER = 'Молот'
-    PICK = 'Кирка'
-    POLEARM = 'Древковое'
-    UNARMED = 'Безоружное'
+    AXE = 'AXE', 'Топор'
+    MACE = 'MACE', 'Булава'
+    LIGHT_BLADE = 'LIGHT_BLADE', 'Лёгкий клинок'
+    SPEAR = 'SPEAR', 'Копьё'
+    STAFF = 'STAFF', 'Посох'
+    FLAIL = 'FLAIL', 'Цеп'
+    HEAVY_BLADE = 'HEAVY_BLADE', 'Тяжелый клинок'
+    HAMMER = 'HAMMER', 'Молот'
+    PICK = 'PICK', 'Кирка'
+    POLEARM = 'POLEARM', 'Древковое'
+    UNARMED = 'UNARMED', 'Безоружное'
     # Дальнобойное
-    SLING = 'Праща'
-    CROSSBOW = 'Арбалет'
-    BOW = 'Лук'
+    SLING = 'SLING', 'Праща'
+    CROSSBOW = 'CROSSBOW', 'Арбалет'
+    BOW = 'BOW', 'Лук'
 
 
 class WeaponCategoryIntEnum(IntDescriptionEnum):
@@ -235,95 +226,98 @@ class DiceIntEnum(IntDescriptionEnum):
         return sum(randint(1, self) for _ in range(dice_number))
 
 
-class WeaponHandednessEnum(BaseCapitalizedEnum):
-    ONE = 'Одноручное'
-    TWO = 'Двуручное'
-    VERSATILE = 'Универсальное'  # one handed, but can be used with two hands
+class WeaponHandednessEnum(BaseNameValueDescriptionEnum):
+    ONE = 'ONE', 'Одноручное'
+    TWO = 'TWO', 'Двуручное'
+    VERSATILE = (
+        'VERSATILE',
+        'Универсальное',
+    )  # one handed, but can be used with two hands
     # (with +1 to damage, unless user is small)
 
 
-class PowerSourceEnum(BaseCapitalizedEnum):
-    MARTIAL = 'Воинский'
-    DIVINE = 'Духовный'
-    ARCANE = 'Магический'
-    PRIMAL = 'Первородный'
-    SHADOW = 'Теневой'
-    PSIONIC = 'Псионический'
+class PowerSourceEnum(BaseNameValueDescriptionEnum):
+    MARTIAL = 'MARTIAL', 'Воинский'
+    DIVINE = 'DIVINE', 'Духовный'
+    ARCANE = 'ARCANE', 'Магический'
+    PRIMAL = 'PRIMAL', 'Первородный'
+    SHADOW = 'SHADOW', 'Теневой'
+    PSIONIC = 'PSIONIC', 'Псионический'
 
 
-class PowerFrequencyEnum(BaseCapitalizedEnum):
-    PASSIVE = 'Пассивный'
-    AT_WILL = 'Неограниченный'
-    ENCOUNTER = 'На сцену'
-    DAYLY = 'На день'
+class PowerFrequencyEnum(BaseNameValueDescriptionEnum):
+    PASSIVE = 'PASSIVE', 'Пассивный'
+    AT_WILL = 'AT_WILL', 'Неограниченный'
+    ENCOUNTER = 'ENCOUNTER', 'На сцену'
+    DAYLY = 'DAYLY', 'На день'
 
 
-class PowerDamageTypeEnum(BaseCapitalizedEnum):
-    NONE = ''
-    ACID = 'Кислота'
-    COLD = 'Холод'
-    FIRE = 'Огонь'
-    LIGHTNING = 'Электричество'
-    NECROTIC = 'Некротическая энергия'
-    POISON = 'Яд'
-    PSYCHIC = 'Психическая энергия'
-    RADIANT = 'Излучение'
-    THUNDER = 'Звук'
-    FORCE = 'Силовое поле'
+class PowerDamageTypeEnum(BaseNameValueDescriptionEnum):
+    NONE = 'NONE', ''
+    ACID = 'ACID', 'Кислота'
+    COLD = 'COLD', 'Холод'
+    FIRE = 'FIRE', 'Огонь'
+    LIGHTNING = 'LIGHTNING', 'Электричество'
+    NECROTIC = 'NECROTIC', 'Некротическая энергия'
+    POISON = 'POISON', 'Яд'
+    PSYCHIC = 'PSYCHIC', 'Психическая энергия'
+    RADIANT = 'RADIANT', 'Излучение'
+    THUNDER = 'THUNDER', 'Звук'
+    FORCE = 'FORCE', 'Силовое поле'
 
 
-class PowerEffectTypeEnum(BaseCapitalizedEnum):
-    NONE = ''
-    CHARM = 'Очарование'
-    CONJURATION = 'Иллюзия'
-    FEAR = 'Страх'
-    HEALING = 'Исцеление'
-    INVIGORATING = 'Укрепляющий'
-    POLYMORPH = 'Превращение'
-    RAGE = 'Ярость'
-    RATTLING = 'Ужасающий'
-    RELIABLE = 'Надежный'
-    SLEEP = 'Сон'
-    STANCE = 'Стойка'
-    TELEPORTATION = 'Телепортация'
-    ZONE = 'Зона'
+class PowerEffectTypeEnum(BaseNameValueDescriptionEnum):
+    NONE = 'NONE', ''
+    CHARM = 'CHARM', 'Очарование'
+    CONJURATION = 'CONJURATION', 'Иллюзия'
+    FEAR = 'FEAR', 'Страх'
+    HEALING = 'HEALING', 'Исцеление'
+    INVIGORATING = 'INVIGORATING', 'Укрепляющий'
+    POLYMORPH = 'POLYMORPH', 'Превращение'
+    RAGE = 'RAGE', 'Ярость'
+    RATTLING = 'RATTLING', 'Ужасающий'
+    RELIABLE = 'RELIABLE', 'Надежный'
+    SLEEP = 'SLEEP', 'Сон'
+    STANCE = 'STANCE', 'Стойка'
+    TELEPORTATION = 'TELEPORTATION', 'Телепортация'
+    ZONE = 'ZONE', 'Зона'
 
 
-class PowerActionTypeEnum(BaseCapitalizedEnum):
-    STANDARD = 'Стандартное действие'
-    MINOR = 'Малое действие'
-    FREE = 'Свободное действие'
-    MOVEMENT = 'Действие движения'
-    PROVOKED = 'Провоцированное действие'
-    INTERRUPT = 'Немедленное прерывание'
-    REACTION = 'Немедленный ответ'
-    NO_ACTION = 'Нет действия'
+class PowerActionTypeEnum(BaseNameValueDescriptionEnum):
+    STANDARD = 'STANDARD', 'Стандартное действие'
+    MINOR = 'MINOR', 'Малое действие'
+    FREE = 'FREE', 'Свободное действие'
+    MOVEMENT = 'MOVEMENT', 'Действие движения'
+    PROVOKED = 'PROVOKED', 'Провоцированное действие'
+    INTERRUPT = 'INTERRUPT', 'Немедленное прерывание'
+    REACTION = 'REACTION', 'Немедленный ответ'
+    NO_ACTION = 'NO_ACTION', 'Нет действия'
 
 
-class AccessoryTypeEnum(BaseCapitalizedEnum):
-    IMPLEMENT = 'Инструмент'
-    WEAPON = 'Оружие'
-    TWO_WEAPONS = 'Два оружия'
-    # WEAPON_AND_IMPLEMENT = 'Оружие и инструмент'
+class AccessoryTypeEnum(BaseNameValueDescriptionEnum):
+    IMPLEMENT = 'IMPLEMENT', 'Инструмент'
+    WEAPON = 'WEAPON', 'Оружие'
+    TWO_WEAPONS = 'TWO_WEAPONS', 'Два оружия'
+    # WEAPON_AND_IMPLEMENT = 'WEAPON_AND_IMPLEMENT', 'Оружие и инструмент'
 
 
-class DefenceTypeEnum(BaseCapitalizedEnum):
-    ARMOR_CLASS = 'КД'
-    FORTITUDE = 'Стойкость'
-    REFLEX = 'Реакция'
-    WILL = 'Воля'
+class DefenceTypeEnum(BaseNameValueDescriptionEnum):
+    ARMOR_CLASS = 'ARMOR_CLASS', 'КД'
+    FORTITUDE = 'FORTITUDE', 'Стойкость'
+    REFLEX = 'REFLEX', 'Реакция'
+    WILL = 'WILL', 'Воля'
 
 
-class PowerRangeTypeEnum(BaseCapitalizedEnum):
-    MELEE_WEAPON = 'Рукопашное оружие'
-    MELEE = 'Рукопашное'
-    RANGED = 'Дальнобойное'
-    MELEE_RANGED_WEAPON = 'Рукопашное или дальнобойное оружие'
-    RANGED_WEAPON = 'Дальнобойное оружие'
-    BURST = 'Вспышка'
-    BLAST = 'Волна'
-    WALL = 'Стена'
-    PERSONAL = 'Персональный'
+class PowerRangeTypeEnum(BaseNameValueDescriptionEnum):
+    MELEE_WEAPON = 'MELEE_WEAPON', 'Рукопашное оружие'
+    MELEE = 'MELEE', 'Рукопашное'
+    RANGED = 'RANGED', 'Дальнобойное'
+    MELEE_RANGED_WEAPON = 'MELEE_RANGED_WEAPON', 'Рукопашное или дальнобойное оружие'
+    RANGED_WEAPON = 'RANGED_WEAPON', 'Дальнобойное оружие'
+    BURST = 'BURST', 'Вспышка'
+    BLAST = 'BLAST', 'Волна'
+    WALL = 'WALL', 'Стена'
+    PERSONAL = 'PERSONAL', 'Персональный'
 
     def default_target(self):
         if self in (
@@ -341,19 +335,19 @@ class PowerRangeTypeEnum(BaseCapitalizedEnum):
         return '----------'
 
 
-class PowerPropertyTitle(BaseCapitalizedEnum):
-    ATTACK = 'Атака'
-    HIT = 'Попадание'
-    MISS = 'Промах'
-    EFFECT = 'Эффект'
-    REQUIREMENT = 'Требование'
-    TRIGGER = 'Триггер'
-    SPECIAL = 'Особенность'
-    TARGET = 'Цель'
-    OTHER = 'Другое'
+class PowerPropertyTitle(BaseNameValueDescriptionEnum):
+    ATTACK = 'ATTACK', 'Атака'
+    HIT = 'HIT', 'Попадание'
+    MISS = 'MISS', 'Промах'
+    EFFECT = 'EFFECT', 'Эффект'
+    REQUIREMENT = 'REQUIREMENT', 'Требование'
+    TRIGGER = 'TRIGGER', 'Триггер'
+    SPECIAL = 'SPECIAL', 'Особенность'
+    TARGET = 'TARGET', 'Цель'
+    OTHER = 'OTHER', 'Другое'
 
 
-class MagicItemCategory(BaseCapitalizedEnum):
-    COMMON = 'Обычный'
-    UNCOMMON = 'Необычный'
-    RARE = 'Редкий'
+class MagicItemCategory(BaseNameValueDescriptionEnum):
+    COMMON = 'COMMON', 'Обычный'
+    UNCOMMON = 'UNCOMMON', 'Необычный'
+    RARE = 'RARE', 'Редкий'

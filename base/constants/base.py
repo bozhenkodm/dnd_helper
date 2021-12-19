@@ -3,26 +3,36 @@ from enum import Enum, IntEnum
 from django.db import models
 
 
-class BaseCapitalizedEnum(str, Enum):
+class BaseNameValueDescriptionEnum(str, Enum):
+    def __new__(cls, value, description):
+        obj = str.__new__(cls, value)
+        obj._value_ = value
+        obj.description = description
+        return obj
+
     def _generate_next_value_(name, start, count, last_values):
-        return name.lower().capitalize()
+        return str(name)
 
     @classmethod
     def generate_choices(cls, is_sorted=True):
         if is_sorted:
-            return sorted(((item.name, item.value) for item in cls), key=lambda x: x[1])
-        return ((item.name, item.value) for item in cls)
+            return sorted(
+                ((item.value, item.description) for item in cls), key=lambda x: x[1]
+            )
+        return ((item.value, item.description) for item in cls)
 
     @classmethod
     def generate_case(cls, field='name'):
-        kwargs = ({field: item.name, 'then': models.Value(item.value)} for item in cls)
+        kwargs = (
+            {field: item.value, 'then': models.Value(item.description)} for item in cls
+        )
         whens = (models.When(**kws) for kws in kwargs)
         return models.Case(*whens, output_field=models.CharField())
 
     @classmethod
     def generate_order_case(cls, field='name'):
         kwargs = (
-            {field: item.name, 'then': models.Value(index)}
+            {field: item.value, 'then': models.Value(index)}
             for index, item in enumerate(cls)
         )
         whens = (models.When(**kws) for kws in kwargs)
@@ -30,6 +40,7 @@ class BaseCapitalizedEnum(str, Enum):
 
     @classmethod
     def max_length(cls):
+        # getting len(item.name) because auto() has no length
         return max(len(item.name) for item in cls)
 
     @property
