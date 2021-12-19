@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from multiselectfield import MultiSelectFormField
 
 from base.constants.constants import (
-    AttributeEnum,
+    AbilitiesEnum,
     NPCClassIntEnum,
     NPCRaceEnum,
     SexEnum,
@@ -31,7 +31,7 @@ class NPCModelForm(forms.ModelForm):
         if self.instance.id:
             self.fields['var_bonus_attr'] = forms.ChoiceField(
                 choices=[
-                    (key.upper(), AttributeEnum[key.upper()].value)
+                    (key.upper(), AbilitiesEnum[key.upper()].value)
                     for key, value in asdict(
                         self.instance.race_data_instance.var_ability_bonus
                     ).items()

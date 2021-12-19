@@ -1,5 +1,3 @@
-from enum import auto
-
 from base.constants.base import BaseNameValueDescriptionEnum
 
 

@@ -8,9 +8,9 @@ from multiselectfield import MultiSelectField
 
 from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
+    AbilitiesEnum,
     AccessoryTypeEnum,
     ArmorTypeIntEnum,
-    AttributeEnum,
     DefenceTypeEnum,
     DiceIntEnum,
     MagicItemCategory,
@@ -329,10 +329,10 @@ class Power(models.Model):
         related_name='powers',
     )
     level = models.SmallIntegerField(verbose_name='Уровень', default=0)
-    attack_attribute = models.CharField(
+    attack_ability = models.CharField(
         verbose_name='Атакующая характеристика',
-        choices=AttributeEnum.generate_choices(is_sorted=False),
-        max_length=AttributeEnum.max_length(),
+        choices=AbilitiesEnum.generate_choices(is_sorted=False),
+        max_length=AbilitiesEnum.max_length(),
         null=True,
         blank=True,
     )
@@ -392,7 +392,7 @@ class Power(models.Model):
             return (
                 f'{self.name}, '
                 f'{self.klass.get_name_display()} '
-                f'({(self.get_attack_attribute_display() or "Пр")[:3]}), '
+                f'({(self.get_attack_ability_display() or "Пр")[:3]}), '
                 f'{self.get_frequency_display()}, '
                 f'{self.level} уровень'
             )
@@ -589,49 +589,49 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
     )
     var_bonus_attr = models.CharField(
         verbose_name='Выборочный бонус характеристики',
-        max_length=AttributeEnum.max_length(),
+        max_length=AbilitiesEnum.max_length(),
         null=True,
         blank=True,
     )
 
     level4_bonus_attrs = MultiSelectField(
         verbose_name='Бонус характеристики на 4 уровне',
-        choices=AttributeEnum.generate_choices(is_sorted=False),
+        choices=AbilitiesEnum.generate_choices(is_sorted=False),
         max_choices=2,
         null=True,
         blank=True,
     )
     level8_bonus_attrs = MultiSelectField(
         verbose_name='Бонус характеристики на 8 уровне',
-        choices=AttributeEnum.generate_choices(is_sorted=False),
+        choices=AbilitiesEnum.generate_choices(is_sorted=False),
         max_choices=2,
         null=True,
         blank=True,
     )
     level14_bonus_attrs = MultiSelectField(
         verbose_name='Бонус характеристики на 14 уровне',
-        choices=AttributeEnum.generate_choices(is_sorted=False),
+        choices=AbilitiesEnum.generate_choices(is_sorted=False),
         max_choices=2,
         null=True,
         blank=True,
     )
     level18_bonus_attrs = MultiSelectField(
         verbose_name='Бонус характеристики на 18 уровне',
-        choices=AttributeEnum.generate_choices(is_sorted=False),
+        choices=AbilitiesEnum.generate_choices(is_sorted=False),
         max_choices=2,
         null=True,
         blank=True,
     )
     level24_bonus_attrs = MultiSelectField(
         verbose_name='Бонус характеристики на 24 уровне',
-        choices=AttributeEnum.generate_choices(is_sorted=False),
+        choices=AbilitiesEnum.generate_choices(is_sorted=False),
         max_choices=2,
         null=True,
         blank=True,
     )
     level28_bonus_attrs = MultiSelectField(
         verbose_name='Бонус характеристики на 28 уровне',
-        choices=AttributeEnum.generate_choices(is_sorted=False),
+        choices=AbilitiesEnum.generate_choices(is_sorted=False),
         max_choices=2,
         null=True,
         blank=True,

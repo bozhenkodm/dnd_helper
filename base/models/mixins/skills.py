@@ -10,7 +10,7 @@ class SkillMixin:
         return Skills(
             **{
                 skill.lvalue: getattr(
-                    self, f'{skill.get_base_attribute().name.lower()[:3]}_mod'
+                    self, f'{skill.get_base_ability().name.lower()[:3]}_mod'
                 )
                 for skill in SkillsEnum
             }

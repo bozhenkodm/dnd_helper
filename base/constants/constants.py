@@ -10,7 +10,7 @@ class SexEnum(BaseNameValueDescriptionEnum):
     N = 'N', 'Н/Д'
 
 
-class AttributeEnum(BaseNameValueDescriptionEnum):
+class AbilitiesEnum(BaseNameValueDescriptionEnum):
     STRENGTH = 'STRENGTH', 'Сила'
     CONSTITUTION = 'CONSTITUTION', 'Телосложение'
     DEXTERITY = 'DEXTERITY', 'Ловкость'
@@ -145,15 +145,15 @@ class SkillsEnum(BaseNameValueDescriptionEnum):
     STREETWISE = 'STREETWISE', 'Знание улиц'
     THIEVERY = 'THIEVERY', 'Воровство'
 
-    def get_base_attribute(self):
+    def get_base_ability(self):
         if self in (self.ACROBATICS, self.STEALTH, self.THIEVERY):
-            return AttributeEnum.DEXTERITY
+            return AbilitiesEnum.DEXTERITY
         if self in (self.ARCANA, self.HISTORY, self.RELIGION):
-            return AttributeEnum.INTELLIGENCE
+            return AbilitiesEnum.INTELLIGENCE
         if self == self.ATHLETICS:
-            return AttributeEnum.STRENGTH
+            return AbilitiesEnum.STRENGTH
         if self in (self.BLUFF, self.DIPLOMACY, self.INTIMIDATE, self.STREETWISE):
-            return AttributeEnum.CHARISMA
+            return AbilitiesEnum.CHARISMA
         if self in (
             self.DUNGEONEERING,
             self.HEAL,
@@ -161,9 +161,9 @@ class SkillsEnum(BaseNameValueDescriptionEnum):
             self.NATURE,
             self.PERCEPTION,
         ):
-            return AttributeEnum.WISDOM
+            return AbilitiesEnum.WISDOM
         if self == self.ENDURANCE:
-            return AttributeEnum.CONSTITUTION
+            return AbilitiesEnum.CONSTITUTION
 
 
 class ArmorTypeIntEnum(IntDescriptionEnum):

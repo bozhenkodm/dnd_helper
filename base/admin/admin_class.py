@@ -168,7 +168,7 @@ class NPCAdmin(admin.ModelAdmin):
     readonly_fields = [
         'npc_link',
         'mandatory_skills',
-        'generated_attributes',
+        'generated_abilities',
     ]
     autocomplete_fields = ('weapons', 'primary_hand', 'secondary_hand')
     search_fields = ('name',)
@@ -199,7 +199,7 @@ class NPCAdmin(admin.ModelAdmin):
                 ),
                 'klass',
                 'level',
-                'generated_attributes',
+                'generated_abilities',
                 (
                     'base_strength',
                     'base_constitution',
@@ -236,12 +236,12 @@ class NPCAdmin(admin.ModelAdmin):
         return mark_safe(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
 
     @admin.display(description='Сгенерированные атрибуты')
-    def generated_attributes(self, obj):
-        def generate_attribute():
+    def generated_abilities(self, obj):
+        def generate_ability():
             generated_sum = [randint(1, 6) for _ in range(4)]
             return sum(generated_sum) - min(generated_sum)
 
-        return ', '.join(sorted([str(generate_attribute()) for _ in range(6)], key=int))
+        return ', '.join(sorted([str(generate_ability()) for _ in range(6)], key=int))
 
     @admin.display(description='Тренированные навыки')
     def mandatory_skills(self, obj):
@@ -453,7 +453,7 @@ class PowerAdmin(admin.ModelAdmin):
         'description',
         'level',
         ('frequency', 'action_type'),
-        ('attack_attribute', 'defence', 'attack_bonus'),
+        ('attack_ability', 'defence', 'attack_bonus'),
         ('effect_type', 'damage_type'),
         ('dice_number', 'damage_dice'),
         ('accessory_type', 'available_weapon_types'),
@@ -551,9 +551,9 @@ itl - бонус предмета, к которому принадлежит т
     def save_related(self, request, form, formsets, change):
         super(PowerAdmin, self).save_related(request, form, formsets, change)
         obj = form.instance
-        if not obj.attack_attribute:
+        if not obj.attack_ability:
             return
-        ability_mod = obj.attack_attribute.lower()[:3]
+        ability_mod = obj.attack_ability.lower()[:3]
         for property in obj.properties.filter(title=PowerPropertyTitle.ATTACK.name):
             if not property.description:
                 property.description = (

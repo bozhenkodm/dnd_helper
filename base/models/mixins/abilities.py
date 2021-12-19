@@ -1,4 +1,4 @@
-from base.constants.constants import AttributeEnum
+from base.constants.constants import AbilitiesEnum
 from base.helpers import modifier
 from base.objects.abilities import Abilities
 
@@ -39,7 +39,7 @@ class AttributeMixin:
 
     @property
     def _tier_attrs_bonus(self) -> Abilities:
-        return Abilities(**{attribute.lvalue: self._tier for attribute in AttributeEnum})
+        return Abilities(**{ability.lvalue: self._tier for ability in AbilitiesEnum})
 
     @property
     def _base_abilities(self) -> Abilities:
@@ -52,38 +52,38 @@ class AttributeMixin:
             charisma=self.base_charisma,
         )
 
-    def _calculate_attribute_bonus(self, attribute: AttributeEnum):
+    def _calculate_ability_bonus(self, ability: AbilitiesEnum):
         abilities = (
             self._initial_attr_bonuses
             + self._tier_attrs_bonus
             + self._level_attr_bonuses
             + self._base_abilities
         )
-        return getattr(abilities, attribute.lvalue)
+        return getattr(abilities, ability.lvalue)
 
     @property
     def strength(self):
-        return self._calculate_attribute_bonus(AttributeEnum.STRENGTH)
+        return self._calculate_ability_bonus(AbilitiesEnum.STRENGTH)
 
     @property
     def constitution(self):
-        return self._calculate_attribute_bonus(AttributeEnum.CONSTITUTION)
+        return self._calculate_ability_bonus(AbilitiesEnum.CONSTITUTION)
 
     @property
     def dexterity(self):
-        return self._calculate_attribute_bonus(AttributeEnum.DEXTERITY)
+        return self._calculate_ability_bonus(AbilitiesEnum.DEXTERITY)
 
     @property
     def intelligence(self):
-        return self._calculate_attribute_bonus(AttributeEnum.INTELLIGENCE)
+        return self._calculate_ability_bonus(AbilitiesEnum.INTELLIGENCE)
 
     @property
     def wisdom(self):
-        return self._calculate_attribute_bonus(AttributeEnum.WISDOM)
+        return self._calculate_ability_bonus(AbilitiesEnum.WISDOM)
 
     @property
     def charisma(self):
-        return self._calculate_attribute_bonus(AttributeEnum.CHARISMA)
+        return self._calculate_ability_bonus(AbilitiesEnum.CHARISMA)
 
     @property
     def str_mod(self):
@@ -109,11 +109,11 @@ class AttributeMixin:
     def cha_mod(self):
         return modifier(self.charisma)
 
-    def get_attribute_text(self, attribute: AttributeEnum) -> str:
-        attribute_value = getattr(self, attribute.lvalue)
-        mod = modifier(attribute_value)
-        return f'{attribute.value[:3]} {attribute_value} ({mod + self.half_level})'
+    def get_ability_text(self, ability: AbilitiesEnum) -> str:
+        ability_value = getattr(self, ability.lvalue)
+        mod = modifier(ability_value)
+        return f'{ability.value[:3]} {ability_value} ({mod + self.half_level})'
 
     @property
-    def attributes_texts(self) -> list:
-        return list(self.get_attribute_text(attr) for attr in AttributeEnum)
+    def abilities_texts(self) -> list:
+        return list(self.get_ability_text(ability) for ability in AbilitiesEnum)
