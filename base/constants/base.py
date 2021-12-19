@@ -47,6 +47,10 @@ class BaseNameValueDescriptionEnum(str, Enum):
     def lname(self):
         return self.name.lower()
 
+    @property
+    def lvalue(self):
+        return self.value.lower()
+
 
 class IntDescriptionEnum(IntEnum):
     def __new__(cls, value, description=''):

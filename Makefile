@@ -16,5 +16,8 @@ format:
 shell:
 	poetry run python manage.py shell -i ipython
 
+migrations:
+	poetry run python manage.py makemigrations
+
 npc:
 	poetry run python manage.py npc
