@@ -12,6 +12,7 @@ class GeneratorsMainView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
+        context['npc_url'] = reverse('generator_npc')
         context['tavern_url'] = reverse('generator_tavern')
         context['fantasy_name_url'] = reverse('generator_fantasy_name')
         context['random_name_url'] = reverse('random_fantasy_name')

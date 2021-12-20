@@ -44,7 +44,7 @@ class RaceAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None) -> tuple:
         if obj and obj.id:
-            return 'name',
+            return ('name',)
         return ()
 
 
@@ -81,7 +81,8 @@ class ClassAdmin(admin.ModelAdmin):
         if not obj.id or not npc_klasses[obj.name].available_shield_types:
             return '-'
         return ', '.join(
-            shield.description for shield in npc_klasses[obj.name].available_shield_types
+            shield.description
+            for shield in npc_klasses[obj.name].available_shield_types
         )
 
     @admin.display(description='Владение оружием')
