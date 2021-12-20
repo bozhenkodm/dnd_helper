@@ -52,7 +52,7 @@ class NPCName(models.Model):
         except (KeyError, AttributeError):
             sex = random.choice((SexEnum.M, SexEnum.F))
         first_names = cls.objects.filter(
-            sex__in=(sex.name, SexEnum.N.name), name_type=cls.FIRST_NAME, race=race
+            sex__in=(sex.name, SexEnum.N), name_type=cls.FIRST_NAME, race=race
         ).values_list('name', flat=True)
         last_names = cls.objects.filter(name_type=cls.LAST_NAME, race=race).values_list(
             'name', flat=True

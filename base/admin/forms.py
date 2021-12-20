@@ -31,7 +31,7 @@ class NPCModelForm(forms.ModelForm):
         if self.instance.id:
             self.fields['var_bonus_attr'] = forms.ChoiceField(
                 choices=[
-                    (key.upper(), AbilitiesEnum[key.upper()].value)
+                    (key.upper(), AbilitiesEnum[key.upper()].description)
                     for key, value in asdict(
                         self.instance.race_data_instance.var_ability_bonus
                     ).items()
@@ -43,7 +43,7 @@ class NPCModelForm(forms.ModelForm):
             choices = self.instance.klass_data_instance.trainable_skills
             self.fields['trained_skills'] = MultiSelectFormField(
                 choices=(
-                    (key.upper(), SkillsEnum[key.upper()].value)
+                    (key.upper(), SkillsEnum[key.upper()].description)
                     for key, value in asdict(choices).items()
                     if value
                 ),

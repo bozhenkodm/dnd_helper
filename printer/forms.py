@@ -17,11 +17,11 @@ class EncounterIconForm(forms.ModelForm):
         label='Цвет номера',
         choices=ColorsStyle.generate_choices(),
         widget=forms.RadioSelect,
-        initial=ColorsStyle.RED.name,
+        initial=ColorsStyle.RED,
     )
     number_position = forms.ChoiceField(
         label='Класс позиции номера на картинке',
         choices=Position.generate_choices(),
         widget=forms.RadioSelect,
-        initial=Position.TOP_LEFT.name,
+        initial=Position.TOP_LEFT,
     )

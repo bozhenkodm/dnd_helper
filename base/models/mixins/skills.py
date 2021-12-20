@@ -136,5 +136,5 @@ class SkillMixin:
         )
         for skill, value in asdict(self.skills).items():
             if getattr(ordinary_skills, skill) != value:
-                result.append(f'{SkillsEnum[skill.upper()].value} +{value}')
+                result.append(f'{SkillsEnum[skill.upper()].description} +{value}')
         return sorted(result)

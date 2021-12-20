@@ -50,7 +50,7 @@ class MagicItem(models.Model):
     category = models.CharField(
         verbose_name='Категория',
         choices=MagicItemCategory.generate_choices(is_sorted=False),
-        default=MagicItemCategory.UNCOMMON.name,
+        default=MagicItemCategory.UNCOMMON,
         max_length=MagicItemCategory.max_length(),
     )
     picture = models.ImageField(
@@ -226,7 +226,7 @@ class Race(models.Model):
         return race_classes.get(self.name)(npc=self)
 
     def __str__(self):
-        return NPCRaceEnum[self.name].value
+        return NPCRaceEnum[self.name].description
 
 
 class Class(models.Model):
@@ -288,7 +288,7 @@ class Power(models.Model):
         verbose_name='Действие',
         choices=PowerActionTypeEnum.generate_choices(is_sorted=False),
         max_length=PowerActionTypeEnum.max_length(),
-        default=PowerActionTypeEnum.STANDARD.name,
+        default=PowerActionTypeEnum.STANDARD,
         null=True,
         blank=False,
     )
@@ -347,12 +347,12 @@ class Power(models.Model):
     effect_type = MultiSelectField(
         verbose_name='Тип эффекта',
         choices=PowerEffectTypeEnum.generate_choices(),
-        default=PowerEffectTypeEnum.NONE.name,
+        default=PowerEffectTypeEnum.NONE,
     )
     damage_type = MultiSelectField(
         verbose_name='Тип урона',
         choices=PowerDamageTypeEnum.generate_choices(),
-        default=PowerDamageTypeEnum.NONE.name,
+        default=PowerDamageTypeEnum.NONE,
     )
     dice_number = models.SmallIntegerField(verbose_name='Количество кубов', default=1)
     damage_dice = models.SmallIntegerField(
@@ -378,7 +378,7 @@ class Power(models.Model):
         verbose_name='Дальность',
         choices=PowerRangeTypeEnum.generate_choices(is_sorted=False),
         max_length=PowerRangeTypeEnum.max_length(),
-        default=PowerRangeTypeEnum.PERSONAL.name,
+        default=PowerRangeTypeEnum.PERSONAL,
     )
     range = models.SmallIntegerField(verbose_name='Дальность', default=0)
     burst = models.SmallIntegerField(verbose_name='Площадь', default=0)
@@ -396,11 +396,13 @@ class Power(models.Model):
                 f'{self.get_frequency_display()}, '
                 f'{self.level} уровень'
             )
+        if self.magic_item:
+            return f'{self.name} - {self.magic_item}'
         return self.name
 
     @property
     def defence_subjanctive(self):
-        if self.defence == DefenceTypeEnum.ARMOR_CLASS.name:
+        if self.defence == DefenceTypeEnum.ARMOR_CLASS:
             return self.get_defence_display()
         return self.get_defence_display()[:-1] + 'и'
 
@@ -416,15 +418,15 @@ class Power(models.Model):
         if self.race:
             return self.race.get_name_display()
         if self.accessory_type in (
-            AccessoryTypeEnum.WEAPON.name,
-            AccessoryTypeEnum.IMPLEMENT.name,
+            AccessoryTypeEnum.WEAPON,
+            AccessoryTypeEnum.IMPLEMENT,
         ):
             return str(primary_weapon)
-        if self.accessory_type == AccessoryTypeEnum.TWO_WEAPONS.name:
+        if self.accessory_type == AccessoryTypeEnum.TWO_WEAPONS:
             return f'{primary_weapon}, {secondary_weapon}'
         if self.level % 2 == 0 and self.level > 0:
             return 'Приём'
-        if self.frequency == PowerFrequencyEnum.PASSIVE.name:
+        if self.frequency == PowerFrequencyEnum.PASSIVE:
             return 'Пассивный'
         if self.klass:
             return self.klass.get_name_display()
@@ -432,40 +434,38 @@ class Power(models.Model):
 
     @property
     def attack_type(self):
-        # PowerRangeTypeEnum.MELEE_TOUCH.name,
-        # PowerRangeTypeEnum.RANGED_SIGHT.name,
         if self.range_type in (
-            PowerRangeTypeEnum.MELEE_RANGED_WEAPON.name,
-            PowerRangeTypeEnum.MELEE_WEAPON.name,
-            PowerRangeTypeEnum.RANGED_WEAPON.name,
-            PowerRangeTypeEnum.PERSONAL.name,
+            PowerRangeTypeEnum.MELEE_RANGED_WEAPON,
+            PowerRangeTypeEnum.MELEE_WEAPON,
+            PowerRangeTypeEnum.RANGED_WEAPON,
+            PowerRangeTypeEnum.PERSONAL,
         ):
             return self.get_range_type_display()
         if (
             self.range_type
             in (
-                PowerRangeTypeEnum.MELEE.name,
-                PowerRangeTypeEnum.RANGED.name,
+                PowerRangeTypeEnum.MELEE,
+                PowerRangeTypeEnum.RANGED,
             )
             and self.range
         ):
             return f'{self.get_range_type_display().split()[0]} {self.range}'
-        if self.range_type == PowerRangeTypeEnum.MELEE.name:
+        if self.range_type == PowerRangeTypeEnum.MELEE:
             return f'{self.get_range_type_display()} касание'
-        if self.range_type == PowerRangeTypeEnum.RANGED.name:
+        if self.range_type == PowerRangeTypeEnum.RANGED:
             return f'{self.get_range_type_display()} видимость'
         if (
             self.range_type
             in (
-                PowerRangeTypeEnum.BURST.name,
-                PowerRangeTypeEnum.BLAST.name,
+                PowerRangeTypeEnum.BURST,
+                PowerRangeTypeEnum.BLAST,
             )
             and not self.range
         ):
             return f'Ближняя {self.get_range_type_display().lower()} {self.burst}'
         if self.range_type in (
-            PowerRangeTypeEnum.BURST.name,
-            PowerRangeTypeEnum.WALL.name,
+            PowerRangeTypeEnum.BURST,
+            PowerRangeTypeEnum.WALL,
         ):
             return (
                 f'Зональная {self.get_range_type_display().lower()} '
@@ -475,7 +475,7 @@ class Power(models.Model):
 
     @property
     def keywords(self):
-        if self.frequency == PowerFrequencyEnum.PASSIVE.name:
+        if self.frequency == PowerFrequencyEnum.PASSIVE:
             return ''
         return filter(
             None,
@@ -486,14 +486,14 @@ class Power(models.Model):
                 self.attack_type,
             )
             + tuple(
-                PowerDamageTypeEnum[type_].value
+                PowerDamageTypeEnum[type_].description
                 for type_ in self.damage_type
-                if type_ != PowerDamageTypeEnum.NONE.name
+                if type_ != PowerDamageTypeEnum.NONE
             )
             + tuple(
-                PowerEffectTypeEnum[type_].value
+                PowerEffectTypeEnum[type_].description
                 for type_ in self.effect_type
-                if type_ != PowerEffectTypeEnum.NONE.name
+                if type_ != PowerEffectTypeEnum.NONE
             ),
         )
 
@@ -522,12 +522,12 @@ class PowerProperty(models.Model):
     order = models.SmallIntegerField(verbose_name='Порядок', default=0)
 
     def get_displayed_title(self):
-        if self.title != PowerPropertyTitle.OTHER.name:
+        if self.title and self.title != PowerPropertyTitle.OTHER:
             return self.get_title_display()
         return self.description.split(':')[0]
 
     def get_displayed_description(self):
-        if self.title != PowerPropertyTitle.OTHER.name:
+        if self.title and self.title != PowerPropertyTitle.OTHER:
             return self.description
         return '.'.join(self.description.split(':')[1:])
 
@@ -587,6 +587,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
     base_charisma = models.SmallIntegerField(
         verbose_name='Харизма (базовая)',
     )
+    # TODO rename attr to abilities
     var_bonus_attr = models.CharField(
         verbose_name='Выборочный бонус характеристики',
         max_length=AbilitiesEnum.max_length(),
@@ -907,12 +908,12 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
         if self.primary_hand.weapon_type in power.available_weapon_types.all():
             return True
         if (
-            power.accessory_type == AccessoryTypeEnum.WEAPON.name
+            power.accessory_type == AccessoryTypeEnum.WEAPON
             and self.primary_hand.weapon_type.data_instance.damage_dice
         ):
             return True
         if (
-            power.accessory_type == AccessoryTypeEnum.IMPLEMENT.name
+            power.accessory_type == AccessoryTypeEnum.IMPLEMENT
             and type(self.primary_hand.weapon_type.data_instance)
             in self.klass_data_instance.available_implement_types
         ):
@@ -1057,7 +1058,7 @@ class PlayerCharacters(models.Model):
     )
 
     def __str__(self):
-        return f'{self.name}'
+        return self.name
 
 
 class Encounter(models.Model):

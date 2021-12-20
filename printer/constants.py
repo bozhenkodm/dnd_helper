@@ -9,14 +9,14 @@ class PrintableObjectType(BaseNameValueDescriptionEnum):
 
 
 class ColorsStyle(BaseNameValueDescriptionEnum):
-    RED = 'RED', 'Red'
-    BLACK = 'BLACK', 'Black'
-    WHITE = 'WHITE', 'White'
+    RED = 'red', 'Red'
+    BLACK = 'black', 'Black'
+    WHITE = 'white', 'White'
 
 
 class Position(BaseNameValueDescriptionEnum):
-    BOTTOM_LEFT = 'BOTTOM_LEFT', 'bottom-left'
-    TOP_LEFT = 'TOP_LEFT', 'top-left'
-    BOTTOM_RIGHT = 'BOTTOM_RIGHT', 'bottom-right'
-    TOP_RIGHT = 'TOP_RIGHT', 'top-right'
-    CENTER = 'CENTER', 'center'
+    BOTTOM_LEFT = 'bottom-left', 'bottom-left'
+    TOP_LEFT = 'top-left', 'top-left'
+    BOTTOM_RIGHT = 'bottom-right', 'bottom-right'
+    TOP_RIGHT = 'top-right', 'top-right'
+    CENTER = 'center', 'center'

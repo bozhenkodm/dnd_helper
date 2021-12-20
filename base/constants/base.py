@@ -40,8 +40,7 @@ class BaseNameValueDescriptionEnum(str, Enum):
 
     @classmethod
     def max_length(cls):
-        # getting len(item.name) because auto() has no length
-        return max(len(item.name) for item in cls)
+        return max(len(item.value) for item in cls)
 
     @property
     def lvalue(self):

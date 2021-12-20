@@ -42,9 +42,9 @@ class RaceAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request).annotate(title=NPCRaceEnum.generate_case())
         return qs.order_by('title')
 
-    def get_readonly_fields(self, request, obj=None):
+    def get_readonly_fields(self, request, obj=None) -> tuple:
         if obj and obj.id:
-            return ('name',)
+            return 'name',
         return ()
 
 
@@ -81,7 +81,7 @@ class ClassAdmin(admin.ModelAdmin):
         if not obj.id or not npc_klasses[obj.name].available_shield_types:
             return '-'
         return ', '.join(
-            shield.value for shield in npc_klasses[obj.name].available_shield_types
+            shield.description for shield in npc_klasses[obj.name].available_shield_types
         )
 
     @admin.display(description='Владение оружием')
@@ -104,8 +104,8 @@ class ClassAdmin(admin.ModelAdmin):
         if not obj.id:
             return '-'
         return ', '.join(
-            armor_type.name
-            for armor_type in npc_klasses[obj.name].available_implement_types
+            implement_type.name
+            for implement_type in npc_klasses[obj.name].available_implement_types
         )
 
 
@@ -379,7 +379,7 @@ class WeaponTypeAdmin(admin.ModelAdmin):
     def group(self, obj):
         if not obj.id:
             return '-'
-        return obj.data_instance.group.value
+        return obj.data_instance.group.description
 
     @admin.display(description='Урон')
     def damage(self, obj):
@@ -409,7 +409,7 @@ class WeaponAdmin(admin.ModelAdmin):
 
     @admin.display(description='Группа оружия')
     def group(self, obj):
-        return obj.weapon_type.data_instance.group.value
+        return obj.weapon_type.data_instance.group.description
 
     @admin.display(description='Урон')
     def damage(self, obj):
@@ -502,7 +502,7 @@ itl - бонус предмета, к которому принадлежит т
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_fields(self, request, obj=None):
-        if not obj or obj.frequency == PowerFrequencyEnum.PASSIVE.name:
+        if not obj or obj.frequency == PowerFrequencyEnum.PASSIVE:
             return (
                 'name',
                 'description',
@@ -554,7 +554,7 @@ itl - бонус предмета, к которому принадлежит т
         if not obj.attack_ability:
             return
         ability_mod = obj.attack_ability.lower()[:3]
-        for property in obj.properties.filter(title=PowerPropertyTitle.ATTACK.name):
+        for property in obj.properties.filter(title=PowerPropertyTitle.ATTACK):
             if not property.description:
                 property.description = (
                     f'${ability_mod}+atk+{obj.attack_bonus} '
@@ -566,10 +566,10 @@ itl - бонус предмета, к которому принадлежит т
                     f'против {obj.defence_subjanctive}. {property.description[1:]}'
                 )
             property.save()
-        for property in obj.properties.filter(title=PowerPropertyTitle.HIT.name):
-            if obj.accessory_type == AccessoryTypeEnum.WEAPON.name:
+        for property in obj.properties.filter(title=PowerPropertyTitle.HIT):
+            if obj.accessory_type == AccessoryTypeEnum.WEAPON:
                 default_string = f'Урон $wpn*{obj.dice_number}+dmg+{ability_mod}'
-            elif obj.accessory_type == AccessoryTypeEnum.IMPLEMENT.name:
+            elif obj.accessory_type == AccessoryTypeEnum.IMPLEMENT:
                 default_string = (
                     f'Урон {obj.dice_number}{obj.get_damage_dice_display()}'
                     f'+$dmg+{ability_mod}'
@@ -581,13 +581,13 @@ itl - бонус предмета, к которому принадлежит т
             elif property.description.startswith('+'):
                 property.description = default_string + property.description[1:]
             property.save()
-        for property in obj.properties.filter(title=PowerPropertyTitle.TARGET.name):
+        for property in obj.properties.filter(title=PowerPropertyTitle.TARGET):
             if not property.description:
                 property.description = PowerRangeTypeEnum[
                     property.power.range_type
                 ].default_target()
                 property.save()
-        for property in obj.properties.filter(title=PowerPropertyTitle.MISS.name):
+        for property in obj.properties.filter(title=PowerPropertyTitle.MISS):
             if not property.description:
                 property.description = 'Половина урона'
                 property.save()
