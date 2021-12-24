@@ -2,7 +2,7 @@ from dataclasses import asdict
 
 from django import forms
 from django.core.exceptions import ValidationError
-from multiselectfield import MultiSelectFormField
+from multiselectfield import MultiSelectFormField  # type: ignore
 
 from base.constants.constants import (
     AbilitiesEnum,
@@ -62,41 +62,54 @@ class NPCModelForm(forms.ModelForm):
                 self.fields['subclass'] = forms.ChoiceField(
                     choices=subclass_enum.generate_choices(), label='Подкласс'
                 )
+            weapon_queryset = Weapon.objects.all()
+            if self.instance.weapons.count():
+                weapon_queryset = weapon_queryset.filter(
+                    id__in=self.instance.weapons.values_list('id', flat=True)
+                )
+            self.fields['primary_hand'] = forms.ModelChoiceField(
+                queryset=weapon_queryset, label='Основная рука'
+            )
+            self.fields['secondary_hand'] = forms.ModelChoiceField(
+                queryset=weapon_queryset, label='Вторичная рука'
+            )
 
     def clean(self):
         if not self.instance.id:
             return super(NPCModelForm, self).clean()
-        if self.cleaned_data['secondary_hand'] and self.cleaned_data['shield']:
+        primary_hand = self.cleaned_data.get('primary_hand')
+        secondary_hand = self.cleaned_data.get('secondary_hand')
+        if secondary_hand and self.cleaned_data['shield']:
             error = ValidationError('Нельзя удержать в одной руке оружие и щит')
             self.add_error('shield', error)
             self.add_error('secondary_hand', error)
         if (
-            self.cleaned_data['primary_hand']
-            and self.cleaned_data['primary_hand'].data_instance.handedness
-            == WeaponHandednessEnum.TWO
+            primary_hand
+            and primary_hand.data_instance.handedness == WeaponHandednessEnum.TWO
         ):
             error = ValidationError(
                 'Когда в основной руке двуручное оружие, вторая должна быть пустой'
             )
-            if self.cleaned_data['secondary_hand']:
+            if secondary_hand:
                 self.add_error('secondary_hand', error)
             if self.cleaned_data['shield']:
                 self.add_error('shield', error)
         if (
-            self.cleaned_data['primary_hand']
-            and self.cleaned_data['primary_hand'].data_instance.handedness
+            primary_hand
+            and primary_hand.data_instance.handedness
             != WeaponHandednessEnum.TWO  # one-handed or versatile
-            and self.cleaned_data['secondary_hand']
+            and secondary_hand
         ):
             npc_data_instance = self.instance.klass_data_instance
             if (
-                npc_data_instance.slug == NPCClassIntEnum.RANGER_MELEE
-                or npc_data_instance == NPCClassIntEnum.BARBARIAN
-                and self.cleaned_data['subclass']
-                == npc_data_instance.subclass_enum.WHIRLING
-            ) and self.cleaned_data[
-                'secondary_hand'
-            ].data_instance.handedness == WeaponHandednessEnum.TWO:
+                (
+                    npc_data_instance.slug == NPCClassIntEnum.RANGER_MELEE
+                    or npc_data_instance == NPCClassIntEnum.BARBARIAN
+                    and self.cleaned_data['subclass']
+                    == npc_data_instance.subclass_enum.WHIRLING
+                )
+                and secondary_hand.data_instance.handedness == WeaponHandednessEnum.TWO
+            ):
                 self.add_error(
                     'secondary_hand',
                     ValidationError(
@@ -104,15 +117,12 @@ class NPCModelForm(forms.ModelForm):
                         'не могут держать двуручное оружие во второй руке'
                     ),
                 )
-            elif (
-                not (
-                    npc_data_instance.slug == NPCClassIntEnum.RANGER_MELEE
-                    or npc_data_instance == NPCClassIntEnum.BARBARIAN
-                    and self.cleaned_data['subclass']
-                    == npc_data_instance.subclass_enum.WHIRLING
-                )
-                and not self.cleaned_data['secondary_hand'].data_instance.is_off_hand
-            ):
+            elif not (
+                npc_data_instance.slug == NPCClassIntEnum.RANGER_MELEE
+                or npc_data_instance == NPCClassIntEnum.BARBARIAN
+                and self.cleaned_data['subclass']
+                == npc_data_instance.subclass_enum.WHIRLING
+            ) and not (secondary_hand and secondary_hand.data_instance.is_off_hand):
                 self.add_error(
                     'secondary_hand',
                     ValidationError(

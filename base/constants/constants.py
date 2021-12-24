@@ -145,6 +145,10 @@ class SkillsEnum(BaseNameValueDescriptionEnum):
     STREETWISE = 'STREETWISE', 'Знание улиц'
     THIEVERY = 'THIEVERY', 'Воровство'
 
+    @classmethod
+    def sequence(cls):
+        yield from cls
+
     def get_base_ability(self):
         if self in (self.ACROBATICS, self.STEALTH, self.THIEVERY):
             return AbilitiesEnum.DEXTERITY

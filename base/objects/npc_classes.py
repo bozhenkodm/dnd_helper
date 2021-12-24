@@ -1,4 +1,4 @@
-from typing import ClassVar, Sequence, Union
+from typing import ClassVar, Sequence, Type
 
 from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
@@ -18,7 +18,6 @@ from base.objects.weapon_types import (
     ExquisiteAgonyScourge,
     HandCrossbow,
     HolySymbol,
-    ImplementType,
     KiFocus,
     Longspear,
     LongSword,
@@ -41,7 +40,7 @@ from base.objects.weapon_types import (
 
 
 class NPCClass:
-    slug: ClassVar[NPCClassIntEnum] = None
+    slug: ClassVar[NPCClassIntEnum]
     power_source: ClassVar[PowerSourceEnum]
     fortitude: ClassVar[int] = 0
     reflex: ClassVar[int] = 0
@@ -57,8 +56,8 @@ class NPCClass:
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.SIMPLE_RANGED,
     )
-    available_weapon_types: ClassVar[Sequence[WeaponType]] = ()
-    available_implement_types: ClassVar[Sequence[Union[WeaponType, ImplementType]]] = ()
+    available_weapon_types: ClassVar[Sequence[Type[WeaponType]]] = ()
+    available_implement_types: ClassVar[Sequence[Type[WeaponType]]] = ()
     hit_points_per_level: ClassVar[int] = 8
 
     # class SubclassEnum(IntDescriptionSubclassEnum):
@@ -175,7 +174,7 @@ class BardClass(NPCClass):
         religion=5,
         heal=5,
     )
-    skill_bonuses = Skills.init_with_const(SkillsEnum, 1)
+    skill_bonuses = Skills.init_with_const(SkillsEnum.sequence(), 1)
     reflex = 1
     will = 1
 
@@ -836,7 +835,7 @@ class HexbladeClass(WarlockClass):
 
 class MonkClass(NPCClass):
     slug = NPCClassIntEnum.MONK
-    power_source: PowerSourceEnum.PSIONIC
+    power_source = PowerSourceEnum.PSIONIC
     reflex = 1
     trainable_skills = Skills(
         acrobatics=5,

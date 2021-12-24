@@ -1,10 +1,18 @@
 from dataclasses import asdict
 
 from base.constants.constants import SkillsEnum
+from base.objects.npc_classes import NPCClass
+from base.objects.races import Race
 from base.objects.skills import Skills
 
 
 class SkillMixin:
+
+    race_data_instance: Race
+    klass_data_instance: NPCClass
+    half_level: int
+    trained_skills: list[str]
+
     @property
     def skill_mod_bonus(self):
         return Skills(
@@ -18,7 +26,7 @@ class SkillMixin:
 
     @property
     def skills(self) -> Skills:
-        half_level = Skills.init_with_const(SkillsEnum, self.half_level)
+        half_level = Skills.init_with_const(SkillsEnum.sequence(), self.half_level)
         trained_skills = Skills.init_with_const(
             [SkillsEnum[trained_skill] for trained_skill in self.trained_skills], 5
         )

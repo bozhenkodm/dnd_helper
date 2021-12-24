@@ -28,4 +28,6 @@ urlpatterns = [
     path('', include('base.urls')),
     path('generator/', include('generator.urls')),
     path('printer/', include('printer.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(
+    settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
+)  # type: ignore

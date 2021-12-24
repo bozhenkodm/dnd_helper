@@ -1,9 +1,14 @@
 from base.constants.constants import AbilitiesEnum
 from base.helpers import modifier
 from base.objects.abilities import Abilities
+from base.objects.races import Race
 
 
 class AttributeMixin:
+    half_level: int
+    race_data_instance: Race
+    _tier: int
+
     @property
     def _initial_attr_bonuses(self) -> Abilities:
         # getting one of variable ability bonus for specific npc

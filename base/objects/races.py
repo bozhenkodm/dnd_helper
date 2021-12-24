@@ -1,4 +1,4 @@
-from typing import ClassVar, Sequence
+from typing import ClassVar, Sequence, Type
 
 from base.constants.constants import NPCRaceEnum, SizeEnum, VisionEnum
 from base.objects.abilities import Abilities
@@ -16,13 +16,13 @@ from base.objects.weapon_types import (
 
 
 class Race:
-    slug: ClassVar[NPCRaceEnum] = None
+    slug: ClassVar[NPCRaceEnum]
     speed: ClassVar[int] = 6
     const_ability_bonus: ClassVar[Abilities] = Abilities()
     var_ability_bonus: ClassVar[Abilities] = Abilities()
     skill_bonuses: ClassVar[Skills] = Skills()
 
-    available_weapon_types: ClassVar[Sequence[WeaponType]] = frozenset()
+    available_weapon_types: ClassVar[Sequence[Type[WeaponType]]] = ()
     vision: ClassVar[VisionEnum] = VisionEnum.NORMAL
     size: ClassVar[SizeEnum] = SizeEnum.AVERAGE
 
@@ -56,7 +56,7 @@ class DwarfRace(Race):
     speed = 5
     vision = VisionEnum.TWILIGHT
     skill_bonuses = Skills(endurance=2, dungeoneering=2)
-    available_weapon_types = {Warhammer, ThrowingHammer}
+    available_weapon_types = (Warhammer, ThrowingHammer)
 
     @property
     def heavy_armor_speed_penalty(self):

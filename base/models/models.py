@@ -1,10 +1,11 @@
 import re
 from functools import cached_property
+from typing import Optional, Sequence
 
 from django.db import models
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from multiselectfield import MultiSelectField
+from multiselectfield import MultiSelectField  # type: ignore
 
 from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
@@ -656,7 +657,15 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
         null=True,
         blank=True,
     )
-    weapons = models.ManyToManyField(Weapon, verbose_name='Вооружение', blank=True)
+    weapons = models.ManyToManyField(
+        Weapon,
+        verbose_name='Вооружение',
+        blank=True,
+        help_text=(
+            'Имеющееся у персонажа вооружение. '
+            'Если список не пустой, то оружие в руки выбирается из него.'
+        ),
+    )
     primary_hand = models.ForeignKey(
         Weapon,
         verbose_name='Основная рука',
@@ -767,6 +776,10 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
             )
         return self.race_data_instance.speed
 
+    @property
+    def weapons_in_hands(self) -> Sequence[Weapon]:
+        return tuple(filter(None, (self.primary_hand, self.secondary_hand)))
+
     def is_weapon_proficient(self, weapon) -> bool:
         data_instance = weapon.weapon_type.data_instance
         return any(
@@ -778,11 +791,31 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
             )
         )
 
-    def is_implement_proficient(self, weapon):
+    def is_implement_proficient(self, weapon) -> bool:
         return (
-            type(weapon.weapon_type.data_instance)
+            type(weapon.data_instance)
             in self.klass_data_instance.available_implement_types
         )
+
+    def is_weapon_proper_for_power(
+        self, power: Power, weapon: Optional[Weapon] = None
+    ) -> bool:
+        weapon = weapon or self.primary_hand or self.secondary_hand
+        available_weapon_types = power.available_weapon_types
+        if (
+            available_weapon_types.count()
+            and weapon.weapon_type not in available_weapon_types.all()
+        ):
+            return False
+        if power.accessory_type == AccessoryTypeEnum.IMPLEMENT:
+            return self.is_implement_proficient(weapon)
+        if (
+            power.accessory_type == AccessoryTypeEnum.WEAPON
+            and power.accessory_type
+            in (AccessoryTypeEnum.WEAPON, AccessoryTypeEnum.TWO_WEAPONS)
+        ):
+            return bool(weapon.weapon_type.data_instance.damage_dice)
+        return False
 
     @property
     def inventory_text(self):
@@ -809,10 +842,10 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
 
     def parse_string(
         self,
-        string,
+        power: Power,
+        string: str = None,
         weapon: Weapon = None,
         secondary_weapon: Weapon = None,
-        is_implement: bool = False,
         item=None,
     ):  # TODO something with function signature
         pattern = r'\$([^\s]{3,})\b'  # gets substing from '$' to next whitespace
@@ -834,6 +867,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                     current_operation = parsed_expression_element
                     continue
                 if parsed_expression_element == PowersVariables.WPN:
+                    weapon = weapon or self.primary_hand
                     if not weapon:
                         raise ValueError('У данного таланта нет оружия')
                     current_element = weapon.damage_roll.treshhold(
@@ -847,7 +881,11 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                     )
                 elif parsed_expression_element == PowersVariables.ATK:
                     current_element = (
-                        self.klass_data_instance.attack_bonus(weapon, is_implement)
+                        self.klass_data_instance.attack_bonus(
+                            weapon,
+                            is_implement=power.accessory_type
+                            == AccessoryTypeEnum.IMPLEMENT,
+                        )
                         # armament enchantment
                         + min(
                             weapon and weapon.enchantment or 0,
@@ -892,7 +930,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
 
     def valid_properties(self, power: Power):
         # TODO add comments, what's going on
-        properties = {}
+        properties: dict[str, PowerProperty] = {}
         for prop in power.properties.filter(
             level__lte=self.level, subclass__in=(self.subclass, 0)
         ).order_by('-subclass'):
@@ -900,28 +938,6 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
             if key not in properties or properties[key].level < prop.level:
                 properties[key] = prop
         return sorted(properties.values(), key=lambda x: x and x.order)
-
-    def _primary_hand_properly_armed(self, power: Power) -> bool:
-        available_weapon_types = power.available_weapon_types.all()
-        if not available_weapon_types.count():
-            return True
-        if self.primary_hand.weapon_type in power.available_weapon_types.all():
-            return True
-        if (
-            power.accessory_type == AccessoryTypeEnum.WEAPON
-            and self.primary_hand.weapon_type.data_instance.damage_dice
-        ):
-            return True
-        if (
-            power.accessory_type == AccessoryTypeEnum.IMPLEMENT
-            and type(self.primary_hand.weapon_type.data_instance)
-            in self.klass_data_instance.available_implement_types
-        ):
-            return True
-        return False
-
-    def _secondary_hand_properly_armed(self, power: Power) -> bool:
-        return False
 
     def powers_calculated(self):
         powers_qs = self.race.powers.filter(level=0)
@@ -938,13 +954,13 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                     name=power.name,
                     keywords=power.keywords,
                     category=power.category(),
-                    description=self.parse_string(power.description),
+                    description=self.parse_string(power, string=power.description),
                     frequency_order=power.frequency_order,
                     properties=[
                         PowerPropertyDisplay(
                             title=property.get_displayed_title(),
                             description=self.parse_string(
-                                property.get_displayed_description()
+                                power, string=property.get_displayed_description()
                             ),
                             debug=property.get_displayed_description(),
                         )
@@ -953,56 +969,26 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                 ).asdict()
             )
         for power in self.powers.ordered_by_frequency().filter(
-            accessory_type=AccessoryTypeEnum.WEAPON.name
+            accessory_type__in=(AccessoryTypeEnum.WEAPON, AccessoryTypeEnum.IMPLEMENT)
         ):
-            if (
-                not power.available_weapon_types.count()
-                or self.primary_hand.weapon_type in power.available_weapon_types.all()
-                and self.primary_hand.weapon_type.data_instance.damage_dice
-            ):
-                powers.append(
-                    PowerDisplay(
-                        name=power.name,
-                        keywords=power.keywords,
-                        category=power.category(self.primary_hand),
-                        description=self.parse_string(power.description),
-                        frequency_order=power.frequency_order,
-                        properties=[
-                            PowerPropertyDisplay(
-                                **{
-                                    'title': property.get_displayed_title(),
-                                    'description': self.parse_string(
-                                        property.get_displayed_description(),
-                                        weapon=self.primary_hand,
-                                    ),
-                                    'debug': property.description,
-                                }
-                            )
-                            for property in self.valid_properties(power)
-                        ],
-                    ).asdict()
-                )
-        for power in self.powers.ordered_by_frequency().filter(
-            accessory_type=AccessoryTypeEnum.IMPLEMENT.name
-        ):
-            for weapon in filter(None, (self.primary_hand, self.secondary_hand)):
-                if not self.is_implement_proficient(weapon):
+            for weapon in self.weapons_in_hands:
+                if not self.is_weapon_proper_for_power(power=power, weapon=weapon):
                     continue
                 powers.append(
                     PowerDisplay(
                         name=power.name,
                         keywords=power.keywords,
                         category=power.category(weapon),
-                        description=self.parse_string(power.description),
+                        description=self.parse_string(power, power.description),
                         frequency_order=power.frequency_order,
                         properties=[
                             PowerPropertyDisplay(
                                 **{
                                     'title': property.get_displayed_title(),
                                     'description': self.parse_string(
-                                        property.get_displayed_description(),
+                                        power,
+                                        string=property.get_displayed_description(),
                                         weapon=weapon,
-                                        is_implement=True,
                                     ),
                                     'debug': property.description,
                                 }
@@ -1018,14 +1004,15 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                         name=power.name,
                         keywords=power.keywords,
                         category=power.category(),
-                        description=self.parse_string(power.description),
+                        description=self.parse_string(power, power.description),
                         frequency_order=power.frequency_order,
                         properties=[
                             PowerPropertyDisplay(
                                 **{
                                     'title': property.get_displayed_title(),
                                     'description': self.parse_string(
-                                        property.get_displayed_description(),
+                                        power,
+                                        string=property.get_displayed_description(),
                                         item=self.armor,
                                     ),
                                     'debug': property.description,

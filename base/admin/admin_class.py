@@ -246,11 +246,7 @@ class NPCAdmin(admin.ModelAdmin):
 
     @admin.display(description='Тренированные навыки')
     def mandatory_skills(self, obj):
-        return ', '.join(
-            SkillsEnum[key.upper()]
-            for key, value in asdict(obj.klass_data_instance.mandatory_skills).items()
-            if value
-        )
+        return obj.klass_data_instance.mandatory_skills.display_non_zero()
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)

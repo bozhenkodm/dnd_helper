@@ -44,7 +44,7 @@ class NPCName(models.Model):
     def generate_npc(cls, race=None, sex=None) -> dict:
         # TODO remove connection with Race somehow
         if not race:
-            race = random.choice(Race.objects.filter(is_sociable=True))
+            race = random.choice(Race.objects.filter(is_sociable=True))  # type: ignore
         else:
             race = Race.objects.get(name=race)
         try:
@@ -57,8 +57,8 @@ class NPCName(models.Model):
         last_names = cls.objects.filter(name_type=cls.LAST_NAME, race=race).values_list(
             'name', flat=True
         )
-        first_name = random.choice(first_names)
-        last_name = random.choice(last_names) if last_names else ''
+        first_name = random.choice(tuple(first_names))
+        last_name = random.choice(tuple(last_names)) if last_names else ''
         return {
             'first_name': first_name,
             'last_name': last_name,

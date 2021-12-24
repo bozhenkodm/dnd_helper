@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import ClassVar, Sequence, Union
+from typing import ClassVar, Optional, Sequence, Union
 
 from base.constants.constants import (
     DiceIntEnum,
@@ -17,9 +17,9 @@ class WeaponType:
 
     group: ClassVar[Union[Sequence[WeaponGroupEnum], WeaponGroupEnum]]
     category: ClassVar[WeaponCategoryIntEnum]
-    damage_dice: ClassVar[DiceIntEnum]
+    damage_dice: ClassVar[Optional[DiceIntEnum]]
     handedness: ClassVar[WeaponHandednessEnum] = WeaponHandednessEnum.ONE
-    name: ClassVar[str] = None
+    name: ClassVar[str]
     prof_bonus: ClassVar[int] = 2
     dice_number: ClassVar[int] = 1
     range: ClassVar[int] = 0
@@ -75,8 +75,8 @@ class WeaponType:
 
 
 class ImplementType(WeaponType):
-    name: ClassVar[str] = None
-    slug: ClassVar[str] = None
+    name: ClassVar[str]
+    slug: ClassVar[str]
     category = WeaponCategoryIntEnum.IMPLEMENT
     damage_dice = None
     handedness = WeaponHandednessEnum.ONE

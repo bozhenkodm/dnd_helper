@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Sequence
 
 from base.constants.constants import SkillsEnum
@@ -70,8 +70,11 @@ class Skills:
     def init_with_const(cls, skills: Sequence[SkillsEnum], value: int) -> "Skills":
         return Skills(**{skill.lvalue: value for skill in skills})
 
-    def intersect(self, skills: Sequence[SkillsEnum]) -> "Skills":
-        # return new instance with items that only present in skills
-        return Skills(
-            **{skill.lvalue: getattr(self, skill.lvalue, 0) for skill in skills}
+    def display_non_zero(self):
+        return ', '.join(
+            (
+                SkillsEnum[skill_name.upper()].description
+                for skill_name, value in asdict(self).items()
+                if value
+            )
         )
