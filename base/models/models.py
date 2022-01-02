@@ -780,6 +780,16 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
     def weapons_in_hands(self) -> Sequence[Weapon]:
         return tuple(filter(None, (self.primary_hand, self.secondary_hand)))
 
+    @property
+    def magic_items(self) -> Sequence[ItemAbstract]:
+        return tuple(
+            filter(
+                lambda x: x and hasattr(x, 'magic_item'),
+                # TODO add the rest of magic items
+                (self.primary_hand, self.secondary_hand, self.armor),
+            )
+        )
+
     def is_weapon_proficient(self, weapon) -> bool:
         data_instance = weapon.weapon_type.data_instance
         return any(
@@ -814,7 +824,8 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
             and power.accessory_type
             in (AccessoryTypeEnum.WEAPON, AccessoryTypeEnum.TWO_WEAPONS)
         ):
-            return bool(weapon.weapon_type.data_instance.damage_dice)
+            # pure implements can't be used with weapon powers
+            return not weapon.weapon_type.data_instance.is_pure_implement
         return False
 
     @property
@@ -822,7 +833,10 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
         return list(
             filter(
                 None,
-                list(str(weapon) for weapon in self.weapons.all())
+                list(
+                    str(weapon)
+                    for weapon in (self.weapons.all() or self.weapons_in_hands)
+                )
                 + [str(self.armor)]
                 + [self.get_shield_display()],
             )
@@ -846,7 +860,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
         string: str = None,
         weapon: Weapon = None,
         secondary_weapon: Weapon = None,
-        item=None,
+        item: Optional[ItemAbstract] = None,
     ):  # TODO something with function signature
         pattern = r'\$([^\s]{3,})\b'  # gets substing from '$' to next whitespace
         expressions = re.findall(pattern, string)
@@ -958,13 +972,13 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                     frequency_order=power.frequency_order,
                     properties=[
                         PowerPropertyDisplay(
-                            title=property.get_displayed_title(),
+                            title=prop.get_displayed_title(),
                             description=self.parse_string(
-                                power, string=property.get_displayed_description()
+                                power, string=prop.get_displayed_description()
                             ),
-                            debug=property.get_displayed_description(),
+                            debug=prop.get_displayed_description(),
                         )
-                        for property in self.valid_properties(power)
+                        for prop in self.valid_properties(power)
                     ],
                 ).asdict()
             )
@@ -984,21 +998,21 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                         properties=[
                             PowerPropertyDisplay(
                                 **{
-                                    'title': property.get_displayed_title(),
+                                    'title': prop.get_displayed_title(),
                                     'description': self.parse_string(
                                         power,
-                                        string=property.get_displayed_description(),
+                                        string=prop.get_displayed_description(),
                                         weapon=weapon,
                                     ),
-                                    'debug': property.description,
+                                    'debug': prop.description,
                                 }
                             )
-                            for property in self.valid_properties(power)
+                            for prop in self.valid_properties(power)
                         ],
                     ).asdict()
                 )
-        if self.armor.magic_item:
-            for power in self.armor.magic_item.powers.ordered_by_frequency():
+        for magic_item in self.magic_items:
+            for power in magic_item.magic_item.powers.ordered_by_frequency():
                 powers.append(
                     PowerDisplay(
                         name=power.name,
@@ -1009,16 +1023,16 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                         properties=[
                             PowerPropertyDisplay(
                                 **{
-                                    'title': property.get_displayed_title(),
+                                    'title': prop.get_displayed_title(),
                                     'description': self.parse_string(
                                         power,
-                                        string=property.get_displayed_description(),
-                                        item=self.armor,
+                                        string=prop.get_displayed_description(),
+                                        item=magic_item,
                                     ),
-                                    'debug': property.description,
+                                    'debug': prop.description,
                                 }
                             )
-                            for property in self.valid_properties(power)
+                            for prop in self.valid_properties(power)
                         ],
                     ).asdict()
                 )

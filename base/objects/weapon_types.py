@@ -73,6 +73,10 @@ class WeaponType:
             return group in cls.group
         return group == cls.group
 
+    @property
+    def is_pure_implement(self) -> bool:
+        return not self.damage_dice
+
 
 class ImplementType(WeaponType):
     name: ClassVar[str]

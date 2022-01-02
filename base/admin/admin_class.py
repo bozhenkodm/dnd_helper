@@ -1,6 +1,5 @@
 import io
 import subprocess
-from dataclasses import asdict
 from random import randint
 
 from django import forms
@@ -26,7 +25,6 @@ from base.constants.constants import (
     PowerFrequencyEnum,
     PowerPropertyTitle,
     PowerRangeTypeEnum,
-    SkillsEnum,
 )
 from base.models import Class, Race
 from base.models.models import Combatants, CombatantsPC, Power, PowerProperty

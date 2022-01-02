@@ -78,7 +78,7 @@ class NPCRaceEnum(BaseNameValueDescriptionEnum):
     KENKU = 'KENKU', 'Кенку'
     KOBOLD = 'KOBOLD', 'Кобольд'
     WARFORGED = 'WARFORGED', 'Кованый'
-    BLADELING = 'BLADELING', 'Лезвие'
+    BLADELING = 'BLADELING', 'Мечерождённый'
     MINOTAUR = 'MINOTAUR', 'Минотавр'
     MUL = 'MUL', 'Мул'
     ORC = 'ORC', 'Орк'

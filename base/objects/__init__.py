@@ -34,7 +34,7 @@ races_tuple = (
     races.MulRace,
     # races.OrcRace,
     # races.PixieRace,  # too exotic for now
-    races.SatyrRace,  # too exotic for now
+    # races.SatyrRace,  # too exotic for now
     races.ShadarKaiRace,
     races.ShifterLongteethRace,
     races.ShifterRazorclawRace,
