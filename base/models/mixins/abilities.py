@@ -1,13 +1,86 @@
+from django.db import models
+from multiselectfield import MultiSelectField  # type: ignore
+
 from base.constants.constants import AbilitiesEnum
 from base.helpers import modifier
 from base.objects.abilities import Abilities
 from base.objects.races import Race
 
 
-class AttributeMixin:
+class AttributeAbstract(models.Model):
+    class Meta:
+        abstract = True
+
     half_level: int
     race_data_instance: Race
     _tier: int
+
+    base_strength = models.SmallIntegerField(verbose_name='Сила (базовая)')
+    base_constitution = models.SmallIntegerField(
+        verbose_name='Телосложение (базовое)',
+    )
+    base_dexterity = models.SmallIntegerField(
+        verbose_name='Ловкость (базовая)',
+    )
+    base_intelligence = models.SmallIntegerField(
+        verbose_name='Интеллект (базовый)',
+    )
+    base_wisdom = models.SmallIntegerField(
+        verbose_name='Мудрость (базовая)',
+    )
+    base_charisma = models.SmallIntegerField(
+        verbose_name='Харизма (базовая)',
+    )
+    # TODO rename attr to abilities
+    var_bonus_attr = models.CharField(
+        verbose_name='Выборочный бонус характеристики',
+        max_length=AbilitiesEnum.max_length(),
+        null=True,
+        blank=True,
+    )
+
+    level4_bonus_attrs = MultiSelectField(
+        verbose_name='Бонус характеристики на 4 уровне',
+        choices=AbilitiesEnum.generate_choices(is_sorted=False),
+        max_choices=2,
+        null=True,
+        blank=True,
+    )
+    level8_bonus_attrs = MultiSelectField(
+        verbose_name='Бонус характеристики на 8 уровне',
+        choices=AbilitiesEnum.generate_choices(is_sorted=False),
+        max_choices=2,
+        null=True,
+        blank=True,
+    )
+    level14_bonus_attrs = MultiSelectField(
+        verbose_name='Бонус характеристики на 14 уровне',
+        choices=AbilitiesEnum.generate_choices(is_sorted=False),
+        max_choices=2,
+        null=True,
+        blank=True,
+    )
+    level18_bonus_attrs = MultiSelectField(
+        verbose_name='Бонус характеристики на 18 уровне',
+        choices=AbilitiesEnum.generate_choices(is_sorted=False),
+        max_choices=2,
+        null=True,
+        blank=True,
+    )
+    level24_bonus_attrs = MultiSelectField(
+        verbose_name='Бонус характеристики на 24 уровне',
+        choices=AbilitiesEnum.generate_choices(is_sorted=False),
+        max_choices=2,
+        null=True,
+        blank=True,
+    )
+    level28_bonus_attrs = MultiSelectField(
+        verbose_name='Бонус характеристики на 28 уровне',
+        choices=AbilitiesEnum.generate_choices(is_sorted=False),
+        max_choices=2,
+        null=True,
+        blank=True,
+    )
 
     @property
     def _initial_attr_bonuses(self) -> Abilities:
@@ -117,7 +190,10 @@ class AttributeMixin:
     def get_ability_text(self, ability: AbilitiesEnum) -> str:
         ability_value = getattr(self, ability.lvalue)
         mod = modifier(ability_value)
-        return f'{ability.value[:3]} {ability_value} ({mod + self.half_level})'
+        return (
+            f'{ability.description[:3]} '  # type: ignore
+            f'{ability_value} ({mod + self.half_level})'
+        )
 
     @property
     def abilities_texts(self) -> list:

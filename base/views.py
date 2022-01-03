@@ -9,10 +9,10 @@ class NPCDetailView(DetailView):
     model = NPC
 
     def get_context_data(self, **kwargs):
-        object = self.get_object()
+        obj = self.get_object()
         context = super().get_context_data(**kwargs)
         skills = (
-            (item[1], getattr(object, item[0].lower()))
+            (item[1], getattr(obj, item[0].lower()))
             for item in SkillsEnum.generate_choices()
         )
         context['skills'] = skills

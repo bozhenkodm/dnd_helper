@@ -948,7 +948,7 @@ class Migration(migrations.Migration):
             },
             bases=(
                 base.models.mixins.defences.DefenceMixin,
-                base.models.mixins.abilities.AttributeMixin,
+                base.models.mixins.abilities.AttributeAbstract,
                 base.models.mixins.skills.SkillMixin,
                 models.Model,
             ),

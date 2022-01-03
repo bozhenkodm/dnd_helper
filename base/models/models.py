@@ -29,7 +29,7 @@ from base.constants.constants import (
     SkillsEnum,
 )
 from base.managers import PowerQueryset, WeaponTypeQuerySet
-from base.models.mixins.abilities import AttributeMixin
+from base.models.mixins.abilities import AttributeAbstract
 from base.models.mixins.defences import DefenceMixin
 from base.models.mixins.skills import SkillMixin
 from base.objects import npc_klasses, race_classes, weapon_types_classes
@@ -536,7 +536,7 @@ class PowerProperty(models.Model):
         return f'{self.title} {self.description} {self.level}'
 
 
-class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
+class NPC(DefenceMixin, AttributeAbstract, SkillMixin, models.Model):
     class Meta:
         verbose_name = 'NPC'
         verbose_name_plural = 'NPCS'
@@ -571,72 +571,6 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
     )
     level = models.PositiveSmallIntegerField(
         verbose_name='Уровень',
-    )
-    base_strength = models.SmallIntegerField(verbose_name='Сила (базовая)')
-    base_constitution = models.SmallIntegerField(
-        verbose_name='Телосложение (базовое)',
-    )
-    base_dexterity = models.SmallIntegerField(
-        verbose_name='Ловкость (базовая)',
-    )
-    base_intelligence = models.SmallIntegerField(
-        verbose_name='Интеллект (базовый)',
-    )
-    base_wisdom = models.SmallIntegerField(
-        verbose_name='Мудрость (базовая)',
-    )
-    base_charisma = models.SmallIntegerField(
-        verbose_name='Харизма (базовая)',
-    )
-    # TODO rename attr to abilities
-    var_bonus_attr = models.CharField(
-        verbose_name='Выборочный бонус характеристики',
-        max_length=AbilitiesEnum.max_length(),
-        null=True,
-        blank=True,
-    )
-
-    level4_bonus_attrs = MultiSelectField(
-        verbose_name='Бонус характеристики на 4 уровне',
-        choices=AbilitiesEnum.generate_choices(is_sorted=False),
-        max_choices=2,
-        null=True,
-        blank=True,
-    )
-    level8_bonus_attrs = MultiSelectField(
-        verbose_name='Бонус характеристики на 8 уровне',
-        choices=AbilitiesEnum.generate_choices(is_sorted=False),
-        max_choices=2,
-        null=True,
-        blank=True,
-    )
-    level14_bonus_attrs = MultiSelectField(
-        verbose_name='Бонус характеристики на 14 уровне',
-        choices=AbilitiesEnum.generate_choices(is_sorted=False),
-        max_choices=2,
-        null=True,
-        blank=True,
-    )
-    level18_bonus_attrs = MultiSelectField(
-        verbose_name='Бонус характеристики на 18 уровне',
-        choices=AbilitiesEnum.generate_choices(is_sorted=False),
-        max_choices=2,
-        null=True,
-        blank=True,
-    )
-    level24_bonus_attrs = MultiSelectField(
-        verbose_name='Бонус характеристики на 24 уровне',
-        choices=AbilitiesEnum.generate_choices(is_sorted=False),
-        max_choices=2,
-        null=True,
-        blank=True,
-    )
-    level28_bonus_attrs = MultiSelectField(
-        verbose_name='Бонус характеристики на 28 уровне',
-        choices=AbilitiesEnum.generate_choices(is_sorted=False),
-        max_choices=2,
-        null=True,
-        blank=True,
     )
 
     trained_skills = MultiSelectField(
@@ -786,7 +720,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
             filter(
                 lambda x: x and hasattr(x, 'magic_item'),
                 # TODO add the rest of magic items
-                (self.primary_hand, self.secondary_hand, self.armor),
+                (self.primary_hand, self.secondary_hand, self.armor),  # type: ignore
             )
         )
 
@@ -811,6 +745,8 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
         self, power: Power, weapon: Optional[Weapon] = None
     ) -> bool:
         weapon = weapon or self.primary_hand or self.secondary_hand
+        if not weapon:
+            return False
         available_weapon_types = power.available_weapon_types
         if (
             available_weapon_types.count()
@@ -857,7 +793,7 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
     def parse_string(
         self,
         power: Power,
-        string: str = None,
+        string: str,
         weapon: Weapon = None,
         secondary_weapon: Weapon = None,
         item: Optional[ItemAbstract] = None,
@@ -920,6 +856,8 @@ class NPC(DefenceMixin, AttributeMixin, SkillMixin, models.Model):
                         self._magic_threshold,
                     )
                 elif parsed_expression_element == PowersVariables.ITL:
+                    if not item:
+                        raise ValueError('У данного таланта нет магического предмета')
                     current_element = item.level
                 elif parsed_expression_element.isdigit():
                     current_element = int(parsed_expression_element)
