@@ -217,6 +217,9 @@ class DrowRace(Race):
 
 class DuergarRace(Race):
     slug = NPCRaceEnum.DUERGAR
+    const_ability_bonus = Abilities(constitution=2, wisdom=2)
+    skill_bonuses = Skills(dungeoneering=2)
+    vision = VisionEnum.DARK
 
 
 class KalashtarRace(Race):
