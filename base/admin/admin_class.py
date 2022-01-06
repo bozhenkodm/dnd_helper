@@ -27,7 +27,8 @@ from base.constants.constants import (
     PowerRangeTypeEnum,
 )
 from base.models import Class, Race
-from base.models.models import Combatants, CombatantsPC, Power, PowerProperty
+from base.models.encounter import Combatants, CombatantsPC
+from base.models.models import Power, PowerProperty
 from base.objects import npc_klasses
 
 

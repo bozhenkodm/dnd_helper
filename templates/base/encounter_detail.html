@@ -4,6 +4,9 @@
 @media print {
 .pagebreak { page-break-before: always; } /* page-break-after works, as well */
 .pagenotbreak {page-break-inside: avoid}
+.noprint {
+  visibility: hidden;
+}
 }
 .npc-line {
     width: 100%; clear: both;
@@ -24,7 +27,6 @@
     <title>{{ object.short_description }}</title>
 </head>
 <body>
-
 <div class="pagenotbreak" style="width: 1000px; font-size: large">
 <table class="border" style="width: 1000px; font-size: large">
     <colgroup>
@@ -39,7 +41,7 @@
     <th class="border">Ходы</th>
     <th class="border"></th>
   </tr>
-{% for combatant in object.roll_initiative %}
+{% for combatant in object.participants.ordered %}
     <tr class="border">
 <!--    <div class="npc-line">-->
     <td class="border"><span><b>{{ forloop.counter }}</b></span></td>
@@ -48,7 +50,6 @@
     <span style="font-size: small"><b>КД</b>: {{combatant.ac}}, <b>Ст</b>: {{combatant.fortitude}}, <b>Р</b>: {{combatant.reflex}}, <b>В</b>: {{combatant.will}} </span>
     {% endif %}
     </td>
-
     <td></td>
     <td class="border"><span style="float: right">{{ combatant.initiative|floatformat:"0" }} </span></td>
 <!--    </div>-->
@@ -56,6 +57,13 @@
 {% endfor %}
 </table>
 
+</div>
+
+<div class="noprint">
+    <form method="post">
+        {% csrf_token %}
+      <input type="submit" id="roll_button" value="Бросок инициативы"><br>
+    </form>
 </div>
 
 

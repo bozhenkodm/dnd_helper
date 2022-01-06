@@ -28,3 +28,8 @@ class PowerQueryset(models.QuerySet):
 
     def ordered_by_frequency(self):
         return self.with_frequency_order().order_by('frequency_order')
+
+
+class EncounterParticipantsQuerySet(models.QuerySet):
+    def ordered(self):
+        return self.order_by('-initiative', 'name')

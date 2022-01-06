@@ -34,7 +34,6 @@ from base.models.mixins.defences import DefenceMixin
 from base.models.mixins.skills import SkillMixin
 from base.objects import npc_klasses, race_classes, weapon_types_classes
 from base.objects.dice import DiceRoll
-from base.objects.encounter_output import EncounterLine
 from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
 
 
@@ -153,8 +152,8 @@ class WeaponType(models.Model):
 
     def damage(self, weapon_number=1):
         return (
-            f'{self.dataclass_instance.dice_number*weapon_number}'
-            f'{self.dataclass_instance.damage_dice.description}'
+            f'{self.data_instance.dice_number*weapon_number}'
+            f'{self.data_instance.damage_dice.description}'
         )
 
 
@@ -167,7 +166,6 @@ class Weapon(ItemAbstract):
         WeaponType, verbose_name='Тип оружия', on_delete=models.CASCADE, null=False
     )
     name = models.CharField(verbose_name='Название', max_length=20)
-    enchantment_old = models.SmallIntegerField(verbose_name='Улучшение', default=0)
 
     def __str__(self):
         if self.name == self.weapon_type.name:
@@ -175,20 +173,15 @@ class Weapon(ItemAbstract):
         return f'{self.name}, {self.weapon_type}, +{self.enchantment}'
 
     @property
-    def enchantment(self):
-        return super().enchantment or self.enchantment_old
-
-    @property
     def damage(self):
-        dataclass_instance = self.weapon_type.data_instance
         if not self.enchantment:
             return (
-                f'{dataclass_instance.dice_number}'
-                f'{dataclass_instance.damage_dice.description}'
+                f'{self.data_instance.dice_number}'
+                f'{self.data_instance.damage_dice.description}'
             )
         return (
-            f'{dataclass_instance.dice_number}'
-            f'{dataclass_instance.damage_dice.description} + '
+            f'{self.data_instance.dice_number}'
+            f'{self.data_instance.damage_dice.description} + '
             f'{self.enchantment}'
         )
 
@@ -718,7 +711,7 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, models.Model):
     def magic_items(self) -> Sequence[ItemAbstract]:
         return tuple(
             filter(
-                lambda x: x and hasattr(x, 'magic_item'),
+                lambda x: x and getattr(x, 'magic_item', False),
                 # TODO add the rest of magic items
                 (self.primary_hand, self.secondary_hand, self.armor),  # type: ignore
             )
@@ -949,8 +942,8 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, models.Model):
                         ],
                     ).asdict()
                 )
-        for magic_item in self.magic_items:
-            for power in magic_item.magic_item.powers.ordered_by_frequency():
+        for item in self.magic_items:
+            for power in item.magic_item.powers.ordered_by_frequency():
                 powers.append(
                     PowerDisplay(
                         name=power.name,
@@ -965,7 +958,7 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, models.Model):
                                     'description': self.parse_string(
                                         power,
                                         string=prop.get_displayed_description(),
-                                        item=magic_item,
+                                        item=item,
                                     ),
                                     'debug': prop.description,
                                 }
@@ -976,145 +969,3 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, models.Model):
                 )
 
         return sorted(powers, key=lambda x: x['frequency_order'])
-
-
-class PlayerCharacters(models.Model):
-    class Meta:
-        verbose_name = 'Игровой персонаж'
-        verbose_name_plural = 'Игровые персонажи'
-
-    name = models.CharField(verbose_name='Имя', max_length=50)
-    armor_class = models.PositiveSmallIntegerField(verbose_name='КД', null=False)
-    fortitude = models.PositiveSmallIntegerField(verbose_name='Стойкость', null=False)
-    reflex = models.PositiveSmallIntegerField(verbose_name='Реакция', null=False)
-    will = models.PositiveSmallIntegerField(verbose_name='Воля', null=False)
-    initiative = models.PositiveSmallIntegerField(verbose_name='Инициатива', default=0)
-    passive_perception = models.PositiveSmallIntegerField(
-        verbose_name='Пассивная внимательность', default=0
-    )
-    passive_insight = models.PositiveSmallIntegerField(
-        verbose_name='Пассивная проницательность', default=0
-    )
-
-    def __str__(self):
-        return self.name
-
-
-class Encounter(models.Model):
-    class Meta:
-        verbose_name = 'Сцена'
-        verbose_name_plural = 'Сцены'
-
-    short_description = models.CharField(
-        max_length=30, verbose_name='Краткое описание', null=True, blank=True
-    )
-    description = models.TextField(verbose_name='Описание', null=True, blank=True)
-    roll_for_players = models.BooleanField(
-        verbose_name='Кидать инициативу за игроков?', default=False
-    )
-    npcs = models.ManyToManyField(NPC, verbose_name='Мастерские персонажи', blank=True)
-
-    def __str__(self):
-        if self.short_description:
-            return f'Сцена {self.short_description}'
-        return f'Сцена №{self.id}'
-
-    @property
-    def url(self):
-        return reverse('encounter', kwargs={'pk': self.pk})
-
-    def roll_initiative(self):
-        encounter = []
-        for combatant in self.combatants_pcs.all():
-            if self.roll_for_players:
-                initiative = combatant.pc.initiative + DiceIntEnum.D20.roll()
-            else:
-                initiative = combatant.initiative
-
-            encounter.append(
-                EncounterLine(
-                    name=combatant.pc.name,
-                    initiative=initiative
-                    + 0.1,  # Player characters have higher initiative than npc
-                    ac=combatant.pc.armor_class,
-                    fortitude=combatant.pc.fortitude,
-                    reflex=combatant.pc.reflex,
-                    will=combatant.pc.will,
-                    number=0,
-                )
-            )
-        for npc in self.npcs.all():
-            encounter.append(
-                EncounterLine(
-                    name=npc.name,
-                    initiative=npc.initiative + DiceIntEnum.D20.roll(),
-                    ac=npc.armor_class,
-                    fortitude=npc.fortitude,
-                    reflex=npc.reflex,
-                    will=npc.will,
-                    number=0,
-                )
-            )
-        for combatant in self.combatants.all():
-            initiative = combatant.initiative + DiceIntEnum.D20.roll()
-            for i in range(combatant.number):
-                encounter.append(
-                    EncounterLine(
-                        name=combatant.name,
-                        initiative=initiative,
-                        ac=combatant.armor_class,
-                        fortitude=combatant.fortitude,
-                        reflex=combatant.reflex,
-                        will=combatant.will,
-                        number=i + 1,
-                    )
-                )
-        return sorted(
-            encounter,
-            key=lambda x: (x.initiative, x.name),
-            reverse=True,
-        )
-
-
-class Combatants(models.Model):
-    class Meta:
-        verbose_name = 'Участник сцены (Монстрятник)'
-        verbose_name_plural = 'Участники сцены (Монстрятник)'
-
-    name = models.CharField(verbose_name='Участник сцены', max_length=50, null=False)
-    encounter = models.ForeignKey(
-        Encounter,
-        verbose_name='Сцена',
-        on_delete=models.CASCADE,
-        null=True,
-        related_name='combatants',
-    )
-    armor_class = models.PositiveSmallIntegerField(verbose_name='КД', default=0)
-    fortitude = models.PositiveSmallIntegerField(verbose_name='Стойкость', default=0)
-    reflex = models.PositiveSmallIntegerField(verbose_name='Реакция', default=0)
-    will = models.PositiveSmallIntegerField(verbose_name='Воля', default=0)
-    initiative = models.PositiveSmallIntegerField(verbose_name='Инициатива', default=0)
-    number = models.PositiveSmallIntegerField(
-        verbose_name='Количество однотипных', default=1
-    )
-
-    def __str__(self):
-        return self.name
-
-
-class CombatantsPC(models.Model):
-    class Meta:
-        verbose_name = 'Участник сцены (ИП)'
-        verbose_name_plural = 'Участники сцены (ИП)'
-
-    pc = models.ForeignKey(
-        PlayerCharacters, verbose_name='Игровой персонаж', on_delete=models.CASCADE
-    )
-    encounter = models.ForeignKey(
-        Encounter,
-        verbose_name='Сцена',
-        on_delete=models.CASCADE,
-        null=True,
-        related_name='combatants_pcs',
-    )
-    initiative = models.FloatField(verbose_name='Инициатива', default=0)

@@ -14,14 +14,14 @@ from base.admin.admin_class import (
     WeaponAdmin,
     WeaponTypeAdmin,
 )
+from base.models import Encounter
+from base.models.encounter import PlayerCharacters
 from base.models.models import (
     NPC,
     Armor,
     Class,
-    Encounter,
     FunctionalTemplate,
     MagicItem,
-    PlayerCharacters,
     Power,
     Race,
     Weapon,

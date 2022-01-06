@@ -22,6 +22,11 @@ class NPCDetailView(DetailView):
 class EncounterDetailView(DetailView):
     model = Encounter
 
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        obj.roll_initiative()
+        return self.get(request, *args, **kwargs)
+
 
 class MainView(TemplateView):
     template_name = 'base/main.html'
