@@ -161,16 +161,20 @@ class Weapon(ItemAbstract):
     class Meta:
         verbose_name = 'Оружие'
         verbose_name_plural = 'Оружие'
+        unique_together = ('magic_item', 'level', 'weapon_type')
 
     weapon_type = models.ForeignKey(
         WeaponType, verbose_name='Тип оружия', on_delete=models.CASCADE, null=False
     )
-    name = models.CharField(verbose_name='Название', max_length=20)
 
     def __str__(self):
-        if self.name == self.weapon_type.name:
-            return f'{self.name}, +{self.enchantment}'
-        return f'{self.name}, {self.weapon_type}, +{self.enchantment}'
+        return f'{self.title}, +{self.enchantment}'
+
+    @property
+    def title(self) -> str:
+        if not self.magic_item:
+            return str(self.weapon_type)
+        return f'{self.weapon_type}, {self.magic_item}'
 
     @property
     def damage(self):

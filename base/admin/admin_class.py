@@ -387,7 +387,7 @@ class WeaponTypeAdmin(admin.ModelAdmin):
 class WeaponAdmin(admin.ModelAdmin):
     ordering = (
         '-level',
-        'name',
+        'weapon_type__name',
     )
     readonly_fields = (
         'category',
@@ -395,7 +395,7 @@ class WeaponAdmin(admin.ModelAdmin):
         'damage',
     )
     list_display = ('__str__',)
-    search_fields = ('name', 'weapon_type__name')
+    search_fields = ('magic_item__name', 'weapon_type__name')
     autocomplete_fields = ('weapon_type',)
     form = WeaponForm
 
