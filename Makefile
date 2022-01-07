@@ -22,3 +22,9 @@ migrations:
 
 npc:
 	poetry run python manage.py npc
+
+load_data:
+	poetry run python manage.py generate_fixtures
+	poetry run python manage.py loaddata class
+	poetry run python manage.py loaddata race
+	poetry run python manage.py loaddata weapon_types
