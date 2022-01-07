@@ -47,6 +47,12 @@ class RaceAdmin(admin.ModelAdmin):
             return ('name',)
         return ()
 
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
 
 class ClassAdmin(admin.ModelAdmin):
     search_fields = ('name_display',)
@@ -62,10 +68,10 @@ class ClassAdmin(admin.ModelAdmin):
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_change_permission(self, request: HttpRequest, obj=None):
+    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
 
-    def has_delete_permission(self, request, obj=None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
 
     def get_readonly_fields(self, request, obj=None):
@@ -350,6 +356,7 @@ class WeaponTypeAdmin(admin.ModelAdmin):
     readonly_fields = (
         'category',
         'group',
+        'prof_bonus',
         'damage',
     )
     save_as = True
@@ -360,16 +367,24 @@ class WeaponTypeAdmin(admin.ModelAdmin):
             return (
                 'category',
                 'group',
+                'prof_bonus',
                 'damage',
             )
         return (
             'slug',
             'category',
             'group',
+            'prof_bonus',
             'damage',
         )
 
-    def has_change_permission(self, request, obj=None):
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
+    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
 
     @admin.display(description='Категория оружия')
@@ -383,6 +398,12 @@ class WeaponTypeAdmin(admin.ModelAdmin):
         if not obj.id:
             return '-'
         return obj.data_instance.group_display()
+
+    @admin.display(description='Бонус мастерства')
+    def prof_bonus(self, obj):
+        if not obj.id or not obj.data_instance.prof_bonus:
+            return '-'
+        return obj.data_instance.prof_bonus
 
     @admin.display(description='Урон')
     def damage(self, obj):
