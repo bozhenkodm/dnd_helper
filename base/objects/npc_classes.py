@@ -3,7 +3,7 @@ from typing import ClassVar, Sequence, Type
 from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
     ArmorTypeIntEnum,
-    NPCClassIntEnum,
+    NPCClassEnum,
     PowerSourceEnum,
     ShieldTypeEnum,
     SkillsEnum,
@@ -40,7 +40,7 @@ from base.objects.weapon_types import (
 
 
 class NPCClass:
-    slug: ClassVar[NPCClassIntEnum]
+    slug: ClassVar[NPCClassEnum]
     power_source: ClassVar[PowerSourceEnum]
     fortitude: ClassVar[int] = 0
     reflex: ClassVar[int] = 0
@@ -106,7 +106,7 @@ class NPCClass:
 
 
 class InvokerClass(NPCClass):
-    slug = NPCClassIntEnum.INVOKER
+    slug = NPCClassEnum.INVOKER
     power_source = PowerSourceEnum.DIVINE
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
@@ -122,7 +122,7 @@ class InvokerClass(NPCClass):
 
 
 class ArtificerClass(NPCClass):
-    slug = NPCClassIntEnum.ARTIFICER
+    slug = NPCClassEnum.ARTIFICER
     power_source = PowerSourceEnum.ARCANE
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
@@ -138,7 +138,7 @@ class ArtificerClass(NPCClass):
 
 
 class BardClass(NPCClass):
-    slug = NPCClassIntEnum.BARD
+    slug = NPCClassEnum.BARD
     power_source = PowerSourceEnum.ARCANE
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
@@ -180,7 +180,7 @@ class BardClass(NPCClass):
 
 
 class VampireClass(NPCClass):
-    slug = NPCClassIntEnum.VAMPIRE
+    slug = NPCClassEnum.VAMPIRE
     power_source = PowerSourceEnum.SHADOW
     available_implement_types = (KiFocus, HolySymbol)
     trainable_skills = Skills(
@@ -216,7 +216,7 @@ class VampireClass(NPCClass):
 
 
 class BarbarianClass(NPCClass):
-    slug = NPCClassIntEnum.BARBARIAN
+    slug = NPCClassEnum.BARBARIAN
     power_source = PowerSourceEnum.PRIMAL
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
@@ -264,7 +264,7 @@ class BarbarianClass(NPCClass):
 
 
 class WarlordClass(NPCClass):
-    slug = NPCClassIntEnum.WARLORD
+    slug = NPCClassEnum.WARLORD
     power_source = PowerSourceEnum.MARTIAL
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
@@ -290,7 +290,7 @@ class WarlordClass(NPCClass):
 
 
 class FighterClass(NPCClass):
-    slug = NPCClassIntEnum.FIGHTER
+    slug = NPCClassEnum.FIGHTER
     power_source = PowerSourceEnum.MARTIAL
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
@@ -372,7 +372,7 @@ class FighterClass(NPCClass):
 
 
 class WizardClass(NPCClass):
-    slug = NPCClassIntEnum.WIZARD
+    slug = NPCClassEnum.WIZARD
     power_source = PowerSourceEnum.ARCANE
     available_weapon_categories = ()
     available_weapon_types = (Dagger, Quaterstaff)
@@ -394,7 +394,7 @@ class WizardClass(NPCClass):
 
 
 class DruidClass(NPCClass):
-    slug = NPCClassIntEnum.DRUID
+    slug = NPCClassEnum.DRUID
     power_source = PowerSourceEnum.PRIMAL
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
@@ -418,7 +418,7 @@ class DruidClass(NPCClass):
 
 
 class PriestClass(NPCClass):
-    slug = NPCClassIntEnum.PRIEST
+    slug = NPCClassEnum.PRIEST
     power_source = PowerSourceEnum.DIVINE
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
@@ -433,7 +433,7 @@ class PriestClass(NPCClass):
 
 
 class SeekerClass(NPCClass):
-    slug = NPCClassIntEnum.SEEKER
+    slug = NPCClassEnum.SEEKER
     power_source = PowerSourceEnum.PRIMAL
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -442,7 +442,7 @@ class SeekerClass(NPCClass):
 
 
 class AvengerClass(NPCClass):
-    slug = NPCClassIntEnum.AVENGER
+    slug = NPCClassEnum.AVENGER
     power_source = PowerSourceEnum.DIVINE
     available_weapon_categories = (
         WeaponCategoryIntEnum.SIMPLE,
@@ -476,7 +476,7 @@ class AvengerClass(NPCClass):
 
 
 class WarlockClass(NPCClass):
-    slug = NPCClassIntEnum.WARLOCK
+    slug = NPCClassEnum.WARLOCK
     power_source = PowerSourceEnum.ARCANE
     available_implement_types = (Wand, Rod, RitualDagger, RitualSickle)
     available_armor_types = (
@@ -505,7 +505,7 @@ class WarlockClass(NPCClass):
 
 
 class SwordmageClass(NPCClass):
-    slug = NPCClassIntEnum.SWORDMAGE
+    slug = NPCClassEnum.SWORDMAGE
     power_source = PowerSourceEnum.ARCANE
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
@@ -539,7 +539,7 @@ class SwordmageClass(NPCClass):
 
 
 class PaladinClass(NPCClass):
-    slug = NPCClassIntEnum.PALADIN
+    slug = NPCClassEnum.PALADIN
     power_source = PowerSourceEnum.DIVINE
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
@@ -566,7 +566,7 @@ class PaladinClass(NPCClass):
 
 
 class RogueClass(NPCClass):
-    slug = NPCClassIntEnum.ROGUE
+    slug = NPCClassEnum.ROGUE
     power_source = PowerSourceEnum.MARTIAL
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
@@ -608,7 +608,7 @@ class RogueClass(NPCClass):
 
 
 class RunepriestClass(NPCClass):
-    slug = NPCClassIntEnum.RUNEPRIEST
+    slug = NPCClassEnum.RUNEPRIEST
     power_source = PowerSourceEnum.DIVINE
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
@@ -657,11 +657,11 @@ class RangerClass(NPCClass):
 
 
 class RangerMarksmanClass(RangerClass):
-    slug = NPCClassIntEnum.RANGER_MARKSMAN
+    slug = NPCClassEnum.RANGER_MARKSMAN
 
 
 class RangerMeleeClass(RangerClass):
-    slug = NPCClassIntEnum.RANGER_MELEE
+    slug = NPCClassEnum.RANGER_MELEE
 
     @property
     def hit_points_bonus(self):
@@ -669,7 +669,7 @@ class RangerMeleeClass(RangerClass):
 
 
 class WardenClass(NPCClass):
-    slug = NPCClassIntEnum.WARDEN
+    slug = NPCClassEnum.WARDEN
     power_source = PowerSourceEnum.PRIMAL
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
@@ -696,7 +696,7 @@ class WardenClass(NPCClass):
 
 
 class SorcererClass(NPCClass):
-    slug = NPCClassIntEnum.SORCERER
+    slug = NPCClassEnum.SORCERER
     power_source = PowerSourceEnum.ARCANE
     available_implement_types = (Dagger, Quaterstaff)
     mandatory_skills = Skills(arcana=5)
@@ -739,7 +739,7 @@ class SorcererClass(NPCClass):
 
 
 class ShamanClass(NPCClass):
-    slug = NPCClassIntEnum.SHAMAN
+    slug = NPCClassEnum.SHAMAN
     power_source = PowerSourceEnum.PRIMAL
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
@@ -764,7 +764,7 @@ class ShamanClass(NPCClass):
 
 
 class HexbladeClass(WarlockClass):
-    slug = NPCClassIntEnum.HEXBLADE
+    slug = NPCClassEnum.HEXBLADE
     available_weapon_categories = (
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.MILITARY,
@@ -834,7 +834,7 @@ class HexbladeClass(WarlockClass):
 
 
 class MonkClass(NPCClass):
-    slug = NPCClassIntEnum.MONK
+    slug = NPCClassEnum.MONK
     power_source = PowerSourceEnum.PSIONIC
     reflex = 1
     trainable_skills = Skills(
@@ -875,7 +875,7 @@ class MonkClass(NPCClass):
 
 
 class WarpriestClass(PriestClass):
-    slug = NPCClassIntEnum.WARPRIEST
+    slug = NPCClassEnum.WARPRIEST
     power_source = PowerSourceEnum.DIVINE
     available_shield_types = (
         ShieldTypeEnum.LIGHT,

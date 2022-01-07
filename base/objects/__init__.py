@@ -48,35 +48,34 @@ races_tuple = (
 race_classes = {cls.slug.name: cls for cls in races_tuple}
 
 
-npc_klasses = {
-    cls.slug.value: cls
-    for cls in (
-        npc_classes.ArtificerClass,
-        npc_classes.AvengerClass,
-        npc_classes.BarbarianClass,
-        npc_classes.BardClass,
-        npc_classes.DruidClass,
-        npc_classes.FighterClass,
-        npc_classes.HexbladeClass,
-        npc_classes.InvokerClass,
-        npc_classes.MonkClass,
-        npc_classes.PaladinClass,
-        npc_classes.PriestClass,
-        npc_classes.RangerMarksmanClass,
-        npc_classes.RangerMeleeClass,
-        npc_classes.RogueClass,
-        npc_classes.RunepriestClass,
-        npc_classes.SeekerClass,
-        npc_classes.ShamanClass,
-        npc_classes.SorcererClass,
-        npc_classes.SwordmageClass,
-        npc_classes.VampireClass,
-        npc_classes.WardenClass,
-        npc_classes.WarlockClass,
-        npc_classes.WarlordClass,
-        npc_classes.WizardClass,
-    )
-}
+npc_tuple = (
+    npc_classes.ArtificerClass,
+    npc_classes.AvengerClass,
+    npc_classes.BarbarianClass,
+    npc_classes.BardClass,
+    npc_classes.DruidClass,
+    npc_classes.FighterClass,
+    npc_classes.HexbladeClass,
+    npc_classes.InvokerClass,
+    npc_classes.MonkClass,
+    npc_classes.PaladinClass,
+    npc_classes.PriestClass,
+    npc_classes.RangerMarksmanClass,
+    npc_classes.RangerMeleeClass,
+    npc_classes.RogueClass,
+    npc_classes.RunepriestClass,
+    npc_classes.SeekerClass,
+    npc_classes.ShamanClass,
+    npc_classes.SorcererClass,
+    npc_classes.SwordmageClass,
+    npc_classes.VampireClass,
+    npc_classes.WardenClass,
+    npc_classes.WarlockClass,
+    npc_classes.WarlordClass,
+    npc_classes.WizardClass,
+)
+
+npc_klasses = {cls.slug.value: cls for cls in npc_tuple}
 
 weapon_types_tuple = (
     weapon_types.AnnihilationBlade,  # hexblade weapon

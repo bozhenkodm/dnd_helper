@@ -126,6 +126,34 @@ class NPCClassIntEnum(IntDescriptionEnum):
     SHAMAN = 200, 'Шаман'
 
 
+class NPCClassEnum(BaseNameValueDescriptionEnum):
+    INVOKER = 'INVOKER', 'Апостол'
+    ARTIFICER = 'ARTIFICER', 'Артефактор'
+    BARD = 'BARD', 'Бард'
+    VAMPIRE = 'VAMPIRE', 'Вампир'
+    BARBARIAN = 'BARBARIAN', 'Варвар'
+    WARLORD = 'WARLORD', 'Военачальник'
+    WARPRIEST = 'WARPRIEST', 'Военный священник (жрец)'
+    FIGHTER = 'FIGHTER', 'Воин'
+    WIZARD = 'WIZARD', 'Волшебник'
+    DRUID = 'DRUID', 'Друид'
+    PRIEST = 'PRIEST', 'Жрец'
+    SEEKER = 'SEEKER', 'Ловчий'
+    AVENGER = 'AVENGER', 'Каратель'
+    WARLOCK = 'WARLOCK', 'Колдун'
+    SWORDMAGE = 'SWORDMAGE', 'Мечник-маг'
+    MONK = 'MONK', 'Монах'
+    PALADIN = 'PALADIN', 'Паладин'
+    ROGUE = 'ROGUE', 'Плут'
+    RUNEPRIEST = 'RUNEPRIEST', 'Рунный жрец'
+    RANGER_MARKSMAN = 'RANGER_MARKSMAN', 'Следопыт (Дальнобойный)'
+    RANGER_MELEE = 'RANGER_MELEE', 'Следопыт (Рукопашник)'
+    HEXBLADE = 'HEXBLADE', 'Хексблэйд (колдун)'
+    WARDEN = 'WARDEN', 'Хранитель'
+    SORCERER = 'SORCERER', 'Чародей'
+    SHAMAN = 'SHAMAN', 'Шаман'
+
+
 class SkillsEnum(BaseNameValueDescriptionEnum):
     ACROBATICS = 'ACROBATICS', 'Акробатика'
     ARCANA = 'ARCANA', 'Магия'

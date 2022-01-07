@@ -6,6 +6,7 @@ from django import forms
 from django.contrib import admin
 from django.core.files.images import ImageFile
 from django.db import models
+from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 
 from base.admin.forms import (
@@ -48,16 +49,23 @@ class RaceAdmin(admin.ModelAdmin):
 
 
 class ClassAdmin(admin.ModelAdmin):
-    search_fields = ('name',)
+    search_fields = ('name_display',)
     readonly_fields = (
         'available_armor_types',
         'available_shields',
         'available_weapons',
         'available_implements',
     )
+    fields = readonly_fields
     form = ClassForm
 
-    def has_change_permission(self, request, obj=None):
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
+    def has_change_permission(self, request: HttpRequest, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None) -> bool:
         return False
 
     def get_readonly_fields(self, request, obj=None):

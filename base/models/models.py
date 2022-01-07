@@ -15,7 +15,7 @@ from base.constants.constants import (
     DefenceTypeEnum,
     DiceIntEnum,
     MagicItemCategory,
-    NPCClassIntEnum,
+    NPCClassEnum,
     NPCRaceEnum,
     PowerActionTypeEnum,
     PowerDamageTypeEnum,
@@ -231,14 +231,19 @@ class Class(models.Model):
     class Meta:
         verbose_name = 'Класс'
         verbose_name_plural = 'Классы'
-        ordering = ('name',)
+        ordering = ('name_display',)
 
-    name = models.SmallIntegerField(
-        verbose_name='Название', choices=NPCClassIntEnum.generate_choices(), unique=True
+    name = models.SlugField(
+        choices=NPCClassEnum.generate_choices(is_sorted=False),
+        max_length=NPCClassEnum.max_length(),
+    )
+    name_display = models.CharField(
+        verbose_name='Название',
+        max_length=NPCClassEnum.max_description_length(),
     )
 
     def __str__(self):
-        return NPCClassIntEnum(self.name).description
+        return self.name_display
 
 
 class FunctionalTemplate(models.Model):

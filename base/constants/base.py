@@ -42,6 +42,10 @@ class BaseNameValueDescriptionEnum(str, Enum):
     def max_length(cls):
         return max(len(item.value) for item in cls)
 
+    @classmethod
+    def max_description_length(cls):
+        return max(len(item.description) for item in cls)
+
     @property
     def lvalue(self):
         return self.value.lower()
