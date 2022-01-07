@@ -363,7 +363,6 @@ class WeaponTypeAdmin(admin.ModelAdmin):
                 'damage',
             )
         return (
-            'name',
             'slug',
             'category',
             'group',
@@ -383,7 +382,7 @@ class WeaponTypeAdmin(admin.ModelAdmin):
     def group(self, obj):
         if not obj.id:
             return '-'
-        return obj.data_instance.group.description
+        return obj.data_instance.group_display()
 
     @admin.display(description='Урон')
     def damage(self, obj):

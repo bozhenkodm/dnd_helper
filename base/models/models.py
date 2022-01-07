@@ -140,8 +140,8 @@ class WeaponType(models.Model):
 
     objects = WeaponTypeQuerySet.as_manager()
 
-    name = models.CharField(verbose_name='Название', max_length=20, unique=True)
-    slug = models.CharField(verbose_name='Slug', max_length=20, unique=True)
+    name = models.CharField(verbose_name='Название', max_length=30)
+    slug = models.CharField(verbose_name='Slug', max_length=30, unique=True)
 
     def __str__(self):
         return self.name
@@ -217,11 +217,11 @@ class Race(models.Model):
         choices=NPCRaceEnum.generate_choices(),
         unique=True,
     )
-    is_sociable = models.BooleanField(verbose_name='Социальная раса', default=True)
-
-    @cached_property
-    def data_instance(self):
-        return race_classes.get(self.name)(npc=self)
+    is_sociable = models.BooleanField(
+        verbose_name='Социальная раса',
+        default=True,
+        help_text='Социальные расы используются для случайной генерации NPC',
+    )
 
     def __str__(self):
         return NPCRaceEnum[self.name].description

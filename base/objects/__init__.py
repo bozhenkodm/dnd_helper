@@ -1,7 +1,7 @@
 from base.objects import npc_classes, races, weapon_types
 
 races_tuple = (
-    # races.BladelingRace,  # too exotic for now
+    races.BladelingRace,  # too exotic for now
     races.BugbearRace,
     races.DevaRace,
     races.DoppelgangerRace,
@@ -24,17 +24,17 @@ races_tuple = (
     races.HalfelfRace,
     races.HalflingRace,
     races.HalforcRace,
-    # races.HamadryadRace,  # too exotic for now
+    races.HamadryadRace,  # too exotic for now
     races.HobgoblinRace,
     races.HumanRace,
     races.KalashtarRace,
-    # races.KenkuRace,  # too exotic for now
+    races.KenkuRace,  # too exotic for now
     races.KoboldRace,
     races.MinotaurRace,
     races.MulRace,
-    # races.OrcRace,
-    # races.PixieRace,  # too exotic for now
-    # races.SatyrRace,  # too exotic for now
+    races.OrcRace,
+    races.PixieRace,  # too exotic for now
+    races.SatyrRace,  # too exotic for now
     races.ShadarKaiRace,
     races.ShifterLongteethRace,
     races.ShifterRazorclawRace,
@@ -42,13 +42,13 @@ races_tuple = (
     races.TieflingRace,
     races.VrylokaRace,
     races.WarforgedRace,
-    # races.WildenRace,  # dummy
+    races.WildenRace,  # dummy
 )
 
 race_classes = {cls.slug.name: cls for cls in races_tuple}
 
 
-npc_tuple = (
+classes_tuple = (
     npc_classes.ArtificerClass,
     npc_classes.AvengerClass,
     npc_classes.BarbarianClass,
@@ -75,7 +75,7 @@ npc_tuple = (
     npc_classes.WizardClass,
 )
 
-npc_klasses = {cls.slug.value: cls for cls in npc_tuple}
+npc_klasses = {cls.slug.value: cls for cls in classes_tuple}
 
 weapon_types_tuple = (
     weapon_types.AnnihilationBlade,  # hexblade weapon

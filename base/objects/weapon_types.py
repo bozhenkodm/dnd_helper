@@ -69,9 +69,14 @@ class WeaponType:
 
     @classmethod
     def has_group(cls, group: WeaponGroupEnum) -> bool:
-        if isinstance(cls.group, Sequence):
-            return group in cls.group
-        return group == cls.group
+        if isinstance(cls.group, WeaponGroupEnum):
+            return group == cls.group
+        return group in cls.group
+
+    def group_display(self):
+        if isinstance(self.group, WeaponGroupEnum):
+            return self.group.description
+        return ', '.join(group.description for group in self.group)
 
     @property
     def is_pure_implement(self) -> bool:
