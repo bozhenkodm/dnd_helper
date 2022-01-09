@@ -8,5 +8,11 @@
     <div align="center">
         <h1>{{ name }}</h1>
     </div>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" id="save_name" value="Сохранить имя"><br>
+    </form>
 </body>
 </html>

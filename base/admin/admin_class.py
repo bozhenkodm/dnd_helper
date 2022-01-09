@@ -33,10 +33,22 @@ from base.models.models import Power, PowerProperty
 from base.objects import npc_klasses
 
 
+@admin.action(description='Социализировать расы')
+def make_sociable(modeladmin, request, queryset):
+    queryset.update(is_sociable=True)
+
+
+@admin.action(description='Десоциализировать расы')
+def make_unsociable(modeladmin, request, queryset):
+    queryset.update(is_sociable=False)
+
+
 class RaceAdmin(admin.ModelAdmin):
     fields = ('name', 'is_sociable')
     list_filter = ('is_sociable',)
+    list_display = ('name', 'is_sociable')
     form = RaceForm
+    actions = (make_sociable, make_unsociable)
 
     def get_queryset(self, request):
         qs = super().get_queryset(request).annotate(title=NPCRaceEnum.generate_case())

@@ -135,6 +135,10 @@ class EncounterParticipants(models.Model):
             return self.name
         return f'{self.name} №{self.number}'
 
+    def move_after(self, other: "EncounterParticipants"):
+        self.initiative = other.initiative - 0.5
+        self.save()
+
 
 class Combatants(models.Model):
     class Meta:

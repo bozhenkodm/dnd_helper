@@ -22,12 +22,20 @@ def generate_race_fixtures():
     max_pk = get_max_pk(Race) + 1
     for race in races_tuple:
         try:
-            pk = Race.objects.get(name=race.slug.value).id
+            race = Race.objects.get(name=race.slug.value)
         except Race.DoesNotExist:
             pk = max_pk
             max_pk += 1
+            is_sociable = True
+        else:
+            pk = race.pk
+            is_sociable = race.is_sociable
         race_json.append(
-            {"model": "base.race", "pk": pk, "fields": {"name": race.slug.value}}
+            {
+                "model": "base.race",
+                "pk": pk,
+                "fields": {"name": race.slug.value, 'is_sociable': is_sociable},
+            }
         )
     with open(os.path.join(FIXTURE_PATH, 'race.json'), 'w') as f:
         json.dump(

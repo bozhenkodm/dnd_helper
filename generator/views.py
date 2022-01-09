@@ -1,9 +1,10 @@
 import random
 
-from django.urls import reverse
-from django.views.generic import TemplateView
+from django.urls import reverse, reverse_lazy
+from django.views.generic import FormView, TemplateView
 
 from generator.constants import adjectives, consolants, names, nouns, vovels
+from generator.forms import NPCNameForm
 from generator.models import NPCName
 
 
@@ -67,13 +68,31 @@ class TavernView(TemplateView):
         return context
 
 
-class GenerateNameView(TemplateView):
+class GenerateNameFormView(FormView):
     template_name = 'generator/fantasy_name.html'
+    form_class = NPCNameForm
+
+    name = ''
+
+    def generate_name(self):
+        return self.name
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['name'] = self.generate_name()
+        return initial
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
 
 
-class FantasyNameView(GenerateNameView):
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+class FantasyNameView(GenerateNameFormView):
+    success_url = reverse_lazy('generator_fantasy_name')
+
+    def generate_name(self):
+        if self.name:
+            return self.name
         name = random.choice(names.split()).lower()
         replaced_letter_number = random.randint(1, 2)
         replaced_indexes = (
@@ -85,19 +104,29 @@ class FantasyNameView(GenerateNameView):
                 replacements[i] = random.choice(vovels)
             else:
                 replacements[i] = random.choice(consolants)
-        name = ''.join(replacements.get(i, l) for i, l in enumerate(name)).capitalize()
-        context['name'] = name
+        self.name = ''.join(replacements.get(i, l) for i, l in enumerate(name)).capitalize()
+        return self.name
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['name'] = self.generate_name()
         return context
 
 
-class RandomNameView(GenerateNameView):
+class RandomNameView(GenerateNameFormView):
     vovels = 'аеиоуэ'
     consolants = 'бвгджзклмнпрстфхцчш'
+    success_url = reverse_lazy('random_fantasy_name')
+
+    def generate_name(self):
+        if self.name:
+            return self.name
+        self.name = ''.join(self.get_syllable() for _ in range(random.randint(1, 4))).capitalize()
+        return self.name
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
-        name = ''.join(self.get_syllable() for _ in range(random.randint(1, 4)))
-        context['name'] = name.capitalize()
+        context['name'] = self.generate_name()
         return context
 
     def get_syllable(self):

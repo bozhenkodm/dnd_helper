@@ -40,7 +40,7 @@ class SkillMixin:
                 SkillsEnum.ENDURANCE,
                 SkillsEnum.STEALTH,
             ),
-            value=1,
+            value=self.armor.skill_penalty,  # type: ignore
         )
         return (
             half_level

@@ -43,7 +43,6 @@
   </tr>
 {% for combatant in object.participants.ordered %}
     <tr class="border">
-<!--    <div class="npc-line">-->
     <td class="border"><span><b>{{ forloop.counter }}</b></span></td>
     <td class="border"><span><b>{{ combatant.full_name }}</b></span><br>
     {% if combatant.display_defences %}
@@ -52,17 +51,21 @@
     </td>
     <td></td>
     <td class="border"><span style="float: right">{{ combatant.initiative|floatformat:"0" }} </span></td>
-<!--    </div>-->
-<!--    <br><hr>-->
 {% endfor %}
 </table>
 
 </div>
 
 <div class="noprint">
+    <form action="{% url 'encounter-change' pk=object.id %}" method="post">
+        {% csrf_token %}
+        {{ change_initiative_form }}
+        <input type="submit" id="change_initiative" value="Изменить инициативу"><br>
+    </form>
+    <br>
     <form method="post">
         {% csrf_token %}
-      <input type="submit" id="roll_button" value="Бросок инициативы"><br>
+        <input type="submit" id="roll_button" value="Бросок инициативы"><br>
     </form>
 </div>
 

@@ -87,6 +87,12 @@ class ItemAbstract(models.Model):
             return 0
         return (self.level - 1) // 5 + 1
 
+    @property
+    def price(self):
+        if not self.level:
+            return 0
+        return (200 + (self.level % 5) * 160) * (5 ** (self.level // 5))
+
 
 class Armor(ItemAbstract):
     class Meta:
@@ -117,12 +123,6 @@ class Armor(ItemAbstract):
         if not self.magic_item:
             return self.get_armor_type_display()
         return f'{self.get_armor_type_display()}, {self.magic_item.name}'
-
-    @property
-    def price(self):
-        if not self.level:
-            return 0
-        return (200 + (self.level % 5) * 160) * (5 ** (self.level // 5))
 
     @property
     def is_light(self):
