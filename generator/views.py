@@ -104,7 +104,9 @@ class FantasyNameView(GenerateNameFormView):
                 replacements[i] = random.choice(vovels)
             else:
                 replacements[i] = random.choice(consolants)
-        self.name = ''.join(replacements.get(i, l) for i, l in enumerate(name)).capitalize()
+        self.name = ''.join(
+            replacements.get(i, l) for i, l in enumerate(name)
+        ).capitalize()
         return self.name
 
     def get_context_data(self, **kwargs):
@@ -121,7 +123,9 @@ class RandomNameView(GenerateNameFormView):
     def generate_name(self):
         if self.name:
             return self.name
-        self.name = ''.join(self.get_syllable() for _ in range(random.randint(1, 4))).capitalize()
+        self.name = ''.join(
+            self.get_syllable() for _ in range(random.randint(1, 4))
+        ).capitalize()
         return self.name
 
     def get_context_data(self, **kwargs):

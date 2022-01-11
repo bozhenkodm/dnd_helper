@@ -212,6 +212,16 @@ class ShieldTypeEnum(BaseNameValueDescriptionEnum):
     HEAVY = 'HEAVY', 'Тяжелый щит'
 
 
+class ShieldTypeIntEnum(IntDescriptionEnum):
+    LIGHT = 1, 'Лёгкий щит'
+    HEAVY = 2, 'Тяжелый щит'
+
+    def penalty(self):
+        if self == self.HEAVY:
+            return 2
+        return 0
+
+
 class WeaponGroupEnum(BaseNameValueDescriptionEnum):
     # Рукопашное
     AXE = 'AXE', 'Топор'

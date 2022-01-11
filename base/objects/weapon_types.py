@@ -82,6 +82,18 @@ class WeaponType:
     def is_pure_implement(self) -> bool:
         return not self.damage_dice
 
+    @property
+    def is_melee(self) -> bool:
+        return self.category.is_melee
+
+    @property
+    def is_ranged(self) -> bool:
+        return bool(self.range)
+
+    @property
+    def is_melee_and_ranged(self):
+        return self.is_melee and self.is_ranged
+
 
 class ImplementType(WeaponType):
     name: ClassVar[str]

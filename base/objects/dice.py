@@ -23,17 +23,13 @@ class DiceRoll:
     def __mul__(self, other):
         if not isinstance(other, int):
             raise TypeError('should multiply only by int')
-        # 1d6+4 * 2 = 2d6+4.  Addendants don't multiply
+        # 1d6+4 * 2 = 2d6+4. Addendants don't multiply
         return DiceRoll(
             rolls=self.rolls * other, dice=self.dice, addendant=self.addendant
         )
 
     def __imul__(self, other):
-        if not isinstance(other, int):
-            raise TypeError('should multiply only by int')
-        return DiceRoll(
-            rolls=self.rolls * other, dice=self.dice, addendant=self.addendant
-        )
+        return self.__mul__(other)
 
     def __rmul__(self, other):
         return self.__mul__(other)

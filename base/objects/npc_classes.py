@@ -598,7 +598,7 @@ class RogueClass(NPCClass):
         if not weapon:
             return super().attack_bonus()
         base_bonus = super().attack_bonus(weapon=weapon)
-        wt_data_instance = weapon.weapon_type.data_instance
+        wt_data_instance = weapon.data_instance
         if type(wt_data_instance) in self.available_weapon_types and isinstance(
             wt_data_instance,
             (Dagger, Sling, HandCrossbow),  # should choose either dagger or ranged
@@ -730,12 +730,6 @@ class SorcererClass(NPCClass):
         if self.npc.subclass == self.SubclassEnum.DRAGON_MAGIC:
             result = max(self.npc.str_mod, result)
         return result
-
-    @property
-    def armor_class_bonus(self):
-        if self.npc.subclass == self.SubclassEnum.DRAGON_MAGIC:
-            return max(self.npc.int_mod, self.npc.dex_mod, self.npc.str_mod)
-        return super().armor_class_bonus
 
 
 class ShamanClass(NPCClass):

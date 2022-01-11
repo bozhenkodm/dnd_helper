@@ -205,6 +205,22 @@ class Weapon(ItemAbstract):
     def prof_bonus(self):
         return self.data_instance.prof_bonus
 
+    def get_attack_type(self, is_melee: bool, is_ranged: bool):
+        melee_attack_type, ranged_attack_type = '', ''
+        if is_melee:
+            distance = 2 if self.data_instance.is_reach else 1
+            melee_attack_type = f'Рукопашный {distance}'
+        if is_ranged:
+            ranged_attack_type = (
+                f'Дальнобойный '
+                f'{self.data_instance.range}/{self.data_instance.max_range}'
+            )
+        return (
+            (is_melee and is_ranged and f'{melee_attack_type} или {ranged_attack_type}')
+            or (is_melee and melee_attack_type)
+            or (is_ranged and ranged_attack_type)
+        )
+
 
 class Race(models.Model):
     class Meta:
@@ -435,14 +451,31 @@ class Power(models.Model):
             return self.klass.get_name_display()
         raise ValueError('Power unproperly configured')
 
-    @property
-    def attack_type(self):
-        if self.range_type in (
-            PowerRangeTypeEnum.MELEE_RANGED_WEAPON,
-            PowerRangeTypeEnum.MELEE_WEAPON,
-            PowerRangeTypeEnum.RANGED_WEAPON,
-            PowerRangeTypeEnum.PERSONAL,
+    def attack_type(self, weapon: Optional[Weapon] = None):
+        if (
+            self.range_type
+            in (
+                PowerRangeTypeEnum.MELEE_RANGED_WEAPON,
+                PowerRangeTypeEnum.MELEE_WEAPON,
+                PowerRangeTypeEnum.RANGED_WEAPON,
+            )
+            and weapon
         ):
+            # TODO maybe move it to npc model
+            return weapon.get_attack_type(
+                is_melee=self.range_type
+                in (
+                    PowerRangeTypeEnum.MELEE_WEAPON,
+                    PowerRangeTypeEnum.MELEE_RANGED_WEAPON,
+                ),
+                is_ranged=self.range_type
+                in (
+                    PowerRangeTypeEnum.RANGED_WEAPON,
+                    PowerRangeTypeEnum.MELEE_RANGED_WEAPON,
+                ),
+            )
+
+        if self.range_type == PowerRangeTypeEnum.PERSONAL:
             return self.get_range_type_display()
         if (
             self.range_type
@@ -476,8 +509,7 @@ class Power(models.Model):
             )
         raise ValueError('Wrong attack type')
 
-    @property
-    def keywords(self):
+    def keywords(self, weapon: Optional[Weapon] = None):
         if self.frequency == PowerFrequencyEnum.PASSIVE:
             return ''
         return filter(
@@ -486,7 +518,7 @@ class Power(models.Model):
                 self.get_action_type_display(),
                 self.get_accessory_type_display() if self.accessory_type else '',
                 self.get_frequency_display(),
-                self.attack_type,
+                self.attack_type(weapon),
             )
             + tuple(
                 PowerDamageTypeEnum[type_].description
@@ -647,21 +679,21 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, models.Model):
         return reverse('npc', kwargs={'pk': self.pk})
 
     @property
-    def half_level(self):
+    def half_level(self) -> int:
         return self.level // 2
 
     @property
-    def _magic_threshold(self):
+    def _magic_threshold(self) -> int:
         """ Магический порог (максимальный бонус от магических предметов)"""
-        return self.level // 5 + 1
+        return (self.level - 1) // 5
 
     @property
-    def _level_bonus(self):
+    def _level_bonus(self) -> int:
         """ Условный бонус к защитам, атакам и урону для мастерских персонажей"""
-        return ((self.level - 1) // 5) * 2 + 1
+        return self._magic_threshold * 2 + 1
 
     @property
-    def max_hit_points(self):
+    def max_hit_points(self) -> int:
         result = (
             self.klass_data_instance.hit_points_per_level * self.level
             + self.constitution
@@ -675,18 +707,18 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, models.Model):
         return result
 
     @property
-    def bloodied(self):
+    def bloodied(self) -> int:
         return self.max_hit_points // 2
 
     @property
-    def surge(self):
+    def surge(self) -> int:
         """
         Исцеление
         """
         return self.bloodied // 2 + self.race_data_instance.healing_surge_bonus
 
     @property
-    def _tier(self):
+    def _tier(self) -> int:
         """Этап развития"""
         if self.level < 11:
             return 0
@@ -695,12 +727,12 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, models.Model):
         return 1
 
     @property
-    def surges(self):
+    def surges(self) -> int:
         """Количество исцелений"""
         return self._tier + 1 + self.race_data_instance.surges_number_bonus
 
     @property
-    def initiative(self):
+    def initiative(self) -> int:
         return self.dex_mod + self.half_level + self.race_data_instance.initiative
 
     @property
@@ -839,23 +871,21 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, models.Model):
                             == AccessoryTypeEnum.IMPLEMENT,
                         )
                         # armament enchantment
-                        + min(
-                            weapon and weapon.enchantment or 0,
-                            self._magic_threshold,
+                        + max(
+                            weapon and weapon.enchantment or 0 - self._magic_threshold,
+                            0,
                         )
                         # power attack bonus should be added
                         # to string when creating power property
                     )
                 elif parsed_expression_element == PowersVariables.DMG:
                     # TODO separate damage bonus and enchantment
-                    current_element = self.klass_data_instance.damage_bonus + min(
-                        weapon and weapon.enchantment or 0,
-                        self._magic_threshold,
+                    current_element = self.klass_data_instance.damage_bonus + max(
+                        weapon and weapon.enchantment or 0 - self._magic_threshold, 0
                     )
                 elif parsed_expression_element == PowersVariables.EHT:
-                    current_element = min(
-                        weapon and weapon.enchantment or 0,
-                        self._magic_threshold,
+                    current_element = max(
+                        weapon and weapon.enchantment or 0 - self._magic_threshold, 0
                     )
                 elif parsed_expression_element == PowersVariables.ITL:
                     if not item:
@@ -906,7 +936,7 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, models.Model):
             powers.append(
                 PowerDisplay(
                     name=power.name,
-                    keywords=power.keywords,
+                    keywords=power.keywords(),
                     category=power.category(),
                     description=self.parse_string(power, string=power.description),
                     frequency_order=power.frequency_order,
@@ -931,7 +961,7 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, models.Model):
                 powers.append(
                     PowerDisplay(
                         name=power.name,
-                        keywords=power.keywords,
+                        keywords=power.keywords(weapon),
                         category=power.category(weapon),
                         description=self.parse_string(power, power.description),
                         frequency_order=power.frequency_order,
@@ -956,7 +986,7 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, models.Model):
                 powers.append(
                     PowerDisplay(
                         name=power.name,
-                        keywords=power.keywords,
+                        keywords=power.keywords(),
                         category=power.category(),
                         description=self.parse_string(power, power.description),
                         frequency_order=power.frequency_order,

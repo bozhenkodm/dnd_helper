@@ -1,4 +1,4 @@
-from dataclasses import astuple, dataclass
+from dataclasses import dataclass
 
 
 @dataclass
@@ -9,13 +9,6 @@ class Abilities:
     intelligence: int = 0
     wisdom: int = 0
     charisma: int = 0
-
-    def description(self):
-        return astuple(self)
-
-    @staticmethod
-    def _modifier(value):
-        return (value - 10) // 2
 
     def __add__(self, other):
         return Abilities(
