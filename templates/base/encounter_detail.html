@@ -31,10 +31,8 @@
 </head>
 <body>
 <div class="pagenotbreak" style="width: 1000px; font-size: large">
-    <div style="clear: right">
-        <span>Раунд №{{object.round_number}}</span>
-    </div>
     <div class="noprint">
+        <span>Раунд №{{object.round_number}}</span>
         <form method="post">
             {% csrf_token %}
             <input type="submit" id="previous_turn" name="previous_turn" value="Предыдущий ход">
