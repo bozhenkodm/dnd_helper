@@ -68,10 +68,10 @@ class NPCModelForm(forms.ModelForm):
                     id__in=self.instance.weapons.values_list('id', flat=True)
                 )
             self.fields['primary_hand'] = forms.ModelChoiceField(
-                queryset=weapon_queryset, label='Основная рука'
+                queryset=weapon_queryset, label='Основная рука', required=False
             )
             self.fields['secondary_hand'] = forms.ModelChoiceField(
-                queryset=weapon_queryset, label='Вторичная рука'
+                queryset=weapon_queryset, label='Вторичная рука', required=False
             )
 
     def clean(self):

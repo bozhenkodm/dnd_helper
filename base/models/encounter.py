@@ -42,19 +42,40 @@ class Encounter(models.Model):
         verbose_name='Кидать инициативу за игроков?', default=False
     )
     npcs = models.ManyToManyField(NPC, verbose_name='Мастерские персонажи', blank=True)
+    turn_number = models.PositiveSmallIntegerField(verbose_name='Номер хода', default=1)
 
     def __str__(self):
         if self.short_description:
             return f'Сцена {self.short_description}'
         return f'Сцена №{self.id}'
 
+    def next_turn(self):
+        self.turn_number += 1
+        self.save()
+
+    def previous_turn(self):
+        self.turn_number -= 1
+        self.save()
+
     @property
     def url(self):
         return reverse('encounter', kwargs={'pk': self.pk})
 
+    @property
+    def round_number(self) -> int:
+        if not self.turn_number % self.participants.count():
+            return self.turn_number // self.participants.count()
+        return self.turn_number // self.participants.count() + 1
+
+    @property
+    def turn_number_in_round(self) -> int:
+        return self.turn_number % self.participants.count() or self.participants.count()
+
+
     @atomic
     def roll_initiative(self):
         self.participants.all().delete()
+        self.turn_number = 1
         participants = []
         for combatant in self.combatants_pcs.all():
             if self.roll_for_players:
@@ -105,6 +126,7 @@ class Encounter(models.Model):
                     )
                 )
         EncounterParticipants.objects.bulk_create(participants)
+        self.save()
 
 
 class EncounterParticipants(models.Model):

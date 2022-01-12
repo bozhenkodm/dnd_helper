@@ -521,12 +521,12 @@ class Power(models.Model):
                 self.attack_type(weapon),
             )
             + tuple(
-                PowerDamageTypeEnum[type_].description
+                PowerDamageTypeEnum[type_].description  # type: ignore
                 for type_ in self.damage_type
                 if type_ != PowerDamageTypeEnum.NONE
             )
             + tuple(
-                PowerEffectTypeEnum[type_].description
+                PowerEffectTypeEnum[type_].description  # type: ignore
                 for type_ in self.effect_type
                 if type_ != PowerEffectTypeEnum.NONE
             ),
@@ -679,7 +679,7 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, models.Model):
         return reverse('npc', kwargs={'pk': self.pk})
 
     @property
-    def half_level(self) -> int:
+    def half_level(self):
         return self.level // 2
 
     @property
@@ -718,7 +718,7 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, models.Model):
         return self.bloodied // 2 + self.race_data_instance.healing_surge_bonus
 
     @property
-    def _tier(self) -> int:
+    def _tier(self):
         """Этап развития"""
         if self.level < 11:
             return 0

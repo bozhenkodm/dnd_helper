@@ -21,6 +21,9 @@
     border: 2px solid black;
     border-collapse: collapse
 }
+.current_turn {
+    background-color: green
+}
 </style>
 <head>
     <meta charset="UTF-8">
@@ -28,6 +31,16 @@
 </head>
 <body>
 <div class="pagenotbreak" style="width: 1000px; font-size: large">
+    <div style="clear: right">
+        <span>Раунд №{{object.round_number}}</span>
+    </div>
+    <div class="noprint">
+        <form method="post">
+            {% csrf_token %}
+            <input type="submit" id="previous_turn" name="previous_turn" value="Предыдущий ход">
+            <input type="submit" id="next_turn" name="next_turn" value="Следуюший ход"><br>
+        </form>
+    </div>
 <table class="border" style="width: 1000px; font-size: large">
     <colgroup>
        <col span="1" style="width: 5%;">
@@ -42,7 +55,7 @@
     <th class="border"></th>
   </tr>
 {% for combatant in object.participants.ordered %}
-    <tr class="border">
+    <tr class="border {% if object.turn_number_in_round == forloop.counter %}current_turn{% endif %}">
     <td class="border"><span><b>{{ forloop.counter }}</b></span></td>
     <td class="border"><span><b>{{ combatant.full_name }}</b></span><br>
     {% if combatant.display_defences %}
@@ -53,7 +66,6 @@
     <td class="border"><span style="float: right">{{ combatant.initiative|floatformat:"0" }} </span></td>
 {% endfor %}
 </table>
-
 </div>
 
 <div class="noprint">

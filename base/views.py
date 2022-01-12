@@ -36,7 +36,12 @@ class EncounterDetailView(DetailView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        obj.roll_initiative()
+        if 'next_turn' in request.POST:
+            obj.next_turn()
+        elif 'previous_turn' in request.POST:
+            obj.previous_turn()
+        else:
+            obj.roll_initiative()
         return self.get(request, *args, **kwargs)
 
 

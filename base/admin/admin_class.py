@@ -574,6 +574,7 @@ itl - бонус предмета, к которому принадлежит т
                     )
                 )
             ):
+                print(subclass_enum)
                 choices = subclass_enum.generate_choices()
                 db_field.choices = choices
 

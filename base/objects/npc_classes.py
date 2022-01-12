@@ -178,6 +178,11 @@ class BardClass(NPCClass):
     reflex = 1
     will = 1
 
+    class SubclassEnum(IntDescriptionSubclassEnum):
+        CUNNING = 1, 'Хитрый'
+        VALOROUS = 2, 'Доблестный'
+        PRESCIENT = 3, 'Провидец'
+
 
 class VampireClass(NPCClass):
     slug = NPCClassEnum.VAMPIRE
