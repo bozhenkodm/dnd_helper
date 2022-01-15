@@ -71,7 +71,6 @@ class Encounter(models.Model):
     def turn_number_in_round(self) -> int:
         return self.turn_number % self.participants.count() or self.participants.count()
 
-
     @atomic
     def roll_initiative(self):
         self.participants.all().delete()

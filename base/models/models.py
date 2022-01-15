@@ -1,8 +1,10 @@
+import operator
 import re
 from functools import cached_property
 from typing import Optional, Sequence
 
 from django.db import models
+from django.db.transaction import atomic
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from multiselectfield import MultiSelectField  # type: ignore
@@ -532,6 +534,66 @@ class Power(models.Model):
             ),
         )
 
+    @staticmethod
+    def sequential_to_braced(string: str) -> str:
+        parsed_expression = re.findall(r'[a-z]{3}|[+\-*/]|[0-9]{0,2}', string)
+        parsed_expression = parsed_expression[:-1]
+        operators_stack = []
+        values_stack = []
+        for item in parsed_expression:
+            if item in ('+', '-', '*', '/'):
+                operators_stack.append(item)
+            else:
+                values_stack.append(item)
+        while operators_stack and values_stack:
+            left = values_stack.pop(0)
+            right = values_stack.pop(0)
+            operation = operators_stack.pop(0)
+            values_stack.insert(0, f'({left}{operation}{right})')
+        return '$' + ''.join(values_stack)
+
+    @staticmethod
+    def remove_braces(string: str) -> str:
+        print(string)
+        if string[-1] == ')':
+            string = string[:-1]
+        if string[0] == '(':
+            string = string[1:]
+        return '$' + string
+
+    @classmethod
+    def reformat(cls, func):
+        with atomic():
+            for power in cls.objects.all():
+                pattern = r'\$([\S]+)\b'
+                expressions = re.findall(pattern, power.description)
+                template = re.sub(
+                    pattern, '{}', power.description
+                )  # preparing template for format() method
+                template = template.replace('{})', '{}')
+                calculated_expressions = [func(exp) for exp in expressions]
+                power.description = template.format(*calculated_expressions)
+                power.save()
+                for prop in power.properties.all():
+                    expressions = re.findall(pattern, prop.description)
+                    template = re.sub(
+                        pattern, '{}', prop.description
+                    )  # preparing template for format() method
+                    template = template.replace('{})', '{}')
+                    calculated_expressions = [func(exp) for exp in expressions]
+                    prop.description = template.format(*calculated_expressions)
+                    print('1' * 88)
+                    print(prop.description)
+                    print(calculated_expressions)
+                    print(template)
+                    prop.save()
+
+    @classmethod
+    def do(cls):
+        with atomic():
+            cls.reformat(cls.sequential_to_braced)
+            cls.reformat(cls.remove_braces)
+
 
 class PowerProperty(models.Model):
     power = models.ForeignKey(
@@ -660,7 +722,7 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, models.Model):
             f'{self.race} {self.klass} {self.level} уровня'
         )
 
-    # TODO these two next methods are shitshow,
+    # FIXME these two next methods are shitshow,
     #  appeared to be parallel structures of race and class
     #  instead of complementing models.
     #  how to integrate npc instance to these instances and initialise them
@@ -828,26 +890,57 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, models.Model):
         self,
         power: Power,
         string: str,
-        weapon: Weapon = None,
-        secondary_weapon: Weapon = None,
+        weapon: Optional[Weapon] = None,
+        secondary_weapon: Optional[Weapon] = None,
         item: Optional[ItemAbstract] = None,
-    ):  # TODO something with function signature
-        pattern = r'\$([^\s]{3,})\b'  # gets substing from '$' to next whitespace
-        expressions = re.findall(pattern, string)
+    ):
+        pattern = r'\$(\S{3,})\b'  # gets substing from '$' to next whitespace
+        expressions_to_calculate = re.findall(pattern, string)
         template = re.sub(
             pattern, '{}', string
         )  # preparing template for format() method
         calculated_expressions = []
         # calculating without operations order for now, just op for op
         # TODO fix with polish record
-        # TODO rename variables!
-        for expression in expressions:
-            parsed_expression = re.findall(r'[a-z]{3}|[+\-*/]|[0-9]{0,2}', expression)
+        for expression in expressions_to_calculate:
+            # split expression to list of numbers, operators and variables
+            self.expression_to_polish_record(expression)
+            parsed_expression = re.findall(r'[a-z]{3}|[+\-*/^_]|[0-9]{0,2}', expression)
             current_calculated_expression = 0
             current_operation = None
             for parsed_expression_element in parsed_expression[:-1]:
                 # iterating trough parsed_expression[:-1] because last element is ''
-                if parsed_expression_element in ('+', '-', '*', '/'):
+                pass
+
+            calculated_expressions.append(current_calculated_expression)
+        result = template.format(*calculated_expressions)
+        # TODO remove injection weakness, leaving only markdown tags
+        return mark_safe('<br>'.join(result.split('\n')))
+
+    def parse_string_old(
+        self,
+        power: Power,
+        string: str,
+        weapon: Optional[Weapon] = None,
+        secondary_weapon: Optional[Weapon] = None,
+        item: Optional[ItemAbstract] = None,
+    ):
+        pattern = r'\$(\S{3,})\b'  # gets substing from '$' to next whitespace
+        expressions_to_calculate = re.findall(pattern, string)
+        template = re.sub(
+            pattern, '{}', string
+        )  # preparing template for format() method
+        calculated_expressions = []
+        # calculating without operations order for now, just op for op
+        # TODO fix with polish record
+        for expression in expressions_to_calculate:
+            # split expression to list of numbers, operators and variables
+            parsed_expression = re.findall(r'[a-z]{3}|[+\-*/^_]|[0-9]{0,2}', expression)
+            current_calculated_expression = 0
+            current_operation = None
+            for parsed_expression_element in parsed_expression[:-1]:
+                # iterating trough parsed_expression[:-1] because last element is ''
+                if parsed_expression_element in ('+', '-', '*', '/', '^', '_'):
                     current_operation = parsed_expression_element
                     continue
                 if parsed_expression_element == PowersVariables.WPN:

@@ -10,6 +10,7 @@ from base.constants.constants import (
     WeaponCategoryIntEnum,
     WeaponHandednessEnum,
 )
+from base.helpers import modifier
 from base.objects.skills import Skills
 from base.objects.weapon_types import (
     AnnihilationBlade,
@@ -80,14 +81,9 @@ class NPCClass:
     def damage_bonus(self):
         return self.npc._level_bonus
 
-    @staticmethod
-    def _modifier(value: int) -> int:
-        # TODO move to helper function for now it repeats logic in models
-        return (value - 10) // 2
-
     @property
     def _armor_class_ability_bonus(self):
-        return max(map(self._modifier, (self.npc.intelligence, self.npc.dexterity)))
+        return max(map(modifier, (self.npc.intelligence, self.npc.dexterity)))
 
     @property
     def armor_class_bonus(self):
@@ -535,8 +531,7 @@ class SwordmageClass(NPCClass):
     @property
     def armor_class_bonus(self):
         result = super().armor_class_bonus
-        # TODO add handling offhand weapon
-        if not self.npc.shield:
+        if not self.npc.shield and not self.npc.secondary_hand:
             result += 3
         else:
             result += 1

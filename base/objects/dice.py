@@ -38,7 +38,7 @@ class DiceRoll:
         self.dice.roll(self.rolls) + self.addendant
 
     def treshhold(self, value):
-        self.addendant = min(self.addendant, value)
+        self.addendant = max(self.addendant - value, 0)
         return self
 
     @classmethod
