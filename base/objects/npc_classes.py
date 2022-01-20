@@ -324,9 +324,11 @@ class FighterClass(NPCClass):
             (
                 self.npc.subclass != self.SubclassEnum.BRAWLER,
                 self.npc.shield,
-                len(weapons := tuple(self.npc.weapons.all())) != 1,
-                not weapons[0].weapon_type.data_instance.category.is_melee,
-                weapons[0].weapon_type.data_instance.handedness
+                self.npc.secondary_hand,
+                self.npc.primary_hand
+                and not self.npc.primary_hand.data_instance.is_melee,
+                self.npc.primary_hand
+                and self.npc.primary_hand.data_instance.handedness
                 == WeaponHandednessEnum.TWO,
             )
         ):

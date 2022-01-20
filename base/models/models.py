@@ -1,4 +1,3 @@
-import operator
 import re
 from functools import cached_property
 from typing import Optional, Sequence
@@ -33,6 +32,7 @@ from base.constants.constants import (
 from base.managers import PowerQueryset, WeaponTypeQuerySet
 from base.models.mixins.abilities import AttributeAbstract
 from base.models.mixins.defences import DefenceMixin
+from base.models.mixins.powers import PowerMixin
 from base.models.mixins.skills import SkillMixin
 from base.objects import npc_klasses, race_classes, weapon_types_classes
 from base.objects.dice import DiceRoll
@@ -534,66 +534,6 @@ class Power(models.Model):
             ),
         )
 
-    @staticmethod
-    def sequential_to_braced(string: str) -> str:
-        parsed_expression = re.findall(r'[a-z]{3}|[+\-*/]|[0-9]{0,2}', string)
-        parsed_expression = parsed_expression[:-1]
-        operators_stack = []
-        values_stack = []
-        for item in parsed_expression:
-            if item in ('+', '-', '*', '/'):
-                operators_stack.append(item)
-            else:
-                values_stack.append(item)
-        while operators_stack and values_stack:
-            left = values_stack.pop(0)
-            right = values_stack.pop(0)
-            operation = operators_stack.pop(0)
-            values_stack.insert(0, f'({left}{operation}{right})')
-        return '$' + ''.join(values_stack)
-
-    @staticmethod
-    def remove_braces(string: str) -> str:
-        print(string)
-        if string[-1] == ')':
-            string = string[:-1]
-        if string[0] == '(':
-            string = string[1:]
-        return '$' + string
-
-    @classmethod
-    def reformat(cls, func):
-        with atomic():
-            for power in cls.objects.all():
-                pattern = r'\$([\S]+)\b'
-                expressions = re.findall(pattern, power.description)
-                template = re.sub(
-                    pattern, '{}', power.description
-                )  # preparing template for format() method
-                template = template.replace('{})', '{}')
-                calculated_expressions = [func(exp) for exp in expressions]
-                power.description = template.format(*calculated_expressions)
-                power.save()
-                for prop in power.properties.all():
-                    expressions = re.findall(pattern, prop.description)
-                    template = re.sub(
-                        pattern, '{}', prop.description
-                    )  # preparing template for format() method
-                    template = template.replace('{})', '{}')
-                    calculated_expressions = [func(exp) for exp in expressions]
-                    prop.description = template.format(*calculated_expressions)
-                    print('1' * 88)
-                    print(prop.description)
-                    print(calculated_expressions)
-                    print(template)
-                    prop.save()
-
-    @classmethod
-    def do(cls):
-        with atomic():
-            cls.reformat(cls.sequential_to_braced)
-            cls.reformat(cls.remove_braces)
-
 
 class PowerProperty(models.Model):
     power = models.ForeignKey(
@@ -632,7 +572,7 @@ class PowerProperty(models.Model):
         return f'{self.title} {self.description} {self.level}'
 
 
-class NPC(DefenceMixin, AttributeAbstract, SkillMixin, models.Model):
+class NPC(DefenceMixin, AttributeAbstract, SkillMixin, PowerMixin, models.Model):
     class Meta:
         verbose_name = 'NPC'
         verbose_name_plural = 'NPCS'
@@ -874,18 +814,6 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, models.Model):
             )
         )
 
-    @property
-    def power_attrs(self):
-        return {
-            PowersVariables.STR: self.str_mod,
-            PowersVariables.CON: self.con_mod,
-            PowersVariables.DEX: self.dex_mod,
-            PowersVariables.INT: self.int_mod,
-            PowersVariables.WIS: self.wis_mod,
-            PowersVariables.CHA: self.cha_mod,
-            PowersVariables.LVL: self.level,
-        }
-
     def parse_string(
         self,
         power: Power,
@@ -903,104 +831,15 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, models.Model):
         # calculating without operations order for now, just op for op
         # TODO fix with polish record
         for expression in expressions_to_calculate:
-            # split expression to list of numbers, operators and variables
-            self.expression_to_polish_record(expression)
-            parsed_expression = re.findall(r'[a-z]{3}|[+\-*/^_]|[0-9]{0,2}', expression)
-            current_calculated_expression = 0
-            current_operation = None
-            for parsed_expression_element in parsed_expression[:-1]:
-                # iterating trough parsed_expression[:-1] because last element is ''
-                pass
-
-            calculated_expressions.append(current_calculated_expression)
-        result = template.format(*calculated_expressions)
-        # TODO remove injection weakness, leaving only markdown tags
-        return mark_safe('<br>'.join(result.split('\n')))
-
-    def parse_string_old(
-        self,
-        power: Power,
-        string: str,
-        weapon: Optional[Weapon] = None,
-        secondary_weapon: Optional[Weapon] = None,
-        item: Optional[ItemAbstract] = None,
-    ):
-        pattern = r'\$(\S{3,})\b'  # gets substing from '$' to next whitespace
-        expressions_to_calculate = re.findall(pattern, string)
-        template = re.sub(
-            pattern, '{}', string
-        )  # preparing template for format() method
-        calculated_expressions = []
-        # calculating without operations order for now, just op for op
-        # TODO fix with polish record
-        for expression in expressions_to_calculate:
-            # split expression to list of numbers, operators and variables
-            parsed_expression = re.findall(r'[a-z]{3}|[+\-*/^_]|[0-9]{0,2}', expression)
-            current_calculated_expression = 0
-            current_operation = None
-            for parsed_expression_element in parsed_expression[:-1]:
-                # iterating trough parsed_expression[:-1] because last element is ''
-                if parsed_expression_element in ('+', '-', '*', '/', '^', '_'):
-                    current_operation = parsed_expression_element
-                    continue
-                if parsed_expression_element == PowersVariables.WPN:
-                    weapon = weapon or self.primary_hand
-                    if not weapon:
-                        raise ValueError('У данного таланта нет оружия')
-                    current_element = weapon.damage_roll.treshhold(
-                        self._magic_threshold
-                    )
-                elif parsed_expression_element == PowersVariables.WPS:
-                    if not secondary_weapon:
-                        raise ValueError('У данного таланта нет дополнительного оружия')
-                    current_element = secondary_weapon.damage_roll.treshhold(
-                        self._magic_threshold
-                    )
-                elif parsed_expression_element == PowersVariables.ATK:
-                    current_element = (
-                        self.klass_data_instance.attack_bonus(
-                            weapon,
-                            is_implement=power.accessory_type
-                            == AccessoryTypeEnum.IMPLEMENT,
-                        )
-                        # armament enchantment
-                        + max(
-                            weapon and weapon.enchantment or 0 - self._magic_threshold,
-                            0,
-                        )
-                        # power attack bonus should be added
-                        # to string when creating power property
-                    )
-                elif parsed_expression_element == PowersVariables.DMG:
-                    # TODO separate damage bonus and enchantment
-                    current_element = self.klass_data_instance.damage_bonus + max(
-                        weapon and weapon.enchantment or 0 - self._magic_threshold, 0
-                    )
-                elif parsed_expression_element == PowersVariables.EHT:
-                    current_element = max(
-                        weapon and weapon.enchantment or 0 - self._magic_threshold, 0
-                    )
-                elif parsed_expression_element == PowersVariables.ITL:
-                    if not item:
-                        raise ValueError('У данного таланта нет магического предмета')
-                    current_element = item.level
-                elif parsed_expression_element.isdigit():
-                    current_element = int(parsed_expression_element)
-                else:
-                    current_element = self.power_attrs.get(parsed_expression_element)
-                if current_operation == '+':
-                    current_calculated_expression += current_element
-                elif current_operation == '-':
-                    current_calculated_expression -= current_element
-                elif current_operation == '*':
-                    current_calculated_expression = (
-                        current_calculated_expression * current_element
-                    )
-                elif current_operation == '/':
-                    current_calculated_expression //= current_element
-                else:
-                    current_calculated_expression = current_element
-            calculated_expressions.append(current_calculated_expression)
+            calculated_expressions.append(
+                self.evaluate(
+                    string=expression,
+                    power=power,
+                    weapon=weapon,
+                    secondary_weapon=secondary_weapon,
+                    item=item,
+                )
+            )
         result = template.format(*calculated_expressions)
         # TODO remove injection weakness, leaving only markdown tags
         return mark_safe('<br>'.join(result.split('\n')))

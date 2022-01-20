@@ -20,6 +20,9 @@ class DiceRoll:
             rolls=self.rolls, dice=self.dice, addendant=self.addendant + other
         )
 
+    def __radd__(self, other):
+        return self.__add__(other)
+
     def __mul__(self, other):
         if not isinstance(other, int):
             raise TypeError('should multiply only by int')
