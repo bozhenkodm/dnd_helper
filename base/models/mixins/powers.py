@@ -66,10 +66,10 @@ class PowerMixin:
         if token == PowersVariables.DMG:
             # TODO separate damage bonus and enchantment
             return self.klass_data_instance.damage_bonus + max(
-                weapon and weapon.enchantment or 0 - self._magic_threshold, 0
+                (weapon and weapon.enchantment or 0) - self._magic_threshold, 0
             )
         if token == PowersVariables.EHT:
-            return max(weapon and weapon.enchantment or 0 - self._magic_threshold, 0)
+            return max((weapon and weapon.enchantment or 0) - self._magic_threshold, 0)
         if token == PowersVariables.ITL:
             if not item:
                 raise ValueError('У данного таланта нет магического предмета')
@@ -162,7 +162,7 @@ class PowerMixin:
         return ' '.join(result)
 
     def evaluate(
-        self, string: str, power, weapon=None, secondary_weapon=None, item=None
+        self, string: str, power=None, weapon=None, secondary_weapon=None, item=None
     ):
         return self.calculate_reverse_polish_notation(
             self.expression_to_reverse_polish_notation(string),

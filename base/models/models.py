@@ -3,7 +3,6 @@ from functools import cached_property
 from typing import Optional, Sequence
 
 from django.db import models
-from django.db.transaction import atomic
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from multiselectfield import MultiSelectField  # type: ignore
@@ -24,7 +23,6 @@ from base.constants.constants import (
     PowerFrequencyEnum,
     PowerPropertyTitle,
     PowerRangeTypeEnum,
-    PowersVariables,
     SexEnum,
     ShieldTypeEnum,
     SkillsEnum,
@@ -423,6 +421,7 @@ class Power(models.Model):
 
     @property
     def defence_subjanctive(self):
+        # defence subjanctive case for Russian language
         if self.defence == DefenceTypeEnum.ARMOR_CLASS:
             return self.get_defence_display()
         return self.get_defence_display()[:-1] + 'и'
@@ -829,7 +828,6 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, PowerMixin, models.Model)
         )  # preparing template for format() method
         calculated_expressions = []
         # calculating without operations order for now, just op for op
-        # TODO fix with polish record
         for expression in expressions_to_calculate:
             calculated_expressions.append(
                 self.evaluate(

@@ -42,7 +42,6 @@ class NPCName(models.Model):
 
     @classmethod
     def generate_npc(cls, race=None, sex=None) -> dict:
-        # TODO remove connection with Race somehow
         if not race:
             race = random.choice(Race.objects.filter(is_sociable=True))  # type: ignore
         else:

@@ -12,8 +12,6 @@ from base.objects.weapon_types import (
     WeaponType,
 )
 
-# TODO add the rest of race properties
-
 
 class Race:
     slug: ClassVar[NPCRaceEnum]
