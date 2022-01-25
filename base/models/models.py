@@ -30,8 +30,8 @@ from base.constants.constants import (
 from base.managers import PowerQueryset, WeaponTypeQuerySet
 from base.models.mixins.abilities import AttributeAbstract
 from base.models.mixins.defences import DefenceMixin
-from base.models.mixins.powers import PowerMixin
 from base.models.mixins.skills import SkillMixin
+from base.models.powers import PowerMixin
 from base.objects import npc_klasses, race_classes, weapon_types_classes
 from base.objects.dice import DiceRoll
 from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
@@ -190,7 +190,7 @@ class Weapon(ItemAbstract):
         )
 
     @property
-    def damage_roll(self):
+    def damage_roll(self) -> DiceRoll:
         return DiceRoll(
             rolls=self.weapon_type.data_instance.dice_number,
             dice=self.weapon_type.data_instance.damage_dice,
@@ -205,7 +205,7 @@ class Weapon(ItemAbstract):
     def prof_bonus(self):
         return self.data_instance.prof_bonus
 
-    def get_attack_type(self, is_melee: bool, is_ranged: bool):
+    def get_attack_type(self, is_melee: bool, is_ranged: bool) -> str:
         melee_attack_type, ranged_attack_type = '', ''
         if is_melee:
             distance = 2 if self.data_instance.is_reach else 1
@@ -215,11 +215,13 @@ class Weapon(ItemAbstract):
                 f'Дальнобойный '
                 f'{self.data_instance.range}/{self.data_instance.max_range}'
             )
-        return (
-            (is_melee and is_ranged and f'{melee_attack_type} или {ranged_attack_type}')
-            or (is_melee and melee_attack_type)
-            or (is_ranged and ranged_attack_type)
-        )
+        if is_melee and is_ranged:
+            return f'{melee_attack_type} или {ranged_attack_type}'
+        if is_melee:
+            return melee_attack_type
+        if is_ranged:
+            return ranged_attack_type
+        raise ValueError('Wrong attack type')
 
 
 class Race(models.Model):
@@ -760,7 +762,7 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, PowerMixin, models.Model)
         )
 
     def is_weapon_proficient(self, weapon) -> bool:
-        data_instance = weapon.weapon_type.data_instance
+        data_instance = weapon.data_instance
         return any(
             (
                 data_instance.category
@@ -796,7 +798,7 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, PowerMixin, models.Model)
             in (AccessoryTypeEnum.WEAPON, AccessoryTypeEnum.TWO_WEAPONS)
         ):
             # pure implements can't be used with weapon powers
-            return not weapon.weapon_type.data_instance.is_pure_implement
+            return not weapon.data_instance.is_pure_implement
         return False
 
     @property
@@ -821,7 +823,7 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, PowerMixin, models.Model)
         secondary_weapon: Optional[Weapon] = None,
         item: Optional[ItemAbstract] = None,
     ):
-        pattern = r'\$(\S{3,})\b'  # gets substing from '$' to next whitespace
+        pattern = r'\$(\S{3,})\b'  # gets substring from '$' to next whitespace
         expressions_to_calculate = re.findall(pattern, string)
         template = re.sub(
             pattern, '{}', string
@@ -830,7 +832,7 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, PowerMixin, models.Model)
         # calculating without operations order for now, just op for op
         for expression in expressions_to_calculate:
             calculated_expressions.append(
-                self.evaluate(
+                self.evaluate_power_expression(
                     string=expression,
                     power=power,
                     weapon=weapon,
@@ -843,7 +845,10 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, PowerMixin, models.Model)
         return mark_safe('<br>'.join(result.split('\n')))
 
     def valid_properties(self, power: Power):
-        # TODO add comments, what's going on
+        # collecting power properties,
+        # replacing properties without subclass with subclassed properties
+        # and properties with lower level with properties with high level
+        # should they appeared
         properties: dict[str, PowerProperty] = {}
         for prop in power.properties.filter(
             level__lte=self.level, subclass__in=(self.subclass, 0)
@@ -854,6 +859,9 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, PowerMixin, models.Model)
         return sorted(properties.values(), key=lambda x: x and x.order)
 
     def powers_calculated(self):
+        """
+        calculated powers for npc html page
+        """
         powers_qs = self.race.powers.filter(level=0)
         powers_qs |= self.powers.filter(
             models.Q(accessory_type__isnull=True) | models.Q(accessory_type='')

@@ -393,3 +393,17 @@ class MagicItemCategory(BaseNameValueDescriptionEnum):
     COMMON = 'COMMON', 'Обычный'
     UNCOMMON = 'UNCOMMON', 'Необычный'
     RARE = 'RARE', 'Редкий'
+
+
+class MagicItemSlot(BaseNameValueDescriptionEnum):
+    WEAPON = 'weapon', ''
+    ARMOR = 'armor', ''
+    NECK = 'neck', ''
+    HEAD = 'head', ''
+    ARMS = 'arms', ''
+    FEET = 'feet', ''
+    HANDS = 'hands', ''
+    WAIST = 'waist', ''
+    RINGS = 'rings', ''
+    WONDROUS_ITEMS = 'wondrous_items', ''
+    TATOO = 'tatoo', ''

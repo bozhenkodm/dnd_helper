@@ -58,6 +58,7 @@ class DwarfRace(Race):
 
     @property
     def heavy_armor_speed_penalty(self):
+        # dwarfs don't get speed penalty
         return 0
 
 
@@ -124,6 +125,13 @@ class HamadryadRace(Race):
 
 class GithzeraiRace(Race):
     slug = NPCRaceEnum.GITHZERAI
+    const_ability_bonus = Abilities(wisdom=2)
+    var_ability_bonus = Abilities(dexterity=2, intelligence=2)
+    skill_bonuses = Skills(acrobatics=2, athletics=2)
+
+    @property
+    def initiative(self):
+        return 2
 
 
 class GnomeRace(Race):
@@ -195,6 +203,10 @@ class GenasiWindsoulRace(GenasiRace):
 
 class WildenRace(Race):
     slug = NPCRaceEnum.WILDEN
+    const_ability_bonus = Abilities(wisdom=2)
+    var_ability_bonus = Abilities(constitution=2, dexterity=2)
+    skill_bonuses = Skills(nature=2, stealth=2)
+    vision = VisionEnum.TWILIGHT
 
 
 class DoppelgangerRace(Race):
@@ -248,6 +260,10 @@ class BladelingRace(Race):
 
 class MinotaurRace(Race):
     slug = NPCRaceEnum.MINOTAUR
+    const_ability_bonus = Abilities(strength=2)
+    var_ability_bonus = Abilities(constitution=2, wisdom=2)
+    skill_bonuses = Skills(nature=2, perception=2)
+    surges_number_bonus = 1
 
 
 class MulRace(Race):

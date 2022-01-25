@@ -161,7 +161,7 @@ class PowerMixin:
             result.append(stack.pop())
         return ' '.join(result)
 
-    def evaluate(
+    def evaluate_power_expression(
         self, string: str, power=None, weapon=None, secondary_weapon=None, item=None
     ):
         return self.calculate_reverse_polish_notation(
