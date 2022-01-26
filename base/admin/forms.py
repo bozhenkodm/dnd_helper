@@ -13,7 +13,9 @@ from base.constants.constants import (
     WeaponHandednessEnum,
 )
 from base.models import NPC
-from base.models.models import Armor, Class, MagicItem, Power, Race, Weapon, WeaponType
+from base.models.magic_items import MagicItem
+from base.models.models import Armor, Class, Race, Weapon, WeaponType
+from base.models.powers import Power
 from base.objects import weapon_types_tuple
 
 

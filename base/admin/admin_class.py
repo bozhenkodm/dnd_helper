@@ -28,8 +28,8 @@ from base.constants.constants import (
     PowerRangeTypeEnum,
 )
 from base.models import Class, Race
-from base.models.encounter import Combatants, CombatantsPC
-from base.models.models import Power, PowerProperty
+from base.models.encounters import Combatants, CombatantsPC
+from base.models.powers import Power, PowerProperty
 from base.objects import npc_klasses
 
 
@@ -647,6 +647,7 @@ class PlayerCharactersAdmin(admin.ModelAdmin):
 class MagicItemAdmin(admin.ModelAdmin):
     fields = (
         'name',
+        'slots',
         'min_level',
         'step',
         'category',

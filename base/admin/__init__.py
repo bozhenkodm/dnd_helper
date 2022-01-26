@@ -15,18 +15,18 @@ from base.admin.admin_class import (
     WeaponTypeAdmin,
 )
 from base.models import Encounter
-from base.models.encounter import PlayerCharacters
+from base.models.encounters import PlayerCharacters
+from base.models.magic_items import MagicItem
 from base.models.models import (
     NPC,
     Armor,
     Class,
     FunctionalTemplate,
-    MagicItem,
-    Power,
     Race,
     Weapon,
     WeaponType,
 )
+from base.models.powers import Power
 
 admin.site.register(Race, RaceAdmin)
 admin.site.register(Class, ClassAdmin)

@@ -1,6 +1,6 @@
 from django import forms
 
-from base.models.encounter import EncounterParticipants
+from base.models.encounters import EncounterParticipants
 
 
 class EncounterChangeInitiativeForm(forms.Form):

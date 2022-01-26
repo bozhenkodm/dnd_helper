@@ -8,7 +8,7 @@ from django.views.generic import DetailView, TemplateView
 from base.constants.constants import SkillsEnum
 from base.forms import EncounterChangeInitiativeForm
 from base.models import NPC, Encounter
-from base.models.encounter import EncounterParticipants
+from base.models.encounters import EncounterParticipants
 
 
 class NPCDetailView(DetailView):
