@@ -91,6 +91,52 @@ class NeckSlotItem(SimpleMagicItem):
         return self.enchantment
 
 
+class HeadSlotItem(SimpleMagicItem):
+    class Meta:
+        proxy = True
+
+    SLOT = MagicItemSlot.HEAD
+
+
+class FeetSlotItem(SimpleMagicItem):
+    class Meta:
+        proxy = True
+
+    SLOT = MagicItemSlot.FEET
+
+
+class HandsSlotItem(SimpleMagicItem):
+    class Meta:
+        proxy = True
+
+    SLOT = MagicItemSlot.HANDS
+
+
+class WaistSlotItem(SimpleMagicItem):
+    class Meta:
+        proxy = True
+
+    SLOT = MagicItemSlot.WAIST
+
+
+class RingsSlotItem(SimpleMagicItem):
+    class Meta:
+        proxy = True
+
+    SLOT = MagicItemSlot.RING
+
+
+class ArmsSlotItem(SimpleMagicItem):
+    class Meta:
+        proxy = True
+
+    SLOT = MagicItemSlot.ARMS
+
+
+# WONDROUS_ITEMS = 'wondrous_items', ''
+# TATOO = 'tatoo', ''
+
+
 class NPCMagicItemAbstract(models.Model):
     class Meta:
         abstract = True
@@ -102,13 +148,3 @@ class NPCMagicItemAbstract(models.Model):
         blank=True,
         verbose_name='Предмет на шею',
     )
-
-
-# HEAD = 'head', ''
-# ARMS = 'arms', ''
-# FEET = 'feet', ''
-# HANDS = 'hands', ''
-# WAIST = 'waist', ''
-# RINGS = 'rings', ''
-# WONDROUS_ITEMS = 'wondrous_items', ''
-# TATOO = 'tatoo', ''
