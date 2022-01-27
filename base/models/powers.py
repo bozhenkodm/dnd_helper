@@ -73,8 +73,8 @@ class Power(models.Model):
         null=True,
         related_name='powers',
     )
-    magic_item = models.ForeignKey(
-        'MagicItem',
+    magic_item_type = models.ForeignKey(
+        'MagicItemType',
         verbose_name='Магический предмет',
         on_delete=models.CASCADE,
         null=True,
@@ -149,8 +149,8 @@ class Power(models.Model):
                 f'{self.get_frequency_display()}, '
                 f'{self.level} уровень'
             )
-        if self.magic_item:
-            return f'{self.name} - {self.magic_item}'
+        if self.magic_item_type:
+            return f'{self.name} - {self.magic_item_type}'
         return self.name
 
     @property
@@ -169,8 +169,8 @@ class Power(models.Model):
         primary_weapon=None,
         secondary_weapon=None,
     ):
-        if self.magic_item:
-            return self.magic_item.name
+        if self.magic_item_type:
+            return self.magic_item_type.name
         if self.functional_template:
             return self.functional_template.title
         if self.race:

@@ -13,7 +13,7 @@ from base.constants.constants import (
     WeaponHandednessEnum,
 )
 from base.models import NPC
-from base.models.magic_items import MagicItem
+from base.models.magic_items import MagicItemType, NeckSlotItem, SimpleMagicItem
 from base.models.models import Armor, Class, Race, Weapon, WeaponType
 from base.models.powers import Power
 from base.objects import weapon_types_tuple
@@ -74,6 +74,13 @@ class NPCModelForm(forms.ModelForm):
             )
             self.fields['secondary_hand'] = forms.ModelChoiceField(
                 queryset=weapon_queryset, label='Вторичная рука', required=False
+            )
+            self.fields['neck_slot'] = forms.ModelChoiceField(
+                queryset=NeckSlotItem.objects.select_related('magic_item_type').filter(
+                    magic_item_type__slots__contains=NeckSlotItem.SLOT.value
+                ),
+                label='Предмет на шею',
+                required=False,
             )
 
     def clean(self):
@@ -192,51 +199,48 @@ class WeaponTypeForm(forms.ModelForm):
     )
 
 
-class WeaponForm(forms.ModelForm):
+class ItemAbstractForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.magic_item_type:
+            self.fields['level'] = forms.ChoiceField(
+                choices=(
+                    (i, i)
+                    for i in range(
+                        self.instance.magic_item_type.min_level,
+                        31,
+                        self.instance.magic_item_type.step,
+                    )
+                ),
+                label='Уровень',
+            )
+
+
+class WeaponForm(ItemAbstractForm):
     class Meta:
         model = Weapon
         fields = '__all__'
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if self.instance.id and self.instance.magic_item:
-            self.fields['level'] = forms.ChoiceField(
-                choices=(
-                    (i, i)
-                    for i in range(
-                        self.instance.magic_item.min_level,
-                        31,
-                        self.instance.magic_item.step,
-                    )
-                ),
-                label='Уровень',
-            )
 
-
-class ArmorForm(forms.ModelForm):
+class ArmorForm(ItemAbstractForm):
     class Meta:
         model = Armor
         fields = '__all__'
 
-    def __init__(self, *args, **kwargs):
-        super(ArmorForm, self).__init__(*args, **kwargs)
-        if self.instance.id and self.instance.magic_item:
-            self.fields['level'] = forms.ChoiceField(
-                choices=(
-                    (i, i)
-                    for i in range(
-                        self.instance.magic_item.min_level,
-                        31,
-                        self.instance.magic_item.step,
-                    )
-                ),
-                label='Уровень',
-            )
 
-
-class MagicItemForm(forms.ModelForm):
+class MagicItemForm(ItemAbstractForm):
     class Meta:
-        model = MagicItem
+        model = SimpleMagicItem
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(MagicItemForm, self).__init__(*args, **kwargs)
+        self.fields['magic_item_type'].required = True
+
+
+class MagicItemTypeForm(forms.ModelForm):
+    class Meta:
+        model = MagicItemType
         fields = '__all__'
 
     upload_from_clipboard = forms.BooleanField(

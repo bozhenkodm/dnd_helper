@@ -37,7 +37,7 @@ class DefenceMixin:
 
     @property
     def fortitude(self):
-        result = (
+        return (
             self._defence_level_bonus
             + max(map(modifier, (self.strength, self.constitution)))
             + (
@@ -47,8 +47,8 @@ class DefenceMixin:
             )
             + self.race_data_instance.fortitude
             + self.klass_data_instance.fortitude
+            + self.neck_slot.defence_bonus
         )
-        return result
 
     @property
     def reflex(self):
@@ -58,6 +58,7 @@ class DefenceMixin:
             + (self.functional_template.reflex_bonus if self.functional_template else 0)
             + self.race_data_instance.reflex
             + self.klass_data_instance.reflex
+            + self.neck_slot.defence_bonus
         )
         result += self._shield_bonus
         if self.klass.name == NPCClassIntEnum.BARBARIAN:
@@ -73,4 +74,5 @@ class DefenceMixin:
             + (self.functional_template.will_bonus if self.functional_template else 0)
             + self.race_data_instance.will
             + self.klass_data_instance.will
+            + self.neck_slot.defence_bonus
         )

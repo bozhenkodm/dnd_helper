@@ -18,7 +18,7 @@ from base.constants.constants import (
 )
 from base.managers import WeaponTypeQuerySet
 from base.models.abilities import AttributeAbstract
-from base.models.magic_items import ItemAbstract
+from base.models.magic_items import ItemAbstract, NPCMagicItemAbstract
 from base.models.mixins.defences import DefenceMixin
 from base.models.mixins.skills import SkillMixin
 from base.models.powers import Power, PowerMixin
@@ -53,9 +53,9 @@ class Armor(ItemAbstract):
 
     @property
     def name(self):
-        if not self.magic_item:
+        if not self.magic_item_type:
             return self.get_armor_type_display()
-        return f'{self.get_armor_type_display()}, {self.magic_item.name}'
+        return f'{self.get_armor_type_display()}, {self.magic_item_type.name}'
 
     @property
     def is_light(self):
@@ -94,7 +94,7 @@ class Weapon(ItemAbstract):
     class Meta:
         verbose_name = 'Оружие'
         verbose_name_plural = 'Оружие'
-        unique_together = ('magic_item', 'level', 'weapon_type')
+        unique_together = ('magic_item_type', 'level', 'weapon_type')
 
     weapon_type = models.ForeignKey(
         WeaponType, verbose_name='Тип оружия', on_delete=models.CASCADE, null=False
@@ -105,9 +105,9 @@ class Weapon(ItemAbstract):
 
     @property
     def title(self) -> str:
-        if not self.magic_item:
+        if not self.magic_item_type:
             return str(self.weapon_type)
-        return f'{self.weapon_type}, {self.magic_item}'
+        return f'{self.weapon_type}, {self.magic_item_type}'
 
     @property
     def damage(self):
@@ -223,7 +223,9 @@ class FunctionalTemplate(models.Model):
         return self.title
 
 
-class NPC(DefenceMixin, AttributeAbstract, SkillMixin, PowerMixin, models.Model):
+class NPC(
+    DefenceMixin, AttributeAbstract, SkillMixin, PowerMixin, NPCMagicItemAbstract
+):
     class Meta:
         verbose_name = 'NPC'
         verbose_name_plural = 'NPCS'
@@ -405,7 +407,7 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, PowerMixin, models.Model)
     def magic_items(self) -> Sequence[ItemAbstract]:
         return tuple(
             filter(
-                lambda x: x and getattr(x, 'magic_item', False),
+                lambda x: x and getattr(x, 'magic_item_type', False),
                 # TODO add the rest of magic items
                 (self.primary_hand, self.secondary_hand, self.armor),  # type: ignore
             )
@@ -556,7 +558,7 @@ class NPC(DefenceMixin, AttributeAbstract, SkillMixin, PowerMixin, models.Model)
                     ).asdict()
                 )
         for item in self.magic_items:
-            for power in item.magic_item.powers.ordered_by_frequency():
+            for power in item.magic_item_type.powers.ordered_by_frequency():
                 powers.append(
                     PowerDisplay(
                         name=power.name,

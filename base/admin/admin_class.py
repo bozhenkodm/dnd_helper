@@ -13,6 +13,7 @@ from base.admin.forms import (
     ArmorForm,
     ClassForm,
     MagicItemForm,
+    MagicItemTypeForm,
     NPCModelForm,
     RaceForm,
     WeaponForm,
@@ -251,6 +252,17 @@ class NPCAdmin(admin.ModelAdmin):
                 result.append(attr)
         return result
 
+    def get_fieldsets(self, request: HttpRequest, obj=None):
+        fieldsets = super(NPCAdmin, self).get_fieldsets(request, obj)
+        if obj:
+            fieldsets.append(
+                (
+                    'Магические предметы',
+                    {'fields': ('neck_slot',), 'classes': ('collapse',)},
+                )
+            )
+        return fieldsets
+
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super().get_readonly_fields(request, obj)
         if obj and not getattr(obj.klass_data_instance, 'SubclassEnum', None):
@@ -336,7 +348,7 @@ class ArmorAdmin(admin.ModelAdmin):
         'bonus_armor_class',
         'speed_penalty',
         'skill_penalty',
-        'magic_item',
+        'magic_item_type',
         'level',
     )
     readonly_fields = ('armor_class',)
@@ -542,7 +554,7 @@ itl - бонус предмета, к которому принадлежит т
                 'race',
                 ('klass', 'subclass'),
                 'functional_template',
-                'magic_item',
+                'magic_item_type',
             )
         result = super().get_fields(request, obj)[:]
         if obj.klass:
@@ -551,8 +563,8 @@ itl - бонус предмета, к которому принадлежит т
             result.insert(3, 'race')
         if obj.functional_template:
             result.insert(3, 'functional_template')
-        if obj.magic_item:
-            result.insert(3, 'magic_item')
+        if obj.magic_item_type:
+            result.insert(3, 'magic_item_type')
         return result
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
@@ -644,7 +656,7 @@ class PlayerCharactersAdmin(admin.ModelAdmin):
     )
 
 
-class MagicItemAdmin(admin.ModelAdmin):
+class MagicItemTypeAdmin(admin.ModelAdmin):
     fields = (
         'name',
         'slots',
@@ -657,14 +669,14 @@ class MagicItemAdmin(admin.ModelAdmin):
         'source',
     )
     readonly_fields = ('image_tag',)
-    form = MagicItemForm
+    form = MagicItemTypeForm
 
     @admin.display(description='Картинка')
     def image_tag(self, obj):
         return mark_safe(f'<img src="{obj.picture.url}" />')
 
     def save_model(self, request, obj, form, change):
-        super(MagicItemAdmin, self).save_model(request, obj, form, change)
+        super(MagicItemTypeAdmin, self).save_model(request, obj, form, change)
         if form.cleaned_data['upload_from_clipboard']:
             bashCommand = 'xclip -selection clipboard -t image/png -o'
             process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
@@ -673,3 +685,7 @@ class MagicItemAdmin(admin.ModelAdmin):
             image_field = ImageFile(io.BytesIO(output), name=f'MagicItem_{obj.id}.png')
             obj.picture = image_field
             obj.save()
+
+
+class MagicItemAdmin(admin.ModelAdmin):
+    form = MagicItemForm

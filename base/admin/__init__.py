@@ -7,6 +7,7 @@ from base.admin.admin_class import (
     EncounterAdmin,
     FunctionalTemplateAdmin,
     MagicItemAdmin,
+    MagicItemTypeAdmin,
     NPCAdmin,
     PlayerCharactersAdmin,
     PowerAdmin,
@@ -16,7 +17,7 @@ from base.admin.admin_class import (
 )
 from base.models import Encounter
 from base.models.encounters import PlayerCharacters
-from base.models.magic_items import MagicItem
+from base.models.magic_items import MagicItemType, SimpleMagicItem
 from base.models.models import (
     NPC,
     Armor,
@@ -38,7 +39,8 @@ admin.site.register(Weapon, WeaponAdmin)
 admin.site.register(Power, PowerAdmin)
 admin.site.register(FunctionalTemplate, FunctionalTemplateAdmin)
 admin.site.register(PlayerCharacters, PlayerCharactersAdmin)
-admin.site.register(MagicItem, MagicItemAdmin)
+admin.site.register(MagicItemType, MagicItemTypeAdmin)
+admin.site.register(SimpleMagicItem, MagicItemAdmin)
 
 admin.site.unregister(Group)
 admin.site.unregister(User)

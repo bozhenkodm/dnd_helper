@@ -6,10 +6,10 @@ from multiselectfield import MultiSelectField  # type: ignore
 from base.constants.constants import MagicItemCategory, MagicItemSlot
 
 
-class MagicItem(models.Model):
+class MagicItemType(models.Model):
     class Meta:
-        verbose_name = 'Магический предмет'
-        verbose_name_plural = 'Магические предметы'
+        verbose_name = 'Тип магического предмета'
+        verbose_name_plural = 'Типы магическогих предметов'
 
     name = models.CharField(verbose_name='Название', max_length=100)
     min_level = models.PositiveSmallIntegerField(
@@ -47,8 +47,8 @@ class ItemAbstract(models.Model):
     class Meta:
         abstract = True
 
-    magic_item = models.ForeignKey(
-        MagicItem,
+    magic_item_type = models.ForeignKey(
+        MagicItemType,
         verbose_name='Магический предмет',
         null=True,
         on_delete=models.CASCADE,
@@ -58,7 +58,7 @@ class ItemAbstract(models.Model):
 
     @property
     def enchantment(self):
-        if not self.magic_item:
+        if not self.magic_item_type:
             return 0
         return (self.level - 1) // 5 + 1
 
@@ -70,7 +70,14 @@ class ItemAbstract(models.Model):
 
 
 class SimpleMagicItem(ItemAbstract):
+    class Meta:
+        verbose_name = 'Магический предмет'
+        verbose_name_plural = 'Магические предметы'
+
     SLOT: ClassVar[MagicItemSlot]
+
+    def __str__(self):
+        return f'{self.magic_item_type} {self.level} уровня'
 
 
 class NeckSlotItem(SimpleMagicItem):
@@ -78,6 +85,23 @@ class NeckSlotItem(SimpleMagicItem):
         proxy = True
 
     SLOT = MagicItemSlot.NECK
+
+    @property
+    def defence_bonus(self):
+        return self.enchantment
+
+
+class NPCMagicItemAbstract(models.Model):
+    class Meta:
+        abstract = True
+
+    neck_slot = models.ForeignKey(
+        NeckSlotItem,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Предмет на шею',
+    )
 
 
 # HEAD = 'head', ''
