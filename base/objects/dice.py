@@ -11,6 +11,8 @@ class DiceRoll:
     addendant: int
 
     def __str__(self):
+        if not self.addendant:
+            return f'{self.rolls}{self.dice.description}'
         return f'{self.rolls}{self.dice.description}+{self.addendant}'
 
     def __add__(self, other):
@@ -27,9 +29,10 @@ class DiceRoll:
         if not isinstance(other, int):
             raise TypeError('should multiply only by int')
         # 1d6+4 * 2 = 2d6+4. Addendants don't multiply
-        return DiceRoll(
+        result = DiceRoll(
             rolls=self.rolls * other, dice=self.dice, addendant=self.addendant
         )
+        return result
 
     def __imul__(self, other):
         return self.__mul__(other)
@@ -52,9 +55,10 @@ class DiceRoll:
         )
         if parsed_str:
             rolls, dice, addendant = parsed_str[0]
-            dice.replace('к', 'd').replace('д', 'd')
+            dice = dice.replace('к', 'd').replace('д', 'd').replace('k', 'd')
             addendant = int(addendant) if addendant else 0
+
             return DiceRoll(
-                dice=DiceIntEnum[dice.upper()], rolls=rolls, addendant=addendant
+                dice=DiceIntEnum[dice.upper()], rolls=int(rolls), addendant=int(addendant)
             )
         raise ValueError('Not valid DiceRoll')
