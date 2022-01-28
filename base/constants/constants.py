@@ -34,7 +34,7 @@ class PowersVariables(str, Enum):
     LVL = auto()
     DMG = auto()  # damage bonus
     ATK = auto()  # attack bonus =
-    # (class bonus + half level + level bonus + enchantment. NOT POWER ATTACK BONUS)
+    # (class bonus + half level + level bonus + enchantment). NOT +POWER ATTACK BONUS
     EHT = auto()  # armament enchantment
     ITL = auto()  # item level
 

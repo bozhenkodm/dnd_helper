@@ -59,6 +59,8 @@ class DiceRoll:
             addendant = int(addendant) if addendant else 0
 
             return DiceRoll(
-                dice=DiceIntEnum[dice.upper()], rolls=int(rolls), addendant=int(addendant)
+                dice=DiceIntEnum[dice.upper()],
+                rolls=int(rolls),
+                addendant=int(addendant),
             )
         raise ValueError('Not valid DiceRoll')

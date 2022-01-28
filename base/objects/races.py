@@ -386,4 +386,3 @@ class BugbearRace(Race):
     const_ability_bonus = Abilities(strength=2, dexterity=2)
     skill_bonuses = Skills(intimidate=2, stealth=2)
     vision = VisionEnum.TWILIGHT
-

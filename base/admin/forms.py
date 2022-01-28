@@ -6,7 +6,7 @@ from multiselectfield import MultiSelectFormField  # type: ignore
 
 from base.constants.constants import (
     AbilitiesEnum,
-    NPCClassIntEnum,
+    NPCClassEnum,
     NPCRaceEnum,
     SexEnum,
     SkillsEnum,
@@ -24,7 +24,7 @@ from base.models.magic_items import (
     SimpleMagicItem,
     WaistSlotItem,
 )
-from base.models.models import Armor, Class, Race, Weapon, WeaponType
+from base.models.models import Armor, Weapon, WeaponType
 from base.models.powers import Power
 from base.objects import weapon_types_tuple
 
@@ -71,8 +71,10 @@ class NPCModelForm(forms.ModelForm):
             if subclass_enum := getattr(
                 self.instance.klass_data_instance, 'SubclassEnum', None
             ):
-                self.fields['subclass'] = forms.ChoiceField(
-                    choices=subclass_enum.generate_choices(), label='Подкласс'
+                self.fields['subclass'] = forms.TypedChoiceField(
+                    coerce=int,
+                    choices=subclass_enum.generate_choices(),
+                    label='Подкласс',
                 )
             weapon_queryset = Weapon.objects.all()
             if self.instance.weapons.count():
@@ -174,10 +176,10 @@ class NPCModelForm(forms.ModelForm):
             klass_data_instance = self.instance.klass_data_instance
             if (
                 (
-                    klass_data_instance.slug == NPCClassIntEnum.RANGER_MELEE
-                    or klass_data_instance == NPCClassIntEnum.BARBARIAN
+                    klass_data_instance.slug == NPCClassEnum.RANGER_MELEE
+                    or klass_data_instance.slug == NPCClassEnum.BARBARIAN
                     and self.cleaned_data['subclass']
-                    == klass_data_instance.subclass_enum.WHIRLING
+                    == klass_data_instance.SubclassEnum.WHIRLING.value
                 )
                 and secondary_hand.data_instance.handedness == WeaponHandednessEnum.TWO
             ):
@@ -189,10 +191,10 @@ class NPCModelForm(forms.ModelForm):
                     ),
                 )
             elif not (
-                klass_data_instance.slug == NPCClassIntEnum.RANGER_MELEE
-                or klass_data_instance == NPCClassIntEnum.BARBARIAN
+                klass_data_instance.slug == NPCClassEnum.RANGER_MELEE
+                or klass_data_instance.slug == NPCClassEnum.BARBARIAN
                 and self.cleaned_data['subclass']
-                == klass_data_instance.subclass_enum.WHIRLING
+                == klass_data_instance.SubclassEnum.WHIRLING.value
             ) and not (secondary_hand and secondary_hand.data_instance.is_off_hand):
                 self.add_error(
                     'secondary_hand',
@@ -217,48 +219,6 @@ class NPCModelForm(forms.ModelForm):
             self.add_error('race', error)
 
         super(NPCModelForm, self).clean()
-
-
-class ClassForm(forms.ModelForm):
-    class Meta:
-        model = Class
-        fields = '__all__'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if not self.instance.id:
-            existing_classes = set(
-                self._meta.model.objects.values_list('name', flat=True)
-            )
-            self.fields['name'] = forms.ChoiceField(
-                choices=[
-                    item
-                    for item in NPCClassIntEnum.generate_choices()
-                    if item[0] not in existing_classes
-                ],
-                label='Название класса',
-            )
-
-
-class RaceForm(forms.ModelForm):
-    class Meta:
-        model = Race
-        fields = '__all__'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if not self.instance.id:
-            existing_races = set(
-                self._meta.model.objects.values_list('name', flat=True)
-            )
-            self.fields['name'] = forms.ChoiceField(
-                choices=[
-                    item
-                    for item in NPCRaceEnum.generate_choices()
-                    if item[0] not in existing_races
-                ],
-                label='Название класса',
-            )
 
 
 class WeaponTypeForm(forms.ModelForm):

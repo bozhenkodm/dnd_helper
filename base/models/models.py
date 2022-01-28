@@ -168,6 +168,9 @@ class Race(models.Model):
         choices=NPCRaceEnum.generate_choices(),
         unique=True,
     )
+    name_display = models.CharField(
+        verbose_name='Название', max_length=NPCRaceEnum.max_description_length()
+    )
     is_sociable = models.BooleanField(
         verbose_name='Социальная раса',
         default=True,
@@ -481,7 +484,6 @@ class NPC(
             pattern, '{}', string
         )  # preparing template for format() method
         calculated_expressions = []
-        # calculating without operations order for now, just op for op
         for expression in expressions_to_calculate:
             calculated_expressions.append(
                 self.evaluate_power_expression(

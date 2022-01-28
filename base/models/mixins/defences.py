@@ -1,4 +1,4 @@
-from base.constants.constants import NPCClassIntEnum, ShieldTypeEnum
+from base.constants.constants import NPCClassEnum, ShieldTypeEnum
 from base.helpers import modifier
 
 INITIAL_DEFENCE_VALUE = 10
@@ -22,9 +22,9 @@ class DefenceMixin:
 
     @property
     def _necklace_defence_bonus(self) -> int:
-        if not self.neck_slot:
+        if not self.neck_slot:  # type: ignore
             return 0
-        return self.neck_slot.defence_bonus
+        return self.neck_slot.defence_bonus  # type: ignore
 
     @property
     def armor_class(self):
@@ -67,7 +67,7 @@ class DefenceMixin:
             + self._necklace_defence_bonus
         )
         result += self._shield_bonus
-        if self.klass.name == NPCClassIntEnum.BARBARIAN:
+        if self.klass.name == NPCClassEnum.BARBARIAN:
             if not self.shield and self.armor.is_light:
                 result += self._tier + 1
         return result

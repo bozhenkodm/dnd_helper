@@ -11,11 +11,9 @@ from django.utils.safestring import mark_safe
 
 from base.admin.forms import (
     ArmorForm,
-    ClassForm,
     MagicItemForm,
     MagicItemTypeForm,
     NPCModelForm,
-    RaceForm,
     WeaponForm,
     WeaponTypeForm,
 )
@@ -48,7 +46,7 @@ class RaceAdmin(admin.ModelAdmin):
     fields = ('name', 'is_sociable')
     list_filter = ('is_sociable',)
     list_display = ('name', 'is_sociable')
-    form = RaceForm
+    search_fields = ('name_display',)
     actions = (make_sociable, make_unsociable)
 
     def get_queryset(self, request):
@@ -57,7 +55,7 @@ class RaceAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None) -> tuple:
         if obj and obj.id:
-            return ('name',)
+            return 'name',
         return ()
 
     def has_add_permission(self, request: HttpRequest) -> bool:
@@ -69,6 +67,7 @@ class RaceAdmin(admin.ModelAdmin):
 
 class ClassAdmin(admin.ModelAdmin):
     search_fields = ('name_display',)
+    ordering = ('name_display',)
     readonly_fields = (
         'available_armor_types',
         'available_shields',
@@ -76,7 +75,6 @@ class ClassAdmin(admin.ModelAdmin):
         'available_implements',
     )
     fields = readonly_fields
-    form = ClassForm
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
@@ -197,7 +195,7 @@ class NPCAdmin(admin.ModelAdmin):
         'mandatory_skills',
         'generated_abilities',
     ]
-    autocomplete_fields = ('weapons', 'primary_hand', 'secondary_hand')
+    autocomplete_fields = ('race', 'klass', 'weapons', 'primary_hand', 'secondary_hand')
     search_fields = ('name',)
     list_filter = (RaceListFilter, 'klass')
     form = NPCModelForm
