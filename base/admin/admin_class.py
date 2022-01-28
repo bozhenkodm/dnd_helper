@@ -258,7 +258,15 @@ class NPCAdmin(admin.ModelAdmin):
             fieldsets.append(
                 (
                     'Магические предметы',
-                    {'fields': ('neck_slot',), 'classes': ('collapse',)},
+                    {
+                        'fields': (
+                            ('neck_slot', 'head_slot'),
+                            ('waist_slot', 'feet_slot'),
+                            ('left_ring_slot', 'right_ring_slot'),
+                            ('arms_slot', 'hands_slot'),
+                        ),
+                        'classes': ('collapse',),
+                    },
                 )
             )
         return fieldsets

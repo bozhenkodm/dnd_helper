@@ -147,4 +147,61 @@ class NPCMagicItemAbstract(models.Model):
         null=True,
         blank=True,
         verbose_name='Предмет на шею',
+        related_name='npc_necks',
+    )
+    head_slot = models.ForeignKey(
+        HeadSlotItem,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Предмет на голову',
+        related_name='npc_heads',
+    )
+    feet_slot = models.ForeignKey(
+        FeetSlotItem,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Предмет на ноги',
+        related_name='npc_feet',
+    )
+    waist_slot = models.ForeignKey(
+        WaistSlotItem,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Предмет на пояс',
+        related_name='npc_waists',
+    )
+    arms_slot = models.ForeignKey(
+        ArmsSlotItem,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Предмет на предплечья',
+        related_name='npc_arms',
+    )
+    left_ring_slot = models.ForeignKey(
+        RingsSlotItem,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Кольцо на левую руку',
+        related_name='npc_left_rings',
+    )
+    right_ring_slot = models.ForeignKey(
+        RingsSlotItem,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Кольцо на правую руку',
+        related_name='npc_right_rings',
+    )
+    hands_slot = models.ForeignKey(
+        HandsSlotItem,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Предмет на кисти',
+        related_name='npc_hands',
     )

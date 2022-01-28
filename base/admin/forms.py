@@ -13,7 +13,17 @@ from base.constants.constants import (
     WeaponHandednessEnum,
 )
 from base.models import NPC
-from base.models.magic_items import MagicItemType, NeckSlotItem, SimpleMagicItem
+from base.models.magic_items import (
+    ArmsSlotItem,
+    FeetSlotItem,
+    HandsSlotItem,
+    HeadSlotItem,
+    MagicItemType,
+    NeckSlotItem,
+    RingsSlotItem,
+    SimpleMagicItem,
+    WaistSlotItem,
+)
 from base.models.models import Armor, Class, Race, Weapon, WeaponType
 from base.models.powers import Power
 from base.objects import weapon_types_tuple
@@ -80,6 +90,57 @@ class NPCModelForm(forms.ModelForm):
                     magic_item_type__slots__contains=NeckSlotItem.SLOT.value
                 ),
                 label='Предмет на шею',
+                required=False,
+            )
+            self.fields['head_slot'] = forms.ModelChoiceField(
+                queryset=HeadSlotItem.objects.select_related('magic_item_type').filter(
+                    magic_item_type__slots__contains=HeadSlotItem.SLOT.value
+                ),
+                label='Предмет на голову',
+                required=False,
+            )
+            self.fields['waist_slot'] = forms.ModelChoiceField(
+                queryset=WaistSlotItem.objects.select_related('magic_item_type').filter(
+                    magic_item_type__slots__contains=WaistSlotItem.SLOT.value
+                ),
+                label='Предмет на пояс',
+                required=False,
+            )
+            self.fields['feet_slot'] = forms.ModelChoiceField(
+                queryset=FeetSlotItem.objects.select_related('magic_item_type').filter(
+                    magic_item_type__slots__contains=FeetSlotItem.SLOT.value
+                ),
+                label='Предмет на ноги',
+                required=False,
+            )
+            self.fields['arms_slot'] = forms.ModelChoiceField(
+                queryset=ArmsSlotItem.objects.select_related('magic_item_type').filter(
+                    magic_item_type__slots__contains=ArmsSlotItem.SLOT.value
+                ),
+                label='Предмет на предплечья',
+                required=False,
+            )
+
+            self.fields['left_ring_slot'] = forms.ModelChoiceField(
+                queryset=RingsSlotItem.objects.select_related('magic_item_type').filter(
+                    magic_item_type__slots__contains=RingsSlotItem.SLOT.value
+                ),
+                label='Кольцо на левую руку',
+                required=False,
+            )
+
+            self.fields['right_ring_slot'] = forms.ModelChoiceField(
+                queryset=RingsSlotItem.objects.select_related('magic_item_type').filter(
+                    magic_item_type__slots__contains=RingsSlotItem.SLOT.value
+                ),
+                label='Кольцо на правую руку',
+                required=False,
+            )
+            self.fields['hands_slot'] = forms.ModelChoiceField(
+                queryset=HandsSlotItem.objects.select_related('magic_item_type').filter(
+                    magic_item_type__slots__contains=HandsSlotItem.SLOT.value
+                ),
+                label='Предмет на кисти',
                 required=False,
             )
 
