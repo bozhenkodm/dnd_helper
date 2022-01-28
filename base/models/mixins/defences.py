@@ -21,6 +21,12 @@ class DefenceMixin:
         return INITIAL_DEFENCE_VALUE + self.half_level + self._level_bonus
 
     @property
+    def _necklace_defence_bonus(self) -> int:
+        if not self.neck_slot:
+            return 0
+        return self.neck_slot.defence_bonus
+
+    @property
     def armor_class(self):
         result = (
             self._defence_level_bonus
@@ -47,7 +53,7 @@ class DefenceMixin:
             )
             + self.race_data_instance.fortitude
             + self.klass_data_instance.fortitude
-            + self.neck_slot.defence_bonus
+            + self._necklace_defence_bonus
         )
 
     @property
@@ -58,7 +64,7 @@ class DefenceMixin:
             + (self.functional_template.reflex_bonus if self.functional_template else 0)
             + self.race_data_instance.reflex
             + self.klass_data_instance.reflex
-            + self.neck_slot.defence_bonus
+            + self._necklace_defence_bonus
         )
         result += self._shield_bonus
         if self.klass.name == NPCClassIntEnum.BARBARIAN:
@@ -74,5 +80,5 @@ class DefenceMixin:
             + (self.functional_template.will_bonus if self.functional_template else 0)
             + self.race_data_instance.will
             + self.klass_data_instance.will
-            + self.neck_slot.defence_bonus
+            + self._necklace_defence_bonus
         )
