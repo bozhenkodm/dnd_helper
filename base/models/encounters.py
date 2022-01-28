@@ -63,6 +63,8 @@ class Encounter(models.Model):
 
     @property
     def round_number(self) -> int:
+        if not self.participants.count():
+            return 0
         if not self.turn_number % self.participants.count():
             return self.turn_number // self.participants.count()
         return self.turn_number // self.participants.count() + 1
