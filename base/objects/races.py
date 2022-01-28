@@ -31,6 +31,8 @@ class Race:
 
     surges_number_bonus: ClassVar[int] = 0
 
+    initiative: ClassVar[int] = 0
+
     @property
     def healing_surge_bonus(self):
         return 0
@@ -38,10 +40,6 @@ class Race:
     @property
     def heavy_armor_speed_penalty(self):
         return 1
-
-    @property
-    def initiative(self):
-        return 0
 
     def __init__(self, npc):
         self.npc = npc
@@ -121,6 +119,10 @@ class VrylokaRace(Race):
 
 class HamadryadRace(Race):
     slug = NPCRaceEnum.HAMADRYAD
+    const_ability_bonus = Abilities(wisdom=2)
+    var_ability_bonus = Abilities(intelligence=2, charisma=2)
+    skill_bonuses = Skills(diplomacy=2, nature=2)
+    vision = VisionEnum.TWILIGHT
 
 
 class GithzeraiRace(Race):
@@ -128,10 +130,7 @@ class GithzeraiRace(Race):
     const_ability_bonus = Abilities(wisdom=2)
     var_ability_bonus = Abilities(dexterity=2, intelligence=2)
     skill_bonuses = Skills(acrobatics=2, athletics=2)
-
-    @property
-    def initiative(self):
-        return 2
+    initiative = 2
 
 
 class GnomeRace(Race):
@@ -145,6 +144,10 @@ class GnomeRace(Race):
 
 class GnollRace(Race):
     slug = NPCRaceEnum.GNOLL
+    const_ability_bonus = Abilities(constitution=2, dexterity=2)
+    skill_bonuses = Skills(intimidate=2, perception=2)
+    vision = VisionEnum.TWILIGHT
+    speed = 7
 
 
 class GoblinRace(Race):
@@ -241,10 +244,19 @@ class KalashtarRace(Race):
 
 class KenkuRace(Race):
     slug = NPCRaceEnum.KENKU
+    const_ability_bonus = Abilities(charisma=2)
+    var_ability_bonus = Abilities(dexterity=2, intelligence=2)
+    skill_bonuses = Skills(bluff=2, stealth=2)
+    vision = VisionEnum.TWILIGHT
 
 
 class KoboldRace(Race):
     slug = NPCRaceEnum.KOBOLD
+    const_ability_bonus = Abilities(constitution=2)
+    var_ability_bonus = Abilities(dexterity=2, charisma=2)
+    skill_bonuses = Skills(dungeoneering=2, thievery=2)
+    size = SizeEnum.SMALL
+    vision = VisionEnum.DARK
 
 
 class WarforgedRace(Race):
@@ -256,6 +268,9 @@ class WarforgedRace(Race):
 
 class BladelingRace(Race):
     slug = NPCRaceEnum.BLADELING
+    const_ability_bonus = Abilities(wisdom=2)
+    var_ability_bonus = Abilities(strength=2, dexterity=2)
+    skill_bonuses = Skills(arcana=2, intimidate=2)
 
 
 class MinotaurRace(Race):
@@ -276,6 +291,8 @@ class MulRace(Race):
 
 class OrcRace(Race):
     slug = NPCRaceEnum.ORC
+    const_ability_bonus = Abilities(strength=2, constitution=2)
+    vision = VisionEnum.TWILIGHT
 
 
 class HalfelfRace(Race):
@@ -299,15 +316,24 @@ class HalforcRace(Race):
     const_ability_bonus = Abilities(dexterity=2)
     var_ability_bonus = Abilities(strength=2, constitution=2)
     skill_bonuses = Skills(endurance=2, intimidate=2)
+    vision = VisionEnum.TWILIGHT
 
 
 class PixieRace(Race):
     slug = NPCRaceEnum.PIXIE
+    const_ability_bonus = Abilities(charisma=2)
+    var_ability_bonus = Abilities(dexterity=2, intelligence=2)
+    skill_bonuses = Skills(nature=2, stealth=2)
     size = SizeEnum.TINY
+    vision = VisionEnum.TWILIGHT
 
 
 class SatyrRace(Race):
     slug = NPCRaceEnum.SATYR
+    const_ability_bonus = Abilities(charisma=2)
+    var_ability_bonus = Abilities(dexterity=2, constitution=2)
+    skill_bonuses = Skills(nature=2, thievery=2)
+    vision = VisionEnum.TWILIGHT
 
 
 class TieflingRace(Race):
@@ -320,6 +346,11 @@ class TieflingRace(Race):
 
 class ThriKreenRace(Race):
     slug = NPCRaceEnum.THRI_KREEN
+    const_ability_bonus = Abilities(dexterity=2)
+    var_ability_bonus = Abilities(strength=2, wisdom=2)
+    skill_bonuses = Skills(athletics=2, nature=2)
+    speed = 7
+    vision = VisionEnum.DARK
 
 
 class HumanRace(Race):
@@ -347,12 +378,12 @@ class HobgoblinRace(Race):
     var_ability_bonus = Abilities(intelligence=2, charisma=2)
     vision = VisionEnum.TWILIGHT
     skill_bonuses = Skills(athletics=2, history=2)
-
-    @property
-    def initiative(self):
-        """Готовый к битве"""
-        return 2
+    initiative = 2
 
 
 class BugbearRace(Race):
     slug = NPCRaceEnum.BUGBEAR
+    const_ability_bonus = Abilities(strength=2, dexterity=2)
+    skill_bonuses = Skills(intimidate=2, stealth=2)
+    vision = VisionEnum.TWILIGHT
+

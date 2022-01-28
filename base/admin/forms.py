@@ -145,6 +145,7 @@ class NPCModelForm(forms.ModelForm):
             )
 
     def clean(self):
+        self.instance: NPC
         if not self.instance.id:
             return super(NPCModelForm, self).clean()
         primary_hand = self.cleaned_data.get('primary_hand')
@@ -170,13 +171,13 @@ class NPCModelForm(forms.ModelForm):
             != WeaponHandednessEnum.TWO  # one-handed or versatile
             and secondary_hand
         ):
-            npc_data_instance = self.instance.klass_data_instance
+            klass_data_instance = self.instance.klass_data_instance
             if (
                 (
-                    npc_data_instance.slug == NPCClassIntEnum.RANGER_MELEE
-                    or npc_data_instance == NPCClassIntEnum.BARBARIAN
+                    klass_data_instance.slug == NPCClassIntEnum.RANGER_MELEE
+                    or klass_data_instance == NPCClassIntEnum.BARBARIAN
                     and self.cleaned_data['subclass']
-                    == npc_data_instance.subclass_enum.WHIRLING
+                    == klass_data_instance.subclass_enum.WHIRLING
                 )
                 and secondary_hand.data_instance.handedness == WeaponHandednessEnum.TWO
             ):
@@ -188,10 +189,10 @@ class NPCModelForm(forms.ModelForm):
                     ),
                 )
             elif not (
-                npc_data_instance.slug == NPCClassIntEnum.RANGER_MELEE
-                or npc_data_instance == NPCClassIntEnum.BARBARIAN
+                klass_data_instance.slug == NPCClassIntEnum.RANGER_MELEE
+                or klass_data_instance == NPCClassIntEnum.BARBARIAN
                 and self.cleaned_data['subclass']
-                == npc_data_instance.subclass_enum.WHIRLING
+                == klass_data_instance.subclass_enum.WHIRLING
             ) and not (secondary_hand and secondary_hand.data_instance.is_off_hand):
                 self.add_error(
                     'secondary_hand',
@@ -199,6 +200,21 @@ class NPCModelForm(forms.ModelForm):
                         'Во второй руке можно держать только дополнительное оружие'
                     ),
                 )
+        if (
+            self.cleaned_data['race'].name == NPCRaceEnum.HAMADRYAD
+            and self.cleaned_data['sex'] != SexEnum.F
+        ):
+            error = ValidationError('Гамадриады только женщины')
+            self.add_error('sex', error)
+            self.add_error('race', error)
+
+        if (
+            self.cleaned_data['race'].name == NPCRaceEnum.SATYR
+            and self.cleaned_data['sex'] != SexEnum.M
+        ):
+            error = ValidationError('Сатиры только мужчины')
+            self.add_error('sex', error)
+            self.add_error('race', error)
 
         super(NPCModelForm, self).clean()
 
