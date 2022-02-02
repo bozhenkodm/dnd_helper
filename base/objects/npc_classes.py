@@ -2,7 +2,9 @@ from typing import ClassVar, Sequence, Type
 
 from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
+    AbilitiesEnum,
     ArmorTypeIntEnum,
+    ClassRoleEnum,
     NPCClassEnum,
     PowerSourceEnum,
     ShieldTypeEnum,
@@ -43,9 +45,11 @@ from base.objects.weapon_types import (
 class NPCClass:
     slug: ClassVar[NPCClassEnum]
     power_source: ClassVar[PowerSourceEnum]
+    role: ClassVar[ClassRoleEnum]
     fortitude: ClassVar[int] = 0
     reflex: ClassVar[int] = 0
     will: ClassVar[int] = 0
+    main_attack_abilities: ClassVar[Sequence[AbilitiesEnum]] = ()
     mandatory_skills: ClassVar[Skills] = Skills()
     trainable_skills: ClassVar[Skills] = Skills()
     skill_bonuses: ClassVar[Skills] = Skills()
@@ -104,6 +108,7 @@ class NPCClass:
 class InvokerClass(NPCClass):
     slug = NPCClassEnum.INVOKER
     power_source = PowerSourceEnum.DIVINE
+    role = ClassRoleEnum.CONTROLLER
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -115,11 +120,13 @@ class InvokerClass(NPCClass):
         Quaterstaff,
     )
     hit_points_per_level = 6
+    main_attack_abilities = (AbilitiesEnum.WISDOM,)
 
 
 class ArtificerClass(NPCClass):
     slug = NPCClassEnum.ARTIFICER
     power_source = PowerSourceEnum.ARCANE
+    role = ClassRoleEnum.LEADER
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -131,11 +138,13 @@ class ArtificerClass(NPCClass):
     )
     fortitude = 1
     will = 1
+    main_attack_abilities = (AbilitiesEnum.INTELLIGENCE,)
 
 
 class BardClass(NPCClass):
     slug = NPCClassEnum.BARD
     power_source = PowerSourceEnum.ARCANE
+    role = ClassRoleEnum.LEADER
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -173,6 +182,7 @@ class BardClass(NPCClass):
     skill_bonuses = Skills.init_with_const(SkillsEnum.sequence(), 1)
     reflex = 1
     will = 1
+    main_attack_abilities = (AbilitiesEnum.CHARISMA,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         CUNNING = 1, 'Хитрый'
@@ -183,6 +193,7 @@ class BardClass(NPCClass):
 class VampireClass(NPCClass):
     slug = NPCClassEnum.VAMPIRE
     power_source = PowerSourceEnum.SHADOW
+    role = ClassRoleEnum.STRIKER
     available_implement_types = (KiFocus, HolySymbol)
     trainable_skills = Skills(
         acrobatics=5,
@@ -197,6 +208,7 @@ class VampireClass(NPCClass):
         stealth=5,
         thievery=5,
     )
+    main_attack_abilities = (AbilitiesEnum.DEXTERITY, AbilitiesEnum.CHARISMA)
 
     @property
     def armor_class_bonus(self):
@@ -219,6 +231,7 @@ class VampireClass(NPCClass):
 class BarbarianClass(NPCClass):
     slug = NPCClassEnum.BARBARIAN
     power_source = PowerSourceEnum.PRIMAL
+    role = ClassRoleEnum.STRIKER
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -239,6 +252,7 @@ class BarbarianClass(NPCClass):
     )
     fortitude = 2
     hit_points_per_level = 10
+    main_attack_abilities = (AbilitiesEnum.STRENGTH,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         THANEBORN = 1, 'Глава клана'
@@ -267,6 +281,7 @@ class BarbarianClass(NPCClass):
 class WarlordClass(NPCClass):
     slug = NPCClassEnum.WARLORD
     power_source = PowerSourceEnum.MARTIAL
+    role = ClassRoleEnum.LEADER
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -284,6 +299,7 @@ class WarlordClass(NPCClass):
     trainable_skills = Skills(
         athletics=5, endurance=5, intimidate=5, history=5, diplomacy=5, heal=5
     )
+    main_attack_abilities = (AbilitiesEnum.STRENGTH,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         INSPIRING = 1, 'Вдохновитель'
@@ -293,6 +309,7 @@ class WarlordClass(NPCClass):
 class FighterClass(NPCClass):
     slug = NPCClassEnum.FIGHTER
     power_source = PowerSourceEnum.MARTIAL
+    role = ClassRoleEnum.DEFENDER
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -310,6 +327,7 @@ class FighterClass(NPCClass):
     trainable_skills = Skills(
         athletics=5, endurance=5, intimidate=5, streetwise=5, heal=5
     )
+    main_attack_abilities = (AbilitiesEnum.STRENGTH,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         GREAT_WEAPON = 1, 'Воин с большим оружием'
@@ -377,6 +395,7 @@ class FighterClass(NPCClass):
 class WizardClass(NPCClass):
     slug = NPCClassEnum.WIZARD
     power_source = PowerSourceEnum.ARCANE
+    role = ClassRoleEnum.CONTROLLER
     available_weapon_categories = ()
     available_weapon_types = (Dagger, Quaterstaff)
     available_implement_types = (Wand, Sphere, Quaterstaff)
@@ -386,6 +405,7 @@ class WizardClass(NPCClass):
         history=5, diplomacy=5, dungeoneering=5, nature=5, insight=5, religion=5
     )
     will = 2
+    main_attack_abilities = (AbilitiesEnum.INTELLIGENCE,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         WAND_OF_ACCURACY = 1, 'Меткость с волшебной палочкой'
@@ -399,6 +419,7 @@ class WizardClass(NPCClass):
 class DruidClass(NPCClass):
     slug = NPCClassEnum.DRUID
     power_source = PowerSourceEnum.PRIMAL
+    role = ClassRoleEnum.CONTROLLER
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -418,11 +439,13 @@ class DruidClass(NPCClass):
     )
     reflex = 1
     will = 1
+    main_attack_abilities = (AbilitiesEnum.WISDOM,)
 
 
 class PriestClass(NPCClass):
     slug = NPCClassEnum.PRIEST
     power_source = PowerSourceEnum.DIVINE
+    role = ClassRoleEnum.LEADER
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -433,11 +456,14 @@ class PriestClass(NPCClass):
     mandatory_skills = Skills(religion=5)
     trainable_skills = Skills(history=5, arcana=5, diplomacy=5, insight=5, heal=5)
     will = 2
+    main_attack_abilities = (AbilitiesEnum.WISDOM,)
 
 
 class SeekerClass(NPCClass):
     slug = NPCClassEnum.SEEKER
     power_source = PowerSourceEnum.PRIMAL
+    role = ClassRoleEnum.CONTROLLER
+    main_attack_abilities = (AbilitiesEnum.WISDOM,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         SPIRITBOND = 1, 'Духовная связь'
@@ -447,6 +473,7 @@ class SeekerClass(NPCClass):
 class AvengerClass(NPCClass):
     slug = NPCClassEnum.AVENGER
     power_source = PowerSourceEnum.DIVINE
+    role = ClassRoleEnum.STRIKER
     available_weapon_categories = (
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.MILITARY,
@@ -467,6 +494,12 @@ class AvengerClass(NPCClass):
     fortitude = 1
     reflex = 1
     will = 1
+    main_attack_abilities = (AbilitiesEnum.WISDOM,)
+
+    class SubclassEnum(IntDescriptionSubclassEnum):
+        PURSUIT = 1, 'Осуждение преследования'
+        RETRIBUTION = 2, 'Осуждение расплаты'
+        UNITY = 3, 'Осуждение единства'
 
     @property
     def armor_class_bonus(self):
@@ -481,6 +514,7 @@ class AvengerClass(NPCClass):
 class WarlockClass(NPCClass):
     slug = NPCClassEnum.WARLOCK
     power_source = PowerSourceEnum.ARCANE
+    role = ClassRoleEnum.STRIKER
     available_implement_types = (Wand, Rod, RitualDagger, RitualSickle)
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
@@ -498,6 +532,7 @@ class WarlockClass(NPCClass):
     )
     reflex = 1
     will = 1
+    main_attack_abilities = (AbilitiesEnum.CHARISMA, AbilitiesEnum.CONSTITUTION)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         FEY_PACT = 1, 'Фейский договор'
@@ -510,6 +545,7 @@ class WarlockClass(NPCClass):
 class SwordmageClass(NPCClass):
     slug = NPCClassEnum.SWORDMAGE
     power_source = PowerSourceEnum.ARCANE
+    role = ClassRoleEnum.DEFENDER
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -524,6 +560,7 @@ class SwordmageClass(NPCClass):
         athletics=5, endurance=5, intimidate=5, history=5, diplomacy=5, insight=5
     )
     will = 2
+    main_attack_abilities = (AbilitiesEnum.INTELLIGENCE,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         ASSAULT_AEGIS = 1, 'Эгида атаки'
@@ -543,6 +580,7 @@ class SwordmageClass(NPCClass):
 class PaladinClass(NPCClass):
     slug = NPCClassEnum.PALADIN
     power_source = PowerSourceEnum.DIVINE
+    role = ClassRoleEnum.DEFENDER
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -565,11 +603,13 @@ class PaladinClass(NPCClass):
     fortitude = 1
     reflex = 1
     will = 1
+    main_attack_abilities = (AbilitiesEnum.STRENGTH, AbilitiesEnum.CHARISMA)
 
 
 class RogueClass(NPCClass):
     slug = NPCClassEnum.ROGUE
     power_source = PowerSourceEnum.MARTIAL
+    role = ClassRoleEnum.STRIKER
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -589,6 +629,7 @@ class RogueClass(NPCClass):
         insight=5,
     )
     reflex = 2
+    main_attack_abilities = (AbilitiesEnum.DEXTERITY,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         DODGER = 1, 'Мастер уклонения'
@@ -612,6 +653,7 @@ class RogueClass(NPCClass):
 class RunepriestClass(NPCClass):
     slug = NPCClassEnum.RUNEPRIEST
     power_source = PowerSourceEnum.DIVINE
+    role = ClassRoleEnum.LEADER
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -631,6 +673,7 @@ class RunepriestClass(NPCClass):
         heal=5,
     )
     will = 2
+    main_attack_abilities = (AbilitiesEnum.STRENGTH,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         WRATHFUL_HAMMER = 1, 'Мстительный молот'
@@ -639,6 +682,7 @@ class RunepriestClass(NPCClass):
 
 class RangerClass(NPCClass):
     power_source = PowerSourceEnum.MARTIAL
+    role = ClassRoleEnum.STRIKER
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -656,6 +700,7 @@ class RangerClass(NPCClass):
     )
     fortitude = 1
     reflex = 1
+    main_attack_abilities = (AbilitiesEnum.STRENGTH, AbilitiesEnum.DEXTERITY)
 
 
 class RangerMarksmanClass(RangerClass):
@@ -673,6 +718,7 @@ class RangerMeleeClass(RangerClass):
 class WardenClass(NPCClass):
     slug = NPCClassEnum.WARDEN
     power_source = PowerSourceEnum.PRIMAL
+    role = ClassRoleEnum.DEFENDER
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -691,6 +737,7 @@ class WardenClass(NPCClass):
     hit_points_per_level = 10
     fortitude = 1
     will = 1
+    main_attack_abilities = (AbilitiesEnum.STRENGTH,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         EARTHSTRENGTH = 1, 'Сила земли'
@@ -700,6 +747,7 @@ class WardenClass(NPCClass):
 class SorcererClass(NPCClass):
     slug = NPCClassEnum.SORCERER
     power_source = PowerSourceEnum.ARCANE
+    role = ClassRoleEnum.STRIKER
     available_implement_types = (Dagger, Quaterstaff)
     mandatory_skills = Skills(arcana=5)
     trainable_skills = Skills(
@@ -714,6 +762,7 @@ class SorcererClass(NPCClass):
         insight=5,
     )
     will = 2
+    main_attack_abilities = (AbilitiesEnum.CHARISMA,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         DRAGON_MAGIC = 1, 'Драконья магия'
@@ -737,6 +786,7 @@ class SorcererClass(NPCClass):
 class ShamanClass(NPCClass):
     slug = NPCClassEnum.SHAMAN
     power_source = PowerSourceEnum.PRIMAL
+    role = ClassRoleEnum.LEADER
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -757,6 +807,7 @@ class ShamanClass(NPCClass):
     )
     fortitude = 1
     will = 1
+    main_attack_abilities = (AbilitiesEnum.WISDOM,)
 
 
 class HexbladeClass(WarlockClass):
@@ -780,6 +831,7 @@ class HexbladeClass(WarlockClass):
     fortitude = 1
     reflex = 0
     will = 1
+    main_attack_abilities = (AbilitiesEnum.CHARISMA,)  # type: ignore
 
     @property
     def available_armor_types(self):
@@ -832,6 +884,7 @@ class HexbladeClass(WarlockClass):
 class MonkClass(NPCClass):
     slug = NPCClassEnum.MONK
     power_source = PowerSourceEnum.PSIONIC
+    role = ClassRoleEnum.STRIKER
     reflex = 1
     trainable_skills = Skills(
         acrobatics=5,
@@ -849,6 +902,7 @@ class MonkClass(NPCClass):
     available_accesories = (Quaterstaff, Club, Dagger, Spear, Sling, Shuriken)
     available_weapon_types = available_accesories + (UnarmedMonkStrile,)
     available_implement_types = available_accesories + (KiFocus,)
+    main_attack_abilities = (AbilitiesEnum.DEXTERITY,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         CENTERED_BREATH = 1, 'Сконцентрированное дыхание'
@@ -868,15 +922,3 @@ class MonkClass(NPCClass):
         if self.npc.subclass == self.SubclassEnum.STONE_FIST:
             return self.npc._tier + 2
         return 1
-
-
-class WarpriestClass(PriestClass):
-    slug = NPCClassEnum.WARPRIEST
-    power_source = PowerSourceEnum.DIVINE
-    available_shield_types = (
-        ShieldTypeEnum.LIGHT,
-        ShieldTypeEnum.HEAVY,
-    )
-    available_implement_types = (HolySymbol,)
-    fortitude = 1
-    will = 1
