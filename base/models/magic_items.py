@@ -133,10 +133,6 @@ class ArmsSlotItem(SimpleMagicItem):
     SLOT = MagicItemSlot.ARMS
 
 
-# WONDROUS_ITEMS = 'wondrous_items', ''
-# TATOO = 'tatoo', ''
-
-
 class NPCMagicItemAbstract(models.Model):
     class Meta:
         abstract = True

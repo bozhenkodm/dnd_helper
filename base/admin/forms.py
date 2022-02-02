@@ -41,7 +41,7 @@ class NPCModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(NPCModelForm, self).__init__(*args, **kwargs)
         if self.instance.id:
-            self.fields['var_bonus_attr'] = forms.ChoiceField(
+            self.fields['var_bonus_ability'] = forms.ChoiceField(
                 choices=[
                     (key.upper(), AbilitiesEnum[key.upper()].description)
                     for key, value in asdict(

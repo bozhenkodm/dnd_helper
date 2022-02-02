@@ -32,7 +32,7 @@ class AttributeAbstract(models.Model):
         verbose_name='Харизма (базовая)',
     )
     # TODO rename attr to abilities
-    var_bonus_attr = models.CharField(
+    var_bonus_ability = models.CharField(
         verbose_name='Выборочный бонус характеристики',
         max_length=AbilitiesEnum.max_length(),
         null=True,
@@ -85,13 +85,13 @@ class AttributeAbstract(models.Model):
     @property
     def _initial_attr_bonuses(self) -> Abilities:
         # getting one of variable ability bonus for specific npc
-        if not self.var_bonus_attr:
+        if not self.var_bonus_ability:
             return self.race_data_instance.const_ability_bonus
-        var_bonus_attr_name = self.var_bonus_attr.lower()
+        var_bonus_abilitiy_name = self.var_bonus_ability.lower()
         return self.race_data_instance.const_ability_bonus + Abilities(
             **{
-                var_bonus_attr_name: getattr(
-                    self.race_data_instance.var_ability_bonus, var_bonus_attr_name
+                var_bonus_abilitiy_name: getattr(
+                    self.race_data_instance.var_ability_bonus, var_bonus_abilitiy_name
                 )
             }
         )

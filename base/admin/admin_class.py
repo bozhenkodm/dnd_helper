@@ -55,7 +55,7 @@ class RaceAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None) -> tuple:
         if obj and obj.id:
-            return 'name',
+            return ('name',)
         return ()
 
     def has_add_permission(self, request: HttpRequest) -> bool:
@@ -179,7 +179,7 @@ class NPCAdmin(admin.ModelAdmin):
             'base_wisdom',
             'base_charisma',
         ),
-        'var_bonus_attr',
+        'var_bonus_ability',
         'mandatory_skills',
         'trained_skills',
         (
@@ -463,7 +463,7 @@ class WeaponAdmin(admin.ModelAdmin):
 
     @admin.display(description='Группа оружия')
     def group(self, obj):
-        return obj.weapon_type.data_instance.group.description
+        return obj.weapon_type.data_instance.group_display()
 
     @admin.display(description='Урон')
     def damage(self, obj):
@@ -557,6 +557,7 @@ itl - бонус предмета, к которому принадлежит т
             return (
                 'name',
                 'description',
+                'level',
                 'race',
                 ('klass', 'subclass'),
                 'functional_template',
@@ -589,7 +590,6 @@ itl - бонус предмета, к которому принадлежит т
                     )
                 )
             ):
-                print(subclass_enum)
                 choices = subclass_enum.generate_choices()
                 db_field.choices = choices
 
@@ -619,12 +619,22 @@ itl - бонус предмета, к которому принадлежит т
                 )
             property.save()
         for property in obj.properties.filter(title=PowerPropertyTitle.HIT):
+            if obj.level == 1 and obj.frequency == PowerFrequencyEnum.AT_WILL:
+                # at will first level powers damage changes from 1WPN to 2WPN
+                # on 21 level
+                at_will_first_level_modifier = '(lvl/21+1)*'
+            else:
+                at_will_first_level_modifier = ''
             if obj.accessory_type == AccessoryTypeEnum.WEAPON:
-                default_string = f'Урон $wpn*{obj.dice_number}+dmg+{ability_mod}'
+                default_string = (
+                    f'Урон ${at_will_first_level_modifier}'
+                    f'wpn*{obj.dice_number}+dmg+{ability_mod}'
+                )
             elif obj.accessory_type == AccessoryTypeEnum.IMPLEMENT:
                 default_string = (
-                    f'Урон {obj.dice_number}{obj.get_damage_dice_display()}'
-                    f'+$dmg+{ability_mod}'
+                    f'Урон ${at_will_first_level_modifier}'
+                    f'{obj.dice_number}*{obj.get_damage_dice_display()}'
+                    f'+dmg+{ability_mod}'
                 )
             else:
                 continue
@@ -695,3 +705,4 @@ class MagicItemTypeAdmin(admin.ModelAdmin):
 
 class MagicItemAdmin(admin.ModelAdmin):
     form = MagicItemForm
+    save_as = True

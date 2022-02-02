@@ -342,12 +342,12 @@ class NPC(
 
     @property
     def _magic_threshold(self) -> int:
-        """ Магический порог (максимальный бонус от магических предметов)"""
+        """Магический порог (максимальный бонус от магических предметов)"""
         return (self.level - 1) // 5
 
     @property
     def _level_bonus(self) -> int:
-        """ Условный бонус к защитам, атакам и урону для мастерских персонажей"""
+        """Условный бонус к защитам, атакам и урону для мастерских персонажей"""
         return self._magic_threshold * 2 + 1
 
     @property
@@ -412,7 +412,19 @@ class NPC(
             filter(
                 lambda x: x and getattr(x, 'magic_item_type', False),
                 # TODO add the rest of magic items
-                (self.primary_hand, self.secondary_hand, self.armor),  # type: ignore
+                (
+                    self.primary_hand,
+                    self.secondary_hand,
+                    self.armor,
+                    self.neck_slot,
+                    self.head_slot,
+                    self.feet_slot,
+                    self.waist_slot,
+                    self.arms_slot,
+                    self.left_ring_slot,
+                    self.right_ring_slot,
+                    self.hands_slot,
+                ),  # type: ignore
             )
         )
 

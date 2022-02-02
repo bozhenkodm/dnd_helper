@@ -15,8 +15,7 @@ from base.admin.admin_class import (
     WeaponAdmin,
     WeaponTypeAdmin,
 )
-from base.models import Encounter
-from base.models.encounters import PlayerCharacters
+from base.models.encounters import Encounter, PlayerCharacters
 from base.models.magic_items import MagicItemType, SimpleMagicItem
 from base.models.models import (
     NPC,
