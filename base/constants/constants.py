@@ -98,34 +98,6 @@ class NPCRaceEnum(BaseNameValueDescriptionEnum):
     ELF = 'ELF', 'Эльф'
 
 
-class NPCClassIntEnum(IntDescriptionEnum):
-    INVOKER = 10, 'Апостол'
-    ARTIFICER = 20, 'Артефактор'
-    BARD = 30, 'Бард'
-    VAMPIRE = 35, 'Вампир'
-    BARBARIAN = 40, 'Варвар'
-    WARLORD = 50, 'Военачальник'
-    WARPRIEST = 55, 'Военный священник (жрец)'
-    FIGHTER = 60, 'Воин'
-    WIZARD = 70, 'Волшебник'
-    DRUID = 80, 'Друид'
-    PRIEST = 90, 'Жрец'
-    SEEKER = 95, 'Ловчий'
-    AVENGER = 100, 'Каратель'
-    WARLOCK = 110, 'Колдун'
-    SWORDMAGE = 120, 'Мечник-маг'
-    MONK = 125, 'Монах'
-    PALADIN = 130, 'Паладин'
-    ROGUE = 140, 'Плут'
-    RUNEPRIEST = 150, 'Рунный жрец'
-    RANGER_MARKSMAN = 160, 'Следопыт (Дальнобойный)'
-    RANGER_MELEE = 170, 'Следопыт (Рукопашник)'
-    HEXBLADE = 175, 'Хексблэйд (колдун)'
-    WARDEN = 180, 'Хранитель'
-    SORCERER = 190, 'Чародей'
-    SHAMAN = 200, 'Шаман'
-
-
 class NPCClassEnum(BaseNameValueDescriptionEnum):
     INVOKER = 'INVOKER', 'Апостол'
     ARTIFICER = 'ARTIFICER', 'Артефактор'
@@ -285,6 +257,13 @@ class PowerSourceEnum(BaseNameValueDescriptionEnum):
     PRIMAL = 'PRIMAL', 'Первородный'
     SHADOW = 'SHADOW', 'Теневой'
     PSIONIC = 'PSIONIC', 'Псионический'
+
+
+class ClassRoleEnum(BaseNameValueDescriptionEnum):
+    STRIKER = 'striker', 'Атакующий'
+    DEFENDER = 'defender', 'Защитник'
+    CONTROLLER = 'controller', 'Контроллер'
+    LEADER = 'leader', 'Лидер'
 
 
 class PowerFrequencyEnum(BaseNameValueDescriptionEnum):
