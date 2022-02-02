@@ -1,8 +1,9 @@
 from dataclasses import dataclass
-from typing import ClassVar, Optional, Sequence, Union
+from typing import ClassVar, Literal, Optional, Sequence, Union
 
 from base.constants.constants import (
     DiceIntEnum,
+    PowerActionTypeEnum,
     WeaponCategoryIntEnum,
     WeaponGroupEnum,
     WeaponHandednessEnum,
@@ -31,10 +32,9 @@ class WeaponType:
     is_heavy_thrown: ClassVar[bool] = False
     is_high_crit: ClassVar[bool] = False
     is_reach: ClassVar[bool] = False
-    is_load_free: ClassVar[
-        bool
-    ] = False  # TODO make it one with next, or replace with enum
-    is_load_minor: ClassVar[bool] = False
+    load: ClassVar[
+        Literal[PowerActionTypeEnum.FREE, PowerActionTypeEnum.MINOR, None]
+    ] = None
     is_small: ClassVar[bool] = False
     is_defensive: ClassVar[bool] = False
 
@@ -53,8 +53,7 @@ class WeaponType:
             'heavy_thrown': cls.is_heavy_thrown,
             'high_crit': cls.is_high_crit,
             'reach': cls.is_reach,
-            'load_free': cls.is_load_free,
-            'load_minor': cls.is_load_minor,
+            'load': cls.load,
             'small': cls.is_small,
             'defensive': cls.is_defensive,
             'versatile': cls.handedness == WeaponHandednessEnum.VERSATILE,
@@ -571,7 +570,7 @@ class HandCrossbow(WeaponType):
     category = WeaponCategoryIntEnum.SIMPLE_RANGED
     damage_dice = DiceIntEnum.D6
     range = 10
-    is_load_free = True
+    load = PowerActionTypeEnum.FREE
 
 
 class Sling(WeaponType):
@@ -580,7 +579,7 @@ class Sling(WeaponType):
     category = WeaponCategoryIntEnum.SIMPLE_RANGED
     damage_dice = DiceIntEnum.D6
     range = 10
-    is_load_free = True
+    load = PowerActionTypeEnum.FREE
 
 
 class Crossbow(WeaponType):
@@ -590,7 +589,7 @@ class Crossbow(WeaponType):
     category = WeaponCategoryIntEnum.SIMPLE_RANGED
     damage_dice = DiceIntEnum.D8
     range = 15
-    is_load_minor = True
+    load = PowerActionTypeEnum.MINOR
 
 
 class RepeatingCrossbow(WeaponType):
@@ -600,7 +599,7 @@ class RepeatingCrossbow(WeaponType):
     category = WeaponCategoryIntEnum.SIMPLE_RANGED
     damage_dice = DiceIntEnum.D8
     range = 10
-    is_load_free = True
+    load = PowerActionTypeEnum.FREE
 
 
 class Longbow(WeaponType):
@@ -610,7 +609,7 @@ class Longbow(WeaponType):
     category = WeaponCategoryIntEnum.MILITARY_RANGED
     damage_dice = DiceIntEnum.D10
     range = 20
-    is_load_free = True
+    load = PowerActionTypeEnum.FREE
 
 
 class Shortbow(WeaponType):
@@ -620,7 +619,7 @@ class Shortbow(WeaponType):
     category = WeaponCategoryIntEnum.MILITARY_RANGED
     damage_dice = DiceIntEnum.D8
     range = 15
-    is_load_free = True
+    load = PowerActionTypeEnum.FREE
     is_small = True
 
 
@@ -640,7 +639,7 @@ class Greatbow(WeaponType):
     handedness = WeaponHandednessEnum.TWO
     category = WeaponCategoryIntEnum.SUPERIOR_RANGED
     damage_dice = DiceIntEnum.D12
-    is_load_free = True
+    load = PowerActionTypeEnum.FREE
     range = 25
 
 
@@ -650,7 +649,7 @@ class SuperiorCrossbow(WeaponType):
     handedness = WeaponHandednessEnum.TWO
     category = WeaponCategoryIntEnum.SUPERIOR_RANGED
     damage_dice = DiceIntEnum.D10
-    is_load_minor = True
+    load = PowerActionTypeEnum.MINOR
     prof_bonus = 3
     range = 20
 

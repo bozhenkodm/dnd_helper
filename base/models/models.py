@@ -411,7 +411,6 @@ class NPC(
         return tuple(
             filter(
                 lambda x: x and getattr(x, 'magic_item_type', False),
-                # TODO add the rest of magic items
                 (
                     self.primary_hand,
                     self.secondary_hand,
