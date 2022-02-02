@@ -245,7 +245,7 @@ class ItemAbstractForm(forms.ModelForm):
                     (i, i)
                     for i in range(
                         self.instance.magic_item_type.min_level,
-                        31,
+                        self.instance.magic_item_type.max_level + 1,
                         self.instance.magic_item_type.step,
                     )
                 ),

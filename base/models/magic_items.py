@@ -15,6 +15,9 @@ class MagicItemType(models.Model):
     min_level = models.PositiveSmallIntegerField(
         verbose_name='Минимальный уровень', default=1
     )
+    max_level = models.PositiveSmallIntegerField(
+        verbose_name='Максимальный уровень', default=30
+    )
     step = models.PositiveSmallIntegerField('Шаг повышения уровня', default=5)
     category = models.CharField(
         verbose_name='Категория',
