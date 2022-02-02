@@ -238,12 +238,12 @@ class NPCAdmin(admin.ModelAdmin):
             )
         result = self.fields[:]
         level_attrs_bonuses = {
-            4: 'level4_bonus_attrs',
-            8: 'level8_bonus_attrs',
-            14: 'level14_bonus_attrs',
-            18: 'level18_bonus_attrs',
-            24: 'level24_bonus_attrs',
-            28: 'level28_bonus_attrs',
+            4: 'level4_bonus_abilities',
+            8: 'level8_bonus_abilities',
+            14: 'level14_bonus_abilities',
+            18: 'level18_bonus_abilities',
+            24: 'level24_bonus_abilities',
+            28: 'level28_bonus_abilities',
         }
         for level, attr in level_attrs_bonuses.items():
             if obj.level >= level and attr not in result:

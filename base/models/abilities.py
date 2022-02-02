@@ -31,7 +31,6 @@ class AttributeAbstract(models.Model):
     base_charisma = models.SmallIntegerField(
         verbose_name='Харизма (базовая)',
     )
-    # TODO rename attr to abilities
     var_bonus_ability = models.CharField(
         verbose_name='Выборочный бонус характеристики',
         max_length=AbilitiesEnum.max_length(),
@@ -39,42 +38,42 @@ class AttributeAbstract(models.Model):
         blank=True,
     )
 
-    level4_bonus_attrs = MultiSelectField(
+    level4_bonus_abilities = MultiSelectField(
         verbose_name='Бонус характеристики на 4 уровне',
         choices=AbilitiesEnum.generate_choices(is_sorted=False),
         max_choices=2,
         null=True,
         blank=True,
     )
-    level8_bonus_attrs = MultiSelectField(
+    level8_bonus_abilities = MultiSelectField(
         verbose_name='Бонус характеристики на 8 уровне',
         choices=AbilitiesEnum.generate_choices(is_sorted=False),
         max_choices=2,
         null=True,
         blank=True,
     )
-    level14_bonus_attrs = MultiSelectField(
+    level14_bonus_abilities = MultiSelectField(
         verbose_name='Бонус характеристики на 14 уровне',
         choices=AbilitiesEnum.generate_choices(is_sorted=False),
         max_choices=2,
         null=True,
         blank=True,
     )
-    level18_bonus_attrs = MultiSelectField(
+    level18_bonus_abilities = MultiSelectField(
         verbose_name='Бонус характеристики на 18 уровне',
         choices=AbilitiesEnum.generate_choices(is_sorted=False),
         max_choices=2,
         null=True,
         blank=True,
     )
-    level24_bonus_attrs = MultiSelectField(
+    level24_bonus_abilities = MultiSelectField(
         verbose_name='Бонус характеристики на 24 уровне',
         choices=AbilitiesEnum.generate_choices(is_sorted=False),
         max_choices=2,
         null=True,
         blank=True,
     )
-    level28_bonus_attrs = MultiSelectField(
+    level28_bonus_abilities = MultiSelectField(
         verbose_name='Бонус характеристики на 28 уровне',
         choices=AbilitiesEnum.generate_choices(is_sorted=False),
         max_choices=2,
@@ -83,7 +82,7 @@ class AttributeAbstract(models.Model):
     )
 
     @property
-    def _initial_attr_bonuses(self) -> Abilities:
+    def _initial_abilities_bonuses(self) -> Abilities:
         # getting one of variable ability bonus for specific npc
         if not self.var_bonus_ability:
             return self.race_data_instance.const_ability_bonus
@@ -97,7 +96,7 @@ class AttributeAbstract(models.Model):
         )
 
     @property
-    def _level_attr_bonuses(self) -> Abilities:
+    def _level_abilities_bonuses(self) -> Abilities:
         result = Abilities()
         for i in (
             4,
@@ -110,7 +109,7 @@ class AttributeAbstract(models.Model):
             result += Abilities(
                 **{
                     ability.lower(): 1
-                    for ability in getattr(self, f'level{i}_bonus_attrs')
+                    for ability in getattr(self, f'level{i}_bonus_abilities')
                 }
             )
         return result
@@ -132,9 +131,9 @@ class AttributeAbstract(models.Model):
 
     def _calculate_ability_bonus(self, ability: AbilitiesEnum):
         abilities = (
-            self._initial_attr_bonuses
+            self._initial_abilities_bonuses
             + self._tier_attrs_bonus
-            + self._level_attr_bonuses
+            + self._level_abilities_bonuses
             + self._base_abilities
         )
         return getattr(abilities, ability.lvalue)
