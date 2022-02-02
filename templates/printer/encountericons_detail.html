@@ -15,7 +15,7 @@
   position: absolute;
   bottom: 8px;
   left: 16px;
-  color: {{ object.get_number_color_display }}
+  color: {{ object.number_color }}
 }
 
 /* Top left text */
@@ -23,7 +23,7 @@
   position: absolute;
   top: 8px;
   left: 16px;
-  color: {{ object.get_number_color_display }}
+  color: {{ object.number_color }}
 }
 
 /* Top right text */
@@ -31,7 +31,7 @@
   position: absolute;
   top: 8px;
   right: 16px;
-  color: {{ object.get_number_color_display }}
+  color: {{ object.number_color }}
 }
 
 /* Bottom right text */
@@ -39,7 +39,7 @@
   position: absolute;
   bottom: 8px;
   right: 16px;
-  color: {{ object.get_number_color_display }}
+  color: {{ object.number_color }}
 }
 
 /* Centered text */
@@ -48,7 +48,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: {{ object.get_number_color_display }}
+  color: {{ object.number_color }}
 }
 </style>
 <head>
@@ -60,7 +60,7 @@
 {% for _ in range %}
  <div class="container">
   <img src="{{object.base_image.url}}" alt="Snow" style="width:100%;">
-  <div class="{{ object.get_number_position_display }}">{{ forloop.counter }}</div>
+  <div class="{{ object.number_position }}">{{ forloop.counter }}</div>
 </div>
 <!--<br>-->
 {% endfor %}
