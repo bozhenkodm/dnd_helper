@@ -49,9 +49,8 @@ class DiceRoll:
 
     @classmethod
     def from_str(cls, string):
-        # TODO fix d100 match. now it gets d10.
         parsed_str = re.findall(
-            r'([0-9]{1,2})([dkдк](?:[468]|1[02]|20|100))(?:\+(\d{1,2}))?', string
+            r'([0-9]{1,2})([dkдк](?:100|[468]|1[02]|20))(?:\+(\d{1,2}))?', string
         )
         if parsed_str:
             rolls, dice, addendant = parsed_str[0]
