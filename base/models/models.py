@@ -318,12 +318,6 @@ class NPC(
             f'{self.race} {self.klass} {self.level} уровня'
         )
 
-    # FIXME these two next methods are shitshow,
-    #  appeared to be parallel structures of race and class
-    #  instead of complementing models.
-    #  how to integrate npc instance to these instances and initialise them
-    #  in race and class models respectively?
-
     @cached_property
     def race_data_instance(self):
         return race_classes.get(self.race.name)(npc=self)
@@ -505,9 +499,7 @@ class NPC(
                     item=item,
                 )
             )
-        result = template.format(*calculated_expressions)
-        # TODO remove injection weakness, leaving only markdown tags
-        return mark_safe('<br>'.join(result.split('\n')))
+        return template.format(*calculated_expressions)
 
     def powers_calculated(self):
         """
