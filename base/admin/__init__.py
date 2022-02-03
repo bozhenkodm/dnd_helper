@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group, User
 
-from base.admin.admin_class import (
+from base.admin.admin_classes import (
     ArmorAdmin,
     ClassAdmin,
     EncounterAdmin,

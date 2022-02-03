@@ -49,7 +49,7 @@ class NPCClass:
     fortitude: ClassVar[int] = 0
     reflex: ClassVar[int] = 0
     will: ClassVar[int] = 0
-    main_attack_abilities: ClassVar[Sequence[AbilitiesEnum]] = ()
+    base_attack_abilities: ClassVar[Sequence[AbilitiesEnum]] = ()
     mandatory_skills: ClassVar[Skills] = Skills()
     trainable_skills: ClassVar[Skills] = Skills()
     skill_bonuses: ClassVar[Skills] = Skills()
@@ -120,7 +120,7 @@ class InvokerClass(NPCClass):
         Quaterstaff,
     )
     hit_points_per_level = 6
-    main_attack_abilities = (AbilitiesEnum.WISDOM,)
+    base_attack_abilities = (AbilitiesEnum.WISDOM,)
 
 
 class ArtificerClass(NPCClass):
@@ -138,7 +138,7 @@ class ArtificerClass(NPCClass):
     )
     fortitude = 1
     will = 1
-    main_attack_abilities = (AbilitiesEnum.INTELLIGENCE,)
+    base_attack_abilities = (AbilitiesEnum.INTELLIGENCE,)
 
 
 class BardClass(NPCClass):
@@ -182,7 +182,7 @@ class BardClass(NPCClass):
     skill_bonuses = Skills.init_with_const(SkillsEnum.sequence(), 1)
     reflex = 1
     will = 1
-    main_attack_abilities = (AbilitiesEnum.CHARISMA,)
+    base_attack_abilities = (AbilitiesEnum.CHARISMA,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         CUNNING = 1, 'Хитрый'
@@ -208,7 +208,7 @@ class VampireClass(NPCClass):
         stealth=5,
         thievery=5,
     )
-    main_attack_abilities = (AbilitiesEnum.DEXTERITY, AbilitiesEnum.CHARISMA)
+    base_attack_abilities = (AbilitiesEnum.DEXTERITY, AbilitiesEnum.CHARISMA)
 
     @property
     def armor_class_bonus(self):
@@ -252,7 +252,7 @@ class BarbarianClass(NPCClass):
     )
     fortitude = 2
     hit_points_per_level = 10
-    main_attack_abilities = (AbilitiesEnum.STRENGTH,)
+    base_attack_abilities = (AbilitiesEnum.STRENGTH,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         THANEBORN = 1, 'Глава клана'
@@ -299,7 +299,7 @@ class WarlordClass(NPCClass):
     trainable_skills = Skills(
         athletics=5, endurance=5, intimidate=5, history=5, diplomacy=5, heal=5
     )
-    main_attack_abilities = (AbilitiesEnum.STRENGTH,)
+    base_attack_abilities = (AbilitiesEnum.STRENGTH,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         INSPIRING = 1, 'Вдохновитель'
@@ -327,7 +327,7 @@ class FighterClass(NPCClass):
     trainable_skills = Skills(
         athletics=5, endurance=5, intimidate=5, streetwise=5, heal=5
     )
-    main_attack_abilities = (AbilitiesEnum.STRENGTH,)
+    base_attack_abilities = (AbilitiesEnum.STRENGTH,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         GREAT_WEAPON = 1, 'Воин с большим оружием'
@@ -405,7 +405,7 @@ class WizardClass(NPCClass):
         history=5, diplomacy=5, dungeoneering=5, nature=5, insight=5, religion=5
     )
     will = 2
-    main_attack_abilities = (AbilitiesEnum.INTELLIGENCE,)
+    base_attack_abilities = (AbilitiesEnum.INTELLIGENCE,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         WAND_OF_ACCURACY = 1, 'Меткость с волшебной палочкой'
@@ -439,7 +439,7 @@ class DruidClass(NPCClass):
     )
     reflex = 1
     will = 1
-    main_attack_abilities = (AbilitiesEnum.WISDOM,)
+    base_attack_abilities = (AbilitiesEnum.WISDOM,)
 
 
 class PriestClass(NPCClass):
@@ -456,14 +456,14 @@ class PriestClass(NPCClass):
     mandatory_skills = Skills(religion=5)
     trainable_skills = Skills(history=5, arcana=5, diplomacy=5, insight=5, heal=5)
     will = 2
-    main_attack_abilities = (AbilitiesEnum.WISDOM,)
+    base_attack_abilities = (AbilitiesEnum.WISDOM,)
 
 
 class SeekerClass(NPCClass):
     slug = NPCClassEnum.SEEKER
     power_source = PowerSourceEnum.PRIMAL
     role = ClassRoleEnum.CONTROLLER
-    main_attack_abilities = (AbilitiesEnum.WISDOM,)
+    base_attack_abilities = (AbilitiesEnum.WISDOM,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         SPIRITBOND = 1, 'Духовная связь'
@@ -494,7 +494,7 @@ class AvengerClass(NPCClass):
     fortitude = 1
     reflex = 1
     will = 1
-    main_attack_abilities = (AbilitiesEnum.WISDOM,)
+    base_attack_abilities = (AbilitiesEnum.WISDOM,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         PURSUIT = 1, 'Осуждение преследования'
@@ -532,7 +532,7 @@ class WarlockClass(NPCClass):
     )
     reflex = 1
     will = 1
-    main_attack_abilities = (AbilitiesEnum.CHARISMA, AbilitiesEnum.CONSTITUTION)
+    base_attack_abilities = (AbilitiesEnum.CHARISMA, AbilitiesEnum.CONSTITUTION)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         FEY_PACT = 1, 'Фейский договор'
@@ -560,7 +560,7 @@ class SwordmageClass(NPCClass):
         athletics=5, endurance=5, intimidate=5, history=5, diplomacy=5, insight=5
     )
     will = 2
-    main_attack_abilities = (AbilitiesEnum.INTELLIGENCE,)
+    base_attack_abilities = (AbilitiesEnum.INTELLIGENCE,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         ASSAULT_AEGIS = 1, 'Эгида атаки'
@@ -603,7 +603,7 @@ class PaladinClass(NPCClass):
     fortitude = 1
     reflex = 1
     will = 1
-    main_attack_abilities = (AbilitiesEnum.STRENGTH, AbilitiesEnum.CHARISMA)
+    base_attack_abilities = (AbilitiesEnum.STRENGTH, AbilitiesEnum.CHARISMA)
 
 
 class RogueClass(NPCClass):
@@ -629,7 +629,7 @@ class RogueClass(NPCClass):
         insight=5,
     )
     reflex = 2
-    main_attack_abilities = (AbilitiesEnum.DEXTERITY,)
+    base_attack_abilities = (AbilitiesEnum.DEXTERITY,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         DODGER = 1, 'Мастер уклонения'
@@ -673,7 +673,7 @@ class RunepriestClass(NPCClass):
         heal=5,
     )
     will = 2
-    main_attack_abilities = (AbilitiesEnum.STRENGTH,)
+    base_attack_abilities = (AbilitiesEnum.STRENGTH,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         WRATHFUL_HAMMER = 1, 'Мстительный молот'
@@ -700,7 +700,7 @@ class RangerClass(NPCClass):
     )
     fortitude = 1
     reflex = 1
-    main_attack_abilities = (AbilitiesEnum.STRENGTH, AbilitiesEnum.DEXTERITY)
+    base_attack_abilities = (AbilitiesEnum.STRENGTH, AbilitiesEnum.DEXTERITY)
 
 
 class RangerMarksmanClass(RangerClass):
@@ -737,7 +737,7 @@ class WardenClass(NPCClass):
     hit_points_per_level = 10
     fortitude = 1
     will = 1
-    main_attack_abilities = (AbilitiesEnum.STRENGTH,)
+    base_attack_abilities = (AbilitiesEnum.STRENGTH,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         EARTHSTRENGTH = 1, 'Сила земли'
@@ -762,7 +762,7 @@ class SorcererClass(NPCClass):
         insight=5,
     )
     will = 2
-    main_attack_abilities = (AbilitiesEnum.CHARISMA,)
+    base_attack_abilities = (AbilitiesEnum.CHARISMA,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         DRAGON_MAGIC = 1, 'Драконья магия'
@@ -807,7 +807,7 @@ class ShamanClass(NPCClass):
     )
     fortitude = 1
     will = 1
-    main_attack_abilities = (AbilitiesEnum.WISDOM,)
+    base_attack_abilities = (AbilitiesEnum.WISDOM,)
 
 
 class HexbladeClass(WarlockClass):
@@ -831,7 +831,7 @@ class HexbladeClass(WarlockClass):
     fortitude = 1
     reflex = 0
     will = 1
-    main_attack_abilities = (AbilitiesEnum.CHARISMA,)  # type: ignore
+    base_attack_abilities = (AbilitiesEnum.CHARISMA,)  # type: ignore
 
     @property
     def available_armor_types(self):
@@ -902,7 +902,7 @@ class MonkClass(NPCClass):
     available_accesories = (Quaterstaff, Club, Dagger, Spear, Sling, Shuriken)
     available_weapon_types = available_accesories + (UnarmedMonkStrile,)
     available_implement_types = available_accesories + (KiFocus,)
-    main_attack_abilities = (AbilitiesEnum.DEXTERITY,)
+    base_attack_abilities = (AbilitiesEnum.DEXTERITY,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         CENTERED_BREATH = 1, 'Сконцентрированное дыхание'

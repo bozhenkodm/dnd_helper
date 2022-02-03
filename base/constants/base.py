@@ -1,4 +1,5 @@
 from enum import Enum, IntEnum
+from typing import Sequence
 
 from django.db import models
 
@@ -14,12 +15,24 @@ class BaseNameValueDescriptionEnum(str, Enum):
         return str(name)
 
     @classmethod
-    def generate_choices(cls, is_sorted=True):
+    def generate_choices(
+        cls,
+        is_sorted: bool = True,
+        start_with: Sequence["BaseNameValueDescriptionEnum"] = (),
+    ) -> list[tuple[str, str]]:
+        result = [(item.value, item.description) for item in start_with]  # type: ignore
         if is_sorted:
-            return sorted(
-                ((item.value, item.description) for item in cls), key=lambda x: x[1]
+            result.extend(
+                sorted(
+                    ((item.value, item.description) for item in cls),  # type: ignore
+                    key=lambda x: x[1],
+                )
             )
-        return ((item.value, item.description) for item in cls)
+        else:
+            result.extend(
+                (item.value, item.description) for item in cls  # type: ignore
+            )
+        return result
 
     @classmethod
     def generate_case(cls, field='name'):

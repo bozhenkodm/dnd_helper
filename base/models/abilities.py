@@ -37,6 +37,12 @@ class AttributeAbstract(models.Model):
         null=True,
         blank=True,
     )
+    base_attack_ability = MultiSelectField(
+        verbose_name='Атакующие характеристики',
+        choices=AbilitiesEnum.generate_choices(is_sorted=False),
+        null=True,
+        blank=True,
+    )
 
     level4_bonus_abilities = MultiSelectField(
         verbose_name='Бонус характеристики на 4 уровне',

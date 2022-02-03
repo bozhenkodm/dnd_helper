@@ -33,7 +33,7 @@ class WeaponType:
     is_high_crit: ClassVar[bool] = False
     is_reach: ClassVar[bool] = False
     load: ClassVar[
-        Literal[PowerActionTypeEnum.FREE, PowerActionTypeEnum.MINOR, None]
+        Optional[Literal[PowerActionTypeEnum.FREE, PowerActionTypeEnum.MINOR]]
     ] = None
     is_small: ClassVar[bool] = False
     is_defensive: ClassVar[bool] = False

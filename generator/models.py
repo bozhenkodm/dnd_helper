@@ -30,7 +30,7 @@ class NPCName(models.Model):
         null=True,
         blank=True,
     )
-    race = models.ManyToManyField(Race)
+    race = models.ManyToManyField(Race, verbose_name='Расы')
 
     def __str__(self):
         return (

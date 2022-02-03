@@ -41,18 +41,36 @@ class NPCModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(NPCModelForm, self).__init__(*args, **kwargs)
         if self.instance.id:
+            klass_data_instance = self.instance.klass_data_instance
+            race_data_instance = self.instance.race_data_instance
             self.fields['var_bonus_ability'] = forms.ChoiceField(
                 choices=[
                     (key.upper(), AbilitiesEnum[key.upper()].description)
                     for key, value in asdict(
-                        self.instance.race_data_instance.var_ability_bonus
+                        race_data_instance.var_ability_bonus
                     ).items()
                     if value
                 ],
                 label='Выборочный бонус характеристики',
                 required=False,
             )
-            choices = self.instance.klass_data_instance.trainable_skills
+            base_attack_abilities = klass_data_instance.base_attack_abilities
+            self.fields['base_attack_ability'] = MultiSelectFormField(
+                choices=(
+                    (item.value, item.description) for item in base_attack_abilities
+                ),
+                label='Атакующие характеристики',
+                initial=[base_attack_abilities[0].value],
+                min_choices=1,
+                disabled=len(base_attack_abilities) == 1,
+            )
+            if len(base_attack_abilities) == 1:
+                # form.initials shoild be changed here directly, because
+                # it has already been inited from fiels.initials in super().__init__()
+                self.initial['base_attack_ability'] = self.fields[
+                    'base_attack_ability'
+                ].initial
+            choices = klass_data_instance.trainable_skills
             self.fields['trained_skills'] = MultiSelectFormField(
                 choices=(
                     (key.upper(), SkillsEnum[key.upper()].description)
@@ -68,9 +86,7 @@ class NPCModelForm(forms.ModelForm):
                 .order_by('level', 'frequency_order'),
                 label='Таланты',
             )
-            if subclass_enum := getattr(
-                self.instance.klass_data_instance, 'SubclassEnum', None
-            ):
+            if subclass_enum := getattr(klass_data_instance, 'SubclassEnum', None):
                 self.fields['subclass'] = forms.TypedChoiceField(
                     coerce=int,
                     choices=subclass_enum.generate_choices(),

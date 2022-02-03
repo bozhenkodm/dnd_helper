@@ -180,6 +180,7 @@ class NPCAdmin(admin.ModelAdmin):
             'base_charisma',
         ),
         'var_bonus_ability',
+        'base_attack_ability',
         'mandatory_skills',
         'trained_skills',
         (
@@ -235,6 +236,7 @@ class NPCAdmin(admin.ModelAdmin):
                     'base_wisdom',
                     'base_charisma',
                 ),
+                'base_attack_ability',
             )
         result = self.fields[:]
         level_attrs_bonuses = {
