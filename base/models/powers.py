@@ -200,7 +200,6 @@ class Power(models.Model):
             )
             and weapon
         ):
-            # TODO maybe move it to npc model
             return weapon.get_attack_type(
                 is_melee=self.range_type
                 in (
@@ -323,7 +322,7 @@ class PowerMixin:
 
     @property
     def _magic_threshold(self) -> int:
-        # form mypy check only
+        # for mypy check only
         return 0
 
     @property
@@ -476,10 +475,11 @@ class PowerMixin:
         )
 
     def valid_properties(self, power: Power):
-        # collecting power properties,
-        # replacing properties without subclass with subclassed properties
-        # and properties with lower level with properties with high level
-        # should they appeared
+        """collecting power properties,
+        replacing properties without subclass with subclassed properties
+        and properties with lower level with properties with high level
+        should they appeared
+        """
         properties: dict[str, PowerProperty] = {}
         for prop in power.properties.filter(
             level__lte=self.level, subclass__in=(self.subclass, 0)  # type: ignore
