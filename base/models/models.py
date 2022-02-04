@@ -4,7 +4,7 @@ from typing import Optional, Sequence
 
 from django.db import models
 from django.urls import reverse
-from django.utils.safestring import mark_safe
+from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField  # type: ignore
 
 from base.constants.constants import (
@@ -29,20 +29,20 @@ from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
 
 class Armor(ItemAbstract):
     class Meta:
-        verbose_name = 'Доспех'
-        verbose_name_plural = 'Доспехи'
+        verbose_name = _('Armor')
+        verbose_name_plural = _('Armors')
 
     armor_type = models.SmallIntegerField(
-        verbose_name='Тип',
+        verbose_name=_('Armor type'),
         choices=ArmorTypeIntEnum.generate_choices(),
     )
     bonus_armor_class = models.SmallIntegerField(
-        verbose_name='Дополнительный класс доспеха',
+        verbose_name=_('Additional armor class'),
         default=0,
-        help_text='Для магических доспехов высоких уровней',
+        help_text=_('For high level magic armor'),
     )
-    speed_penalty = models.SmallIntegerField(verbose_name='Штраф скорости', default=0)
-    skill_penalty = models.SmallIntegerField(verbose_name='Штраф навыков', default=0)
+    speed_penalty = models.SmallIntegerField(verbose_name=_('Speed penalty'), default=0)
+    skill_penalty = models.SmallIntegerField(verbose_name=_('Skills penalty'), default=0)
 
     def __str__(self):
         return f'{self.name}, +{self.enchantment}'

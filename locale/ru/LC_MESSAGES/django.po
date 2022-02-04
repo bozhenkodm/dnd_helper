@@ -1,0 +1,51 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-02-04 07:50+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
+"%100>=11 && n%100<=14)? 2 : 3);\n"
+
+#: base/models/models.py:32
+msgid "Armor"
+msgstr "Доспех"
+
+#: base/models/models.py:33
+msgid "Armors"
+msgstr "Доспехи"
+
+#: base/models/models.py:36
+#, fuzzy
+#| msgid "Armor"
+msgid "Armor type"
+msgstr "Доспех"
+
+#: base/models/models.py:40
+msgid "Additional armor class"
+msgstr "Дополнительный класс доспеха"
+
+#: base/models/models.py:42
+msgid "For high level magic armor"
+msgstr "Для магических доспехов высокого уровня"
+
+#: base/models/models.py:44
+msgid "Speed penalty"
+msgstr "Штраф скорости"
+
+#: base/models/models.py:45
+msgid "Skills penalty"
+msgstr "Штраф навыков"
