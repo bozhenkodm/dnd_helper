@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-04 07:57+0000\n"
+"POT-Creation-Date: 2022-02-04 13:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -46,24 +46,44 @@ msgstr "Для магических доспехов высокого уровн
 msgid "Speed penalty"
 msgstr "Штраф скорости"
 
-#: base/models/models.py:45
+#: base/models/models.py:46
 msgid "Skills penalty"
 msgstr "Штраф навыков"
 
-#: base/models/models.py:71 base/models/models.py:100
+#: base/models/models.py:73 base/models/models.py:102
 msgid "Weapon type"
 msgstr "Тип оружия"
 
-#: base/models/models.py:72
+#: base/models/models.py:74
 msgid "Weapon types"
 msgstr "Типы оружия"
 
-#: base/models/models.py:76
+#: base/models/models.py:78 base/models/models.py:168 base/models/models.py:174
 msgid "Title"
 msgstr "Название"
 
-#: base/models/models.py:95 base/models/models.py:96
+#: base/models/models.py:97 base/models/models.py:98
 #, fuzzy
 #| msgid "Weapon type"
 msgid "Weapon"
 msgstr "Оружие"
+
+#: base/models/models.py:159
+msgid "Wrong attack type"
+msgstr "Неверный тип атаки"
+
+#: base/models/models.py:164
+msgid "Race"
+msgstr "Раса"
+
+#: base/models/models.py:165
+msgid "Races"
+msgstr "Расы"
+
+#: base/models/models.py:177
+msgid "Is race social?"
+msgstr "Социальная раса"
+
+#: base/models/models.py:179
+msgid "Social races are used for random npc generation"
+msgstr "Социальные расы используются для случайной генерации NPC"

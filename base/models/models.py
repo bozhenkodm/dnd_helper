@@ -42,7 +42,9 @@ class Armor(ItemAbstract):
         help_text=_('For high level magic armor'),
     )
     speed_penalty = models.SmallIntegerField(verbose_name=_('Speed penalty'), default=0)
-    skill_penalty = models.SmallIntegerField(verbose_name=_('Skills penalty'), default=0)
+    skill_penalty = models.SmallIntegerField(
+        verbose_name=_('Skills penalty'), default=0
+    )
 
     def __str__(self):
         return f'{self.name}, +{self.enchantment}'
@@ -154,27 +156,27 @@ class Weapon(ItemAbstract):
             return melee_attack_type
         if is_ranged:
             return ranged_attack_type
-        raise ValueError('Wrong attack type')
+        raise ValueError(_('Wrong attack type'))
 
 
 class Race(models.Model):
     class Meta:
-        verbose_name = 'Раса'
-        verbose_name_plural = 'Расы'
+        verbose_name = _('Race')
+        verbose_name_plural = _('Races')
 
     name = models.CharField(
-        verbose_name='Название',
+        verbose_name=_('Title'),
         max_length=NPCRaceEnum.max_length(),
         choices=NPCRaceEnum.generate_choices(),
         unique=True,
     )
     name_display = models.CharField(
-        verbose_name='Название', max_length=NPCRaceEnum.max_description_length()
+        verbose_name=_('Title'), max_length=NPCRaceEnum.max_description_length()
     )
     is_sociable = models.BooleanField(
-        verbose_name='Социальная раса',
+        verbose_name=_('Is race social?'),
         default=True,
-        help_text='Социальные расы используются для случайной генерации NPC',
+        help_text=_('Social races are used for random npc generation'),
     )
 
     def __str__(self):
