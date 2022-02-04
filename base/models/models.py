@@ -92,12 +92,12 @@ class WeaponType(models.Model):
 
 class Weapon(ItemAbstract):
     class Meta:
-        verbose_name = 'Оружие'
-        verbose_name_plural = 'Оружие'
+        verbose_name = _('Weapon')
+        verbose_name_plural = _('Weapon')
         unique_together = ('magic_item_type', 'level', 'weapon_type')
 
     weapon_type = models.ForeignKey(
-        WeaponType, verbose_name='Тип оружия', on_delete=models.CASCADE, null=False
+        WeaponType, verbose_name=_('Weapon type'), on_delete=models.CASCADE, null=False
     )
 
     def __str__(self):

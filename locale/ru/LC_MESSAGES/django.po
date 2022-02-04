@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-04 07:54+0000\n"
+"POT-Creation-Date: 2022-02-04 07:57+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -50,7 +50,7 @@ msgstr "Штраф скорости"
 msgid "Skills penalty"
 msgstr "Штраф навыков"
 
-#: base/models/models.py:71
+#: base/models/models.py:71 base/models/models.py:100
 msgid "Weapon type"
 msgstr "Тип оружия"
 
@@ -61,3 +61,9 @@ msgstr "Типы оружия"
 #: base/models/models.py:76
 msgid "Title"
 msgstr "Название"
+
+#: base/models/models.py:95 base/models/models.py:96
+#, fuzzy
+#| msgid "Weapon type"
+msgid "Weapon"
+msgstr "Оружие"
