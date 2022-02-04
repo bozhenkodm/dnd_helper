@@ -68,12 +68,12 @@ class Armor(ItemAbstract):
 
 class WeaponType(models.Model):
     class Meta:
-        verbose_name = 'Тип оружия'
-        verbose_name_plural = 'Типы оружия'
+        verbose_name = _('Weapon type')
+        verbose_name_plural = _('Weapon types')
 
     objects = WeaponTypeQuerySet.as_manager()
 
-    name = models.CharField(verbose_name='Название', max_length=30)
+    name = models.CharField(verbose_name=_('Title'), max_length=30)
     slug = models.CharField(verbose_name='Slug', max_length=30, unique=True)
 
     def __str__(self):
