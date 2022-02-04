@@ -28,3 +28,7 @@ load_data:
 	poetry run python manage.py loaddata class
 	poetry run python manage.py loaddata race
 	poetry run python manage.py loaddata weapon_types
+
+messages:
+	poetry run python manage.py makemessages --locale=ru
+	poetry run python manage.py compilemessages
