@@ -240,40 +240,40 @@ class NPC(
         verbose_name = 'NPC'
         verbose_name_plural = 'NPCS'
 
-    name = models.CharField(verbose_name='Имя', max_length=50)
-    description = models.TextField(verbose_name='Описание', null=True, blank=True)
+    name = models.CharField(verbose_name=_('Name'), max_length=50)
+    description = models.TextField(verbose_name=_('Description'), null=True, blank=True)
     race = models.ForeignKey(
         Race,
         on_delete=models.CASCADE,
-        verbose_name='Раса',
+        verbose_name=_('Race'),
     )
     klass = models.ForeignKey(
         Class,
         on_delete=models.CASCADE,
-        verbose_name='Класс',
+        verbose_name=('Class'),
     )
     subclass = models.SmallIntegerField(
-        verbose_name='Подкласс',
+        verbose_name=_('Subclass'),
         default=0,
     )
     functional_template = models.ForeignKey(
         FunctionalTemplate,
         on_delete=models.CASCADE,
-        verbose_name='Функциональный шаблон',
+        verbose_name=_('Functional template'),
         null=True,
         blank=True,
     )
     sex = models.CharField(
         max_length=SexEnum.max_length(),
         choices=SexEnum.generate_choices(is_sorted=False),
-        verbose_name='Пол',
+        verbose_name=_('Sex'),
     )
     level = models.PositiveSmallIntegerField(
-        verbose_name='Уровень',
+        verbose_name=_('Level'),
     )
 
     trained_skills = MultiSelectField(
-        verbose_name='Тренированные навыки',
+        verbose_name=_('Trained skills'),
         choices=SkillsEnum.generate_choices(),
         min_choices=1,
         null=True,
@@ -281,10 +281,10 @@ class NPC(
     )
 
     armor = models.ForeignKey(
-        Armor, verbose_name='Доспехи', null=True, on_delete=models.SET_NULL
+        Armor, verbose_name=_('Armor'), null=True, on_delete=models.SET_NULL
     )
     shield = models.CharField(
-        verbose_name='Щит',
+        verbose_name=_('Shield'),
         max_length=5,
         choices=ShieldTypeEnum.generate_choices(),
         null=True,
@@ -292,16 +292,16 @@ class NPC(
     )
     weapons = models.ManyToManyField(
         Weapon,
-        verbose_name='Вооружение',
+        verbose_name=_('Armament'),
         blank=True,
-        help_text=(
-            'Имеющееся у персонажа вооружение. '
-            'Если список не пустой, то оружие в руки выбирается из него.'
+        help_text=_(
+            'Armament posessed by character. '
+            'If list is not empty, weapons in hands are choose from it.'
         ),
     )
     primary_hand = models.ForeignKey(
         Weapon,
-        verbose_name='Основная рука',
+        verbose_name=_('Primary hand'),
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
@@ -309,16 +309,17 @@ class NPC(
     )
     secondary_hand = models.ForeignKey(
         Weapon,
-        verbose_name='Вторичная рука',
+        verbose_name=_('Secondary hand'),
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
         related_name='in_secondary_hands',
     )
 
-    powers = models.ManyToManyField(Power, blank=True)
+    powers = models.ManyToManyField(Power, blank=True, verbose_name=_('Powers'))
 
     def __str__(self):
+        # TODO localization
         return (
             f'{self.name}'
             f'{f" ({self.functional_template}) " if self.functional_template else " "}'
