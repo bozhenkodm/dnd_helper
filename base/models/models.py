@@ -141,6 +141,7 @@ class Weapon(ItemAbstract):
         return self.data_instance.prof_bonus
 
     def get_attack_type(self, is_melee: bool, is_ranged: bool) -> str:
+        # TODO localization
         melee_attack_type, ranged_attack_type = '', ''
         if is_melee:
             distance = 2 if self.data_instance.is_reach else 1
@@ -185,8 +186,8 @@ class Race(models.Model):
 
 class Class(models.Model):
     class Meta:
-        verbose_name = 'Класс'
-        verbose_name_plural = 'Классы'
+        verbose_name = _('Class')
+        verbose_name_plural = _('Classes')
         ordering = ('name_display',)
 
     name = models.SlugField(
@@ -194,7 +195,7 @@ class Class(models.Model):
         max_length=NPCClassEnum.max_length(),
     )
     name_display = models.CharField(
-        verbose_name='Название',
+        verbose_name=_('Title'),
         max_length=NPCClassEnum.max_description_length(),
     )
 

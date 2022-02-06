@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-04 13:43+0000\n"
+"POT-Creation-Date: 2022-02-06 11:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,7 +58,8 @@ msgstr "Тип оружия"
 msgid "Weapon types"
 msgstr "Типы оружия"
 
-#: base/models/models.py:78 base/models/models.py:168 base/models/models.py:174
+#: base/models/models.py:78 base/models/models.py:169 base/models/models.py:175
+#: base/models/models.py:198
 msgid "Title"
 msgstr "Название"
 
@@ -68,22 +69,30 @@ msgstr "Название"
 msgid "Weapon"
 msgstr "Оружие"
 
-#: base/models/models.py:159
+#: base/models/models.py:160
 msgid "Wrong attack type"
 msgstr "Неверный тип атаки"
 
-#: base/models/models.py:164
+#: base/models/models.py:165
 msgid "Race"
 msgstr "Раса"
 
-#: base/models/models.py:165
+#: base/models/models.py:166
 msgid "Races"
 msgstr "Расы"
 
-#: base/models/models.py:177
+#: base/models/models.py:178
 msgid "Is race social?"
 msgstr "Социальная раса"
 
-#: base/models/models.py:179
+#: base/models/models.py:180
 msgid "Social races are used for random npc generation"
 msgstr "Социальные расы используются для случайной генерации NPC"
+
+#: base/models/models.py:189
+msgid "Class"
+msgstr "Класс"
+
+#: base/models/models.py:190
+msgid "Classes"
+msgstr "Классы"
