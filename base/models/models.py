@@ -205,24 +205,28 @@ class Class(models.Model):
 
 class FunctionalTemplate(models.Model):
     class Meta:
-        verbose_name = 'Функциональный шаблон'
-        verbose_name_plural = 'Функциональные шаблоны'
+        verbose_name = _('Functional template')
+        verbose_name_plural = _('Functional templates')
         ordering = ('title',)
 
-    title = models.CharField(max_length=50, null=False, verbose_name='Название')
-    min_level = models.SmallIntegerField(verbose_name='Минимальный уровень', default=0)
-    armor_class_bonus = models.SmallIntegerField(verbose_name='Бонус КД', default=0)
-    fortitude_bonus = models.SmallIntegerField(
-        verbose_name='Бонус стойкости', default=0
+    title = models.CharField(max_length=50, null=False, verbose_name=_('Title'))
+    min_level = models.SmallIntegerField(verbose_name=_('Minimal level'), default=0)
+    armor_class_bonus = models.SmallIntegerField(
+        verbose_name=_('Armor class bonus'), default=0
     )
-    reflex_bonus = models.SmallIntegerField(verbose_name='Бонус реакции', default=0)
-    will_bonus = models.SmallIntegerField(verbose_name='Бонус воли', default=0)
-    save_bonus = models.SmallIntegerField(verbose_name='Бонус спасбросков', default=2)
+    fortitude_bonus = models.SmallIntegerField(
+        verbose_name=_('Fortitude bonus'), default=0
+    )
+    reflex_bonus = models.SmallIntegerField(verbose_name=_('Reflex bonus'), default=0)
+    will_bonus = models.SmallIntegerField(verbose_name=_('Will bonus'), default=0)
+    save_bonus = models.SmallIntegerField(
+        verbose_name=_('Saving throws bonus'), default=2
+    )
     action_points_bonus = models.SmallIntegerField(
-        verbose_name='Дополнительные очки действия', default=1
+        verbose_name=_('Action points'), default=1
     )
     hit_points_per_level = models.SmallIntegerField(
-        verbose_name='Хиты за уровень', default=8
+        verbose_name=_('Hits per level'), default=8
     )
 
     def __str__(self):

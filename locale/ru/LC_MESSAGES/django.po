@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-06 11:28+0000\n"
+"POT-Creation-Date: 2022-02-06 11:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,7 +59,7 @@ msgid "Weapon types"
 msgstr "Типы оружия"
 
 #: base/models/models.py:78 base/models/models.py:169 base/models/models.py:175
-#: base/models/models.py:198
+#: base/models/models.py:198 base/models/models.py:212
 msgid "Title"
 msgstr "Название"
 
@@ -96,3 +96,45 @@ msgstr "Класс"
 #: base/models/models.py:190
 msgid "Classes"
 msgstr "Классы"
+
+#: base/models/models.py:208
+msgid "Functional template"
+msgstr "Функциональный шаблон"
+
+#: base/models/models.py:209
+#, fuzzy
+#| msgid "Functional template"
+msgid "Functional templates"
+msgstr "Функциональные шаблоны"
+
+#: base/models/models.py:213
+msgid "Minimal level"
+msgstr "Минимальный уровень"
+
+#: base/models/models.py:215
+msgid "Armor class bonus"
+msgstr "Бонус класса доспеха"
+
+#: base/models/models.py:218
+msgid "Fortitude bonus"
+msgstr "Бонус стойкости"
+
+#: base/models/models.py:220
+msgid "Reflex bonus"
+msgstr "Бонус реакции"
+
+#: base/models/models.py:221
+msgid "Will bonus"
+msgstr "Бонус воли"
+
+#: base/models/models.py:223
+msgid "Saving throws bonus"
+msgstr "Бонус спасбросков"
+
+#: base/models/models.py:226
+msgid "Action points"
+msgstr "Очки действия"
+
+#: base/models/models.py:229
+msgid "Hits per level"
+msgstr "Хиты за уровень"
