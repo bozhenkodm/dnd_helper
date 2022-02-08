@@ -250,7 +250,7 @@ class NPC(
     klass = models.ForeignKey(
         Class,
         on_delete=models.CASCADE,
-        verbose_name=('Class'),
+        verbose_name=_('Class'),
     )
     subclass = models.SmallIntegerField(
         verbose_name=_('Subclass'),
@@ -344,12 +344,12 @@ class NPC(
 
     @property
     def _magic_threshold(self) -> int:
-        """Магический порог (максимальный бонус от магических предметов)"""
+        """Maximum magic item bonus"""
         return (self.level - 1) // 5
 
     @property
     def _level_bonus(self) -> int:
-        """Условный бонус к защитам, атакам и урону для мастерских персонажей"""
+        """NPC bonus to attacks, defences and damage"""
         return self._magic_threshold * 2 + 1
 
     @property
@@ -373,13 +373,12 @@ class NPC(
     @property
     def surge(self) -> int:
         """
-        Исцеление
+        Healing surge value
         """
         return self.bloodied // 2 + self.race_data_instance.healing_surge_bonus
 
     @property
     def _tier(self):
-        """Этап развития"""
         if self.level < 11:
             return 0
         if self.level >= 21:
@@ -388,7 +387,7 @@ class NPC(
 
     @property
     def surges(self) -> int:
-        """Количество исцелений"""
+        """Surges number"""
         return self._tier + 1 + self.race_data_instance.surges_number_bonus
 
     @property
@@ -409,14 +408,17 @@ class NPC(
         return tuple(filter(None, (self.primary_hand, self.secondary_hand)))
 
     @property
-    def magic_items(self) -> Sequence[ItemAbstract]:
+    def items(self):
         return tuple(
             filter(
-                lambda x: x and getattr(x, 'magic_item_type', False),
+                None,
                 (
                     self.primary_hand,
                     self.secondary_hand,
                     self.armor,
+                    # TODO unite shields with hand slot
+                    #  let it be impossible to add hands item with non magical shield
+                    ShieldTypeEnum[self.shield].description,
                     self.neck_slot,
                     self.head_slot,
                     self.feet_slot,
@@ -425,8 +427,14 @@ class NPC(
                     self.left_ring_slot,
                     self.right_ring_slot,
                     self.hands_slot,
-                ),  # type: ignore
+                ),
             )
+        )
+
+    @property
+    def magic_items(self) -> Sequence[ItemAbstract]:
+        return tuple(
+            filter(lambda x: x and getattr(x, 'magic_item_type', False), self.items)
         )
 
     def is_weapon_proficient(self, weapon) -> bool:
@@ -471,17 +479,7 @@ class NPC(
 
     @property
     def inventory_text(self):
-        return list(
-            filter(
-                None,
-                list(
-                    str(weapon)
-                    for weapon in (self.weapons.all() or self.weapons_in_hands)
-                )
-                + [str(self.armor)]
-                + [self.get_shield_display()],
-            )
-        )
+        return map(str, self.items)
 
     def parse_string(
         self,
