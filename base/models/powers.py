@@ -348,11 +348,11 @@ class PowerMixin:
         if token == PowersVariables.WPN:
             weapon = weapon or self.primary_hand  # type: ignore
             if not weapon:
-                raise ValueError('У данного таланта нет оружия')
+                raise ValueError(_("This power doesn't use weapon"))
             return weapon.damage_roll.treshhold(self._magic_threshold)
         if token == PowersVariables.WPS:
             if not secondary_weapon:
-                raise ValueError('У данного таланта нет дополнительного оружия')
+                raise ValueError(_("This power doesn't use off-hand weapon"))
             return secondary_weapon.damage_roll.treshhold(self._magic_threshold)
         if token == PowersVariables.ATK:
             return (
@@ -377,7 +377,7 @@ class PowerMixin:
             return max((weapon and weapon.enchantment or 0) - self._magic_threshold, 0)
         if token == PowersVariables.ITL:
             if not item:
-                raise ValueError('У данного таланта нет магического предмета')
+                raise ValueError(_("This power doesn't use magic item"))
             return item.level
         if token in self._power_attrs:
             return self._power_attrs[token]

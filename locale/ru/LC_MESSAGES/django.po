@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-08 11:33+0000\n"
+"POT-Creation-Date: 2022-02-08 11:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -262,3 +262,15 @@ msgstr "Площадь"
 #: base/models/powers.py:298
 msgid "Order"
 msgstr "Порядок"
+
+#: base/models/powers.py:351
+msgid "This power doesn't use weapon"
+msgstr "Этот талант не использует оружие"
+
+#: base/models/powers.py:355
+msgid "This power doesn't use off-hand weapon"
+msgstr "Этот талант не использует дополнительное оружие"
+
+#: base/models/powers.py:380
+msgid "This power doesn't use magic item"
+msgstr "Этот талант не использует магический предмет"
