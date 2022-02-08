@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-08 09:58+0000\n"
+"POT-Creation-Date: 2022-02-08 11:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -64,12 +64,10 @@ msgid "Title"
 msgstr "Название"
 
 #: base/models/models.py:97 base/models/models.py:98
-#, fuzzy
-#| msgid "Weapon type"
 msgid "Weapon"
 msgstr "Оружие"
 
-#: base/models/models.py:160
+#: base/models/models.py:160 base/models/powers.py:251
 msgid "Wrong attack type"
 msgstr "Неверный тип атаки"
 
@@ -102,8 +100,6 @@ msgid "Functional template"
 msgstr "Функциональный шаблон"
 
 #: base/models/models.py:209
-#, fuzzy
-#| msgid "Functional template"
 msgid "Functional templates"
 msgstr "Функциональные шаблоны"
 
@@ -147,9 +143,7 @@ msgstr "Имя"
 msgid "Description"
 msgstr "Описание"
 
-#: base/models/models.py:256 base/models/powers.py:58
-#, fuzzy
-#| msgid "Class"
+#: base/models/models.py:256 base/models/powers.py:58 base/models/powers.py:293
 msgid "Subclass"
 msgstr "Подкласс"
 
@@ -157,7 +151,7 @@ msgstr "Подкласс"
 msgid "Sex"
 msgstr "Пол"
 
-#: base/models/models.py:272 base/models/powers.py:85
+#: base/models/models.py:272 base/models/powers.py:85 base/models/powers.py:291
 msgid "Level"
 msgstr "Уровень"
 
@@ -193,9 +187,7 @@ msgstr "Дополнительная рука"
 msgid "Powers"
 msgstr "Таланты"
 
-#: base/models/powers.py:29
-#, fuzzy
-#| msgid "Powers"
+#: base/models/powers.py:29 base/models/powers.py:280
 msgid "Power"
 msgstr "Талант"
 
@@ -266,3 +258,7 @@ msgstr "Дистанция"
 #: base/models/powers.py:139
 msgid "Area"
 msgstr "Площадь"
+
+#: base/models/powers.py:298
+msgid "Order"
+msgstr "Порядок"

@@ -248,7 +248,7 @@ class Power(models.Model):
                 f'Зональная {self.get_range_type_display().lower()} '
                 f'{self.burst} в пределах {self.range}'
             )
-        raise ValueError('Wrong attack type')
+        raise ValueError(_('Wrong attack type'))
 
     def keywords(self, weapon=None):
         if self.frequency == PowerFrequencyEnum.PASSIVE:
@@ -277,7 +277,7 @@ class Power(models.Model):
 class PowerProperty(models.Model):
     power = models.ForeignKey(
         Power,
-        verbose_name='Талант',
+        verbose_name=_('Power'),
         null=False,
         on_delete=models.CASCADE,
         related_name='properties',
@@ -288,14 +288,14 @@ class PowerProperty(models.Model):
         blank=True,
         max_length=PowerPropertyTitle.max_length(),
     )
-    level = models.SmallIntegerField(verbose_name='Уровень', default=1)
+    level = models.SmallIntegerField(verbose_name=_('Level'), default=1)
     subclass = models.SmallIntegerField(
-        verbose_name='Подкласс',
+        verbose_name=_('Subclass'),
         choices=IntDescriptionSubclassEnum.generate_choices(),
         default=0,
     )
-    description = models.TextField(verbose_name='Описание', blank=True, null=True)
-    order = models.SmallIntegerField(verbose_name='Порядок', default=0)
+    description = models.TextField(verbose_name=('Description'), blank=True, null=True)
+    order = models.SmallIntegerField(verbose_name=_('Order'), default=0)
 
     def get_displayed_title(self):
         if self.title and self.title != PowerPropertyTitle.OTHER:
