@@ -1,6 +1,7 @@
 from typing import ClassVar
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField  # type: ignore
 
 from base.constants.constants import MagicItemCategory, MagicItemSlot
@@ -8,35 +9,35 @@ from base.constants.constants import MagicItemCategory, MagicItemSlot
 
 class MagicItemType(models.Model):
     class Meta:
-        verbose_name = 'Тип магического предмета'
-        verbose_name_plural = 'Типы магическогих предметов'
+        verbose_name = _('Magic item type')
+        verbose_name_plural = _('Magic item types')
 
-    name = models.CharField(verbose_name='Название', max_length=100)
+    name = models.CharField(verbose_name=_('Title'), max_length=100)
     min_level = models.PositiveSmallIntegerField(
-        verbose_name='Минимальный уровень', default=1
+        verbose_name=_('Minimal level'), default=1
     )
     max_level = models.PositiveSmallIntegerField(
-        verbose_name='Максимальный уровень', default=30
+        verbose_name=_('Maximum level'), default=30
     )
-    step = models.PositiveSmallIntegerField('Шаг повышения уровня', default=5)
+    step = models.PositiveSmallIntegerField(_('Level step'), default=5)
     category = models.CharField(
-        verbose_name='Категория',
+        verbose_name=_('Category'),
         choices=MagicItemCategory.generate_choices(is_sorted=False),
         default=MagicItemCategory.UNCOMMON,
         max_length=MagicItemCategory.max_length(),
     )
     picture = models.ImageField(
-        verbose_name='Картинка', null=True, upload_to='items', blank=True
+        verbose_name=_('Picture'), null=True, upload_to='items', blank=True
     )
     source = models.CharField(
-        verbose_name='Источник',
+        verbose_name=_('Source'),
         max_length=20,
-        help_text='Книга и страница',
+        help_text=_('Book and page'),
         null=True,
         blank=True,
     )
     slots = MultiSelectField(
-        verbose_name='Слоты',
+        verbose_name=_('Slots'),
         choices=MagicItemSlot.generate_choices(),
         min_choices=1,
         null=True,

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-08 11:37+0000\n"
+"POT-Creation-Date: 2022-02-08 11:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,6 +19,58 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
 "%100>=11 && n%100<=14)? 2 : 3);\n"
+
+#: base/models/magic_items.py:12 base/models/powers.py:79
+msgid "Magic item type"
+msgstr "Тип магического предмета"
+
+#: base/models/magic_items.py:13
+#, fuzzy
+#| msgid "Magic item type"
+msgid "Magic item types"
+msgstr "Типы магических предметов"
+
+#: base/models/magic_items.py:15 base/models/models.py:78
+#: base/models/models.py:169 base/models/models.py:175
+#: base/models/models.py:198 base/models/models.py:212 base/models/powers.py:34
+msgid "Title"
+msgstr "Название"
+
+#: base/models/magic_items.py:17 base/models/models.py:213
+msgid "Minimal level"
+msgstr "Минимальный уровень"
+
+#: base/models/magic_items.py:20
+#, fuzzy
+#| msgid "Minimal level"
+msgid "Maximum level"
+msgstr "Максимальный уровень"
+
+#: base/models/magic_items.py:22
+#, fuzzy
+#| msgid "Level"
+msgid "Level step"
+msgstr "Шаг повышения уровня"
+
+#: base/models/magic_items.py:24
+msgid "Category"
+msgstr "Категория"
+
+#: base/models/magic_items.py:30
+msgid "Picture"
+msgstr "Картинка"
+
+#: base/models/magic_items.py:33
+msgid "Source"
+msgstr "Источник"
+
+#: base/models/magic_items.py:35
+msgid "Book and page"
+msgstr "Книга и страница"
+
+#: base/models/magic_items.py:40
+msgid "Slots"
+msgstr "Слоты"
 
 #: base/models/models.py:32 base/models/models.py:284
 msgid "Armor"
@@ -57,11 +109,6 @@ msgstr "Тип оружия"
 #: base/models/models.py:74
 msgid "Weapon types"
 msgstr "Типы оружия"
-
-#: base/models/models.py:78 base/models/models.py:169 base/models/models.py:175
-#: base/models/models.py:198 base/models/models.py:212 base/models/powers.py:34
-msgid "Title"
-msgstr "Название"
 
 #: base/models/models.py:97 base/models/models.py:98
 msgid "Weapon"
@@ -102,10 +149,6 @@ msgstr "Функциональный шаблон"
 #: base/models/models.py:209
 msgid "Functional templates"
 msgstr "Функциональные шаблоны"
-
-#: base/models/models.py:213
-msgid "Minimal level"
-msgstr "Минимальный уровень"
 
 #: base/models/models.py:215
 msgid "Armor class bonus"
@@ -198,10 +241,6 @@ msgstr "Частота использования"
 #: base/models/powers.py:42
 msgid "Action type"
 msgstr "Действие"
-
-#: base/models/powers.py:79
-msgid "Magic item type"
-msgstr "Тип магического предмета"
 
 #: base/models/powers.py:87
 msgid "Attack ability"
