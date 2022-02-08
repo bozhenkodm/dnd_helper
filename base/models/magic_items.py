@@ -53,12 +53,12 @@ class ItemAbstract(models.Model):
 
     magic_item_type = models.ForeignKey(
         MagicItemType,
-        verbose_name='Магический предмет',
+        verbose_name=_('Magic item type'),
         null=True,
         on_delete=models.CASCADE,
         blank=True,
     )
-    level = models.SmallIntegerField(verbose_name='Уровень', default=0)
+    level = models.SmallIntegerField(verbose_name=_('Level'), default=0)
 
     @property
     def enchantment(self):
@@ -75,8 +75,8 @@ class ItemAbstract(models.Model):
 
 class SimpleMagicItem(ItemAbstract):
     class Meta:
-        verbose_name = 'Магический предмет'
-        verbose_name_plural = 'Магические предметы'
+        verbose_name = _('Magic item')
+        verbose_name_plural = _('Magic items')
 
     SLOT: ClassVar[MagicItemSlot]
 
@@ -146,7 +146,7 @@ class NPCMagicItemAbstract(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name='Предмет на шею',
+        verbose_name=_('Neck slot'),
         related_name='npc_necks',
     )
     head_slot = models.ForeignKey(
@@ -154,7 +154,7 @@ class NPCMagicItemAbstract(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name='Предмет на голову',
+        verbose_name=_('Head slot'),
         related_name='npc_heads',
     )
     feet_slot = models.ForeignKey(
@@ -162,7 +162,7 @@ class NPCMagicItemAbstract(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name='Предмет на ноги',
+        verbose_name=_('Feet slot'),
         related_name='npc_feet',
     )
     waist_slot = models.ForeignKey(
@@ -170,7 +170,7 @@ class NPCMagicItemAbstract(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name='Предмет на пояс',
+        verbose_name=_('Waist slot'),
         related_name='npc_waists',
     )
     arms_slot = models.ForeignKey(
@@ -178,7 +178,7 @@ class NPCMagicItemAbstract(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name='Предмет на предплечья',
+        verbose_name=_('Arms slot'),
         related_name='npc_arms',
     )
     left_ring_slot = models.ForeignKey(
@@ -186,7 +186,7 @@ class NPCMagicItemAbstract(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name='Кольцо на левую руку',
+        verbose_name=_('Left hand ring'),
         related_name='npc_left_rings',
     )
     right_ring_slot = models.ForeignKey(
@@ -194,7 +194,7 @@ class NPCMagicItemAbstract(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name='Кольцо на правую руку',
+        verbose_name=_('Right hand ring'),
         related_name='npc_right_rings',
     )
     hands_slot = models.ForeignKey(
@@ -202,6 +202,6 @@ class NPCMagicItemAbstract(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name='Предмет на кисти',
+        verbose_name=_('Hands slot'),
         related_name='npc_hands',
     )

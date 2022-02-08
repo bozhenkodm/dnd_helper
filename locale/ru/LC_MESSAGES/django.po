@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-08 11:43+0000\n"
+"POT-Creation-Date: 2022-02-08 11:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,7 +20,8 @@ msgstr ""
 "%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
 "%100>=11 && n%100<=14)? 2 : 3);\n"
 
-#: base/models/magic_items.py:12 base/models/powers.py:79
+#: base/models/magic_items.py:12 base/models/magic_items.py:56
+#: base/models/powers.py:79
 msgid "Magic item type"
 msgstr "Тип магического предмета"
 
@@ -71,6 +72,55 @@ msgstr "Книга и страница"
 #: base/models/magic_items.py:40
 msgid "Slots"
 msgstr "Слоты"
+
+#: base/models/magic_items.py:61 base/models/models.py:272
+#: base/models/powers.py:85 base/models/powers.py:291
+msgid "Level"
+msgstr "Уровень"
+
+#: base/models/magic_items.py:78
+#, fuzzy
+#| msgid "Magic item type"
+msgid "Magic item"
+msgstr "Магический предмет"
+
+#: base/models/magic_items.py:79
+#, fuzzy
+#| msgid "Magic item type"
+msgid "Magic items"
+msgstr "Магические предметы"
+
+#: base/models/magic_items.py:149
+msgid "Neck slot"
+msgstr "Предмет на шею"
+
+#: base/models/magic_items.py:157
+msgid "Head slot"
+msgstr "Предмет на голову"
+
+#: base/models/magic_items.py:165
+msgid "Feet slot"
+msgstr "Предмет на ноги"
+
+#: base/models/magic_items.py:173
+msgid "Waist slot"
+msgstr "Предмет на пояс"
+
+#: base/models/magic_items.py:181
+msgid "Arms slot"
+msgstr "Предмет на руки"
+
+#: base/models/magic_items.py:189
+msgid "Left hand ring"
+msgstr "Кольо левой руки"
+
+#: base/models/magic_items.py:197
+msgid "Right hand ring"
+msgstr "Кольцо правой руки"
+
+#: base/models/magic_items.py:205
+msgid "Hands slot"
+msgstr "Предмет на кисти"
 
 #: base/models/models.py:32 base/models/models.py:284
 msgid "Armor"
@@ -193,10 +243,6 @@ msgstr "Подкласс"
 #: base/models/models.py:269
 msgid "Sex"
 msgstr "Пол"
-
-#: base/models/models.py:272 base/models/powers.py:85 base/models/powers.py:291
-msgid "Level"
-msgstr "Уровень"
 
 #: base/models/models.py:276
 msgid "Trained skills"
