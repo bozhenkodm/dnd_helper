@@ -2,6 +2,7 @@ import operator
 from typing import Union
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField  # type: ignore
 
 from base.constants.base import IntDescriptionSubclassEnum
@@ -25,20 +26,20 @@ from base.objects.npc_classes import NPCClass
 
 class Power(models.Model):
     class Meta:
-        verbose_name = 'Талант'
-        verbose_name_plural = 'Таланты'
+        verbose_name = _('Power')
+        verbose_name_plural = _('Powers')
 
     objects = PowerQueryset.as_manager()
 
-    name = models.CharField(verbose_name='Название', max_length=100)
-    description = models.TextField(verbose_name='Описание', null=True, blank=True)
+    name = models.CharField(verbose_name=_('Title'), max_length=100)
+    description = models.TextField(verbose_name=_('Description'), null=True, blank=True)
     frequency = models.CharField(
-        verbose_name='Частота использования',
+        verbose_name=_('Usage frequency'),
         choices=PowerFrequencyEnum.generate_choices(is_sorted=False),
         max_length=PowerFrequencyEnum.max_length(),
     )
     action_type = models.CharField(
-        verbose_name='Действие',
+        verbose_name=_('Action type'),
         choices=PowerActionTypeEnum.generate_choices(is_sorted=False),
         max_length=PowerActionTypeEnum.max_length(),
         default=PowerActionTypeEnum.STANDARD,
@@ -48,18 +49,18 @@ class Power(models.Model):
     klass = models.ForeignKey(
         'base.Class',
         related_name='powers',
-        verbose_name='Класс',
+        verbose_name=_('Class'),
         on_delete=models.CASCADE,
         null=True,
         blank=True,
     )
     subclass = models.SmallIntegerField(
-        verbose_name='Подкласс',
+        verbose_name=_('Subclass'),
         default=0,
     )
     race = models.ForeignKey(
         'base.Race',
-        verbose_name='Раса',
+        verbose_name=_('Race'),
         null=True,
         on_delete=models.CASCADE,
         blank=True,
@@ -67,7 +68,7 @@ class Power(models.Model):
     )
     functional_template = models.ForeignKey(
         'base.FunctionalTemplate',
-        verbose_name='Функциональный шаблон',
+        verbose_name=_('Functional template'),
         on_delete=models.CASCADE,
         blank=True,
         null=True,
@@ -75,47 +76,48 @@ class Power(models.Model):
     )
     magic_item_type = models.ForeignKey(
         'MagicItemType',
-        verbose_name='Магический предмет',
+        verbose_name=_('Magic item type'),
         on_delete=models.CASCADE,
         null=True,
         blank=True,
         related_name='powers',
     )
-    level = models.SmallIntegerField(verbose_name='Уровень', default=0)
+    level = models.SmallIntegerField(verbose_name=_('Level'), default=0)
     attack_ability = models.CharField(
-        verbose_name='Атакующая характеристика',
+        verbose_name=_('Attack ability'),
         choices=AbilitiesEnum.generate_choices(is_sorted=False),
         max_length=AbilitiesEnum.max_length(),
         null=True,
         blank=True,
     )
-    attack_bonus = models.SmallIntegerField(verbose_name='Бонус атаки', default=0)
+    attack_bonus = models.SmallIntegerField(verbose_name=_('Attack bonus'), default=0)
     defence = models.CharField(
-        verbose_name='Против защиты',
+        verbose_name=_('against'),
         choices=DefenceTypeEnum.generate_choices(is_sorted=False),
         max_length=DefenceTypeEnum.max_length(),
+        help_text=_('defence'),
         null=True,
         blank=True,
     )
     effect_type = MultiSelectField(
-        verbose_name='Тип эффекта',
+        verbose_name=_('Effect type'),
         choices=PowerEffectTypeEnum.generate_choices(),
         default=PowerEffectTypeEnum.NONE,
     )
     damage_type = MultiSelectField(
-        verbose_name='Тип урона',
+        verbose_name=_('Damage type'),
         choices=PowerDamageTypeEnum.generate_choices(),
         default=PowerDamageTypeEnum.NONE,
     )
-    dice_number = models.SmallIntegerField(verbose_name='Количество кубов', default=1)
+    dice_number = models.SmallIntegerField(verbose_name=_('Dice number'), default=1)
     damage_dice = models.SmallIntegerField(
-        verbose_name='Кость урона',
+        verbose_name=_('Damage dice'),
         choices=DiceIntEnum.generate_choices(),
         null=True,
         blank=True,
     )
     accessory_type = models.CharField(
-        verbose_name='Тип вооружения',
+        verbose_name=_('Accessory type'),
         choices=AccessoryTypeEnum.generate_choices(),
         max_length=AccessoryTypeEnum.max_length(),
         null=True,
@@ -123,18 +125,18 @@ class Power(models.Model):
     )
     available_weapon_types = models.ManyToManyField(
         'WeaponType',
-        verbose_name='Требования к оружию',
-        help_text='для талантов с оружием',
+        verbose_name=_('Weapon requirement'),
+        help_text=_('for powers with weapons'),
         blank=True,
     )
     range_type = models.CharField(
-        verbose_name='Дальность',
+        verbose_name=_('Range type'),
         choices=PowerRangeTypeEnum.generate_choices(is_sorted=False),
         max_length=PowerRangeTypeEnum.max_length(),
         default=PowerRangeTypeEnum.PERSONAL,
     )
-    range = models.SmallIntegerField(verbose_name='Дальность', default=0)
-    burst = models.SmallIntegerField(verbose_name='Площадь', default=0)
+    range = models.SmallIntegerField(verbose_name=_('Distance'), default=0)
+    burst = models.SmallIntegerField(verbose_name=_('Area'), default=0)
 
     def __str__(self):
         if self.race:
@@ -169,6 +171,7 @@ class Power(models.Model):
         primary_weapon=None,
         secondary_weapon=None,
     ):
+        # TODO localization
         if self.magic_item_type:
             return self.magic_item_type.name
         if self.functional_template:
