@@ -28,7 +28,7 @@ class SkillMixin:
     def skills(self) -> Skills:
         half_level = Skills.init_with_const(SkillsEnum.sequence(), self.half_level)
         trained_skills = Skills.init_with_const(
-            [SkillsEnum[trained_skill] for trained_skill in self.trained_skills], 5
+            [SkillsEnum(trained_skill) for trained_skill in self.trained_skills], 5
         )
         race_bonus = self.race_data_instance.skill_bonuses
         mandatory_skills = self.klass_data_instance.mandatory_skills

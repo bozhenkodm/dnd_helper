@@ -205,3 +205,6 @@ class CombatantsPC(models.Model):
         related_name='combatants_pcs',
     )
     initiative = models.FloatField(verbose_name='Инициатива', default=0)
+
+    def __str__(self):
+        return str(self.pc)

@@ -127,23 +127,23 @@ class NPCClassEnum(BaseNameValueDescriptionEnum):
 
 
 class SkillsEnum(BaseNameValueDescriptionEnum):
-    ACROBATICS = 'ACROBATICS', 'Акробатика'
-    ARCANA = 'ARCANA', 'Магия'
-    ATHLETICS = 'ATHLETICS', 'Атлетика'
-    BLUFF = 'BLUFF', 'Обман'
-    DIPLOMACY = 'DIPLOMACY', 'Переговоры'
-    DUNGEONEERING = 'DUNGEONEERING', 'Подземелья'
-    ENDURANCE = 'ENDURANCE', 'Выносливость'
-    HEAL = 'HEAL', 'Целительство'
-    HISTORY = 'HISTORY', 'История'
-    INSIGHT = 'INSIGHT', 'Проницательность'
-    INTIMIDATE = 'INTIMIDATE', 'Запугивание'
-    NATURE = 'NATURE', 'Природа'
-    PERCEPTION = 'PERCEPTION', 'Внимательность'
-    RELIGION = 'RELIGION', 'Религия'
-    STEALTH = 'STEALTH', 'Скрытность'
-    STREETWISE = 'STREETWISE', 'Знание улиц'
-    THIEVERY = 'THIEVERY', 'Воровство'
+    ACROBATICS = 'acrobatics', 'Акробатика'
+    ARCANA = 'arcana', 'Магия'
+    ATHLETICS = 'athletics', 'Атлетика'
+    BLUFF = 'bluff', 'Обман'
+    DIPLOMACY = 'diplomacy', 'Переговоры'
+    DUNGEONEERING = 'dungeoneering', 'Подземелья'
+    ENDURANCE = 'endurance', 'Выносливость'
+    HEAL = 'heal', 'Целительство'
+    HISTORY = 'history', 'История'
+    INSIGHT = 'insight', 'Проницательность'
+    INTIMIDATE = 'intimidate', 'Запугивание'
+    NATURE = 'nature', 'Природа'
+    PERCEPTION = 'perception', 'Внимательность'
+    RELIGION = 'religion', 'Религия'
+    STEALTH = 'stealth', 'Скрытность'
+    STREETWISE = 'streetwise', 'Знание улиц'
+    THIEVERY = 'thievery', 'Воровство'
 
     @classmethod
     def sequence(cls):
@@ -195,7 +195,7 @@ class ShieldTypeIntEnum(IntDescriptionEnum):
 
 
 class WeaponGroupEnum(BaseNameValueDescriptionEnum):
-    # Рукопашное
+    # Melee
     AXE = 'AXE', 'Топор'
     MACE = 'MACE', 'Булава'
     LIGHT_BLADE = 'LIGHT_BLADE', 'Лёгкий клинок'
@@ -207,7 +207,7 @@ class WeaponGroupEnum(BaseNameValueDescriptionEnum):
     PICK = 'PICK', 'Кирка'
     POLEARM = 'POLEARM', 'Древковое'
     UNARMED = 'UNARMED', 'Безоружное'
-    # Дальнобойное
+    # Ranged
     SLING = 'SLING', 'Праща'
     CROSSBOW = 'CROSSBOW', 'Арбалет'
     BOW = 'BOW', 'Лук'
@@ -241,22 +241,22 @@ class DiceIntEnum(IntDescriptionEnum):
 
 
 class WeaponHandednessEnum(BaseNameValueDescriptionEnum):
-    ONE = 'ONE', 'Одноручное'
-    TWO = 'TWO', 'Двуручное'
+    ONE = 'one', 'Одноручное'
+    TWO = 'two', 'Двуручное'
     VERSATILE = (
-        'VERSATILE',
+        'versatile',
         'Универсальное',
     )  # one handed, but can be used with two hands
     # (with +1 to damage, unless user is small)
 
 
 class PowerSourceEnum(BaseNameValueDescriptionEnum):
-    MARTIAL = 'MARTIAL', 'Воинский'
-    DIVINE = 'DIVINE', 'Духовный'
-    ARCANE = 'ARCANE', 'Магический'
-    PRIMAL = 'PRIMAL', 'Первородный'
-    SHADOW = 'SHADOW', 'Теневой'
-    PSIONIC = 'PSIONIC', 'Псионический'
+    MARTIAL = 'martial', 'Воинский'
+    DIVINE = 'divine', 'Духовный'
+    ARCANE = 'arcane', 'Магический'
+    PRIMAL = 'primal', 'Первородный'
+    SHADOW = 'shadow', 'Теневой'
+    PSIONIC = 'psionic', 'Псионический'
 
 
 class ClassRoleEnum(BaseNameValueDescriptionEnum):

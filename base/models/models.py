@@ -418,7 +418,7 @@ class NPC(
                     self.armor,
                     # TODO unite shields with hand slot
                     #  let it be impossible to add hands item with non magical shield
-                    ShieldTypeEnum[self.shield].description,
+                    ShieldTypeEnum[self.shield].description if self.shield else None,
                     self.neck_slot,
                     self.head_slot,
                     self.feet_slot,

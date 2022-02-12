@@ -675,17 +675,62 @@ class PlayerCharactersAdmin(admin.ModelAdmin):
 
 
 class MagicItemTypeAdmin(admin.ModelAdmin):
-    fields = (
-        'name',
-        'slots',
-        'min_level',
-        'step',
-        'category',
-        'picture',
-        'upload_from_clipboard',
-        'image_tag',
-        'source',
-    )
+    fieldsets = [
+        (
+            None,
+            {
+                'fields': (
+                    'name',
+                    'slots',
+                    'min_level',
+                    'step',
+                    'category',
+                    'picture',
+                    'upload_from_clipboard',
+                    'image_tag',
+                    'source',
+                )
+            },
+        ),
+        (
+            'Свойства (Навыки)',
+            {
+                'fields': (
+                    'acrobatics',
+                    'athletics',
+                    'perception',
+                    'thievery',
+                    'endurance',
+                    'intimidate',
+                    'streetwise',
+                    'history',
+                    'arcana',
+                    'bluff',
+                    'diplomacy',
+                    'dungeoneering',
+                    'nature',
+                    'insight',
+                    'religion',
+                    'stealth',
+                    'heal',
+                ),
+                'classes': ('collapse',),
+            },
+        ),
+        (
+            'Свойства (Защиты)',
+            {
+                'fields': (
+                    'armor_class',
+                    'fortitude',
+                    'reflex',
+                    'will',
+                ),
+                'classes': ('collapse',),
+            },
+        ),
+    ]
+
     readonly_fields = ('image_tag',)
     form = MagicItemTypeForm
 

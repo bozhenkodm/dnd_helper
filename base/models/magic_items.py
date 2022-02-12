@@ -10,7 +10,9 @@ from base.constants.constants import MagicItemCategory, MagicItemSlot
 class MagicItemType(models.Model):
     class Meta:
         verbose_name = _('Magic item type')
-        verbose_name_plural = _('Magic item types')
+        # verbose_name = 'Тип магического предмета'
+        # verbose_name_plural = _('Magic item types')
+        verbose_name_plural = 'Типы магических предметов'
 
     name = models.CharField(verbose_name=_('Title'), max_length=100)
     min_level = models.PositiveSmallIntegerField(
@@ -42,6 +44,7 @@ class MagicItemType(models.Model):
         min_choices=1,
         null=True,
     )
+    properties = models.JSONField(null=True)
 
     def __str__(self):
         return self.name
@@ -75,8 +78,10 @@ class ItemAbstract(models.Model):
 
 class SimpleMagicItem(ItemAbstract):
     class Meta:
-        verbose_name = _('Magic item')
-        verbose_name_plural = _('Magic items')
+        verbose_name = 'Магический предмет'
+        # verbose_name = _('Magic item')
+        verbose_name_plural = 'Магические предметы'
+        # verbose_name_plural = _('Magic items')
 
     SLOT: ClassVar[MagicItemSlot]
 

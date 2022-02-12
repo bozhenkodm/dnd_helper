@@ -6,6 +6,7 @@ from multiselectfield import MultiSelectFormField  # type: ignore
 
 from base.constants.constants import (
     AbilitiesEnum,
+    DefenceTypeEnum,
     NPCClassEnum,
     NPCRaceEnum,
     SexEnum,
@@ -299,3 +300,96 @@ class MagicItemTypeForm(forms.ModelForm):
     upload_from_clipboard = forms.BooleanField(
         required=False, label='Загрузить из буфера обмена', initial=False
     )
+
+    acrobatics = forms.CharField(required=False, label='Акробатика')
+    arcana = forms.CharField(required=False, label='Магия')
+    athletics = forms.CharField(required=False, label='Атлетика')
+    bluff = forms.CharField(required=False, label='Обман')
+    diplomacy = forms.CharField(required=False, label='Переговоры')
+    dungeoneering = forms.CharField(required=False, label='Подземелья')
+    endurance = forms.CharField(required=False, label='Выносливость')
+    heal = forms.CharField(required=False, label='Целительство')
+    history = forms.CharField(required=False, label='История')
+    insight = forms.CharField(required=False, label='Проницательность')
+    intimidate = forms.CharField(required=False, label='Запугивание')
+    nature = forms.CharField(required=False, label='Природа')
+    perception = forms.CharField(required=False, label='Внимательность')
+    religion = forms.CharField(required=False, label='Религия')
+    stealth = forms.CharField(required=False, label='Скрытность')
+    streetwise = forms.CharField(required=False, label='Знание улиц')
+    thievery = forms.CharField(required=False, label='Воровство')
+
+    armor_class = forms.CharField(required=False, label='КД')
+    fortitude = forms.CharField(required=False, label='Стойкость')
+    reflex = forms.CharField(required=False, label='Реакция')
+    will = forms.CharField(required=False, label='Воля')
+
+    resist_acid = forms.CharField(required=False, label='Кислота')
+    resist_cold = forms.CharField(required=False, label='Холод')
+    resist_fire = forms.CharField(required=False, label='Огонь')
+    resist_lightning = forms.CharField(required=False, label='Электричество')
+    resist_necrotic = forms.CharField(required=False, label='Некротическая энергия')
+    resist_poison = forms.CharField(required=False, label='Яд')
+    resist_psychic = forms.CharField(required=False, label='Психическая энергия')
+    resist_radiant = forms.CharField(required=False, label='Излучение')
+    resist_thunder = forms.CharField(required=False, label='Звук')
+    resist_force = forms.CharField(required=False, label='Силовое поле')
+
+    save_charm = forms.CharField(required=False, label='Очарование')
+    save_conjuration = forms.CharField(required=False, label='Иллюзия')
+    save_fear = forms.CharField(required=False, label='Страх')
+    save_sleep = forms.CharField(required=False, label='Сон')
+    save_acid = forms.CharField(required=False, label='Кислота')
+    save_cols = forms.CharField(required=False, label='Холод')
+    save_fire = forms.CharField(required=False, label='Огонь')
+    save_lightning = forms.CharField(required=False, label='Электричество')
+    save_necrotic = forms.CharField(required=False, label='Некротическая энергия')
+    save_poison = forms.CharField(required=False, label='Яд')
+    save_slow = forms.CharField(required=False, label='Замедление')
+    save_immobilized = forms.CharField(required=False, label='Обездвиживание')
+    save_restrained = forms.CharField(required=False, label='Удерживание')
+    save_damage = forms.CharField(required=False, label='Урон')
+    # TODO add the rest of conditions that can be saved
+
+    speed = forms.CharField(required=False, label='Скорость')
+    initiative = forms.CharField(required=False, label='Инициатива')
+    melee_damage = forms.CharField(required=False, label='Рукопашный урон')
+    range_damage = forms.CharField(required=False, label='Дальнобойный урон')
+
+    def __init__(self, *args, **kwargs):
+        super(MagicItemTypeForm, self).__init__(*args, **kwargs)
+        properties = self.instance.properties
+        properties = properties or {
+            'defences': {},
+            'skills': {},
+            'resist': {},
+            'save': {},
+        }
+        print(properties)
+        for defence in DefenceTypeEnum:
+            self.initial[defence] = properties['defences'].get(defence, '')
+
+    def clean(self):
+        super(MagicItemTypeForm, self).clean()
+        properties = {
+            'defences': {},
+            'skills': {},
+            'resist': {},
+            'save': {},
+        }
+        skills = {}
+        for skill in SkillsEnum:
+            field = skill.value.lower()
+            if self.cleaned_data[field]:
+                skills[field] = self.cleaned_data[field]
+        if skills:
+            properties['skills'] = skills
+        defences = {}
+        for defence in DefenceTypeEnum:
+            field = defence.value.lower()
+            if self.cleaned_data[field]:
+                defences[field] = self.cleaned_data[field]
+        if defences:
+            properties['defences'] = defences
+        self.cleaned_data['properties'] = properties
+        
