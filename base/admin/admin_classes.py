@@ -11,6 +11,7 @@ from django.utils.safestring import mark_safe
 
 from base.admin.forms import (
     ArmorForm,
+    ArmsSlotItemForm,
     MagicItemForm,
     MagicItemTypeForm,
     NPCModelForm,
@@ -185,10 +186,12 @@ class NPCAdmin(admin.ModelAdmin):
         'trained_skills',
         (
             'armor',
-            'shield',
+            'arms_slot',
         ),
         'weapons',
-        ('primary_hand', 'secondary_hand'),
+        'primary_hand',
+        'secondary_hand',
+        'no_hand',
         'powers',
     ]
     readonly_fields = [
@@ -196,7 +199,14 @@ class NPCAdmin(admin.ModelAdmin):
         'mandatory_skills',
         'generated_abilities',
     ]
-    autocomplete_fields = ('race', 'klass', 'weapons', 'primary_hand', 'secondary_hand')
+    autocomplete_fields = (
+        'race',
+        'klass',
+        'weapons',
+        'primary_hand',
+        'secondary_hand',
+        'no_hand',
+    )
     search_fields = ('name',)
     list_filter = (RaceListFilter, 'klass')
     form = NPCModelForm
@@ -263,7 +273,7 @@ class NPCAdmin(admin.ModelAdmin):
                             ('neck_slot', 'head_slot'),
                             ('waist_slot', 'feet_slot'),
                             ('left_ring_slot', 'right_ring_slot'),
-                            ('arms_slot', 'hands_slot'),
+                            'hands_slot',
                         ),
                         'classes': ('collapse',),
                     },
@@ -753,3 +763,7 @@ class MagicItemTypeAdmin(admin.ModelAdmin):
 class MagicItemAdmin(admin.ModelAdmin):
     form = MagicItemForm
     save_as = True
+
+
+class ArmsItemSlotAdmin(admin.ModelAdmin):
+    form = ArmsSlotItemForm

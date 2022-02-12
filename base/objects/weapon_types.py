@@ -103,6 +103,7 @@ class ImplementType(WeaponType):
     prof_bonus = 0
     range: ClassVar[int] = 0
     is_off_hand: ClassVar[bool] = True
+    is_no_hand: ClassVar[bool] = False
 
 
 class LongSword(WeaponType):
@@ -712,6 +713,8 @@ class RitualSickle(Sickle):
 class KiFocus(ImplementType):
     name = 'Фокусировка ци'
     slug = 'ki_focus'
+    is_off_hand = False
+    is_no_hand = True
 
 
 class Totem(ImplementType):
@@ -732,6 +735,8 @@ class Rod(ImplementType):
 class HolySymbol(ImplementType):
     name = 'Символ веры'
     slug = 'holy_symbol'
+    is_off_hand = False
+    is_no_hand = True
 
 
 class Sphere(ImplementType):

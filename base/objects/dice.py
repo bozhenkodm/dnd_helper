@@ -40,8 +40,8 @@ class DiceRoll:
     def __rmul__(self, other):
         return self.__mul__(other)
 
-    def roll(self):
-        self.dice.roll(self.rolls) + self.addendant
+    def roll(self) -> int:
+        return self.dice.roll(self.rolls) + self.addendant
 
     def treshhold(self, value):
         self.addendant = max(self.addendant - value, 0)

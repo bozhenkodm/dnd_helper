@@ -13,7 +13,6 @@ from base.constants.constants import (
     NPCClassEnum,
     NPCRaceEnum,
     SexEnum,
-    ShieldTypeEnum,
     SkillsEnum,
 )
 from base.managers import WeaponTypeQuerySet
@@ -283,13 +282,6 @@ class NPC(
     armor = models.ForeignKey(
         Armor, verbose_name=_('Armor'), null=True, on_delete=models.SET_NULL
     )
-    shield = models.CharField(
-        verbose_name=_('Shield'),
-        max_length=5,
-        choices=ShieldTypeEnum.generate_choices(),
-        null=True,
-        blank=True,
-    )
     weapons = models.ManyToManyField(
         Weapon,
         verbose_name=_('Armament'),
@@ -314,6 +306,15 @@ class NPC(
         null=True,
         on_delete=models.SET_NULL,
         related_name='in_secondary_hands',
+    )
+    no_hand = models.ForeignKey(
+        Weapon,
+        verbose_name=_('No hand implement'),
+        help_text=_("Armament that doesn't take hand slot"),
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='in_no_hands',
     )
 
     powers = models.ManyToManyField(Power, blank=True, verbose_name=_('Powers'))
@@ -418,7 +419,7 @@ class NPC(
                     self.armor,
                     # TODO unite shields with hand slot
                     #  let it be impossible to add hands item with non magical shield
-                    ShieldTypeEnum[self.shield].description if self.shield else None,
+                    self.shield.description if self.shield else None,
                     self.neck_slot,
                     self.head_slot,
                     self.feet_slot,

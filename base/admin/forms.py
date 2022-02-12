@@ -7,9 +7,11 @@ from multiselectfield import MultiSelectFormField  # type: ignore
 from base.constants.constants import (
     AbilitiesEnum,
     DefenceTypeEnum,
+    MagicItemSlot,
     NPCClassEnum,
     NPCRaceEnum,
     SexEnum,
+    ShieldTypeIntEnum,
     SkillsEnum,
     WeaponHandednessEnum,
 )
@@ -28,6 +30,7 @@ from base.models.magic_items import (
 from base.models.models import Armor, Weapon, WeaponType
 from base.models.powers import Power
 from base.objects import weapon_types_tuple
+from base.objects.weapon_types import HolySymbol, KiFocus
 
 
 class NPCModelForm(forms.ModelForm):
@@ -74,7 +77,7 @@ class NPCModelForm(forms.ModelForm):
             choices = klass_data_instance.trainable_skills
             self.fields['trained_skills'] = MultiSelectFormField(
                 choices=(
-                    (key.upper(), SkillsEnum[key.upper()].description)
+                    (key, SkillsEnum[key.upper()].description)
                     for key, value in asdict(choices).items()
                     if value
                 ),
@@ -103,6 +106,14 @@ class NPCModelForm(forms.ModelForm):
             )
             self.fields['secondary_hand'] = forms.ModelChoiceField(
                 queryset=weapon_queryset, label='Вторичная рука', required=False
+            )
+            self.fields['no_hand'] = forms.ModelChoiceField(
+                queryset=Weapon.objects.select_related('weapon_type').filter(
+                    weapon_type__slug__in=(KiFocus.slug, HolySymbol.slug)
+                    # TODO make it type, put it in base and filter by it
+                ),
+                label='Инструмент не в руку',
+                required=False,
             )
             self.fields['neck_slot'] = forms.ModelChoiceField(
                 queryset=NeckSlotItem.objects.select_related('magic_item_type').filter(
@@ -292,6 +303,24 @@ class MagicItemForm(ItemAbstractForm):
         self.fields['magic_item_type'].required = True
 
 
+class ArmsSlotItemForm(ItemAbstractForm):
+    class Meta:
+        model = ArmsSlotItem
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(ArmsSlotItemForm, self).__init__(*args, **kwargs)
+        self.fields['magic_item_type'].queryset = MagicItemType.objects.filter(
+            slots__contains=MagicItemSlot.ARMS.value
+        )
+
+    shield = forms.ChoiceField(
+        choices=ShieldTypeIntEnum.generate_choices(),
+        label='Щит',
+        initial=ShieldTypeIntEnum.NONE,
+    )
+
+
 class MagicItemTypeForm(forms.ModelForm):
     class Meta:
         model = MagicItemType
@@ -392,4 +421,3 @@ class MagicItemTypeForm(forms.ModelForm):
         if defences:
             properties['defences'] = defences
         self.cleaned_data['properties'] = properties
-        

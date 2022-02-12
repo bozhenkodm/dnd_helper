@@ -1,4 +1,4 @@
-from base.constants.constants import NPCClassEnum, ShieldTypeEnum
+from base.constants.constants import NPCClassEnum, ShieldTypeIntEnum
 from base.helpers import modifier
 
 INITIAL_DEFENCE_VALUE = 10
@@ -6,15 +6,16 @@ INITIAL_DEFENCE_VALUE = 10
 
 class DefenceMixin:
     @property
-    def _shield_bonus(self):
-        if (
-            not self.shield
-            or self.shield not in self.klass_data_instance.available_shield_types
-        ):
+    def shield(self) -> ShieldTypeIntEnum:
+        if not self.arms_slot:  # type: ignore
+            return ShieldTypeIntEnum.NONE
+        return ShieldTypeIntEnum.get_by_value(self.arms_slot.shield)  # type: ignore
+
+    @property
+    def _shield_bonus(self) -> int:
+        if self.shield not in self.klass_data_instance.available_shield_types:
             return 0
-        if self.shield == ShieldTypeEnum.LIGHT:
-            return 1
-        return 2
+        return self.shield.value
 
     @property
     def _defence_level_bonus(self):

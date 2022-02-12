@@ -7,7 +7,7 @@ from base.constants.constants import (
     ClassRoleEnum,
     NPCClassEnum,
     PowerSourceEnum,
-    ShieldTypeEnum,
+    ShieldTypeIntEnum,
     SkillsEnum,
     WeaponCategoryIntEnum,
     WeaponHandednessEnum,
@@ -56,7 +56,7 @@ class NPCClass:
     available_armor_types: ClassVar[Sequence[ArmorTypeIntEnum]] = (
         ArmorTypeIntEnum.CLOTH,
     )
-    available_shield_types: ClassVar[Sequence[ShieldTypeEnum]] = ()
+    available_shield_types: ClassVar[Sequence[ShieldTypeIntEnum]] = ()
     available_weapon_categories: ClassVar[Sequence[WeaponCategoryIntEnum]] = (
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.SIMPLE_RANGED,
@@ -151,7 +151,7 @@ class BardClass(NPCClass):
         ArmorTypeIntEnum.HIDE,
         ArmorTypeIntEnum.CHAINMAIL,
     )
-    available_shield_types = (ShieldTypeEnum.LIGHT,)
+    available_shield_types = (ShieldTypeIntEnum.LIGHT,)
     available_weapon_categories = (
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.SIMPLE_RANGED,
@@ -288,7 +288,7 @@ class WarlordClass(NPCClass):
         ArmorTypeIntEnum.HIDE,
         ArmorTypeIntEnum.CHAINMAIL,
     )
-    available_shield_types = (ShieldTypeEnum.LIGHT,)
+    available_shield_types = (ShieldTypeIntEnum.LIGHT,)
     available_weapon_categories = (
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.MILITARY,
@@ -317,7 +317,7 @@ class FighterClass(NPCClass):
         ArmorTypeIntEnum.CHAINMAIL,
         ArmorTypeIntEnum.SCALE,
     )
-    available_shield_types = (ShieldTypeEnum.LIGHT, ShieldTypeEnum.HEAVY)
+    available_shield_types = (ShieldTypeIntEnum.LIGHT, ShieldTypeIntEnum.HEAVY)
     available_weapon_categories = (
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.MILITARY,
@@ -589,7 +589,7 @@ class PaladinClass(NPCClass):
         ArmorTypeIntEnum.SCALE,
         ArmorTypeIntEnum.PLATE,
     )
-    available_shield_types = (ShieldTypeEnum.LIGHT, ShieldTypeEnum.HEAVY)
+    available_shield_types = (ShieldTypeIntEnum.LIGHT, ShieldTypeIntEnum.HEAVY)
     available_weapon_categories = (
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.MILITARY,
@@ -661,7 +661,7 @@ class RunepriestClass(NPCClass):
         ArmorTypeIntEnum.CHAINMAIL,
         ArmorTypeIntEnum.SCALE,
     )
-    available_shield_types = (ShieldTypeEnum.LIGHT,)
+    available_shield_types = (ShieldTypeIntEnum.LIGHT,)
     mandatory_skills = Skills(religion=5)
     trainable_skills = Skills(
         athletics=5,
@@ -724,7 +724,7 @@ class WardenClass(NPCClass):
         ArmorTypeIntEnum.LEATHER,
         ArmorTypeIntEnum.HIDE,
     )
-    available_shield_types = (ShieldTypeEnum.LIGHT, ShieldTypeEnum.HEAVY)
+    available_shield_types = (ShieldTypeIntEnum.LIGHT, ShieldTypeIntEnum.HEAVY)
     available_weapon_categories = (
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.MILITARY,

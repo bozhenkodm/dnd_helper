@@ -4,7 +4,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField  # type: ignore
 
-from base.constants.constants import MagicItemCategory, MagicItemSlot
+from base.constants.constants import MagicItemCategory, MagicItemSlot, ShieldTypeIntEnum
 
 
 class MagicItemType(models.Model):
@@ -114,11 +114,29 @@ class FeetSlotItem(SimpleMagicItem):
     SLOT = MagicItemSlot.FEET
 
 
-class HandsSlotItem(SimpleMagicItem):
+class ArmsSlotItem(ItemAbstract):
     class Meta:
-        proxy = True
+        # verbose_name = _('Hand item/shield')
+        # verbose_name_plural = _('Hand items/shields')
+        verbose_name = 'Предмет на руки/щит'
+        verbose_name_plural = 'Предметы на руки/щиты'
 
-    SLOT = MagicItemSlot.HANDS
+    SLOT = MagicItemSlot.ARMS
+
+    shield = models.SmallIntegerField(
+        verbose_name=_('Shield'),
+        choices=ShieldTypeIntEnum.generate_choices(),
+        default=ShieldTypeIntEnum.NONE,
+    )
+
+    def __str__(self):
+        if self.magic_item_type and not self.shield:
+            return f'{self.magic_item_type} {self.level} уровня'
+        if not self.magic_item_type and self.shield:
+            return self.get_shield_display()
+        return (
+            f'{self.magic_item_type} ({self.get_shield_display()}) {self.level} уровня'
+        )
 
 
 class WaistSlotItem(SimpleMagicItem):
@@ -135,11 +153,11 @@ class RingsSlotItem(SimpleMagicItem):
     SLOT = MagicItemSlot.RING
 
 
-class ArmsSlotItem(SimpleMagicItem):
+class HandsSlotItem(SimpleMagicItem):
     class Meta:
         proxy = True
 
-    SLOT = MagicItemSlot.ARMS
+    SLOT = MagicItemSlot.HANDS
 
 
 class NPCMagicItemAbstract(models.Model):
@@ -178,12 +196,12 @@ class NPCMagicItemAbstract(models.Model):
         verbose_name=_('Waist slot'),
         related_name='npc_waists',
     )
-    arms_slot = models.ForeignKey(
-        ArmsSlotItem,
+    hands_slot = models.ForeignKey(
+        HandsSlotItem,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name=_('Arms slot'),
+        verbose_name=_('Hands slot'),
         related_name='npc_arms',
     )
     left_ring_slot = models.ForeignKey(
@@ -202,11 +220,11 @@ class NPCMagicItemAbstract(models.Model):
         verbose_name=_('Right hand ring'),
         related_name='npc_right_rings',
     )
-    hands_slot = models.ForeignKey(
-        HandsSlotItem,
+    arms_slot = models.ForeignKey(
+        ArmsSlotItem,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name=_('Hands slot'),
+        verbose_name=_('Arms slot'),
         related_name='npc_hands',
     )

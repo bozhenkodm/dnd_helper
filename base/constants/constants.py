@@ -179,19 +179,22 @@ class ArmorTypeIntEnum(IntDescriptionEnum):
     PLATE = 8, 'Латный'
 
 
-class ShieldTypeEnum(BaseNameValueDescriptionEnum):
-    LIGHT = 'LIGHT', 'Лёгкий щит'
-    HEAVY = 'HEAVY', 'Тяжелый щит'
-
-
 class ShieldTypeIntEnum(IntDescriptionEnum):
+    NONE = 0, '----------'
     LIGHT = 1, 'Лёгкий щит'
     HEAVY = 2, 'Тяжелый щит'
 
+    @property
     def penalty(self):
         if self == self.HEAVY:
             return 2
         return 0
+
+    @classmethod
+    def get_by_value(cls, value) -> 'ShieldTypeIntEnum':
+        for item in cls:
+            if item.value == value:
+                return item
 
 
 class WeaponGroupEnum(BaseNameValueDescriptionEnum):

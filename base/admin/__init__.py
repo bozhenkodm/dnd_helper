@@ -3,6 +3,7 @@ from django.contrib.auth.models import Group, User
 
 from base.admin.admin_classes import (
     ArmorAdmin,
+    ArmsItemSlotAdmin,
     ClassAdmin,
     EncounterAdmin,
     FunctionalTemplateAdmin,
@@ -16,7 +17,7 @@ from base.admin.admin_classes import (
     WeaponTypeAdmin,
 )
 from base.models.encounters import Encounter, PlayerCharacters
-from base.models.magic_items import MagicItemType, SimpleMagicItem
+from base.models.magic_items import ArmsSlotItem, MagicItemType, SimpleMagicItem
 from base.models.models import (
     NPC,
     Armor,
@@ -40,6 +41,7 @@ admin.site.register(FunctionalTemplate, FunctionalTemplateAdmin)
 admin.site.register(PlayerCharacters, PlayerCharactersAdmin)
 admin.site.register(MagicItemType, MagicItemTypeAdmin)
 admin.site.register(SimpleMagicItem, MagicItemAdmin)
+admin.site.register(ArmsSlotItem, ArmsItemSlotAdmin)
 
 admin.site.unregister(Group)
 admin.site.unregister(User)

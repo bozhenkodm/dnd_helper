@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-08 23:51+0000\n"
+"POT-Creation-Date: 2022-02-12 16:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -72,35 +72,47 @@ msgstr "Слоты"
 msgid "Level"
 msgstr "Уровень"
 
-#: base/models/magic_items.py:154
+#: base/models/magic_items.py:119
+msgid "Hand item/shield"
+msgstr "Предмет на руки/щит"
+
+#: base/models/magic_items.py:120
+msgid "Hand items/shields"
+msgstr "Предметы на руки/щиты"
+
+#: base/models/magic_items.py:125 base/models/models.py:287
+msgid "Shield"
+msgstr "Щит"
+
+#: base/models/magic_items.py:163
 msgid "Neck slot"
 msgstr "Предмет на шею"
 
-#: base/models/magic_items.py:162
+#: base/models/magic_items.py:171
 msgid "Head slot"
 msgstr "Предмет на голову"
 
-#: base/models/magic_items.py:170
+#: base/models/magic_items.py:179
 msgid "Feet slot"
 msgstr "Предмет на ноги"
 
-#: base/models/magic_items.py:178
+#: base/models/magic_items.py:187
 msgid "Waist slot"
 msgstr "Предмет на пояс"
 
-#: base/models/magic_items.py:186
+#: base/models/magic_items.py:195
 msgid "Arms slot"
 msgstr "Предмет на руки"
 
-#: base/models/magic_items.py:194
+#: base/models/magic_items.py:203
 msgid "Left hand ring"
 msgstr "Кольо левой руки"
 
-#: base/models/magic_items.py:202
+#: base/models/magic_items.py:211
 msgid "Right hand ring"
 msgstr "Кольцо правой руки"
 
-#: base/models/magic_items.py:210
+#: base/models/magic_items.py:219
 msgid "Hands slot"
 msgstr "Предмет на кисти"
 
@@ -230,10 +242,6 @@ msgstr "Пол"
 msgid "Trained skills"
 msgstr "Тренированные навыки"
 
-#: base/models/models.py:287
-msgid "Shield"
-msgstr "Щит"
-
 #: base/models/models.py:295
 msgid "Armament"
 msgstr "Вооружение"
@@ -254,7 +262,16 @@ msgstr "Основная рука"
 msgid "Secondary hand"
 msgstr "Дополнительная рука"
 
-#: base/models/models.py:319 base/models/powers.py:30
+#: base/models/models.py:320
+msgid "No hand implement"
+msgstr "Свободный инструмент"
+# TODO rephrase
+
+#: base/models/models.py:321
+msgid "Armament that doesn't take hand slot"
+msgstr "Вооружение, которое не занимает слоты рук"
+
+#: base/models/models.py:328 base/models/powers.py:30
 msgid "Powers"
 msgstr "Таланты"
 
@@ -341,18 +358,3 @@ msgstr "Этот талант не использует дополнительн
 #: base/models/powers.py:380
 msgid "This power doesn't use magic item"
 msgstr "Этот талант не использует магический предмет"
-
-#, fuzzy
-#~| msgid "Magic item type"
-#~ msgid "Magic item types"
-#~ msgstr "Типы магических предметов"
-
-#, fuzzy
-#~| msgid "Magic item type"
-#~ msgid "Magic item"
-#~ msgstr "Магический предмет"
-
-#, fuzzy
-#~| msgid "Magic item type"
-#~ msgid "Magic items"
-#~ msgstr "Магические предметы"
