@@ -120,6 +120,7 @@ class ArmsSlotItem(ItemAbstract):
         # verbose_name_plural = _('Hand items/shields')
         verbose_name = 'Предмет на руки/щит'
         verbose_name_plural = 'Предметы на руки/щиты'
+        unique_together = ('magic_item_type', 'level', 'shield')
 
     SLOT = MagicItemSlot.ARMS
 

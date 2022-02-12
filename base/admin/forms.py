@@ -180,9 +180,13 @@ class NPCModelForm(forms.ModelForm):
             return super(NPCModelForm, self).clean()
         primary_hand = self.cleaned_data.get('primary_hand')
         secondary_hand = self.cleaned_data.get('secondary_hand')
-        if secondary_hand and self.cleaned_data['shield']:
+        shield_is_in_hand = bool(
+            self.cleaned_data['arms_slot']
+            and self.cleaned_data['arms_slot'].shield
+        )
+        if secondary_hand and shield_is_in_hand:
             error = ValidationError('Нельзя удержать в одной руке оружие и щит')
-            self.add_error('shield', error)
+            self.add_error('arms_slot', error)
             self.add_error('secondary_hand', error)
         if (
             primary_hand
@@ -193,8 +197,8 @@ class NPCModelForm(forms.ModelForm):
             )
             if secondary_hand:
                 self.add_error('secondary_hand', error)
-            if self.cleaned_data['shield']:
-                self.add_error('shield', error)
+            if shield_is_in_hand:
+                self.add_error('arms_slot', error)
         if (
             primary_hand
             and primary_hand.data_instance.handedness

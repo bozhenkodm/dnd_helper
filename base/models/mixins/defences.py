@@ -1,10 +1,13 @@
 from base.constants.constants import NPCClassEnum, ShieldTypeIntEnum
 from base.helpers import modifier
+from base.objects.npc_classes import NPCClass
 
 INITIAL_DEFENCE_VALUE = 10
 
 
 class DefenceMixin:
+    klass_data_instance: NPCClass
+
     @property
     def shield(self) -> ShieldTypeIntEnum:
         if not self.arms_slot:  # type: ignore

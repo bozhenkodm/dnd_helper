@@ -69,7 +69,7 @@ class DragonbornRace(Race):
     @property
     def healing_surge_bonus(self):
         # У драконорождённых исцеление увеличено
-        return self.npc.constitution
+        return self.npc.con_mod
 
 
 class ShifterRace(Race):

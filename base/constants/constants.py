@@ -195,6 +195,7 @@ class ShieldTypeIntEnum(IntDescriptionEnum):
         for item in cls:
             if item.value == value:
                 return item
+        raise ValueError('Wrong shield')
 
 
 class WeaponGroupEnum(BaseNameValueDescriptionEnum):
