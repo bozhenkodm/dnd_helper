@@ -23,6 +23,7 @@ from base.models.mixins.skills import SkillMixin
 from base.models.powers import Power, PowerMixin
 from base.objects import npc_klasses, race_classes, weapon_types_classes
 from base.objects.dice import DiceRoll
+from base.objects.weapon_types import WeaponType as WeaponTypeClass
 from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
 
 
@@ -132,7 +133,7 @@ class Weapon(ItemAbstract):
         )
 
     @property
-    def data_instance(self):
+    def data_instance(self) -> WeaponTypeClass:
         return self.weapon_type.data_instance
 
     @property
@@ -142,6 +143,8 @@ class Weapon(ItemAbstract):
     def get_attack_type(self, is_melee: bool, is_ranged: bool) -> str:
         # TODO localization
         melee_attack_type, ranged_attack_type = '', ''
+        is_melee = is_melee and self.data_instance.is_melee
+        is_ranged = is_ranged and self.data_instance.is_ranged
         if is_melee:
             distance = 2 if self.data_instance.is_reach else 1
             melee_attack_type = f'Рукопашный {distance}'

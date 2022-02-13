@@ -49,6 +49,13 @@ class MagicItemType(models.Model):
     def __str__(self):
         return self.name
 
+    def level_range(self):
+        return range(
+            self.min_level,
+            self.max_level + 1,
+            self.step,
+        )
+
 
 class ItemAbstract(models.Model):
     class Meta:
@@ -82,6 +89,7 @@ class SimpleMagicItem(ItemAbstract):
         # verbose_name = _('Magic item')
         verbose_name_plural = 'Магические предметы'
         # verbose_name_plural = _('Magic items')
+        unique_together = ('magic_item_type', 'level')
 
     SLOT: ClassVar[MagicItemSlot]
 

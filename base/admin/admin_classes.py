@@ -6,6 +6,7 @@ from django import forms
 from django.contrib import admin
 from django.core.files.images import ImageFile
 from django.db import models
+from django.db.transaction import atomic
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 
@@ -30,7 +31,7 @@ from base.constants.constants import (
 )
 from base.models import Class, Race
 from base.models.encounters import Combatants, CombatantsPC
-from base.models.magic_items import MagicItemType
+from base.models.magic_items import MagicItemType, SimpleMagicItem
 from base.models.powers import Power, PowerProperty
 from base.objects import npc_klasses
 
@@ -581,7 +582,7 @@ itl - бонус предмета, к которому принадлежит т
                 title=NPCRaceEnum.generate_case()
             ).order_by('title')
         if db_field.name == 'klass':
-            kwargs['queryset'] = Class.objects.order_by('name')
+            kwargs['queryset'] = Class.objects.order_by('name_display')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_fields(self, request, obj=None):
@@ -715,6 +716,7 @@ class MagicItemTypeAdmin(admin.ModelAdmin):
                     'slots',
                     'min_level',
                     'step',
+                    'max_level',
                     'category',
                     'picture',
                     'upload_from_clipboard',
@@ -769,6 +771,7 @@ class MagicItemTypeAdmin(admin.ModelAdmin):
     def image_tag(self, obj):
         return mark_safe(f'<img src="{obj.picture.url}" />')
 
+    @atomic
     def save_model(self, request, obj, form, change):
         super(MagicItemTypeAdmin, self).save_model(request, obj, form, change)
         if form.cleaned_data['upload_from_clipboard']:
@@ -778,7 +781,16 @@ class MagicItemTypeAdmin(admin.ModelAdmin):
 
             image_field = ImageFile(io.BytesIO(output), name=f'MagicItem_{obj.id}.png')
             obj.picture = image_field
-            obj.save()
+        if len(obj.level_range()) == 1 and len(obj.slots) == 1 and obj.slots[0] not in (
+
+                MagicItemSlot.WEAPON, MagicItemSlot.ARMOR, MagicItemSlot.ARMS, MagicItemSlot.NECK
+        ):
+            magic_item = SimpleMagicItem(
+                magic_item_type=obj,
+                level=obj.min_level
+            )
+            magic_item.save()
+        obj.save()
 
 
 class MagicItemAdmin(admin.ModelAdmin):

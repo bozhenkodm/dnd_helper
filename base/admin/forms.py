@@ -276,14 +276,7 @@ class ItemAbstractForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.magic_item_type:
             self.fields['level'] = forms.ChoiceField(
-                choices=(
-                    (i, i)
-                    for i in range(
-                        self.instance.magic_item_type.min_level,
-                        self.instance.magic_item_type.max_level + 1,
-                        self.instance.magic_item_type.step,
-                    )
-                ),
+                choices=((i, i) for i in self.instance.magic_item_type.level_range()),
                 label='Уровень',
             )
 
