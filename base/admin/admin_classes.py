@@ -380,9 +380,7 @@ class ArmorAdmin(admin.ModelAdmin):
             kwargs['queryset'] = MagicItemType.objects.filter(
                 slots__contains=MagicItemSlot.ARMOR.value
             ).order_by('name')
-        return super().formfield_for_foreignkey(
-            db_field, request, **kwargs
-        )
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     @admin.display(description='Класс доспеха')
     def armor_class(self, obj):
@@ -781,14 +779,18 @@ class MagicItemTypeAdmin(admin.ModelAdmin):
 
             image_field = ImageFile(io.BytesIO(output), name=f'MagicItem_{obj.id}.png')
             obj.picture = image_field
-        if len(obj.level_range()) == 1 and len(obj.slots) == 1 and obj.slots[0] not in (
-
-                MagicItemSlot.WEAPON, MagicItemSlot.ARMOR, MagicItemSlot.ARMS, MagicItemSlot.NECK
-        ):
-            magic_item = SimpleMagicItem(
-                magic_item_type=obj,
-                level=obj.min_level
+        if (
+            len(obj.level_range()) == 1
+            and len(obj.slots) == 1
+            and obj.slots[0]
+            not in (
+                MagicItemSlot.WEAPON,
+                MagicItemSlot.ARMOR,
+                MagicItemSlot.ARMS,
+                MagicItemSlot.NECK,
             )
+        ):
+            magic_item = SimpleMagicItem(magic_item_type=obj, level=obj.min_level)
             magic_item.save()
         obj.save()
 

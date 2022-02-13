@@ -23,8 +23,8 @@ from base.models.mixins.skills import SkillMixin
 from base.models.powers import Power, PowerMixin
 from base.objects import npc_klasses, race_classes, weapon_types_classes
 from base.objects.dice import DiceRoll
-from base.objects.weapon_types import WeaponType as WeaponTypeClass
 from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
+from base.objects.weapon_types import WeaponType as WeaponTypeClass
 
 
 class Armor(ItemAbstract):
