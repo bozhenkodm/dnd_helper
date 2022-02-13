@@ -166,7 +166,7 @@ class NPCModelForm(forms.ModelForm):
                 label='Кольцо на правую руку',
                 required=False,
             )
-            self.fields['hands_slot'] = forms.ModelChoiceField(
+            self.fields['gloves_slot'] = forms.ModelChoiceField(
                 queryset=HandsSlotItem.objects.select_related('magic_item_type').filter(
                     magic_item_type__slots__contains=HandsSlotItem.SLOT.value
                 ),
@@ -181,8 +181,7 @@ class NPCModelForm(forms.ModelForm):
         primary_hand = self.cleaned_data.get('primary_hand')
         secondary_hand = self.cleaned_data.get('secondary_hand')
         shield_is_in_hand = bool(
-            self.cleaned_data['arms_slot']
-            and self.cleaned_data['arms_slot'].shield
+            self.cleaned_data['arms_slot'] and self.cleaned_data['arms_slot'].shield
         )
         if secondary_hand and shield_is_in_hand:
             error = ValidationError('Нельзя удержать в одной руке оружие и щит')

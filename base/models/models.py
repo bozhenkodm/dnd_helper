@@ -405,8 +405,10 @@ class NPC(
         return self.race_data_instance.speed
 
     @property
-    def weapons_in_hands(self) -> Sequence[Weapon]:
-        return tuple(filter(None, (self.primary_hand, self.secondary_hand)))
+    def wielded_weapons(self) -> Sequence[Weapon]:
+        return tuple(
+            filter(None, (self.primary_hand, self.secondary_hand, self.no_hand))
+        )
 
     @property
     def items(self):
@@ -417,17 +419,14 @@ class NPC(
                     self.primary_hand,
                     self.secondary_hand,
                     self.armor,
-                    # TODO unite shields with hand slot
-                    #  let it be impossible to add hands item with non magical shield
-                    self.shield.description if self.shield else None,
+                    self.arms_slot,
                     self.neck_slot,
                     self.head_slot,
                     self.feet_slot,
                     self.waist_slot,
-                    self.arms_slot,
                     self.left_ring_slot,
                     self.right_ring_slot,
-                    self.hands_slot,
+                    self.gloves_slot,
                 ),
             )
         )
@@ -543,7 +542,7 @@ class NPC(
         for power in self.powers.ordered_by_frequency().filter(
             accessory_type__in=(AccessoryTypeEnum.WEAPON, AccessoryTypeEnum.IMPLEMENT)
         ):
-            for weapon in self.weapons_in_hands:
+            for weapon in self.wielded_weapons:
                 if not self.is_weapon_proper_for_power(power=power, weapon=weapon):
                     continue
                 powers.append(

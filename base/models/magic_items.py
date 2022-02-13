@@ -197,7 +197,7 @@ class NPCMagicItemAbstract(models.Model):
         verbose_name=_('Waist slot'),
         related_name='npc_waists',
     )
-    hands_slot = models.ForeignKey(
+    gloves_slot = models.ForeignKey(
         HandsSlotItem,
         on_delete=models.SET_NULL,
         null=True,

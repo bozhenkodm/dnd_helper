@@ -273,7 +273,7 @@ class NPCAdmin(admin.ModelAdmin):
                             ('neck_slot', 'head_slot'),
                             ('waist_slot', 'feet_slot'),
                             ('left_ring_slot', 'right_ring_slot'),
-                            'hands_slot',
+                            'gloves_slot',
                         ),
                         'classes': ('collapse',),
                     },
