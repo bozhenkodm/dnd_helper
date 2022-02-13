@@ -22,6 +22,7 @@ from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
     AccessoryTypeEnum,
     ArmorTypeIntEnum,
+    MagicItemSlot,
     NPCRaceEnum,
     PowerFrequencyEnum,
     PowerPropertyTitle,
@@ -29,6 +30,7 @@ from base.constants.constants import (
 )
 from base.models import Class, Race
 from base.models.encounters import Combatants, CombatantsPC
+from base.models.magic_items import MagicItemType
 from base.models.powers import Power, PowerProperty
 from base.objects import npc_klasses
 
@@ -181,7 +183,7 @@ class NPCAdmin(admin.ModelAdmin):
             'base_charisma',
         ),
         'var_bonus_ability',
-        'base_attack_ability',
+        # 'base_attack_ability',
         'mandatory_skills',
         'trained_skills',
         (
@@ -246,7 +248,7 @@ class NPCAdmin(admin.ModelAdmin):
                     'base_wisdom',
                     'base_charisma',
                 ),
-                'base_attack_ability',
+                # 'base_attack_ability',
             )
         result = self.fields[:]
         level_attrs_bonuses = {
@@ -372,6 +374,15 @@ class ArmorAdmin(admin.ModelAdmin):
     readonly_fields = ('armor_class',)
     form = ArmorForm
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'magic_item_type':
+            kwargs['queryset'] = MagicItemType.objects.filter(
+                slots__contains=MagicItemSlot.ARMOR.value
+            ).order_by('name')
+        return super().formfield_for_foreignkey(
+            db_field, request, **kwargs
+        )
+
     @admin.display(description='Класс доспеха')
     def armor_class(self, obj):
         if not obj.id:
@@ -468,6 +479,15 @@ class WeaponAdmin(admin.ModelAdmin):
     search_fields = ('magic_item__name', 'weapon_type__name')
     autocomplete_fields = ('weapon_type',)
     form = WeaponForm
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'magic_item_type':
+            kwargs['queryset'] = MagicItemType.objects.filter(
+                slots__contains=MagicItemSlot.WEAPON.value
+            ).order_by('name')
+        return super(WeaponAdmin, self).formfield_for_foreignkey(
+            db_field, request, **kwargs
+        )
 
     @admin.display(description='Категория оружия')
     def category(self, obj):
@@ -685,6 +705,7 @@ class PlayerCharactersAdmin(admin.ModelAdmin):
 
 
 class MagicItemTypeAdmin(admin.ModelAdmin):
+    ordering = ('name',)
     fieldsets = [
         (
             None,

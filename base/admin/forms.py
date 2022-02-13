@@ -96,7 +96,9 @@ class NPCModelForm(forms.ModelForm):
                     choices=subclass_enum.generate_choices(),
                     label='Подкласс',
                 )
-            weapon_queryset = Weapon.objects.all()
+            weapon_queryset = Weapon.objects.select_related(
+                'weapon_type', 'magic_item_type'
+            ).order_by('level', 'weapon_type__name', 'magic_item_type__name')
             if self.instance.weapons.count():
                 weapon_queryset = weapon_queryset.filter(
                     id__in=self.instance.weapons.values_list('id', flat=True)
@@ -108,10 +110,12 @@ class NPCModelForm(forms.ModelForm):
                 queryset=weapon_queryset, label='Вторичная рука', required=False
             )
             self.fields['no_hand'] = forms.ModelChoiceField(
-                queryset=Weapon.objects.select_related('weapon_type').filter(
+                queryset=Weapon.objects.select_related('weapon_type', 'magic_item_type')
+                .filter(
                     weapon_type__slug__in=(KiFocus.slug, HolySymbol.slug)
                     # TODO make it type, put it in base and filter by it
-                ),
+                )
+                .order_by('level', 'weapon_type__name', 'magic_item_type__name'),
                 label='Инструмент не в руку',
                 required=False,
             )
