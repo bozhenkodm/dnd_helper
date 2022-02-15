@@ -5,7 +5,7 @@ from base.objects.npc_classes import NPCClass
 INITIAL_DEFENCE_VALUE = 10
 
 
-class DefenceMixin:
+class NPCDefenceMixin:
     klass_data_instance: NPCClass
 
     @property

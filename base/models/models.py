@@ -7,55 +7,22 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from base.constants.constants import (
-    AbilitiesEnum,
     AccessoryTypeEnum,
     ArmorTypeIntEnum,
     NPCClassEnum,
     NPCRaceEnum,
     SexEnum,
-    SkillsEnum,
 )
 from base.managers import WeaponTypeQuerySet
-from base.models.abilities import AttributeAbstract
+from base.models.abilities import Ability, NPCAbilityAbstract
 from base.models.magic_items import ItemAbstract, NPCMagicItemAbstract
-from base.models.mixins.defences import DefenceMixin
-from base.models.mixins.skills import SkillMixin
+from base.models.mixins.defences import NPCDefenceMixin
 from base.models.powers import Power, PowerMixin
+from base.models.skills import NPCSkillMixin, Skill
 from base.objects import npc_klasses, race_classes, weapon_types_classes
 from base.objects.dice import DiceRoll
 from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
 from base.objects.weapon_types import WeaponType as WeaponTypeClass
-
-
-class Ability(models.Model):
-    class Meta:
-        ordering = ('ordering',)
-
-    title = models.CharField(
-        choices=AbilitiesEnum.generate_choices(),
-        max_length=AbilitiesEnum.max_length(),
-        primary_key=True,
-    )
-    ordering = models.PositiveSmallIntegerField(default=1)
-
-    def __str__(self):
-        return self.get_title_display()
-
-
-class Skill(models.Model):
-    class Meta:
-        ordering = ('ordering',)
-
-    title = models.CharField(
-        choices=SkillsEnum.generate_choices(),
-        max_length=SkillsEnum.max_length(),
-        primary_key=True,
-    )
-    based_on = models.ForeignKey(Ability, on_delete=models.CASCADE, null=False)
-    ordering = models.PositiveSmallIntegerField(default=1)
-
-    def __str__(self):
-        return self.get_title_display()
 
 
 class Armor(ItemAbstract):
@@ -207,6 +174,9 @@ class Race(models.Model):
     name_display = models.CharField(
         verbose_name=_('Title'), max_length=NPCRaceEnum.max_description_length()
     )
+    var_ability_bonus = models.ManyToManyField(
+        Ability, related_name='races', verbose_name='Выборочные бонусы характеристик'
+    )
 
     is_sociable = models.BooleanField(
         verbose_name=_('Is race social?'),
@@ -271,7 +241,7 @@ class FunctionalTemplate(models.Model):
 
 
 class NPC(
-    DefenceMixin, AttributeAbstract, SkillMixin, PowerMixin, NPCMagicItemAbstract
+    NPCDefenceMixin, NPCAbilityAbstract, NPCSkillMixin, PowerMixin, NPCMagicItemAbstract
 ):
     class Meta:
         verbose_name = 'NPC'

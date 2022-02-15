@@ -38,6 +38,9 @@ def generate_race_fixtures():
                     "name": race.slug.value,
                     'name_display': race.slug.description,
                     'is_sociable': is_sociable,
+                    'var_ability_bonus': [
+                        ability.value for ability in race.var_ability_bonus.enum_objects
+                    ],
                 },
             }
         )

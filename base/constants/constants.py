@@ -11,12 +11,12 @@ class SexEnum(BaseNameValueDescriptionEnum):
 
 
 class AbilitiesEnum(BaseNameValueDescriptionEnum):
-    STRENGTH = 'STRENGTH', 'Сила'
-    CONSTITUTION = 'CONSTITUTION', 'Телосложение'
-    DEXTERITY = 'DEXTERITY', 'Ловкость'
-    INTELLIGENCE = 'INTELLIGENCE', 'Интеллект'
-    WISDOM = 'WISDOM', 'Мудрость'
-    CHARISMA = 'CHARISMA', 'Харизма'
+    STRENGTH = 'strength', 'Сила'
+    CONSTITUTION = 'constitution', 'Телосложение'
+    DEXTERITY = 'dexterity', 'Ловкость'
+    INTELLIGENCE = 'intelligence', 'Интеллект'
+    WISDOM = 'wisdom', 'Мудрость'
+    CHARISMA = 'charisma', 'Харизма'
 
 
 class PowersVariables(str, Enum):

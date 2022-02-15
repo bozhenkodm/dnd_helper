@@ -1,12 +1,8 @@
-from dataclasses import asdict
-
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.core.exceptions import ValidationError
-from multiselectfield import MultiSelectFormField  # type: ignore
 
 from base.constants.constants import (
-    AbilitiesEnum,
     DefenceTypeEnum,
     MagicItemSlot,
     NPCClassEnum,
@@ -17,6 +13,7 @@ from base.constants.constants import (
     WeaponHandednessEnum,
 )
 from base.models import NPC
+from base.models.abilities import Ability
 from base.models.magic_items import (
     ArmsSlotItem,
     FeetSlotItem,
@@ -28,8 +25,9 @@ from base.models.magic_items import (
     SimpleMagicItem,
     WaistSlotItem,
 )
-from base.models.models import Armor, Skill, Weapon, WeaponType
+from base.models.models import Armor, Weapon, WeaponType
 from base.models.powers import Power
+from base.models.skills import Skill
 from base.objects import weapon_types_tuple
 from base.objects.weapon_types import HolySymbol, KiFocus
 
@@ -47,34 +45,11 @@ class NPCModelForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.instance.id:
             klass_data_instance = self.instance.klass_data_instance
-            race_data_instance = self.instance.race_data_instance
-            self.fields['var_bonus_ability'] = forms.ChoiceField(
-                choices=[
-                    (key.upper(), AbilitiesEnum[key.upper()].description)
-                    for key, value in asdict(
-                        race_data_instance.var_ability_bonus
-                    ).items()
-                    if value
-                ],
+            self.fields['var_bonus_ability'] = forms.ModelChoiceField(
+                queryset=Ability.objects.filter(races=self.instance.race),
                 label='Выборочный бонус характеристики',
                 required=False,
             )
-            base_attack_abilities = klass_data_instance.base_attack_abilities
-            # self.fields['base_attack_ability'] = MultiSelectFormField(
-            #     choices=(
-            #         (item.value, item.description) for item in base_attack_abilities
-            #     ),
-            #     label='Атакующие характеристики',
-            #     initial=[base_attack_abilities[0].value],
-            #     min_choices=1,
-            #     disabled=len(base_attack_abilities) == 1,
-            # )
-            # if len(base_attack_abilities) == 1:
-                # form.initials shoild be changed here directly, because
-                # it has already been inited from fiels.initials in super().__init__()
-                # self.initial['base_attack_ability'] = self.fields[
-                #     'base_attack_ability'
-                # ].initial
             self.fields['trained_skills'] = forms.ModelMultipleChoiceField(
                 queryset=Skill.objects.filter(classes=self.instance.klass),
                 widget=forms.CheckboxSelectMultiple,

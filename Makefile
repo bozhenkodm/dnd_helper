@@ -25,6 +25,8 @@ npc:
 
 load_data:
 	poetry run python manage.py generate_fixtures
+	poetry run python manage.py loaddata abilities
+	poetry run python manage.py loaddata skills
 	poetry run python manage.py loaddata class
 	poetry run python manage.py loaddata race
 	poetry run python manage.py loaddata weapon_types

@@ -1,12 +1,31 @@
 from dataclasses import asdict
 
+from django.db import models
+
 from base.constants.constants import SkillsEnum
+from base.models.abilities import Ability
 from base.objects.npc_classes import NPCClass
 from base.objects.races import Race
 from base.objects.skills import Skills
 
 
-class SkillMixin:
+class Skill(models.Model):
+    class Meta:
+        ordering = ('ordering',)
+
+    title = models.CharField(
+        choices=SkillsEnum.generate_choices(),
+        max_length=SkillsEnum.max_length(),
+        primary_key=True,
+    )
+    based_on = models.ForeignKey(Ability, on_delete=models.CASCADE, null=False)
+    ordering = models.PositiveSmallIntegerField(default=1)
+
+    def __str__(self):
+        return self.get_title_display()
+
+
+class NPCSkillMixin:
 
     race_data_instance: Race
     klass_data_instance: NPCClass

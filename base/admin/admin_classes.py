@@ -34,7 +34,7 @@ from base.models import Class, Race
 from base.models.encounters import Combatants, CombatantsPC
 from base.models.magic_items import MagicItemType, SimpleMagicItem
 from base.models.powers import Power, PowerProperty
-from base.objects import npc_klasses
+from base.objects import npc_klasses, race_classes
 
 
 @admin.action(description='Социализировать расы')
@@ -48,7 +48,7 @@ def make_unsociable(modeladmin, request, queryset):
 
 
 class RaceAdmin(admin.ModelAdmin):
-    fields = ('name', 'is_sociable')
+    fields = ('name', 'const_ability_bonus', 'var_ability_bonus', 'is_sociable')
     list_filter = ('is_sociable',)
     list_display = ('name', 'is_sociable')
     search_fields = ('name_display',)
@@ -60,8 +60,17 @@ class RaceAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None) -> tuple:
         if obj and obj.id:
-            return ('name',)
+            return 'name', 'const_ability_bonus', 'var_ability_bonus'
         return ()
+
+    @admin.display(description='Постоянныe бонусs характеристик')
+    def const_ability_bonus(self, obj):
+        if not obj.id:
+            return '-'
+        return ', '.join(
+            ability.description
+            for ability in race_classes[obj.name].const_ability_bonus.enum_objects
+        )
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False

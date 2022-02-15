@@ -6,8 +6,8 @@ from django.db import migrations, models
 
 import base.constants.constants
 import base.models.mixins.defences
-import base.models.mixins.skills
 import base.models.powers
+import base.models.skills
 
 
 class Migration(migrations.Migration):
@@ -1132,8 +1132,8 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'NPCS',
             },
             bases=(
-                base.models.mixins.defences.DefenceMixin,
-                base.models.mixins.skills.SkillMixin,
+                base.models.mixins.defences.NPCDefenceMixin,
+                base.models.skills.NPCSkillMixin,
                 base.models.powers.PowerMixin,
                 models.Model,
             ),

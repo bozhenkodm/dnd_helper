@@ -7,7 +7,22 @@ from base.objects.abilities import Abilities
 from base.objects.races import Race
 
 
-class AttributeAbstract(models.Model):
+class Ability(models.Model):
+    class Meta:
+        ordering = ('ordering',)
+
+    title = models.CharField(
+        choices=AbilitiesEnum.generate_choices(),
+        max_length=AbilitiesEnum.max_length(),
+        primary_key=True,
+    )
+    ordering = models.PositiveSmallIntegerField(default=1)
+
+    def __str__(self):
+        return self.get_title_display()
+
+
+class NPCAbilityAbstract(models.Model):
     class Meta:
         abstract = True
 
@@ -31,11 +46,11 @@ class AttributeAbstract(models.Model):
     base_charisma = models.SmallIntegerField(
         verbose_name='Харизма (базовая)',
     )
-    var_bonus_ability = models.CharField(
+    var_bonus_ability = models.ForeignKey(
+        Ability,
+        on_delete=models.SET_NULL,
         verbose_name='Выборочный бонус характеристики',
-        max_length=AbilitiesEnum.max_length(),
         null=True,
-        blank=True,
     )
     base_attack_ability = MultiSelectField(
         verbose_name='Атакующие характеристики',
@@ -92,7 +107,7 @@ class AttributeAbstract(models.Model):
         # getting one of variable ability bonus for specific npc
         if not self.var_bonus_ability:
             return self.race_data_instance.const_ability_bonus
-        var_bonus_abilitiy_name = self.var_bonus_ability.lower()
+        var_bonus_abilitiy_name = self.var_bonus_ability_id.lower()
         return self.race_data_instance.const_ability_bonus + Abilities(
             **{
                 var_bonus_abilitiy_name: getattr(

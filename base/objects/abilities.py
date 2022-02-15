@@ -1,4 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
+
+from base.constants.constants import AbilitiesEnum
 
 
 @dataclass
@@ -19,3 +21,11 @@ class Abilities:
             wisdom=self.wisdom + other.wisdom,
             charisma=self.charisma + other.charisma,
         )
+
+    @property
+    def enum_objects(self) -> list:
+        return [
+            AbilitiesEnum[ability_name.upper()]
+            for ability_name, value in asdict(self).items()
+            if value
+        ]
