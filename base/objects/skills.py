@@ -70,11 +70,13 @@ class Skills:
     def init_with_const(cls, skills: Sequence[SkillsEnum], value: int) -> "Skills":
         return Skills(**{skill.lvalue: value for skill in skills})
 
+    @property
+    def enum_objects(self) -> list:
+        return [
+            SkillsEnum[skill_name.upper()]
+            for skill_name, value in asdict(self).items()
+            if value
+        ]
+
     def display_non_zero(self):
-        return ', '.join(
-            (
-                SkillsEnum[skill_name.upper()].description
-                for skill_name, value in asdict(self).items()
-                if value
-            )
-        )
+        return ', '.join((obj.description for obj in self.enum_objects))

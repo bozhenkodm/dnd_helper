@@ -1,0 +1,138 @@
+[
+{
+    "model": "base.skillmodel",
+    "pk": "acrobatics",
+    "fields": {
+        "based_on": "DEXTERITY",
+        "ordering": 3
+    }
+},
+{
+    "model": "base.skillmodel",
+    "pk": "arcana",
+    "fields": {
+        "based_on": "INTELLIGENCE",
+        "ordering": 11
+    }
+},
+{
+    "model": "base.skillmodel",
+    "pk": "athletics",
+    "fields": {
+        "based_on": "STRENGTH",
+        "ordering": 4
+    }
+},
+{
+    "model": "base.skillmodel",
+    "pk": "bluff",
+    "fields": {
+        "based_on": "CHARISMA",
+        "ordering": 12
+    }
+},
+{
+    "model": "base.skillmodel",
+    "pk": "diplomacy",
+    "fields": {
+        "based_on": "CHARISMA",
+        "ordering": 13
+    }
+},
+{
+    "model": "base.skillmodel",
+    "pk": "dungeoneering",
+    "fields": {
+        "based_on": "WISDOM",
+        "ordering": 14
+    }
+},
+{
+    "model": "base.skillmodel",
+    "pk": "endurance",
+    "fields": {
+        "based_on": "CONSTITUTION",
+        "ordering": 7
+    }
+},
+{
+    "model": "base.skillmodel",
+    "pk": "heal",
+    "fields": {
+        "based_on": "WISDOM",
+        "ordering": 19
+    }
+},
+{
+    "model": "base.skillmodel",
+    "pk": "history",
+    "fields": {
+        "based_on": "INTELLIGENCE",
+        "ordering": 10
+    }
+},
+{
+    "model": "base.skillmodel",
+    "pk": "insight",
+    "fields": {
+        "based_on": "WISDOM",
+        "ordering": 16
+    }
+},
+{
+    "model": "base.skillmodel",
+    "pk": "intimidate",
+    "fields": {
+        "based_on": "CHARISMA",
+        "ordering": 8
+    }
+},
+{
+    "model": "base.skillmodel",
+    "pk": "nature",
+    "fields": {
+        "based_on": "WISDOM",
+        "ordering": 15
+    }
+},
+{
+    "model": "base.skillmodel",
+    "pk": "perception",
+    "fields": {
+        "based_on": "WISDOM",
+        "ordering": 5
+    }
+},
+{
+    "model": "base.skillmodel",
+    "pk": "religion",
+    "fields": {
+        "based_on": "INTELLIGENCE",
+        "ordering": 17
+    }
+},
+{
+    "model": "base.skillmodel",
+    "pk": "stealth",
+    "fields": {
+        "based_on": "DEXTERITY",
+        "ordering": 18
+    }
+},
+{
+    "model": "base.skillmodel",
+    "pk": "streetwise",
+    "fields": {
+        "based_on": "CHARISMA",
+        "ordering": 9
+    }
+},
+{
+    "model": "base.skillmodel",
+    "pk": "thievery",
+    "fields": {
+        "based_on": "DEXTERITY",
+        "ordering": 6
+    }
+}
+]

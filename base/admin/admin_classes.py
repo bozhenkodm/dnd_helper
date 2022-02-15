@@ -24,6 +24,7 @@ from base.constants.constants import (
     AccessoryTypeEnum,
     ArmorTypeIntEnum,
     MagicItemSlot,
+    NPCClassEnum,
     NPCRaceEnum,
     PowerFrequencyEnum,
     PowerPropertyTitle,
@@ -77,6 +78,8 @@ class ClassAdmin(admin.ModelAdmin):
         'available_shields',
         'available_weapons',
         'available_implements',
+        'mandatory_skills',
+        'trainable_skills',
     )
     fields = readonly_fields
 
@@ -94,6 +97,15 @@ class ClassAdmin(admin.ModelAdmin):
         if obj and obj.id:
             return ('name',) + base
         return base
+
+    @admin.display(description='Обязательные навыки')
+    def mandatory_skills(self, obj):
+        if not obj.id:
+            return '-'
+        return ', '.join(
+            skill.description
+            for skill in npc_klasses[obj.name].mandatory_skills.enum_objects
+        )
 
     @admin.display(description='Ношение брони')
     def available_armor_types(self, obj):
@@ -157,6 +169,24 @@ class RaceListFilter(admin.SimpleListFilter):
             return queryset.filter(race__name=self.value())
 
 
+class KlassListFilter(admin.SimpleListFilter):
+    title = 'Класс'
+    parameter_name = 'class'
+
+    def lookups(self, request, model_admin):
+        return (
+            Class.objects.annotate(
+                name_order=NPCClassEnum.generate_order_case(),
+            )
+            .values_list('name', 'name_display')
+            .order_by('name_order')
+        )
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(klass__name=self.value())
+
+
 class NPCAdmin(admin.ModelAdmin):
     fields = [
         (
@@ -210,10 +240,17 @@ class NPCAdmin(admin.ModelAdmin):
         'secondary_hand',
         'no_hand',
     )
+    filter_horizontal = (
+        'powers',
+        'weapons',
+    )
     search_fields = ('name',)
-    list_filter = (RaceListFilter, 'klass')
+    list_filter = (RaceListFilter, KlassListFilter, 'functional_template')
     form = NPCModelForm
-    save_as = True
+
+    def get_object(self, request, object_id, from_field=None):
+        self.object = super().get_object(request, object_id, from_field)
+        return self.object
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'race':
@@ -231,7 +268,7 @@ class NPCAdmin(admin.ModelAdmin):
                     'name',
                     'sex',
                 ),
-                'description',
+                # 'description',
                 (
                     'race',
                     'functional_template',

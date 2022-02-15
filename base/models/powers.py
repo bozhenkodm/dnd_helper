@@ -305,7 +305,7 @@ class PowerProperty(models.Model):
     def get_displayed_description(self):
         if self.title and self.title != PowerPropertyTitle.OTHER:
             return self.description
-        return '.'.join(self.description.split(':')[1:])
+        return ':'.join(self.description.split(':')[1:])
 
     def __str__(self):
         return f'{self.title} {self.description} {self.level}'

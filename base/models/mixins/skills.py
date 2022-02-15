@@ -11,7 +11,6 @@ class SkillMixin:
     race_data_instance: Race
     klass_data_instance: NPCClass
     half_level: int
-    trained_skills: list[str]
 
     @property
     def skill_mod_bonus(self):
@@ -30,7 +29,7 @@ class SkillMixin:
         trained_skills = Skills.init_with_const(
             [
                 SkillsEnum[trained_skill.upper()]
-                for trained_skill in self.trained_skills
+                for trained_skill in self.trained_skills.all()  # type: ignore
             ],
             5,
         )

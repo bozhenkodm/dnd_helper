@@ -63,6 +63,9 @@ def generate_class_fixtures():
                 "fields": {
                     "name": klass.slug.value,
                     "name_display": klass.slug.description,
+                    'trainable_skills': [
+                        skill.value for skill in klass.trainable_skills.enum_objects
+                    ],
                 },
             }
         )

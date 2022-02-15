@@ -681,6 +681,7 @@ class RunepriestClass(NPCClass):
 
 
 class RangerClass(NPCClass):
+    slug = NPCClassEnum.RANGER
     power_source = PowerSourceEnum.MARTIAL
     role = ClassRoleEnum.STRIKER
     available_armor_types = (
@@ -702,17 +703,15 @@ class RangerClass(NPCClass):
     reflex = 1
     base_attack_abilities = (AbilitiesEnum.STRENGTH, AbilitiesEnum.DEXTERITY)
 
-
-class RangerMarksmanClass(RangerClass):
-    slug = NPCClassEnum.RANGER_MARKSMAN
-
-
-class RangerMeleeClass(RangerClass):
-    slug = NPCClassEnum.RANGER_MELEE
+    class SubclassEnum(IntDescriptionSubclassEnum):
+        MARKSMAN = 0, 'Стрелок'
+        TWO_HANDED = 1, 'Обоерукий'
 
     @property
     def hit_points_bonus(self):
-        return (self.npc._tier + 1) * 5
+        if self.npc.subclass == self.SubclassEnum.TWO_HANDED:
+            return (self.npc._tier + 1) * 5
+        return 0
 
 
 class WardenClass(NPCClass):

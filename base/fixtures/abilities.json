@@ -1,0 +1,44 @@
+[
+{
+    "model": "base.abilitymodel",
+    "pk": "CHARISMA",
+    "fields": {
+        "ordering": 6
+    }
+},
+{
+    "model": "base.abilitymodel",
+    "pk": "CONSTITUTION",
+    "fields": {
+        "ordering": 2
+    }
+},
+{
+    "model": "base.abilitymodel",
+    "pk": "DEXTERITY",
+    "fields": {
+        "ordering": 3
+    }
+},
+{
+    "model": "base.abilitymodel",
+    "pk": "INTELLIGENCE",
+    "fields": {
+        "ordering": 4
+    }
+},
+{
+    "model": "base.abilitymodel",
+    "pk": "STRENGTH",
+    "fields": {
+        "ordering": 1
+    }
+},
+{
+    "model": "base.abilitymodel",
+    "pk": "WISDOM",
+    "fields": {
+        "ordering": 5
+    }
+}
+]

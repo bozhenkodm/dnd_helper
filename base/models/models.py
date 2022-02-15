@@ -5,9 +5,9 @@ from typing import Optional, Sequence
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from multiselectfield import MultiSelectField  # type: ignore
 
 from base.constants.constants import (
+    AbilitiesEnum,
     AccessoryTypeEnum,
     ArmorTypeIntEnum,
     NPCClassEnum,
@@ -25,6 +25,37 @@ from base.objects import npc_klasses, race_classes, weapon_types_classes
 from base.objects.dice import DiceRoll
 from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
 from base.objects.weapon_types import WeaponType as WeaponTypeClass
+
+
+class Ability(models.Model):
+    class Meta:
+        ordering = ('ordering',)
+
+    title = models.CharField(
+        choices=AbilitiesEnum.generate_choices(),
+        max_length=AbilitiesEnum.max_length(),
+        primary_key=True,
+    )
+    ordering = models.PositiveSmallIntegerField(default=1)
+
+    def __str__(self):
+        return self.get_title_display()
+
+
+class Skill(models.Model):
+    class Meta:
+        ordering = ('ordering',)
+
+    title = models.CharField(
+        choices=SkillsEnum.generate_choices(),
+        max_length=SkillsEnum.max_length(),
+        primary_key=True,
+    )
+    based_on = models.ForeignKey(Ability, on_delete=models.CASCADE, null=False)
+    ordering = models.PositiveSmallIntegerField(default=1)
+
+    def __str__(self):
+        return self.get_title_display()
 
 
 class Armor(ItemAbstract):
@@ -176,6 +207,7 @@ class Race(models.Model):
     name_display = models.CharField(
         verbose_name=_('Title'), max_length=NPCRaceEnum.max_description_length()
     )
+
     is_sociable = models.BooleanField(
         verbose_name=_('Is race social?'),
         default=True,
@@ -199,6 +231,9 @@ class Class(models.Model):
     name_display = models.CharField(
         verbose_name=_('Title'),
         max_length=NPCClassEnum.max_description_length(),
+    )
+    trainable_skills = models.ManyToManyField(
+        Skill, verbose_name='Выборочно тренируемые навыки', related_name='classes'
     )
 
     def __str__(self):
@@ -244,6 +279,7 @@ class NPC(
 
     name = models.CharField(verbose_name=_('Name'), max_length=50)
     description = models.TextField(verbose_name=_('Description'), null=True, blank=True)
+    creation_step = models.PositiveSmallIntegerField(default=1)
     race = models.ForeignKey(
         Race,
         on_delete=models.CASCADE,
@@ -274,13 +310,7 @@ class NPC(
         verbose_name=_('Level'),
     )
 
-    trained_skills = MultiSelectField(
-        verbose_name=_('Trained skills'),
-        choices=SkillsEnum.generate_choices(),
-        min_choices=1,
-        null=True,
-        blank=True,
-    )
+    trained_skills = models.ManyToManyField(Skill, verbose_name=_('Trained skills'))
 
     armor = models.ForeignKey(
         Armor, verbose_name=_('Armor'), null=True, on_delete=models.SET_NULL

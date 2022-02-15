@@ -61,7 +61,9 @@ local_settings.py
 *.sqlite3
 *.sqlite3-journal
 media
-base/fixtures
+base/fixtures/class.json
+base/fixtures/race.json
+base/fixtures/weapon_types.json
 
 # Flask stuff:
 instance/

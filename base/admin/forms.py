@@ -1,6 +1,7 @@
 from dataclasses import asdict
 
 from django import forms
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.core.exceptions import ValidationError
 from multiselectfield import MultiSelectFormField  # type: ignore
 
@@ -27,7 +28,7 @@ from base.models.magic_items import (
     SimpleMagicItem,
     WaistSlotItem,
 )
-from base.models.models import Armor, Weapon, WeaponType
+from base.models.models import Armor, Skill, Weapon, WeaponType
 from base.models.powers import Power
 from base.objects import weapon_types_tuple
 from base.objects.weapon_types import HolySymbol, KiFocus
@@ -43,7 +44,7 @@ class NPCModelForm(forms.ModelForm):
     )
 
     def __init__(self, *args, **kwargs):
-        super(NPCModelForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if self.instance.id:
             klass_data_instance = self.instance.klass_data_instance
             race_data_instance = self.instance.race_data_instance
@@ -59,28 +60,23 @@ class NPCModelForm(forms.ModelForm):
                 required=False,
             )
             base_attack_abilities = klass_data_instance.base_attack_abilities
-            self.fields['base_attack_ability'] = MultiSelectFormField(
-                choices=(
-                    (item.value, item.description) for item in base_attack_abilities
-                ),
-                label='Атакующие характеристики',
-                initial=[base_attack_abilities[0].value],
-                min_choices=1,
-                disabled=len(base_attack_abilities) == 1,
-            )
-            if len(base_attack_abilities) == 1:
+            # self.fields['base_attack_ability'] = MultiSelectFormField(
+            #     choices=(
+            #         (item.value, item.description) for item in base_attack_abilities
+            #     ),
+            #     label='Атакующие характеристики',
+            #     initial=[base_attack_abilities[0].value],
+            #     min_choices=1,
+            #     disabled=len(base_attack_abilities) == 1,
+            # )
+            # if len(base_attack_abilities) == 1:
                 # form.initials shoild be changed here directly, because
                 # it has already been inited from fiels.initials in super().__init__()
-                self.initial['base_attack_ability'] = self.fields[
-                    'base_attack_ability'
-                ].initial
-            choices = klass_data_instance.trainable_skills
-            self.fields['trained_skills'] = MultiSelectFormField(
-                choices=(
-                    (key, SkillsEnum[key.upper()].description)
-                    for key, value in asdict(choices).items()
-                    if value
-                ),
+                # self.initial['base_attack_ability'] = self.fields[
+                #     'base_attack_ability'
+                # ].initial
+            self.fields['trained_skills'] = forms.ModelMultipleChoiceField(
+                queryset=Skill.objects.filter(classes=self.instance.klass),
                 widget=forms.CheckboxSelectMultiple,
                 label='Тренированный навыки',
             )
@@ -89,6 +85,7 @@ class NPCModelForm(forms.ModelForm):
                 .filter(klass=self.instance.klass, level__lte=self.instance.level)
                 .order_by('level', 'frequency_order'),
                 label='Таланты',
+                widget=FilteredSelectMultiple('Таланты', False),
             )
             if subclass_enum := getattr(klass_data_instance, 'SubclassEnum', None):
                 self.fields['subclass'] = forms.TypedChoiceField(
@@ -113,7 +110,7 @@ class NPCModelForm(forms.ModelForm):
                 queryset=Weapon.objects.select_related('weapon_type', 'magic_item_type')
                 .filter(
                     weapon_type__slug__in=(KiFocus.slug, HolySymbol.slug)
-                    # TODO make it type, put it in base and filter by it
+                    # TODO make it type, put it in database and filter by it
                 )
                 .order_by('level', 'weapon_type__name', 'magic_item_type__name'),
                 label='Инструмент не в руку',
@@ -181,7 +178,7 @@ class NPCModelForm(forms.ModelForm):
     def clean(self):
         self.instance: NPC
         if not self.instance.id:
-            return super(NPCModelForm, self).clean()
+            return super().clean()
         primary_hand = self.cleaned_data.get('primary_hand')
         secondary_hand = self.cleaned_data.get('secondary_hand')
         shield_is_in_hand = bool(
@@ -253,7 +250,13 @@ class NPCModelForm(forms.ModelForm):
             self.add_error('sex', error)
             self.add_error('race', error)
 
-        super(NPCModelForm, self).clean()
+        super().clean()
+
+
+class NPCModelForm__(forms.ModelForm):
+    class Meta:
+        model = NPC
+        exclude = ('description', 'creation_step', 'creation_step')
 
 
 class WeaponTypeForm(forms.ModelForm):
