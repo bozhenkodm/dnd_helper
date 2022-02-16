@@ -4,10 +4,12 @@ from random import randint
 
 from django import forms
 from django.contrib import admin
+from django.contrib.admin.utils import quote
 from django.core.files.images import ImageFile
 from django.db import models
 from django.db.transaction import atomic
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponseRedirect
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from base.admin.forms import (
@@ -199,11 +201,11 @@ class KlassListFilter(admin.SimpleListFilter):
 class NPCAdmin(admin.ModelAdmin):
     steps = {
         1: (('name', 'sex'), ('race', 'functional_template'), ('klass', 'level')),
-        2: (
-            (
-                'klass',
-                'subclass',
-            ),
+        2: [
+            # ( add dynamically
+            #     'klass',
+            #     'subclass',
+            # ),
             (
                 'base_strength',
                 'base_constitution',
@@ -215,15 +217,16 @@ class NPCAdmin(admin.ModelAdmin):
                 'base_charisma',
             ),
             'var_bonus_ability',
-        ),
-        3: (
-            'level4_bonus_abilities',
-            'level8_bonus_abilities',
-            'level14_bonus_abilities',
-            'level18_bonus_abilities',
-            'level24_bonus_abilities',
-            'level28_bonus_abilities',
-        ),
+        ],
+        3: [
+            # add dynamically depending on level
+            # 'level4_bonus_abilities',
+            # 'level8_bonus_abilities',
+            # 'level14_bonus_abilities',
+            # 'level18_bonus_abilities',
+            # 'level24_bonus_abilities',
+            # 'level28_bonus_abilities',
+        ],
         4: (
             'mandatory_skills',
             'trained_skills',
@@ -312,6 +315,29 @@ class NPCAdmin(admin.ModelAdmin):
     list_filter = (RaceListFilter, KlassListFilter, 'functional_template')
     form = NPCModelForm
 
+    def response_post_save_add(self, request: HttpRequest, obj) -> HttpResponseRedirect:
+        if '_next' in request.POST:
+            opts = obj._meta
+            obj_url = reverse(
+                'admin:%s_%s_change' % (opts.app_label, opts.model_name),
+                args=(quote(obj.pk),),
+                current_app=self.admin_site.name,
+            )
+            return HttpResponseRedirect(obj_url)
+        return super(NPCAdmin, self).response_post_save_add(request, obj)
+
+    def response_post_save_change(
+        self, request: HttpRequest, obj
+    ) -> HttpResponseRedirect:
+        if '_next' in request.POST:
+            return HttpResponseRedirect(request.path)
+        return super(NPCAdmin, self).response_post_save_change(request, obj)
+
+    def save_form(self, request, form, change):
+        if '_next' in request.POST:
+            form.instance.creation_step += 1
+        return super(NPCAdmin, self).save_form(request, form, change)
+
     def get_object(self, request, object_id, from_field=None):
         self.object = super().get_object(request, object_id, from_field)
         return self.object
@@ -325,7 +351,7 @@ class NPCAdmin(admin.ModelAdmin):
             kwargs['queryset'] = Class.objects.order_by('name')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    def get_fields(self, request, obj=None):
+    def get_fields(self, request: HttpRequest, obj=None):
         if not obj:
             return (
                 (
@@ -737,7 +763,7 @@ itl - бонус предмета, к которому принадлежит т
         obj = form.instance
         if not obj.attack_ability:
             return
-        ability_mod = obj.attack_ability.lower()[:3]
+        ability_mod = obj.attack_ability[:3]
         for property in obj.properties.filter(title=PowerPropertyTitle.ATTACK):
             if not property.description:
                 property.description = (
