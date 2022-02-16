@@ -197,6 +197,64 @@ class KlassListFilter(admin.SimpleListFilter):
 
 
 class NPCAdmin(admin.ModelAdmin):
+    steps = {
+        1: (('name', 'sex'), ('race', 'functional_template'), ('klass', 'level')),
+        2: (
+            (
+                'klass',
+                'subclass',
+            ),
+            (
+                'base_strength',
+                'base_constitution',
+                'base_dexterity',
+            ),
+            (
+                'base_intelligence',
+                'base_wisdom',
+                'base_charisma',
+            ),
+            'var_bonus_ability',
+        ),
+        3: (
+            'level4_bonus_abilities',
+            'level8_bonus_abilities',
+            'level14_bonus_abilities',
+            'level18_bonus_abilities',
+            'level24_bonus_abilities',
+            'level28_bonus_abilities',
+        ),
+        4: (
+            'mandatory_skills',
+            'trained_skills',
+        ),
+        5: (
+            (
+                'armor',
+                'arms_slot',
+            ),
+            'weapons',
+            (
+                'neck_slot',
+                'head_slot',
+            ),
+            (
+                'waist_slot',
+                'feet_slot',
+            ),
+            (
+                'left_ring_slot',
+                'right_ring_slot',
+            ),
+            'gloves_slot',
+        ),
+        6: (
+            'primary_hand',
+            'secondary_hand',
+            'no_hand',
+            'powers',
+        ),
+    }
     fields = [
         (
             'name',
@@ -249,10 +307,7 @@ class NPCAdmin(admin.ModelAdmin):
         'secondary_hand',
         'no_hand',
     )
-    filter_horizontal = (
-        'powers',
-        'weapons',
-    )
+    filter_horizontal = ('powers',)
     search_fields = ('name',)
     list_filter = (RaceListFilter, KlassListFilter, 'functional_template')
     form = NPCModelForm
@@ -307,7 +362,7 @@ class NPCAdmin(admin.ModelAdmin):
             28: 'level28_bonus_abilities',
         }
         for level, attr in level_attrs_bonuses.items():
-            if obj.level >= level and attr not in result:
+            if obj.level >= level:
                 result.append(attr)
         return result
 

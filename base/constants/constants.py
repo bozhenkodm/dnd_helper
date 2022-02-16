@@ -185,7 +185,7 @@ class ShieldTypeIntEnum(IntDescriptionEnum):
     HEAVY = 2, 'Тяжелый щит'
 
     @property
-    def penalty(self):
+    def skill_penalty(self):
         if self == self.HEAVY:
             return 2
         return 0
@@ -200,21 +200,21 @@ class ShieldTypeIntEnum(IntDescriptionEnum):
 
 class WeaponGroupEnum(BaseNameValueDescriptionEnum):
     # Melee
-    AXE = 'AXE', 'Топор'
-    MACE = 'MACE', 'Булава'
-    LIGHT_BLADE = 'LIGHT_BLADE', 'Лёгкий клинок'
-    SPEAR = 'SPEAR', 'Копьё'
-    STAFF = 'STAFF', 'Посох'
-    FLAIL = 'FLAIL', 'Цеп'
-    HEAVY_BLADE = 'HEAVY_BLADE', 'Тяжелый клинок'
-    HAMMER = 'HAMMER', 'Молот'
-    PICK = 'PICK', 'Кирка'
-    POLEARM = 'POLEARM', 'Древковое'
-    UNARMED = 'UNARMED', 'Безоружное'
+    AXE = 'axe', 'Топор'
+    MACE = 'mace', 'Булава'
+    LIGHT_BLADE = 'light_blade', 'Лёгкий клинок'
+    SPEAR = 'spear', 'Копьё'
+    STAFF = 'staff', 'Посох'
+    FLAIL = 'flail', 'Цеп'
+    HEAVY_BLADE = 'heavy_blade', 'Тяжелый клинок'
+    HAMMER = 'hammer', 'Молот'
+    PICK = 'pick', 'Кирка'
+    POLEARM = 'polearm', 'Древковое'
+    UNARMED = 'unarmed', 'Безоружное'
     # Ranged
-    SLING = 'SLING', 'Праща'
-    CROSSBOW = 'CROSSBOW', 'Арбалет'
-    BOW = 'BOW', 'Лук'
+    SLING = 'sling', 'Праща'
+    CROSSBOW = 'crossbow', 'Арбалет'
+    BOW = 'bow', 'Лук'
 
 
 class WeaponCategoryIntEnum(IntDescriptionEnum):

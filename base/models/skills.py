@@ -33,11 +33,12 @@ class NPCSkillMixin:
 
     @property
     def skill_mod_bonus(self):
+        """
+        Getting skill base ability modifier for every skill
+        """
         return Skills(
             **{
-                skill.lvalue: getattr(
-                    self, f'{skill.get_base_ability().lower()[:3]}_mod'
-                )
+                skill.value: getattr(self, f'{skill.get_base_ability()[:3]}_mod')
                 for skill in SkillsEnum
             }
         )
@@ -47,7 +48,7 @@ class NPCSkillMixin:
         half_level = Skills.init_with_const(SkillsEnum.sequence(), self.half_level)
         trained_skills = Skills.init_with_const(
             [
-                SkillsEnum[trained_skill.upper()]
+                SkillsEnum[trained_skill.title.upper()]
                 for trained_skill in self.trained_skills.all()  # type: ignore
             ],
             5,
@@ -62,7 +63,7 @@ class NPCSkillMixin:
                 SkillsEnum.ENDURANCE,
                 SkillsEnum.STEALTH,
             ),
-            value=self.armor.skill_penalty + self.shield.penalty,  # type: ignore
+            value=self.armor.skill_penalty + self.shield.skill_penalty,  # type: ignore
         )
         return (
             half_level

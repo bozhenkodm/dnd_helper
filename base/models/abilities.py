@@ -107,7 +107,7 @@ class NPCAbilityAbstract(models.Model):
         # getting one of variable ability bonus for specific npc
         if not self.var_bonus_ability:
             return self.race_data_instance.const_ability_bonus
-        var_bonus_abilitiy_name = self.var_bonus_ability_id.lower()
+        var_bonus_abilitiy_name = self.var_bonus_ability_id
         return self.race_data_instance.const_ability_bonus + Abilities(
             **{
                 var_bonus_abilitiy_name: getattr(

@@ -421,6 +421,7 @@ class NPC(
                 (
                     self.primary_hand,
                     self.secondary_hand,
+                    self.no_hand,
                     self.armor,
                     self.arms_slot,
                     self.neck_slot,
