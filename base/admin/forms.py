@@ -54,6 +54,7 @@ class NPCModelForm(forms.ModelForm):
                 queryset=Skill.objects.filter(classes=self.instance.klass),
                 widget=forms.CheckboxSelectMultiple,
                 label='Тренированный навыки',
+                required=False
             )
             self.fields['powers'] = forms.ModelMultipleChoiceField(
                 queryset=Power.objects.with_frequency_order()
@@ -61,6 +62,7 @@ class NPCModelForm(forms.ModelForm):
                 .order_by('level', 'frequency_order'),
                 label='Таланты',
                 widget=FilteredSelectMultiple('Таланты', False),
+                required=False
             )
             if subclass_enum := getattr(klass_data_instance, 'SubclassEnum', None):
                 self.fields['subclass'] = forms.TypedChoiceField(
@@ -226,6 +228,10 @@ class NPCModelForm(forms.ModelForm):
             self.add_error('race', error)
 
         super().clean()
+
+    def is_valid(self) -> bool:
+        print(self.errors)
+        return super(NPCModelForm, self).is_valid()
 
 
 class NPCModelForm__(forms.ModelForm):

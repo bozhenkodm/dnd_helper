@@ -1,5 +1,6 @@
 import io
 import subprocess
+from copy import deepcopy
 from random import randint
 
 from django import forms
@@ -27,6 +28,7 @@ from base.constants.constants import (
     ArmorTypeIntEnum,
     MagicItemSlot,
     NPCClassEnum,
+    NPCCreationStepEnum,
     NPCRaceEnum,
     PowerFrequencyEnum,
     PowerPropertyTitle,
@@ -203,7 +205,6 @@ class NPCAdmin(admin.ModelAdmin):
         1: (('name', 'sex'), ('race', 'functional_template'), ('klass', 'level')),
         2: [
             # ( add dynamically
-            #     'klass',
             #     'subclass',
             # ),
             (
@@ -352,13 +353,14 @@ class NPCAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_fields(self, request: HttpRequest, obj=None):
+        print('0' * 88)
         if not obj:
             return (
                 (
                     'name',
                     'sex',
                 ),
-                # 'description',
+                'description',
                 (
                     'race',
                     'functional_template',
@@ -393,23 +395,54 @@ class NPCAdmin(admin.ModelAdmin):
         return result
 
     def get_fieldsets(self, request: HttpRequest, obj=None):
-        fieldsets = super(NPCAdmin, self).get_fieldsets(request, obj)
-        if obj:
-            fieldsets.append(
-                (
-                    'Магические предметы',
-                    {
-                        'fields': (
-                            ('neck_slot', 'head_slot'),
-                            ('waist_slot', 'feet_slot'),
-                            ('left_ring_slot', 'right_ring_slot'),
-                            'gloves_slot',
-                        ),
-                        'classes': ('collapse',),
-                    },
-                )
+        print('1' * 88)
+        print(obj)
+        if obj and obj.creation_step > 6:
+            return super(NPCAdmin, self).get_fieldsets(request, obj)
+        if not obj:
+            current_step = 1
+        else:
+            current_step = obj.creation_step
+        steps = deepcopy(self.steps)
+        level_attrs_bonuses = {
+            4: 'level4_bonus_abilities',
+            8: 'level8_bonus_abilities',
+            14: 'level14_bonus_abilities',
+            18: 'level18_bonus_abilities',
+            24: 'level24_bonus_abilities',
+            28: 'level28_bonus_abilities',
+        }
+        for level, attr in level_attrs_bonuses.items():
+            if obj and obj.level >= level:
+                step_num = NPCCreationStepEnum.LEVEL_BONUS_ABILITIES.value
+                steps[step_num].append(attr)  # type: ignore
+        if obj and getattr(obj.klass_data_instance, 'SubclassEnum', False):
+            steps[NPCCreationStepEnum.BASE_ABILITIES].insert(0, 'subclass')
+        return tuple(
+            (
+                step.description,  # type: ignore
+                {
+                    'fields': steps[step],
+                    'classes': ('collapse',) if step != current_step else (),
+                },
             )
-        return fieldsets
+            for step in NPCCreationStepEnum
+            if step <= current_step
+        )
+        # (
+        #     (
+        #         'Магические предметы',
+        #         {
+        #             'fields': (
+        #                 ('neck_slot', 'head_slot'),
+        #                 ('waist_slot', 'feet_slot'),
+        #                 ('left_ring_slot', 'right_ring_slot'),
+        #                 'gloves_slot',
+        #             ),
+        #             'classes': ('collapse',),
+        #         },
+        #     )
+        # )
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super().get_readonly_fields(request, obj)

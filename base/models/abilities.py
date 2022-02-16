@@ -30,21 +30,21 @@ class NPCAbilityAbstract(models.Model):
     race_data_instance: Race
     _tier: int
 
-    base_strength = models.SmallIntegerField(verbose_name='Сила (базовая)')
+    base_strength = models.SmallIntegerField(verbose_name='Сила (базовая)', default=10)
     base_constitution = models.SmallIntegerField(
-        verbose_name='Телосложение (базовое)',
+        verbose_name='Телосложение (базовое)', default=10
     )
     base_dexterity = models.SmallIntegerField(
-        verbose_name='Ловкость (базовая)',
+        verbose_name='Ловкость (базовая)', default=10
     )
     base_intelligence = models.SmallIntegerField(
-        verbose_name='Интеллект (базовый)',
+        verbose_name='Интеллект (базовый)', default=10
     )
     base_wisdom = models.SmallIntegerField(
-        verbose_name='Мудрость (базовая)',
+        verbose_name='Мудрость (базовая)', default=10
     )
     base_charisma = models.SmallIntegerField(
-        verbose_name='Харизма (базовая)',
+        verbose_name='Харизма (базовая)', default=10
     )
     var_bonus_ability = models.ForeignKey(
         Ability,
@@ -107,7 +107,7 @@ class NPCAbilityAbstract(models.Model):
         # getting one of variable ability bonus for specific npc
         if not self.var_bonus_ability:
             return self.race_data_instance.const_ability_bonus
-        var_bonus_abilitiy_name = self.var_bonus_ability_id
+        var_bonus_abilitiy_name = self.var_bonus_ability.title
         return self.race_data_instance.const_ability_bonus + Abilities(
             **{
                 var_bonus_abilitiy_name: getattr(
