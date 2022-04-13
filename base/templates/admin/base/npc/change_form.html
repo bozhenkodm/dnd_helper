@@ -1,7 +1,9 @@
 {% extends 'admin/change_form.html' %}
 {% block submit_buttons_bottom %}
+{% if adminform.form.instance.creation_step <= 6 %}
 <div class="submit-row">
     <input type="submit" value="Далее" name="_next">
 </div>
+{% endif %}
 {{ block.super }}
 {% endblock %}

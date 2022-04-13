@@ -704,8 +704,8 @@ class RangerClass(NPCClass):
     base_attack_abilities = (AbilitiesEnum.STRENGTH, AbilitiesEnum.DEXTERITY)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
-        MARKSMAN = 0, 'Стрелок'
-        TWO_HANDED = 1, 'Обоерукий'
+        MARKSMAN = 1, 'Стрелок'
+        TWO_HANDED = 2, 'Обоерукий'
 
     @property
     def hit_points_bonus(self):

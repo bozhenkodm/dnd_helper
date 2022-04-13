@@ -1,7 +1,6 @@
 import io
 import subprocess
 from copy import deepcopy
-from random import randint
 
 from django import forms
 from django.contrib import admin
@@ -201,9 +200,14 @@ class KlassListFilter(admin.SimpleListFilter):
 
 
 class NPCAdmin(admin.ModelAdmin):
+    # change_form_template = 'admin/base/npc/change_form.html'
     steps = {
-        1: (('name', 'sex'), ('race', 'functional_template'), ('klass', 'level')),
-        2: [
+        NPCCreationStepEnum.BASE: (
+            ('name', 'sex'),
+            ('race', 'functional_template'),
+            ('klass', 'level'),
+        ),
+        NPCCreationStepEnum.BASE_ABILITIES: [
             # ( add dynamically
             #     'subclass',
             # ),
@@ -219,7 +223,7 @@ class NPCAdmin(admin.ModelAdmin):
             ),
             'var_bonus_ability',
         ],
-        3: [
+        NPCCreationStepEnum.LEVEL_BONUS_ABILITIES: [
             # add dynamically depending on level
             # 'level4_bonus_abilities',
             # 'level8_bonus_abilities',
@@ -228,11 +232,11 @@ class NPCAdmin(admin.ModelAdmin):
             # 'level24_bonus_abilities',
             # 'level28_bonus_abilities',
         ],
-        4: (
+        NPCCreationStepEnum.SKILLS: (
             'mandatory_skills',
             'trained_skills',
         ),
-        5: (
+        NPCCreationStepEnum.ITEMS: (
             (
                 'armor',
                 'arms_slot',
@@ -245,14 +249,14 @@ class NPCAdmin(admin.ModelAdmin):
             (
                 'waist_slot',
                 'feet_slot',
+                'gloves_slot',
             ),
             (
                 'left_ring_slot',
                 'right_ring_slot',
             ),
-            'gloves_slot',
         ),
-        6: (
+        NPCCreationStepEnum.WEAPONS: (
             'primary_hand',
             'secondary_hand',
             'no_hand',
@@ -264,7 +268,6 @@ class NPCAdmin(admin.ModelAdmin):
             'name',
             'sex',
         ),
-        'npc_link',
         (
             'race',
             'functional_template',
@@ -296,12 +299,23 @@ class NPCAdmin(admin.ModelAdmin):
         'primary_hand',
         'secondary_hand',
         'no_hand',
+        (
+            'neck_slot',
+            'head_slot',
+        ),
+        (
+            'waist_slot',
+            'feet_slot',
+            'gloves_slot',
+        ),
+        (
+            'left_ring_slot',
+            'right_ring_slot',
+        ),
         'powers',
     ]
     readonly_fields = [
-        'npc_link',
         'mandatory_skills',
-        'generated_abilities',
     ]
     autocomplete_fields = (
         'race',
@@ -314,6 +328,7 @@ class NPCAdmin(admin.ModelAdmin):
     filter_horizontal = ('powers',)
     search_fields = ('name',)
     list_filter = (RaceListFilter, KlassListFilter, 'functional_template')
+    list_per_page = 15
     form = NPCModelForm
 
     def response_post_save_add(self, request: HttpRequest, obj) -> HttpResponseRedirect:
@@ -352,8 +367,22 @@ class NPCAdmin(admin.ModelAdmin):
             kwargs['queryset'] = Class.objects.order_by('name')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
+    def get_level_abilities_bonus_fields(self, obj) -> list[str]:
+        result = []
+        level_attrs_bonuses = {
+            4: 'level4_bonus_abilities',
+            8: 'level8_bonus_abilities',
+            14: 'level14_bonus_abilities',
+            18: 'level18_bonus_abilities',
+            24: 'level24_bonus_abilities',
+            28: 'level28_bonus_abilities',
+        }
+        for level, ability in level_attrs_bonuses.items():
+            if obj and obj.level >= level:
+                result.append(ability)
+        return result
+
     def get_fields(self, request: HttpRequest, obj=None):
-        print('0' * 88)
         if not obj:
             return (
                 (
@@ -367,7 +396,6 @@ class NPCAdmin(admin.ModelAdmin):
                 ),
                 'klass',
                 'level',
-                'generated_abilities',
                 (
                     'base_strength',
                     'base_constitution',
@@ -378,46 +406,28 @@ class NPCAdmin(admin.ModelAdmin):
                     'base_wisdom',
                     'base_charisma',
                 ),
-                # 'base_attack_ability',
             )
         result = self.fields[:]
-        level_attrs_bonuses = {
-            4: 'level4_bonus_abilities',
-            8: 'level8_bonus_abilities',
-            14: 'level14_bonus_abilities',
-            18: 'level18_bonus_abilities',
-            24: 'level24_bonus_abilities',
-            28: 'level28_bonus_abilities',
-        }
-        for level, attr in level_attrs_bonuses.items():
-            if obj.level >= level:
-                result.append(attr)
+        result.insert(7, self.get_level_abilities_bonus_fields(obj))
         return result
 
+    def get_steps(self, obj=None):
+        steps = deepcopy(self.steps)
+        steps[NPCCreationStepEnum.LEVEL_BONUS_ABILITIES].extend(
+            self.get_level_abilities_bonus_fields(obj)
+        )
+        if obj and getattr(obj.klass_data_instance, 'SubclassEnum', False):
+            steps[NPCCreationStepEnum.BASE_ABILITIES].insert(0, 'subclass')
+        return steps
+
     def get_fieldsets(self, request: HttpRequest, obj=None):
-        print('1' * 88)
-        print(obj)
         if obj and obj.creation_step > 6:
             return super(NPCAdmin, self).get_fieldsets(request, obj)
         if not obj:
             current_step = 1
         else:
             current_step = obj.creation_step
-        steps = deepcopy(self.steps)
-        level_attrs_bonuses = {
-            4: 'level4_bonus_abilities',
-            8: 'level8_bonus_abilities',
-            14: 'level14_bonus_abilities',
-            18: 'level18_bonus_abilities',
-            24: 'level24_bonus_abilities',
-            28: 'level28_bonus_abilities',
-        }
-        for level, attr in level_attrs_bonuses.items():
-            if obj and obj.level >= level:
-                step_num = NPCCreationStepEnum.LEVEL_BONUS_ABILITIES.value
-                steps[step_num].append(attr)  # type: ignore
-        if obj and getattr(obj.klass_data_instance, 'SubclassEnum', False):
-            steps[NPCCreationStepEnum.BASE_ABILITIES].insert(0, 'subclass')
+        steps = self.get_steps(obj)
         return tuple(
             (
                 step.description,  # type: ignore
@@ -429,38 +439,26 @@ class NPCAdmin(admin.ModelAdmin):
             for step in NPCCreationStepEnum
             if step <= current_step
         )
-        # (
-        #     (
-        #         'Магические предметы',
-        #         {
-        #             'fields': (
-        #                 ('neck_slot', 'head_slot'),
-        #                 ('waist_slot', 'feet_slot'),
-        #                 ('left_ring_slot', 'right_ring_slot'),
-        #                 'gloves_slot',
-        #             ),
-        #             'classes': ('collapse',),
-        #         },
-        #     )
-        # )
 
     def get_readonly_fields(self, request, obj=None):
-        readonly_fields = super().get_readonly_fields(request, obj)
-        if obj and not getattr(obj.klass_data_instance, 'SubclassEnum', None):
-            readonly_fields.append('subclass')
+        readonly_fields = set(super().get_readonly_fields(request, obj))
+        for step, fields in self.get_steps(obj).items():
+            if not obj and step == NPCCreationStepEnum.BASE:
+                break
+            if obj.creation_step > NPCCreationStepEnum.WEAPONS:
+                break
+            if step >= obj.creation_step:
+                break
+            if isinstance(fields, str):
+                readonly_fields.add(fields)
+                continue
+            for field in fields:
+                if isinstance(field, str):
+                    readonly_fields.add(field)
+                else:
+                    for nested_field in field:
+                        readonly_fields.add(nested_field)
         return readonly_fields
-
-    @admin.display(description='Лист персонажа')
-    def npc_link(self, obj):
-        return mark_safe(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
-
-    @admin.display(description='Сгенерированные атрибуты')
-    def generated_abilities(self, obj):
-        def generate_ability():
-            generated_sum = [randint(1, 6) for _ in range(4)]
-            return sum(generated_sum) - min(generated_sum)
-
-        return ', '.join(sorted([str(generate_ability()) for _ in range(6)], key=int))
 
     @admin.display(description='Тренированные навыки')
     def mandatory_skills(self, obj):
@@ -490,12 +488,18 @@ class CombatantsPCSInlineAdmin(admin.TabularInline):
     model = CombatantsPC
 
 
+@admin.action(description='Отметить пройденной')
+def make_passed(modeladmin, request, queryset):
+    queryset.update(is_passed=True)
+
+
 class EncounterAdmin(admin.ModelAdmin):
     fields = (
         'short_description',
         'roll_for_players',
         ('npcs', 'npc_links'),
         'encounter_link',
+        'is_passed',
     )
     readonly_fields = ('encounter_link', 'npc_links')
     inlines = (
@@ -503,6 +507,9 @@ class EncounterAdmin(admin.ModelAdmin):
         CombatantsInlineAdmin,
     )
     autocomplete_fields = ('npcs',)
+    list_filter = ('is_passed',)
+    list_per_page = 5
+    actions = (make_passed,)
 
     @admin.display(description='Страница сцены')
     def encounter_link(self, obj):
@@ -824,7 +831,7 @@ itl - бонус предмета, к которому принадлежит т
             elif obj.accessory_type == AccessoryTypeEnum.IMPLEMENT:
                 default_string = (
                     f'Урон ${at_will_first_level_modifier}'
-                    f'{obj.dice_number}*{obj.get_damage_dice_display()}'
+                    f'{obj.dice_number}{obj.get_damage_dice_display()}'
                     f'+dmg+{ability_mod}'
                 )
             else:

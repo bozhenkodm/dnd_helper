@@ -34,6 +34,8 @@ class Encounter(models.Model):
         verbose_name = 'Сцена'
         verbose_name_plural = 'Сцены'
 
+    participants: models.QuerySet  # workaround for mypy
+
     short_description = models.CharField(
         max_length=30, verbose_name='Краткое описание', null=True, blank=True
     )
@@ -43,6 +45,7 @@ class Encounter(models.Model):
     )
     npcs = models.ManyToManyField(NPC, verbose_name='Мастерские персонажи', blank=True)
     turn_number = models.PositiveSmallIntegerField(verbose_name='Номер хода', default=1)
+    is_passed = models.BooleanField(verbose_name='Сцена сыграна', default=False)
 
     def __str__(self):
         if self.short_description:

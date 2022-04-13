@@ -49,8 +49,9 @@ class DiceRoll:
 
     @classmethod
     def from_str(cls, string):
+        print(string)
         parsed_str = re.findall(
-            r'([0-9]{1,2})([dkдк](?:100|[468]|1[02]|20))(?:\+(\d{1,2}))?', string
+            r'([0-9]{0,2})([dkдк](?:100|[468]|1[02]|20))(?:\+(\d{1,2}))?', string
         )
         if parsed_str:
             rolls, dice, addendant = parsed_str[0]
@@ -59,7 +60,7 @@ class DiceRoll:
 
             return DiceRoll(
                 dice=DiceIntEnum[dice.upper()],
-                rolls=int(rolls),
+                rolls=int(rolls) if rolls else 0,
                 addendant=int(addendant),
             )
         raise ValueError('Not valid DiceRoll')

@@ -342,6 +342,9 @@ class NPC(
     def url(self):
         return reverse('npc', kwargs={'pk': self.pk})
 
+    def get_absolute_url(self):
+        return self.url
+
     @property
     def half_level(self):
         return self.level // 2
@@ -579,7 +582,9 @@ class NPC(
                         name=power.name,
                         keywords=power.keywords(),
                         category=power.category(),
-                        description=self.parse_string(power, power.description),
+                        description=self.parse_string(
+                            power, power.description, item=item
+                        ),
                         frequency_order=power.frequency_order,
                         properties=[
                             PowerPropertyDisplay(

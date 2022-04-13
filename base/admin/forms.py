@@ -6,6 +6,7 @@ from base.constants.constants import (
     DefenceTypeEnum,
     MagicItemSlot,
     NPCClassEnum,
+    NPCCreationStepEnum,
     NPCRaceEnum,
     SexEnum,
     ShieldTypeIntEnum,
@@ -54,7 +55,7 @@ class NPCModelForm(forms.ModelForm):
                 queryset=Skill.objects.filter(classes=self.instance.klass),
                 widget=forms.CheckboxSelectMultiple,
                 label='Тренированный навыки',
-                required=False
+                required=False,
             )
             self.fields['powers'] = forms.ModelMultipleChoiceField(
                 queryset=Power.objects.with_frequency_order()
@@ -62,13 +63,15 @@ class NPCModelForm(forms.ModelForm):
                 .order_by('level', 'frequency_order'),
                 label='Таланты',
                 widget=FilteredSelectMultiple('Таланты', False),
-                required=False
+                required=False,
             )
             if subclass_enum := getattr(klass_data_instance, 'SubclassEnum', None):
                 self.fields['subclass'] = forms.TypedChoiceField(
                     coerce=int,
                     choices=subclass_enum.generate_choices(),
                     label='Подкласс',
+                    required=self.instance.creation_step
+                    == NPCCreationStepEnum.BASE_ABILITIES,
                 )
             weapon_queryset = Weapon.objects.select_related(
                 'weapon_type', 'magic_item_type'
@@ -185,7 +188,9 @@ class NPCModelForm(forms.ModelForm):
             klass_data_instance = self.instance.klass_data_instance
             if (
                 (
-                    klass_data_instance.slug == NPCClassEnum.RANGER_MELEE
+                    klass_data_instance.slug == NPCClassEnum.RANGER
+                    and self.cleaned_data['subclass']
+                    == klass_data_instance.SubclassEnum.TWO_HANDED.value
                     or klass_data_instance.slug == NPCClassEnum.BARBARIAN
                     and self.cleaned_data['subclass']
                     == klass_data_instance.SubclassEnum.WHIRLING.value
@@ -200,7 +205,9 @@ class NPCModelForm(forms.ModelForm):
                     ),
                 )
             elif not (
-                klass_data_instance.slug == NPCClassEnum.RANGER_MELEE
+                klass_data_instance.slug == NPCClassEnum.RANGER
+                and self.cleaned_data['subclass']
+                == klass_data_instance.SubclassEnum.TWO_HANDED.value
                 or klass_data_instance.slug == NPCClassEnum.BARBARIAN
                 and self.cleaned_data['subclass']
                 == klass_data_instance.SubclassEnum.WHIRLING.value
@@ -211,21 +218,22 @@ class NPCModelForm(forms.ModelForm):
                         'Во второй руке можно держать только дополнительное оружие'
                     ),
                 )
-        if (
-            self.cleaned_data['race'].name == NPCRaceEnum.HAMADRYAD
-            and self.cleaned_data['sex'] != SexEnum.F
-        ):
-            error = ValidationError('Гамадриады только женщины')
-            self.add_error('sex', error)
-            self.add_error('race', error)
+        if 'race' in self.cleaned_data:
+            if (
+                self.cleaned_data['race'].name == NPCRaceEnum.HAMADRYAD
+                and self.cleaned_data['sex'] != SexEnum.F
+            ):
+                error = ValidationError('Гамадриады только женщины')
+                self.add_error('sex', error)
+                self.add_error('race', error)
 
-        if (
-            self.cleaned_data['race'].name == NPCRaceEnum.SATYR
-            and self.cleaned_data['sex'] != SexEnum.M
-        ):
-            error = ValidationError('Сатиры только мужчины')
-            self.add_error('sex', error)
-            self.add_error('race', error)
+            if (
+                self.cleaned_data['race'].name == NPCRaceEnum.SATYR
+                and self.cleaned_data['sex'] != SexEnum.M
+            ):
+                error = ValidationError('Сатиры только мужчины')
+                self.add_error('sex', error)
+                self.add_error('race', error)
 
         super().clean()
 
