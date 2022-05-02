@@ -49,6 +49,7 @@ class NPCClass:
     fortitude: ClassVar[int] = 0
     reflex: ClassVar[int] = 0
     will: ClassVar[int] = 0
+    base_surges_per_day: ClassVar[int] = 6  # if level bonus is not applied
     base_attack_abilities: ClassVar[Sequence[AbilitiesEnum]] = ()
     mandatory_skills: ClassVar[Skills] = Skills()
     trainable_skills: ClassVar[Skills] = Skills()
@@ -182,6 +183,7 @@ class BardClass(NPCClass):
     skill_bonuses = Skills.init_with_const(SkillsEnum.sequence(), 1)
     reflex = 1
     will = 1
+    base_surges_per_day = 7
     base_attack_abilities = (AbilitiesEnum.CHARISMA,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -208,6 +210,7 @@ class VampireClass(NPCClass):
         stealth=5,
         thievery=5,
     )
+    base_surges_per_day = 2
     base_attack_abilities = (AbilitiesEnum.DEXTERITY, AbilitiesEnum.CHARISMA)
 
     @property
@@ -251,6 +254,7 @@ class BarbarianClass(NPCClass):
         heal=5,
     )
     fortitude = 2
+    base_surges_per_day = 8
     hit_points_per_level = 10
     base_attack_abilities = (AbilitiesEnum.STRENGTH,)
 
@@ -296,6 +300,7 @@ class WarlordClass(NPCClass):
     )
     fortitude = 1
     will = 1
+    base_surges_per_day = 7
     trainable_skills = Skills(
         athletics=5, endurance=5, intimidate=5, history=5, diplomacy=5, heal=5
     )
@@ -310,6 +315,7 @@ class FighterClass(NPCClass):
     slug = NPCClassEnum.FIGHTER
     power_source = PowerSourceEnum.MARTIAL
     role = ClassRoleEnum.DEFENDER
+    base_surges_per_day = 9
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -439,6 +445,7 @@ class DruidClass(NPCClass):
     )
     reflex = 1
     will = 1
+    base_surges_per_day = 7
     base_attack_abilities = (AbilitiesEnum.WISDOM,)
 
 
@@ -456,6 +463,7 @@ class PriestClass(NPCClass):
     mandatory_skills = Skills(religion=5)
     trainable_skills = Skills(history=5, arcana=5, diplomacy=5, insight=5, heal=5)
     will = 2
+    base_surges_per_day = 7
     base_attack_abilities = (AbilitiesEnum.WISDOM,)
 
 
@@ -463,6 +471,7 @@ class SeekerClass(NPCClass):
     slug = NPCClassEnum.SEEKER
     power_source = PowerSourceEnum.PRIMAL
     role = ClassRoleEnum.CONTROLLER
+    base_surges_per_day = 7
     base_attack_abilities = (AbilitiesEnum.WISDOM,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -494,6 +503,7 @@ class AvengerClass(NPCClass):
     fortitude = 1
     reflex = 1
     will = 1
+    base_surges_per_day = 7
     base_attack_abilities = (AbilitiesEnum.WISDOM,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -560,6 +570,7 @@ class SwordmageClass(NPCClass):
         athletics=5, endurance=5, intimidate=5, history=5, diplomacy=5, insight=5
     )
     will = 2
+    base_surges_per_day = 8
     base_attack_abilities = (AbilitiesEnum.INTELLIGENCE,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -603,6 +614,7 @@ class PaladinClass(NPCClass):
     fortitude = 1
     reflex = 1
     will = 1
+    base_surges_per_day = 10
     base_attack_abilities = (AbilitiesEnum.STRENGTH, AbilitiesEnum.CHARISMA)
 
 
@@ -673,6 +685,7 @@ class RunepriestClass(NPCClass):
         heal=5,
     )
     will = 2
+    base_surges_per_day = 7
     base_attack_abilities = (AbilitiesEnum.STRENGTH,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -736,6 +749,7 @@ class WardenClass(NPCClass):
     hit_points_per_level = 10
     fortitude = 1
     will = 1
+    base_surges_per_day = 9
     base_attack_abilities = (AbilitiesEnum.STRENGTH,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -806,6 +820,7 @@ class ShamanClass(NPCClass):
     )
     fortitude = 1
     will = 1
+    base_surges_per_day = 7
     base_attack_abilities = (AbilitiesEnum.WISDOM,)
 
 
@@ -885,6 +900,7 @@ class MonkClass(NPCClass):
     power_source = PowerSourceEnum.PSIONIC
     role = ClassRoleEnum.STRIKER
     reflex = 1
+    base_surges_per_day = 7
     trainable_skills = Skills(
         acrobatics=5,
         athletics=5,

@@ -359,6 +359,14 @@ class PowerRangeTypeEnum(BaseNameValueDescriptionEnum):
             return 'Все существа в волне'
         return '----------'
 
+    @property
+    def is_melee_weapon(self):
+        return self in (self.MELEE_WEAPON, self.MELEE_RANGED_WEAPON)
+
+    @property
+    def is_ranged_weapon(self):
+        return self in (self.RANGED_WEAPON, self.MELEE_RANGED_WEAPON)
+
 
 class PowerPropertyTitle(BaseNameValueDescriptionEnum):
     ATTACK = 'ATTACK', 'Атака'

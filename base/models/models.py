@@ -11,6 +11,7 @@ from base.constants.constants import (
     ArmorTypeIntEnum,
     NPCClassEnum,
     NPCRaceEnum,
+    PowerRangeTypeEnum,
     SexEnum,
 )
 from base.managers import WeaponTypeQuerySet
@@ -279,6 +280,11 @@ class NPC(
     level = models.PositiveSmallIntegerField(
         verbose_name=_('Level'),
     )
+    is_bonus_applied = models.BooleanField(
+        verbose_name='Применять бонус за уровень?',
+        help_text='Бонус за уровень уменьшает количество исцелений',
+        default=True,
+    )
 
     trained_skills = models.ManyToManyField(Skill, verbose_name=_('Trained skills'))
 
@@ -357,7 +363,9 @@ class NPC(
     @property
     def _level_bonus(self) -> int:
         """NPC bonus to attacks, defences and damage"""
-        return self._magic_threshold * 2 + 1
+        if self.is_bonus_applied:
+            return self._magic_threshold * 2 + 1
+        return 0
 
     @property
     def max_hit_points(self) -> int:
@@ -395,7 +403,12 @@ class NPC(
     @property
     def surges(self) -> int:
         """Surges number"""
-        return self._tier + 1 + self.race_data_instance.surges_number_bonus
+        result = self.race_data_instance.surges_number_bonus
+        if self.is_bonus_applied:
+            result += self._tier + 1
+        else:
+            result += self.klass_data_instance.base_surges_per_day + self.con_mod
+        return result
 
     @property
     def initiative(self) -> int:
@@ -440,9 +453,7 @@ class NPC(
 
     @property
     def magic_items(self) -> Sequence[ItemAbstract]:
-        return tuple(
-            filter(lambda x: x and getattr(x, 'magic_item_type', False), self.items)
-        )
+        return tuple(filter(lambda x: getattr(x, 'magic_item_type'), self.items))
 
     def is_weapon_proficient(self, weapon) -> bool:
         data_instance = weapon.data_instance
@@ -468,6 +479,7 @@ class NPC(
         if not weapon:
             return False
         available_weapon_types = power.available_weapon_types
+        # checking available weapon types match
         if (
             available_weapon_types.count()
             and weapon.weapon_type not in available_weapon_types.all()
@@ -475,13 +487,23 @@ class NPC(
             return False
         if power.accessory_type == AccessoryTypeEnum.IMPLEMENT:
             return self.is_implement_proficient(weapon)
+
         if (
             power.accessory_type == AccessoryTypeEnum.WEAPON
             and power.accessory_type
             in (AccessoryTypeEnum.WEAPON, AccessoryTypeEnum.TWO_WEAPONS)
         ):
             # pure implements can't be used with weapon powers
-            return not weapon.data_instance.is_pure_implement
+            if weapon.data_instance.is_pure_implement:
+                return False
+            # checking match of power and weapon range type
+            if (
+                PowerRangeTypeEnum[power.range_type].is_melee_weapon
+                and weapon.data_instance.is_melee
+                or PowerRangeTypeEnum[power.range_type].is_ranged_weapon
+                and weapon.data_instance.is_ranged
+            ):
+                return True
         return False
 
     @property
@@ -490,7 +512,7 @@ class NPC(
 
     def parse_string(
         self,
-        power: Power,
+        power: Power,  # TODO refactor function signature
         string: str,
         weapon: Optional[Weapon] = None,
         secondary_weapon: Optional[Weapon] = None,

@@ -123,10 +123,13 @@ class ClassAdmin(admin.ModelAdmin):
     def available_armor_types(self, obj):
         if not obj.id:
             return '-'
-        return ', '.join(
-            armor_type.description
-            for armor_type in npc_klasses[obj.name].available_armor_types
-        )
+        try:
+            return ', '.join(
+                armor_type.description
+                for armor_type in npc_klasses[obj.name].available_armor_types
+            )
+        except TypeError:
+            return '-'  # fixme dynamic armor list
 
     @admin.display(description='Ношение щитов')
     def available_shields(self, obj):
@@ -141,16 +144,21 @@ class ClassAdmin(admin.ModelAdmin):
     def available_weapons(self, obj):
         if not obj.id:
             return '-'
-        return ', '.join(
-            [
-                weapon_category.description
-                for weapon_category in npc_klasses[obj.name].available_weapon_categories
-            ]
-            + [
-                weapon_type.name
-                for weapon_type in npc_klasses[obj.name].available_weapon_types
-            ]
-        )
+        try:
+            return ', '.join(
+                [
+                    weapon_category.description
+                    for weapon_category in npc_klasses[
+                        obj.name
+                    ].available_weapon_categories
+                ]
+                + [
+                    weapon_type.name
+                    for weapon_type in npc_klasses[obj.name].available_weapon_types
+                ]
+            )
+        except TypeError:
+            return '-'
 
     @admin.display(description='Владение инструментами')
     def available_implements(self, obj):
@@ -205,7 +213,8 @@ class NPCAdmin(admin.ModelAdmin):
         NPCCreationStepEnum.BASE: (
             ('name', 'sex'),
             ('race', 'functional_template'),
-            ('klass', 'level'),
+            'klass',
+            ('level', 'is_bonus_applied'),
         ),
         NPCCreationStepEnum.BASE_ABILITIES: [
             # ( add dynamically
@@ -276,7 +285,7 @@ class NPCAdmin(admin.ModelAdmin):
             'klass',
             'subclass',
         ),
-        'level',
+        ('level', 'is_bonus_applied'),
         (
             'base_strength',
             'base_constitution',

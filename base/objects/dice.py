@@ -49,7 +49,6 @@ class DiceRoll:
 
     @classmethod
     def from_str(cls, string):
-        print(string)
         parsed_str = re.findall(
             r'([0-9]{0,2})([dkдк](?:100|[468]|1[02]|20))(?:\+(\d{1,2}))?', string
         )

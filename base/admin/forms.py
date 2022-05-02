@@ -238,7 +238,6 @@ class NPCModelForm(forms.ModelForm):
         super().clean()
 
     def is_valid(self) -> bool:
-        print(self.errors)
         return super(NPCModelForm, self).is_valid()
 
 
@@ -386,7 +385,6 @@ class MagicItemTypeForm(forms.ModelForm):
             'resist': {},
             'save': {},
         }
-        print(properties)
         for defence in DefenceTypeEnum:
             self.initial[defence] = properties['defences'].get(defence, '')
 
