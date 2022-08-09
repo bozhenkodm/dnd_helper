@@ -2,9 +2,9 @@ from typing import ClassVar
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from multiselectfield import MultiSelectField  # type: ignore
 
 from base.constants.constants import MagicItemCategory, MagicItemSlot, ShieldTypeIntEnum
+from base.fields import MultiSelectField  # type: ignore
 
 
 class MagicItemType(models.Model):

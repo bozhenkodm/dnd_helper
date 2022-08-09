@@ -3,7 +3,6 @@ from typing import Union
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from multiselectfield import MultiSelectField  # type: ignore
 
 from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
@@ -19,6 +18,7 @@ from base.constants.constants import (
     PowerRangeTypeEnum,
     PowersVariables,
 )
+from base.fields import MultiSelectField  # type: ignore
 from base.managers import PowerQueryset
 from base.objects.dice import DiceRoll
 from base.objects.npc_classes import NPCClass
