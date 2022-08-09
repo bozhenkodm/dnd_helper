@@ -33,7 +33,7 @@
 <div class="pagenotbreak" style="width: 1000px; font-size: large">
     <div class="noprint">
         <span>Раунд №{{object.round_number}}</span>
-        <form method="post">
+        <form method="post" id="round_form">
             {% csrf_token %}
             <input type="submit" id="previous_turn" name="previous_turn" value="Предыдущий ход">
             <input type="submit" id="next_turn" name="next_turn" value="Следуюший ход"><br>
@@ -60,7 +60,9 @@
     <span style="font-size: small"><b>КД</b>: {{combatant.ac}}, <b>Ст</b>: {{combatant.fortitude}}, <b>Р</b>: {{combatant.reflex}}, <b>В</b>: {{combatant.will}} </span>
     {% endif %}
     </td>
-    <td></td>
+    <td>
+        <textarea name="status{{ forloop.counter }}" form="round_form" style="width: 98%">{{ combatant.status }}</textarea>
+    </td>
     <td class="border"><span style="float: right">{{ combatant.initiative|floatformat:"0" }} </span></td>
 {% endfor %}
 </table>

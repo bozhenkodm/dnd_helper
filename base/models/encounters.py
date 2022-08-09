@@ -52,12 +52,14 @@ class Encounter(models.Model):
             return f'Сцена {self.short_description}'
         return f'Сцена №{self.id}'
 
-    def next_turn(self):
+    def next_turn(self, form):
         self.turn_number += 1
+        EncounterParticipants.save_statuses(self, form)
         self.save()
 
-    def previous_turn(self):
+    def previous_turn(self, form):
         self.turn_number -= 1
+        EncounterParticipants.save_statuses(self, form)
         self.save()
 
     @property
@@ -147,8 +149,9 @@ class EncounterParticipants(models.Model):
     reflex = models.PositiveSmallIntegerField()
     will = models.PositiveSmallIntegerField()
     number = models.SmallIntegerField(null=True)
+    status = models.TextField(default='')
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{self.name} {self.number}, +{self.initiative}'
 
     @property
@@ -156,7 +159,7 @@ class EncounterParticipants(models.Model):
         return self.ac and self.fortitude and self.reflex and self.will
 
     @property
-    def full_name(self):
+    def full_name(self) -> str:
         if not self.number:
             return self.name
         return f'{self.name} №{self.number}'
@@ -164,6 +167,14 @@ class EncounterParticipants(models.Model):
     def move_after(self, other: "EncounterParticipants"):
         self.initiative = other.initiative - 0.5
         self.save()
+
+    @classmethod
+    def save_statuses(cls, encounter, form):
+        for number, combatant in enumerate(
+            cls.objects.filter(encounter=encounter).ordered(), start=1
+        ):
+            combatant.status = form.get(f'status{number}')
+            combatant.save()
 
 
 class Combatants(models.Model):
