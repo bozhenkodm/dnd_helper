@@ -46,9 +46,9 @@ class NPCClass:
     slug: ClassVar[NPCClassEnum]
     power_source: ClassVar[PowerSourceEnum]
     role: ClassVar[ClassRoleEnum]
-    fortitude: ClassVar[int] = 0
-    reflex: ClassVar[int] = 0
-    will: ClassVar[int] = 0
+    _fortitude: ClassVar[int] = 0
+    _reflex: ClassVar[int] = 0
+    _will: ClassVar[int] = 0
     base_surges_per_day: ClassVar[int] = 6  # if level bonus is not applied
     base_attack_abilities: ClassVar[Sequence[AbilitiesEnum]] = ()
     mandatory_skills: ClassVar[Skills] = Skills()
@@ -73,25 +73,25 @@ class NPCClass:
         self.npc = npc
 
     @property
-    def hit_points_bonus(self):
+    def hit_points_bonus(self) -> int:
         return 0
 
-    def attack_bonus(self, weapon=None, is_implement: bool = False):
+    def attack_bonus(self, weapon=None, is_implement: bool = False) -> int:
         level_bonus = self.npc._level_bonus + self.npc.half_level
         if weapon and not is_implement and self.npc.is_weapon_proficient(weapon=weapon):
             return level_bonus + weapon.prof_bonus
         return level_bonus
 
     @property
-    def damage_bonus(self):
+    def damage_bonus(self) -> int:
         return self.npc._level_bonus
 
     @property
-    def _armor_class_ability_bonus(self):
+    def _armor_class_ability_bonus(self) -> int:
         return max(map(modifier, (self.npc.intelligence, self.npc.dexterity)))
 
     @property
-    def armor_class_bonus(self):
+    def armor_class_bonus(self) -> int:
         result = 0
         if self.npc.armor:
             if self.npc.armor.armor_type in self.available_armor_types:
@@ -102,8 +102,16 @@ class NPCClass:
         return result
 
     @property
-    def fortitude_bonus(self):
-        return 0
+    def fortitude(self) -> int:
+        return self._fortitude
+
+    @property
+    def reflex(self) -> int:
+        return self._reflex
+
+    @property
+    def will(self) -> int:
+        return self._will
 
 
 class InvokerClass(NPCClass):
@@ -137,8 +145,8 @@ class ArtificerClass(NPCClass):
     trainable_skills = Skills(
         perception=5, thievery=5, history=5, diplomacy=5, dungeoneering=5, heal=5
     )
-    fortitude = 1
-    will = 1
+    _fortitude = 1
+    _will = 1
     base_attack_abilities = (AbilitiesEnum.INTELLIGENCE,)
 
 
@@ -181,8 +189,8 @@ class BardClass(NPCClass):
         heal=5,
     )
     skill_bonuses = Skills.init_with_const(SkillsEnum.sequence(), 1)
-    reflex = 1
-    will = 1
+    _reflex = 1
+    _will = 1
     base_surges_per_day = 7
     base_attack_abilities = (AbilitiesEnum.CHARISMA,)
 
@@ -214,7 +222,7 @@ class VampireClass(NPCClass):
     base_attack_abilities = (AbilitiesEnum.DEXTERITY, AbilitiesEnum.CHARISMA)
 
     @property
-    def armor_class_bonus(self):
+    def armor_class_bonus(self) -> int:
         result = super().armor_class_bonus
         if not self.npc.shield and (
             not self.npc.armor or self.npc.armor.armor_type == ArmorTypeIntEnum.CLOTH
@@ -224,7 +232,7 @@ class VampireClass(NPCClass):
         return result
 
     @property
-    def damage_bonus(self):
+    def damage_bonus(self) -> int:
         base_bonus = super().damage_bonus + self.npc.cha_mod
         if self.npc.level < 5:
             return base_bonus
@@ -253,7 +261,7 @@ class BarbarianClass(NPCClass):
         nature=5,
         heal=5,
     )
-    fortitude = 2
+    _fortitude = 2
     base_surges_per_day = 8
     hit_points_per_level = 10
     base_attack_abilities = (AbilitiesEnum.STRENGTH,)
@@ -269,14 +277,14 @@ class BarbarianClass(NPCClass):
         return not self.npc.shield and (not self.npc.armor or self.npc.armor.is_light)
 
     @property
-    def armor_class_bonus(self):
+    def armor_class_bonus(self) -> int:
         result = super().armor_class_bonus
         if self._is_armored_properly:
             result += self.npc._tier + 1
         return result
 
     @property
-    def reflex(self):
+    def reflex(self) -> int:
         if self._is_armored_properly:
             return self.npc._tier + 1
         return 0
@@ -298,8 +306,8 @@ class WarlordClass(NPCClass):
         WeaponCategoryIntEnum.MILITARY,
         WeaponCategoryIntEnum.SIMPLE_RANGED,
     )
-    fortitude = 1
-    will = 1
+    _fortitude = 1
+    _will = 1
     base_surges_per_day = 7
     trainable_skills = Skills(
         athletics=5, endurance=5, intimidate=5, history=5, diplomacy=5, heal=5
@@ -360,21 +368,20 @@ class FighterClass(NPCClass):
         return True
 
     @property
-    def armor_class_bonus(self):
+    def armor_class_bonus(self) -> int:
         result = super().armor_class_bonus
         if self._is_browler_and_properly_armed():
             result += 1
         return result
 
     @property
-    def fortitude(self):
-        # we are overriding class variable with method...
+    def fortitude(self) -> int:
         result = 2  # base fighter fortitude bonus
         if self._is_browler_and_properly_armed():
             result += 2
         return result
 
-    def attack_bonus(self, weapon=None, is_implement=False):
+    def attack_bonus(self, weapon=None, is_implement=False) -> int:
         result = super(FighterClass, self).attack_bonus(weapon)
         if not weapon:
             return result
@@ -410,7 +417,7 @@ class WizardClass(NPCClass):
     trainable_skills = Skills(
         history=5, diplomacy=5, dungeoneering=5, nature=5, insight=5, religion=5
     )
-    will = 2
+    _will = 2
     base_attack_abilities = (AbilitiesEnum.INTELLIGENCE,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -443,8 +450,8 @@ class DruidClass(NPCClass):
         insight=5,
         heal=5,
     )
-    reflex = 1
-    will = 1
+    _reflex = 1
+    _will = 1
     base_surges_per_day = 7
     base_attack_abilities = (AbilitiesEnum.WISDOM,)
 
@@ -462,7 +469,7 @@ class PriestClass(NPCClass):
     available_implement_types = (HolySymbol,)
     mandatory_skills = Skills(religion=5)
     trainable_skills = Skills(history=5, arcana=5, diplomacy=5, insight=5, heal=5)
-    will = 2
+    _will = 2
     base_surges_per_day = 7
     base_attack_abilities = (AbilitiesEnum.WISDOM,)
 
@@ -500,9 +507,9 @@ class AvengerClass(NPCClass):
         stealth=5,
         heal=5,
     )
-    fortitude = 1
-    reflex = 1
-    will = 1
+    _fortitude = 1
+    _reflex = 1
+    _will = 1
     base_surges_per_day = 7
     base_attack_abilities = (AbilitiesEnum.WISDOM,)
 
@@ -512,7 +519,7 @@ class AvengerClass(NPCClass):
         UNITY = 3, 'Осуждение единства'
 
     @property
-    def armor_class_bonus(self):
+    def armor_class_bonus(self) -> int:
         result = super().armor_class_bonus
         if not self.npc.shield and (
             not self.npc.armor or self.npc.armor.armor_type == ArmorTypeIntEnum.CLOTH
@@ -540,8 +547,8 @@ class WarlockClass(NPCClass):
         insight=5,
         religion=5,
     )
-    reflex = 1
-    will = 1
+    _reflex = 1
+    _will = 1
     base_attack_abilities = (AbilitiesEnum.CHARISMA, AbilitiesEnum.CONSTITUTION)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -569,7 +576,7 @@ class SwordmageClass(NPCClass):
     trainable_skills = Skills(
         athletics=5, endurance=5, intimidate=5, history=5, diplomacy=5, insight=5
     )
-    will = 2
+    _will = 2
     base_surges_per_day = 8
     base_attack_abilities = (AbilitiesEnum.INTELLIGENCE,)
 
@@ -579,7 +586,7 @@ class SwordmageClass(NPCClass):
         ENSNAREMENT_AEGIS = 3, 'Эгида западни'
 
     @property
-    def armor_class_bonus(self):
+    def armor_class_bonus(self) -> int:
         result = super().armor_class_bonus
         if not self.npc.shield and not self.npc.secondary_hand:
             result += 3
@@ -611,9 +618,9 @@ class PaladinClass(NPCClass):
     trainable_skills = Skills(
         endurance=5, intimidate=5, history=5, diplomacy=5, insight=5, heal=5
     )
-    fortitude = 1
-    reflex = 1
-    will = 1
+    _fortitude = 1
+    _reflex = 1
+    _will = 1
     base_surges_per_day = 10
     base_attack_abilities = (AbilitiesEnum.STRENGTH, AbilitiesEnum.CHARISMA)
 
@@ -640,7 +647,7 @@ class RogueClass(NPCClass):
         dungeoneering=5,
         insight=5,
     )
-    reflex = 2
+    _reflex = 2
     base_attack_abilities = (AbilitiesEnum.DEXTERITY,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -649,7 +656,7 @@ class RogueClass(NPCClass):
         RUFFAIN = 3, 'Верзила'
         SNEAK = 4, 'Скрытник'
 
-    def attack_bonus(self, weapon=None, is_implement=False):
+    def attack_bonus(self, weapon=None, is_implement=False) -> int:
         if not weapon:
             return super().attack_bonus()
         base_bonus = super().attack_bonus(weapon=weapon)
@@ -684,7 +691,7 @@ class RunepriestClass(NPCClass):
         insight=5,
         heal=5,
     )
-    will = 2
+    _will = 2
     base_surges_per_day = 7
     base_attack_abilities = (AbilitiesEnum.STRENGTH,)
 
@@ -712,8 +719,8 @@ class RangerClass(NPCClass):
     trainable_skills = Skills(
         acrobatics=5, athletics=5, perception=5, endurance=5, stealth=5, heal=5
     )
-    fortitude = 1
-    reflex = 1
+    _fortitude = 1
+    _reflex = 1
     base_attack_abilities = (AbilitiesEnum.STRENGTH, AbilitiesEnum.DEXTERITY)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -721,7 +728,7 @@ class RangerClass(NPCClass):
         TWO_HANDED = 2, 'Обоерукий'
 
     @property
-    def hit_points_bonus(self):
+    def hit_points_bonus(self) -> int:
         if self.npc.subclass == self.SubclassEnum.TWO_HANDED:
             return (self.npc._tier + 1) * 5
         return 0
@@ -747,8 +754,8 @@ class WardenClass(NPCClass):
         athletics=5, perception=5, endurance=5, intimidate=5, dungeoneering=5, heal=5
     )
     hit_points_per_level = 10
-    fortitude = 1
-    will = 1
+    _fortitude = 1
+    _will = 1
     base_surges_per_day = 9
     base_attack_abilities = (AbilitiesEnum.STRENGTH,)
 
@@ -774,7 +781,7 @@ class SorcererClass(NPCClass):
         nature=5,
         insight=5,
     )
-    will = 2
+    _will = 2
     base_attack_abilities = (AbilitiesEnum.CHARISMA,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -782,14 +789,14 @@ class SorcererClass(NPCClass):
         WILD_MAGIC = 2, 'Дикая магия'
 
     @property
-    def damage_bonus(self):
+    def damage_bonus(self) -> int:
         if self.npc.subclass == self.SubclassEnum.DRAGON_MAGIC:
             return self.npc._level_bonus + self.npc.strength + 2 * self.npc._tier
         elif self.npc.subclass == self.SubclassEnum.WILD_MAGIC:
             return self.npc._level_bonus + self.npc.dexterity + 2 * self.npc._tier
 
     @property
-    def _armor_class_ability_bonus(self):
+    def _armor_class_ability_bonus(self) -> int:
         result = super()._armor_class_ability_bonus
         if self.npc.subclass == self.SubclassEnum.DRAGON_MAGIC:
             result = max(self.npc.str_mod, result)
@@ -818,8 +825,8 @@ class ShamanClass(NPCClass):
         religion=5,
         heal=5,
     )
-    fortitude = 1
-    will = 1
+    _fortitude = 1
+    _will = 1
     base_surges_per_day = 7
     base_attack_abilities = (AbilitiesEnum.WISDOM,)
 
@@ -842,13 +849,13 @@ class HexbladeClass(WarlockClass):
         insight=5,
         religion=5,
     )
-    fortitude = 1
-    reflex = 0
-    will = 1
+    _fortitude = 1
+    _reflex = 0
+    _will = 1
     base_attack_abilities = (AbilitiesEnum.CHARISMA,)  # type: ignore
 
     @property
-    def available_armor_types(self):
+    def available_armor_types(self) -> Sequence[ArmorTypeIntEnum]:
         result = (
             ArmorTypeIntEnum.CLOTH,
             ArmorTypeIntEnum.LEATHER,
@@ -863,7 +870,7 @@ class HexbladeClass(WarlockClass):
         return result
 
     @property
-    def available_weapon_types(self):
+    def available_weapon_types(self) -> Sequence[Type[WeaponType]]:
         if self.npc.subclass == self.SubclassEnum.FEY_PACT:
             return (WinterMourningBlade,)
         if self.npc.subclass == self.SubclassEnum.INFERNAL_PACT:
@@ -872,7 +879,7 @@ class HexbladeClass(WarlockClass):
             return (ExquisiteAgonyScourge,)
 
     @property
-    def damage_bonus(self):
+    def damage_bonus(self) -> int:
         base_bonus = super().damage_bonus
         damage_modifier = 0
         if self.npc.subclass in (
@@ -899,7 +906,7 @@ class MonkClass(NPCClass):
     slug = NPCClassEnum.MONK
     power_source = PowerSourceEnum.PSIONIC
     role = ClassRoleEnum.STRIKER
-    reflex = 1
+    _reflex = 1
     base_surges_per_day = 7
     trainable_skills = Skills(
         acrobatics=5,
@@ -927,13 +934,13 @@ class MonkClass(NPCClass):
         # ETERNAL_TIDE = 5, 'Вечный прилив'
 
     @property
-    def fortitude(self):
+    def fortitude(self) -> int:
         if self.npc.subclass == self.SubclassEnum.CENTERED_BREATH:
             return self.npc._tier + 2
         return 1
 
     @property
-    def will(self):
+    def will(self) -> int:
         if self.npc.subclass == self.SubclassEnum.STONE_FIST:
             return self.npc._tier + 2
         return 1

@@ -1,5 +1,4 @@
 import operator
-from typing import Union
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -342,7 +341,7 @@ class PowerMixin:
 
     def calculate_token(
         self, token: str, power, weapon=None, secondary_weapon=None, item=None
-    ) -> Union[int, DiceRoll]:
+    ) -> int | DiceRoll:
         if token.isdigit():
             return int(token)
         if token == PowersVariables.WPN:
@@ -393,7 +392,7 @@ class PowerMixin:
         берём два последних значения из стека в обратном порядке;
         Последнее значение, после отработки алгоритма, является решением выражения.
         """
-        stack: list[Union[str, int, DiceRoll]] = []
+        stack: list[str | int | DiceRoll] = []
         for token in expression.split():
             if token in self.OPERATORS:
                 right, left = stack.pop(), stack.pop()

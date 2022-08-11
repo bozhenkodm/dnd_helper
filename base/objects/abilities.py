@@ -12,7 +12,7 @@ class Abilities:
     wisdom: int = 0
     charisma: int = 0
 
-    def __add__(self, other):
+    def __add__(self, other) -> 'Abilities':
         return Abilities(
             strength=self.strength + other.strength,
             constitution=self.constitution + other.constitution,
@@ -23,7 +23,7 @@ class Abilities:
         )
 
     @property
-    def enum_objects(self) -> list:
+    def enum_objects(self) -> list[AbilitiesEnum]:
         return [
             AbilitiesEnum[ability_name.upper()]
             for ability_name, value in asdict(self).items()

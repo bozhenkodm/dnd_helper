@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import ClassVar, Literal, Optional, Sequence, Union
+from typing import ClassVar, Literal, Optional, Sequence
 
 from base.constants.constants import (
     DiceIntEnum,
@@ -16,7 +16,7 @@ class WeaponType:
     Longsword, waraxe and so on.
     """
 
-    group: ClassVar[Union[Sequence[WeaponGroupEnum], WeaponGroupEnum]]
+    group: ClassVar[Sequence[WeaponGroupEnum] | WeaponGroupEnum]
     category: ClassVar[WeaponCategoryIntEnum]
     damage_dice: ClassVar[Optional[DiceIntEnum]]
     handedness: ClassVar[WeaponHandednessEnum] = WeaponHandednessEnum.ONE
@@ -45,7 +45,7 @@ class WeaponType:
 
     @classmethod
     @property
-    def properties(cls) -> dict:
+    def properties(cls) -> dict[str, int | bool]:
         return {
             'brutal': cls.brutal,
             'off_hand': cls.is_off_hand,

@@ -155,19 +155,17 @@ class NPCModelForm(forms.ModelForm):
                 required=False,
             )
 
-    def clean(self):
-        self.instance: NPC
-        if not self.instance.id:
-            return super().clean()
-        primary_hand = self.cleaned_data.get('primary_hand')
-        secondary_hand = self.cleaned_data.get('secondary_hand')
-        shield_is_in_hand = bool(
-            self.cleaned_data['arms_slot'] and self.cleaned_data['arms_slot'].shield
-        )
+    def check_shield_and_weapon_in_one_hand(
+        self, secondary_hand, shield_is_in_hand: bool
+    ):
         if secondary_hand and shield_is_in_hand:
             error = ValidationError('Нельзя удержать в одной руке оружие и щит')
             self.add_error('arms_slot', error)
             self.add_error('secondary_hand', error)
+
+    def check_two_handed_weapon_held_with_two_hands(
+        self, primary_hand, secondary_hand, shield_is_in_hand: bool
+    ):
         if (
             primary_hand
             and primary_hand.data_instance.handedness == WeaponHandednessEnum.TWO
@@ -179,6 +177,8 @@ class NPCModelForm(forms.ModelForm):
                 self.add_error('secondary_hand', error)
             if shield_is_in_hand:
                 self.add_error('arms_slot', error)
+
+    def check_two_weapons_in_two_hands(self, primary_hand, secondary_hand):
         if (
             primary_hand
             and primary_hand.data_instance.handedness
@@ -218,6 +218,8 @@ class NPCModelForm(forms.ModelForm):
                         'Во второй руке можно держать только дополнительное оружие'
                     ),
                 )
+
+    def check_proper_sex(self):
         if 'race' in self.cleaned_data:
             if (
                 self.cleaned_data['race'].name == NPCRaceEnum.HAMADRYAD
@@ -235,10 +237,22 @@ class NPCModelForm(forms.ModelForm):
                 self.add_error('sex', error)
                 self.add_error('race', error)
 
-        super().clean()
+    def clean(self):
+        self.instance: NPC
+        if not self.instance.id:
+            return super().clean()
+        primary_hand = self.cleaned_data.get('primary_hand')
+        secondary_hand = self.cleaned_data.get('secondary_hand')
+        shield_is_in_hand = bool(
+            self.cleaned_data['arms_slot'] and self.cleaned_data['arms_slot'].shield
+        )
+        self.check_shield_and_weapon_in_one_hand(secondary_hand, shield_is_in_hand)
+        self.check_two_handed_weapon_held_with_two_hands(
+            primary_hand, secondary_hand, shield_is_in_hand
+        )
+        self.check_two_weapons_in_two_hands(primary_hand, secondary_hand)
 
-    def is_valid(self) -> bool:
-        return super(NPCModelForm, self).is_valid()
+        return super().clean()
 
 
 class NPCModelForm__(forms.ModelForm):
