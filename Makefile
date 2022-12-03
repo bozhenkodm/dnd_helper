@@ -14,6 +14,11 @@ format:
 	poetry run black -S .
 	poetry run isort .
 
+lint:
+	poetry run flake8
+	#poetry run mypy . #TODO uncomment after django-stubs fix
+
+
 shell:
 	poetry run python manage.py shell -i ipython
 

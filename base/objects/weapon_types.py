@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import ClassVar, Literal, Optional, Sequence
+from typing import ClassVar, Literal, Sequence
 
 from base.constants.constants import (
     DiceIntEnum,
@@ -18,7 +18,7 @@ class WeaponType:
 
     group: ClassVar[Sequence[WeaponGroupEnum] | WeaponGroupEnum]
     category: ClassVar[WeaponCategoryIntEnum]
-    damage_dice: ClassVar[Optional[DiceIntEnum]]
+    damage_dice: ClassVar[DiceIntEnum | None]
     handedness: ClassVar[WeaponHandednessEnum] = WeaponHandednessEnum.ONE
     name: ClassVar[str]
     prof_bonus: ClassVar[int] = 2
@@ -33,7 +33,7 @@ class WeaponType:
     is_high_crit: ClassVar[bool] = False
     is_reach: ClassVar[bool] = False
     load: ClassVar[
-        Optional[Literal[PowerActionTypeEnum.FREE, PowerActionTypeEnum.MINOR]]
+        Literal[PowerActionTypeEnum.FREE, PowerActionTypeEnum.MINOR] | None
     ] = None
     is_small: ClassVar[bool] = False
     is_defensive: ClassVar[bool] = False

@@ -41,12 +41,12 @@ from base.objects import npc_klasses, race_classes
 
 
 @admin.action(description='Социализировать расы')
-def make_sociable(modeladmin, request, queryset):
+def make_sociable(modeladmin, request, queryset) -> None:
     queryset.update(is_sociable=True)
 
 
 @admin.action(description='Десоциализировать расы')
-def make_unsociable(modeladmin, request, queryset):
+def make_unsociable(modeladmin, request, queryset) -> None:
     queryset.update(is_sociable=False)
 
 
@@ -67,7 +67,7 @@ class RaceAdmin(admin.ModelAdmin):
         return ()
 
     @admin.display(description='Постоянныe бонусs характеристик')
-    def const_ability_bonus(self, obj):
+    def const_ability_bonus(self, obj) -> str:
         if not obj.id:
             return '-'
         return ', '.join(
@@ -104,14 +104,8 @@ class ClassAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
 
-    def get_readonly_fields(self, request, obj=None):
-        base = super().get_readonly_fields(request, obj)
-        if obj and obj.id:
-            return ('name',) + base
-        return base
-
     @admin.display(description='Обязательные навыки')
-    def mandatory_skills(self, obj):
+    def mandatory_skills(self, obj) -> str:
         if not obj.id:
             return '-'
         return ', '.join(

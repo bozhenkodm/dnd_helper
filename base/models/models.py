@@ -1,6 +1,6 @@
 import re
 from functools import cached_property
-from typing import Optional, Sequence
+from typing import Sequence
 
 from django.db import models
 from django.urls import reverse
@@ -45,21 +45,21 @@ class Armor(ItemAbstract):
         verbose_name=_('Skills penalty'), default=0
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{self.name}, +{self.enchantment}'
 
     @property
-    def armor_class(self):
+    def armor_class(self) -> int:
         return self.armor_type + self.bonus_armor_class
 
     @property
-    def name(self):
+    def name(self) -> str:
         if not self.magic_item_type:
             return self.get_armor_type_display()
         return f'{self.get_armor_type_display()}, {self.magic_item_type.name}'
 
     @property
-    def is_light(self):
+    def is_light(self) -> bool:
         return self.armor_type in (
             ArmorTypeIntEnum.CLOTH,
             ArmorTypeIntEnum.LEATHER,
@@ -77,14 +77,14 @@ class WeaponType(models.Model):
     name = models.CharField(verbose_name=_('Title'), max_length=30)
     slug = models.CharField(verbose_name='Slug', max_length=30, unique=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     @cached_property
     def data_instance(self):
         return weapon_types_classes.get(self.slug)()
 
-    def damage(self, weapon_number=1):
+    def damage(self, weapon_number=1) -> str:
         return (
             f'{self.data_instance.dice_number*weapon_number}'
             f'{self.data_instance.damage_dice.description}'
@@ -473,7 +473,7 @@ class NPC(
         )
 
     def is_weapon_proper_for_power(
-        self, power: Power, weapon: Optional[Weapon] = None
+        self, power: Power, weapon: Weapon | None = None
     ) -> bool:
         weapon = weapon or self.primary_hand or self.secondary_hand
         if not weapon:
@@ -514,9 +514,9 @@ class NPC(
         self,
         power: Power,  # TODO refactor function signature
         string: str,
-        weapon: Optional[Weapon] = None,
-        secondary_weapon: Optional[Weapon] = None,
-        item: Optional[ItemAbstract] = None,
+        weapon: Weapon | None = None,
+        secondary_weapon: Weapon | None = None,
+        item: ItemAbstract | None = None,
     ):
         pattern = r'\$(\S{3,})\b'  # gets substring from '$' to next whitespace
         expressions_to_calculate = re.findall(pattern, string)

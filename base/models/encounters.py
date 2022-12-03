@@ -25,7 +25,7 @@ class PlayerCharacters(models.Model):
         verbose_name='Пассивная проницательность', default=0
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -47,17 +47,17 @@ class Encounter(models.Model):
     turn_number = models.PositiveSmallIntegerField(verbose_name='Номер хода', default=1)
     is_passed = models.BooleanField(verbose_name='Сцена сыграна', default=False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.short_description:
             return f'Сцена {self.short_description}'
         return f'Сцена №{self.id}'
 
-    def next_turn(self, form):
+    def next_turn(self, form) -> None:
         self.turn_number += 1
         EncounterParticipants.save_statuses(self, form)
         self.save()
 
-    def previous_turn(self, form):
+    def previous_turn(self, form) -> None:
         self.turn_number -= 1
         EncounterParticipants.save_statuses(self, form)
         self.save()

@@ -56,14 +56,14 @@ class MultiSelectField(CharField):
                 choices_selected.append(string_type(choice_selected[0]))
         return choices_selected
 
-    def value_to_string(self, obj):
+    def value_to_string(self, obj) -> str:
         try:
             value = self._get_val_from_obj(obj)
         except AttributeError:
             value = super(MultiSelectField, self).value_from_object(obj)
         return self.get_prep_value(value)
 
-    def validate(self, value, model_instance):
+    def validate(self, value, model_instance) -> None:
         arr_choices = self.get_choices_selected(self.get_choices_default())
         for opt_select in value:
             if opt_select not in arr_choices:
@@ -91,8 +91,8 @@ class MultiSelectField(CharField):
         defaults.update(kwargs)
         return MultiSelectFormField(**defaults)
 
-    def get_prep_value(self, value):
-        return '' if value is None else ",".join(map(str, value))
+    def get_prep_value(self, value) -> str:
+        return '' if value is None else ','.join(map(str, value))
 
     def get_db_prep_value(self, value, connection, prepared=False):
         if not prepared and not isinstance(value, string_type):

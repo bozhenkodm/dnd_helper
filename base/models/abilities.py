@@ -18,7 +18,7 @@ class Ability(models.Model):
     )
     ordering = models.PositiveSmallIntegerField(default=1)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.get_title_display()
 
 
@@ -150,7 +150,7 @@ class NPCAbilityAbstract(models.Model):
             charisma=self.base_charisma,
         )
 
-    def _calculate_ability_bonus(self, ability: AbilitiesEnum):
+    def _calculate_ability_bonus(self, ability: AbilitiesEnum) -> int:
         abilities = (
             self._initial_abilities_bonuses
             + self._tier_attrs_bonus
@@ -160,51 +160,51 @@ class NPCAbilityAbstract(models.Model):
         return getattr(abilities, ability.lvalue)
 
     @property
-    def strength(self):
+    def strength(self) -> int:
         return self._calculate_ability_bonus(AbilitiesEnum.STRENGTH)
 
     @property
-    def constitution(self):
+    def constitution(self) -> int:
         return self._calculate_ability_bonus(AbilitiesEnum.CONSTITUTION)
 
     @property
-    def dexterity(self):
+    def dexterity(self) -> int:
         return self._calculate_ability_bonus(AbilitiesEnum.DEXTERITY)
 
     @property
-    def intelligence(self):
+    def intelligence(self) -> int:
         return self._calculate_ability_bonus(AbilitiesEnum.INTELLIGENCE)
 
     @property
-    def wisdom(self):
+    def wisdom(self) -> int:
         return self._calculate_ability_bonus(AbilitiesEnum.WISDOM)
 
     @property
-    def charisma(self):
+    def charisma(self) -> int:
         return self._calculate_ability_bonus(AbilitiesEnum.CHARISMA)
 
     @property
-    def str_mod(self):
+    def str_mod(self) -> int:
         return modifier(self.strength)
 
     @property
-    def con_mod(self):
+    def con_mod(self) -> int:
         return modifier(self.constitution)
 
     @property
-    def dex_mod(self):
+    def dex_mod(self) -> int:
         return modifier(self.dexterity)
 
     @property
-    def int_mod(self):
+    def int_mod(self) -> int:
         return modifier(self.intelligence)
 
     @property
-    def wis_mod(self):
+    def wis_mod(self) -> int:
         return modifier(self.wisdom)
 
     @property
-    def cha_mod(self):
+    def cha_mod(self) -> int:
         return modifier(self.charisma)
 
     def get_ability_text(self, ability: AbilitiesEnum) -> str:
@@ -216,5 +216,5 @@ class NPCAbilityAbstract(models.Model):
         )
 
     @property
-    def abilities_texts(self) -> list:
+    def abilities_texts(self) -> list[str]:
         return list(self.get_ability_text(ability) for ability in AbilitiesEnum)

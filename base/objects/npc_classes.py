@@ -118,6 +118,13 @@ class InvokerClass(NPCClass):
     slug = NPCClassEnum.INVOKER
     power_source = PowerSourceEnum.DIVINE
     role = ClassRoleEnum.CONTROLLER
+    _fortitude = 1
+    _reflex = 1
+    _will = 1
+    mandatory_skills = Skills(religion=5)
+    trainable_skills = Skills(
+        endurance=5, history=5, intimidate=5, arcana=5, diplomacy=5, insight=5
+    )
     available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,

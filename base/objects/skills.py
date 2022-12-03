@@ -71,12 +71,12 @@ class Skills:
         return Skills(**{skill.lvalue: value for skill in skills})
 
     @property
-    def enum_objects(self) -> list:
+    def enum_objects(self) -> list[SkillsEnum]:
         return [
             SkillsEnum[skill_name.upper()]
             for skill_name, value in asdict(self).items()
             if value
         ]
 
-    def display_non_zero(self):
+    def display_non_zero(self) -> str:
         return ', '.join((obj.description for obj in self.enum_objects))

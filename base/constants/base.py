@@ -35,7 +35,7 @@ class BaseNameValueDescriptionEnum(str, Enum):
         return result
 
     @classmethod
-    def generate_case(cls, field='name'):
+    def generate_case(cls, field='name') -> models.Case:
         kwargs = (
             {field: item.value, 'then': models.Value(item.description)} for item in cls
         )
@@ -43,7 +43,7 @@ class BaseNameValueDescriptionEnum(str, Enum):
         return models.Case(*whens, output_field=models.CharField())
 
     @classmethod
-    def generate_order_case(cls, field='name'):
+    def generate_order_case(cls, field='name') -> models.Case:
         kwargs = (
             {field: item.value, 'then': models.Value(index)}
             for index, item in enumerate(cls)
@@ -52,15 +52,15 @@ class BaseNameValueDescriptionEnum(str, Enum):
         return models.Case(*whens, output_field=models.IntegerField())
 
     @classmethod
-    def max_length(cls):
+    def max_length(cls) -> int:
         return max(len(item.value) for item in cls)
 
     @classmethod
-    def max_description_length(cls):
+    def max_description_length(cls) -> int:
         return max(len(item.description) for item in cls)
 
     @property
-    def lvalue(self):
+    def lvalue(self) -> str:
         return self.value.lower()
 
 
@@ -78,11 +78,11 @@ class IntDescriptionEnum(IntEnum):
         )
 
     @property
-    def lname(self):
+    def lname(self) -> str:
         return self.name.lower()
 
     @classmethod
-    def generate_case(cls, field='name'):
+    def generate_case(cls, field='name') -> models.Case:
         kwargs = ({field: item.name, 'then': models.Value(item.value)} for item in cls)
         whens = (models.When(**kws) for kws in kwargs)
         return models.Case(*whens, output_field=models.CharField())

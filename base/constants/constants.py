@@ -19,6 +19,7 @@ class AbilitiesEnum(BaseNameValueDescriptionEnum):
     CHARISMA = 'charisma', 'Харизма'
 
 
+# noinspection PyArgumentList
 class PowersVariables(str, Enum):
     def _generate_next_value_(name, start, count, last_values):
         return name.lower()

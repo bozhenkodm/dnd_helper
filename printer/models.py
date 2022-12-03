@@ -18,7 +18,7 @@ class PrintableObject(models.Model):
         blank=True,
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{self.name}'
 
     @property
@@ -68,7 +68,7 @@ class EncounterIcons(models.Model):
         default=Position.TOP_LEFT,
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     @property
@@ -76,5 +76,5 @@ class EncounterIcons(models.Model):
         return reverse('encounter_icon', kwargs={'pk': self.pk})
 
     @property
-    def font_size(self):
+    def font_size(self) -> int:
         return self.width // 4

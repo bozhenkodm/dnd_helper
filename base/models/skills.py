@@ -32,7 +32,7 @@ class NPCSkillMixin:
     half_level: int
 
     @property
-    def skill_mod_bonus(self):
+    def skill_mod_bonus(self) -> Skills:
         """
         Getting skill base ability modifier for every skill
         """
@@ -75,92 +75,92 @@ class NPCSkillMixin:
         )
 
     @property
-    def acrobatics(self):
+    def acrobatics(self) -> int:
         """Акробатика"""
         return self.skills.acrobatics
 
     @property
-    def arcana(self):
+    def arcana(self) -> int:
         """Магия"""
         return self.skills.arcana
 
     @property
-    def athletics(self):
+    def athletics(self) -> int:
         """Атлетика"""
         return self.skills.athletics
 
     @property
-    def bluff(self):
+    def bluff(self) -> int:
         """Обман"""
         return self.skills.bluff
 
     @property
-    def diplomacy(self):
+    def diplomacy(self) -> int:
         """Переговоры"""
         return self.skills.diplomacy
 
     @property
-    def dungeoneering(self):
+    def dungeoneering(self) -> int:
         """Подземелья"""
         return self.skills.dungeoneering
 
     @property
-    def endurance(self):
+    def endurance(self) -> int:
         """Выносливость"""
         return self.skills.endurance
 
     @property
-    def heal(self):
+    def heal(self) -> int:
         """Целительство"""
         return self.skills.heal
 
     @property
-    def history(self):
+    def history(self) -> int:
         """История"""
         return self.skills.history
 
     @property
-    def insight(self):
+    def insight(self) -> int:
         """Проницательность"""
         return self.skills.insight
 
     @property
-    def intimidate(self):
+    def intimidate(self) -> int:
         """Запугивание"""
         return self.skills.intimidate
 
     @property
-    def nature(self):
+    def nature(self) -> int:
         """Природа"""
         return self.skills.nature
 
     @property
-    def perception(self):
+    def perception(self) -> int:
         """Внимательность"""
         return self.skills.perception
 
     @property
-    def religion(self):
+    def religion(self) -> int:
         """Религия"""
         return self.skills.religion
 
     @property
-    def stealth(self):
+    def stealth(self) -> int:
         """Скрытность"""
         return self.skills.stealth
 
     @property
-    def streetwise(self):
+    def streetwise(self) -> int:
         """Знание_улиц"""
         return self.skills.streetwise
 
     @property
-    def thievery(self):
+    def thievery(self) -> int:
         """Воровство"""
         return self.skills.thievery
 
     @property
-    def skills_text(self):
+    def skills_text(self) -> list[str]:
         result = []
         ordinary_skills = self.skill_mod_bonus + Skills.init_with_const(
             SkillsEnum, self.half_level

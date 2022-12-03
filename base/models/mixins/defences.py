@@ -21,7 +21,7 @@ class NPCDefenceMixin:
         return self.shield.value
 
     @property
-    def _defence_level_bonus(self):
+    def _defence_level_bonus(self) -> int:
         return INITIAL_DEFENCE_VALUE + self.half_level + self._level_bonus
 
     @property
@@ -31,7 +31,7 @@ class NPCDefenceMixin:
         return self.neck_slot.defence_bonus  # type: ignore
 
     @property
-    def armor_class(self):
+    def armor_class(self) -> int:
         result = (
             self._defence_level_bonus
             + self.race_data_instance.armor_class
@@ -46,7 +46,7 @@ class NPCDefenceMixin:
         return result
 
     @property
-    def fortitude(self):
+    def fortitude(self) -> int:
         return (
             self._defence_level_bonus
             + max(map(modifier, (self.strength, self.constitution)))
@@ -61,7 +61,7 @@ class NPCDefenceMixin:
         )
 
     @property
-    def reflex(self):
+    def reflex(self) -> int:
         result = (
             self._defence_level_bonus
             + max(map(modifier, (self.dexterity, self.intelligence)))
@@ -77,7 +77,7 @@ class NPCDefenceMixin:
         return result
 
     @property
-    def will(self):
+    def will(self) -> int:
         return (
             self._defence_level_bonus
             + max(map(modifier, (self.wisdom, self.charisma)))

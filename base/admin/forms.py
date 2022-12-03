@@ -42,7 +42,7 @@ class NPCModelForm(forms.ModelForm):
         choices=SexEnum.generate_choices(is_sorted=False), label='Пол'
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if self.instance.id:
             klass_data_instance = self.instance.klass_data_instance
@@ -157,7 +157,7 @@ class NPCModelForm(forms.ModelForm):
 
     def check_shield_and_weapon_in_one_hand(
         self, secondary_hand, shield_is_in_hand: bool
-    ):
+    ) -> None:
         if secondary_hand and shield_is_in_hand:
             error = ValidationError('Нельзя удержать в одной руке оружие и щит')
             self.add_error('arms_slot', error)
@@ -165,7 +165,7 @@ class NPCModelForm(forms.ModelForm):
 
     def check_two_handed_weapon_held_with_two_hands(
         self, primary_hand, secondary_hand, shield_is_in_hand: bool
-    ):
+    ) -> None:
         if (
             primary_hand
             and primary_hand.data_instance.handedness == WeaponHandednessEnum.TWO
@@ -178,7 +178,7 @@ class NPCModelForm(forms.ModelForm):
             if shield_is_in_hand:
                 self.add_error('arms_slot', error)
 
-    def check_two_weapons_in_two_hands(self, primary_hand, secondary_hand):
+    def check_two_weapons_in_two_hands(self, primary_hand, secondary_hand) -> None:
         if (
             primary_hand
             and primary_hand.data_instance.handedness
@@ -219,7 +219,7 @@ class NPCModelForm(forms.ModelForm):
                     ),
                 )
 
-    def check_proper_sex(self):
+    def check_proper_sex(self) -> None:
         if 'race' in self.cleaned_data:
             if (
                 self.cleaned_data['race'].name == NPCRaceEnum.HAMADRYAD

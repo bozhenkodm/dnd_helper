@@ -74,7 +74,7 @@ class GenerateNameFormView(FormView):
 
     name = ''
 
-    def generate_name(self):
+    def generate_name(self) -> str:
         return self.name
 
     def get_initial(self):
@@ -90,7 +90,7 @@ class GenerateNameFormView(FormView):
 class FantasyNameView(GenerateNameFormView):
     success_url = reverse_lazy('generator_fantasy_name')
 
-    def generate_name(self):
+    def generate_name(self) -> str:
         if self.name:
             return self.name
         name = random.choice(names.split()).lower()
@@ -120,7 +120,7 @@ class RandomNameView(GenerateNameFormView):
     consolants = 'бвгджзклмнпрстфхцчш'
     success_url = reverse_lazy('random_fantasy_name')
 
-    def generate_name(self):
+    def generate_name(self) -> str:
         if self.name:
             return self.name
         self.name = ''.join(
