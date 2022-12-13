@@ -79,4 +79,6 @@ class Skills:
         ]
 
     def display_non_zero(self) -> str:
-        return ', '.join((obj.description for obj in self.enum_objects))
+        return ', '.join(
+            (obj.description for obj in self.enum_objects)  # type: ignore[attr-defined]
+        )

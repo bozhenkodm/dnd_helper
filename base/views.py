@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import View
@@ -46,7 +47,7 @@ class EncounterDetailView(DetailView):
 
 
 class EncounterChangeInitiativeView(View):
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs) -> HttpResponse:
         form = EncounterChangeInitiativeForm(request.POST, pk=kwargs.get('pk'))
         if form.is_valid():
             participant: EncounterParticipants = form.cleaned_data['participant']

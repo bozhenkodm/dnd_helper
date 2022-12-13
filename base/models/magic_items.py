@@ -46,7 +46,7 @@ class MagicItemType(models.Model):
     )
     properties = models.JSONField(null=True)
 
-    def __str__(self) -> None:
+    def __str__(self) -> str:
         return self.name
 
     def level_range(self):

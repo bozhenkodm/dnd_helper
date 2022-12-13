@@ -16,7 +16,7 @@ format:
 
 lint:
 	poetry run flake8
-	#poetry run mypy . #TODO uncomment after django-stubs fix
+	poetry run mypy .
 
 
 shell:

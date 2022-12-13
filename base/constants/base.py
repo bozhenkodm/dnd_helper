@@ -37,7 +37,11 @@ class BaseNameValueDescriptionEnum(str, Enum):
     @classmethod
     def generate_case(cls, field='name') -> models.Case:
         kwargs = (
-            {field: item.value, 'then': models.Value(item.description)} for item in cls
+            {
+                field: item.value,  # type: ignore[attr-defined]
+                'then': models.Value(item.description),  # type: ignore[attr-defined]
+            }
+            for item in cls
         )
         whens = (models.When(**kws) for kws in kwargs)
         return models.Case(*whens, output_field=models.CharField())
@@ -45,7 +49,10 @@ class BaseNameValueDescriptionEnum(str, Enum):
     @classmethod
     def generate_order_case(cls, field='name') -> models.Case:
         kwargs = (
-            {field: item.value, 'then': models.Value(index)}
+            {
+                field: item.value,  # type: ignore[attr-defined]
+                'then': models.Value(index),
+            }
             for index, item in enumerate(cls)
         )
         whens = (models.When(**kws) for kws in kwargs)
@@ -57,7 +64,7 @@ class BaseNameValueDescriptionEnum(str, Enum):
 
     @classmethod
     def max_description_length(cls) -> int:
-        return max(len(item.description) for item in cls)
+        return max(len(item.description) for item in cls)  # type: ignore[attr-defined]
 
     @property
     def lvalue(self) -> str:

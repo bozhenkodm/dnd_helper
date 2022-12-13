@@ -9,6 +9,8 @@ from base.constants.constants import (
     WeaponHandednessEnum,
 )
 
+RangedLoadAction = Literal[PowerActionTypeEnum.FREE, PowerActionTypeEnum.MINOR, None]
+
 
 @dataclass
 class WeaponType:
@@ -32,20 +34,16 @@ class WeaponType:
     is_heavy_thrown: ClassVar[bool] = False
     is_high_crit: ClassVar[bool] = False
     is_reach: ClassVar[bool] = False
-    load: ClassVar[
-        Literal[PowerActionTypeEnum.FREE, PowerActionTypeEnum.MINOR] | None
-    ] = None
+    load: ClassVar[RangedLoadAction] = None
     is_small: ClassVar[bool] = False
     is_defensive: ClassVar[bool] = False
 
     @classmethod
-    @property
     def slug(cls):
         return cls.__name__
 
     @classmethod
-    @property
-    def properties(cls) -> dict[str, int | bool]:
+    def properties(cls) -> dict[str, int | bool | RangedLoadAction]:
         return {
             'brutal': cls.brutal,
             'off_hand': cls.is_off_hand,

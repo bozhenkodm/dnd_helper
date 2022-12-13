@@ -801,6 +801,7 @@ class SorcererClass(NPCClass):
             return self.npc._level_bonus + self.npc.strength + 2 * self.npc._tier
         elif self.npc.subclass == self.SubclassEnum.WILD_MAGIC:
             return self.npc._level_bonus + self.npc.dexterity + 2 * self.npc._tier
+        return 0
 
     @property
     def _armor_class_ability_bonus(self) -> int:
@@ -884,6 +885,7 @@ class HexbladeClass(WarlockClass):
             return (AnnihilationBlade,)
         if self.npc.subclass == self.SubclassEnum.GLOOM_PACT:
             return (ExquisiteAgonyScourge,)
+        return ()
 
     @property
     def damage_bonus(self) -> int:

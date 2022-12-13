@@ -1,3 +1,5 @@
+from typing import Any
+
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.core.exceptions import ValidationError
@@ -237,7 +239,7 @@ class NPCModelForm(forms.ModelForm):
                 self.add_error('sex', error)
                 self.add_error('race', error)
 
-    def clean(self):
+    def clean(self) -> dict[str, Any] | None:
         self.instance: NPC
         if not self.instance.id:
             return super().clean()

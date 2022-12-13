@@ -163,9 +163,12 @@ class NPCSkillMixin:
     def skills_text(self) -> list[str]:
         result = []
         ordinary_skills = self.skill_mod_bonus + Skills.init_with_const(
-            SkillsEnum, self.half_level
+            SkillsEnum.sequence(), self.half_level
         )
         for skill, value in asdict(self.skills).items():
             if getattr(ordinary_skills, skill) != value:
-                result.append(f'{SkillsEnum[skill.upper()].description} +{value}')
+                description = SkillsEnum[
+                    skill.upper()
+                ].description  # type: ignore[attr-defined]
+                result.append(f'{description}' f' +{value}')
         return sorted(result)

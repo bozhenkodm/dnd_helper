@@ -1,12 +1,23 @@
 from base.constants.constants import NPCClassEnum, ShieldTypeIntEnum
 from base.helpers import modifier
 from base.objects.npc_classes import NPCClass
+from base.objects.races import Race
 
 INITIAL_DEFENCE_VALUE = 10
 
 
 class NPCDefenceMixin:
     klass_data_instance: NPCClass
+    race_data_instance: Race
+    half_level: int
+    _level_bonus: int
+    _tier: int
+    strength: int
+    constitution: int
+    dexterity: int
+    intelligence: int
+    wisdom: int
+    charisma: int
 
     @property
     def shield(self) -> ShieldTypeIntEnum:
