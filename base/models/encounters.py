@@ -136,7 +136,6 @@ class Encounter(models.Model):
 
 
 class EncounterParticipants(models.Model):
-
     objects = EncounterParticipantsQuerySet.as_manager()
 
     encounter = models.ForeignKey(

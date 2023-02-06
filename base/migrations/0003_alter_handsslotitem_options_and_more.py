@@ -6,7 +6,6 @@ import base.constants.constants
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('base', '0002_delete_handsslotitem_npc_no_hand_handsslotitem_and_more'),
     ]

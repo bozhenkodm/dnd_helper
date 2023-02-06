@@ -7,7 +7,6 @@ import base.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('base', '0031_alter_npc_is_bonus_applied'),
     ]

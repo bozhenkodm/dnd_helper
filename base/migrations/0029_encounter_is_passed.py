@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('base', '0028_alter_ability_title_alter_npc_base_attack_ability_and_more'),
     ]

@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('base', '0010_rename_hands_slot_npc_gloves_slot'),
     ]

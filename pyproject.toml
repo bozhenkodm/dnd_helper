@@ -15,11 +15,11 @@ django-multiselectfield = "^0.1.12"
 pillow = "^9.0.0"
 
 [tool.poetry.dev-dependencies]
-black = "^22"
+black = "^23"
 isort = "^5.7.0"
 ipython = "^8.0.0"
 flake8 = "^6.0.0"
-mypy = "^0.991"
+mypy = "^1.0"
 django-stubs = "^1.9.0"
 
 [tool.black]

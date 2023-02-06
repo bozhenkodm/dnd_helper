@@ -11,7 +11,6 @@ import base.models.skills
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = []

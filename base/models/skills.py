@@ -26,7 +26,6 @@ class Skill(models.Model):
 
 
 class NPCSkillMixin:
-
     race_data_instance: Race
     klass_data_instance: NPCClass
     half_level: int

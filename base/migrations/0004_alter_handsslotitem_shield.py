@@ -6,7 +6,6 @@ import base.constants.constants
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('base', '0003_alter_handsslotitem_options_and_more'),
     ]

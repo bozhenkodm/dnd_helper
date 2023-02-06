@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('base', '0022_rename_tained_skills_key_npc_trained_skills'),
     ]

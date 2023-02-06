@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('base', '0005_delete_armsslotitem_armsslotitem2_and_more'),
     ]

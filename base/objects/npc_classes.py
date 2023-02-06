@@ -877,6 +877,10 @@ class HexbladeClass(WarlockClass):
             result += (ArmorTypeIntEnum.SCALE,)
         return result
 
+    @available_armor_types.setter
+    def available_armor_types(self, value):
+        pass
+
     @property
     def available_weapon_types(self) -> Sequence[Type[WeaponType]]:
         if self.npc.subclass == self.SubclassEnum.FEY_PACT:

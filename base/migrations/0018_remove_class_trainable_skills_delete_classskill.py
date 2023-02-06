@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('base', '0017_rename_abilitymodel_ability_rename_skillmodel_skill'),
     ]

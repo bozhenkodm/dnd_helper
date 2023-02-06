@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('base', '0025_rename_var_bonus_ability_npc_var_bonus_ability_old'),
     ]

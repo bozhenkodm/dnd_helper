@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('base', '0016_classskill_class_trainable_skills_classskill_klass_and_more'),
     ]

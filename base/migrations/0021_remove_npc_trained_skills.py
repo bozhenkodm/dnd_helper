@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('base', '0020_alter_skill_options_npc_tained_skills_key_and_more'),
     ]
