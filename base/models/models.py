@@ -82,7 +82,10 @@ class WeaponType(models.Model):
 
     @cached_property
     def data_instance(self):
-        return weapon_types_classes.get(self.slug)()
+        try:
+            return weapon_types_classes.get(self.slug)()
+        except TypeError:
+            return weapon_types_classes.get(self.slug.capitalize())()
 
     def damage(self, weapon_number=1) -> str:
         return (
@@ -624,5 +627,4 @@ class NPC(
                         ],
                     ).asdict()
                 )
-
         return sorted(powers, key=lambda x: x['frequency_order'])

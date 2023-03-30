@@ -544,6 +544,7 @@ class ArmorAdmin(admin.ModelAdmin):
     )
     readonly_fields = ('armor_class',)
     form = ArmorForm
+    ordering = ('-level', 'armor_type')
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'magic_item_type':
@@ -567,7 +568,8 @@ class ArmorAdmin(admin.ModelAdmin):
                     field='armor_type'
                 )
             )
-            .order_by('displayed_name', 'level')
+            # .order_by('armor_type', 'level')
+            # .order_by('displayed_name', 'level')
         )
 
 
@@ -645,7 +647,7 @@ class WeaponAdmin(admin.ModelAdmin):
         'damage',
     )
     list_display = ('__str__',)
-    search_fields = ('magic_item__name', 'weapon_type__name')
+    search_fields = ['magic_item_type__name', 'weapon_type__name']
     autocomplete_fields = ('weapon_type',)
     form = WeaponForm
 

@@ -17,6 +17,7 @@ from base.constants.constants import (
     PowerRangeTypeEnum,
     PowersVariables,
 )
+from base.exceptions import PowerInconsistent
 from base.fields import MultiSelectField  # type: ignore
 from base.managers import PowerQueryset
 from base.objects.dice import DiceRoll
@@ -247,30 +248,33 @@ class Power(models.Model):
                 f'Зональная {self.get_range_type_display().lower()} '
                 f'{self.burst} в пределах {self.range}'
             )
-        raise ValueError(_('Wrong attack type'))
+        raise PowerInconsistent(_('Wrong attack type'))
 
     def keywords(self, weapon=None):
         if self.frequency == PowerFrequencyEnum.PASSIVE:
             return ''
-        return filter(
-            None,
-            (
-                self.get_action_type_display(),
-                self.get_accessory_type_display() if self.accessory_type else '',
-                self.get_frequency_display(),
-                self.attack_type(weapon),
+        try:
+            return filter(
+                None,
+                (
+                    self.get_action_type_display(),
+                    self.get_accessory_type_display() if self.accessory_type else '',
+                    self.get_frequency_display(),
+                    self.attack_type(weapon),
+                )
+                + tuple(
+                    PowerDamageTypeEnum[type_].description  # type: ignore
+                    for type_ in self.damage_type
+                    if type_ != PowerDamageTypeEnum.NONE
+                )
+                + tuple(
+                    PowerEffectTypeEnum[type_].description  # type: ignore
+                    for type_ in self.effect_type
+                    if type_ != PowerEffectTypeEnum.NONE
+                ),
             )
-            + tuple(
-                PowerDamageTypeEnum[type_].description  # type: ignore
-                for type_ in self.damage_type
-                if type_ != PowerDamageTypeEnum.NONE
-            )
-            + tuple(
-                PowerEffectTypeEnum[type_].description  # type: ignore
-                for type_ in self.effect_type
-                if type_ != PowerEffectTypeEnum.NONE
-            ),
-        )
+        except PowerInconsistent:
+            return 'Ошибка при создании таланта'
 
 
 class PowerProperty(models.Model):

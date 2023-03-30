@@ -82,9 +82,10 @@ class GenerateNameFormView(FormView):
         initial['name'] = self.generate_name()
         return initial
 
-    def form_valid(self, form):
-        form.save()
-        return super().form_valid(form)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['name'] = self.generate_name()
+        return context
 
 
 class FantasyNameView(GenerateNameFormView):
@@ -93,8 +94,8 @@ class FantasyNameView(GenerateNameFormView):
     def generate_name(self) -> str:
         if self.name:
             return self.name
-        name = random.choice(names.split()).lower()
-        replaced_letter_number = random.randint(1, 2)
+        name = random.choice(list(names)).lower()
+        replaced_letter_number = random.randint(0, 2)
         replaced_indexes = (
             random.randint(0, len(name) - 2) for _ in range(replaced_letter_number)
         )
@@ -109,10 +110,6 @@ class FantasyNameView(GenerateNameFormView):
         ).capitalize()
         return self.name
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['name'] = self.generate_name()
-        return context
 
 
 class RandomNameView(GenerateNameFormView):
@@ -128,10 +125,6 @@ class RandomNameView(GenerateNameFormView):
         ).capitalize()
         return self.name
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data()
-        context['name'] = self.generate_name()
-        return context
 
     def get_syllable(self):
         return (

@@ -1,0 +1,2 @@
+class PowerInconsistent(Exception):
+    pass

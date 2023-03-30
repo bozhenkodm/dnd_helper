@@ -1,3 +1,5 @@
+from typing import Protocol
+
 from base.constants.constants import NPCClassEnum, ShieldTypeIntEnum
 from base.helpers import modifier
 from base.objects.npc_classes import NPCClass
@@ -5,8 +7,7 @@ from base.objects.races import Race
 
 INITIAL_DEFENCE_VALUE = 10
 
-
-class NPCDefenceMixin:
+class NPCProtocol(Protocol):
     klass_data_instance: NPCClass
     race_data_instance: Race
     half_level: int
@@ -18,31 +19,62 @@ class NPCDefenceMixin:
     intelligence: int
     wisdom: int
     charisma: int
+    # armor:
+    arms_slot: "ArmsSlotItem"
+    neck_slot: "NeckSlotItem"
+    head_slot: "HeadSlotItem"
+    feet_slot: "FeetSlotItem"
+    waist_slot: "WaistSlotItem"
+    left_ring_slot: "RingsSlotItem"
+    right_ring_slot: "RingsSlotItem"
+    gloves_slot: "HandsSlotItem"
+    functional_template: "FunctionalTemplate"
+    klass: "Class"
+    race: "base.Race"
+    armor: "Armor"
 
     @property
-    def shield(self) -> ShieldTypeIntEnum:
-        if not self.arms_slot:  # type: ignore
-            return ShieldTypeIntEnum.NONE
-        return ShieldTypeIntEnum.get_by_value(self.arms_slot.shield)  # type: ignore
+    def _defence_level_bonus(self) -> int:
+        ...
 
     @property
     def _shield_bonus(self) -> int:
+        ...
+
+    @property
+    def shield(self) -> ShieldTypeIntEnum:
+        ...
+
+    @property
+    def _necklace_defence_bonus(self) -> int:
+        ...
+
+class NPCDefenceMixin:
+
+    @property
+    def shield(self: NPCProtocol) -> ShieldTypeIntEnum:
+        if not self.arms_slot:
+            return ShieldTypeIntEnum.NONE
+        return ShieldTypeIntEnum.get_by_value(self.arms_slot.shield)
+
+    @property
+    def _shield_bonus(self: NPCProtocol) -> int:
         if self.shield not in self.klass_data_instance.available_shield_types:
             return 0
         return self.shield.value
 
     @property
-    def _defence_level_bonus(self) -> int:
+    def _defence_level_bonus(self: NPCProtocol) -> int:
         return INITIAL_DEFENCE_VALUE + self.half_level + self._level_bonus
 
     @property
-    def _necklace_defence_bonus(self) -> int:
-        if not self.neck_slot:  # type: ignore
+    def _necklace_defence_bonus(self: NPCProtocol) -> int:
+        if not self.neck_slot:
             return 0
-        return self.neck_slot.defence_bonus  # type: ignore
+        return self.neck_slot.defence_bonus
 
     @property
-    def armor_class(self) -> int:
+    def armor_class(self: NPCProtocol) -> int:
         result = (
             self._defence_level_bonus
             + self.race_data_instance.armor_class
@@ -57,7 +89,7 @@ class NPCDefenceMixin:
         return result
 
     @property
-    def fortitude(self) -> int:
+    def fortitude(self: NPCProtocol) -> int:
         return (
             self._defence_level_bonus
             + max(map(modifier, (self.strength, self.constitution)))
@@ -72,7 +104,7 @@ class NPCDefenceMixin:
         )
 
     @property
-    def reflex(self) -> int:
+    def reflex(self: NPCProtocol) -> int:
         result = (
             self._defence_level_bonus
             + max(map(modifier, (self.dexterity, self.intelligence)))
@@ -88,7 +120,7 @@ class NPCDefenceMixin:
         return result
 
     @property
-    def will(self) -> int:
+    def will(self: NPCProtocol) -> int:
         return (
             self._defence_level_bonus
             + max(map(modifier, (self.wisdom, self.charisma)))

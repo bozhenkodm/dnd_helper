@@ -485,6 +485,12 @@ class SeekerClass(NPCClass):
     slug = NPCClassEnum.SEEKER
     power_source = PowerSourceEnum.PRIMAL
     role = ClassRoleEnum.CONTROLLER
+    available_armor_types = (ArmorTypeIntEnum.CLOTH, ArmorTypeIntEnum.LEATHER)
+    available_weapon_categories = (WeaponCategoryIntEnum.SIMPLE, WeaponCategoryIntEnum.SIMPLE_RANGED, WeaponCategoryIntEnum.MILITARY_RANGED)
+    mandatory_skills = Skills(nature=5)
+    trainable_skills = Skills(acrobatics=5, athletics=5, endurance=5, heal=5, insight=5, intimidate=5, nature=5, perception=5, stealth=5)
+    _reflex = 1
+    _will = 1
     base_surges_per_day = 7
     base_attack_abilities = (AbilitiesEnum.WISDOM,)
 

@@ -9,7 +9,7 @@ authors = ["Dmitry Bozhenko"]
 version = "1.0.0"
 
 [tool.poetry.dependencies]
-python = "3.10.8"
+python = "^3.10"
 Django = "^4.0.0"
 django-multiselectfield = "^0.1.12"
 pillow = "^9.0.0"
