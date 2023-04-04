@@ -103,6 +103,7 @@ class NPCClassEnum(BaseNameValueDescriptionEnum):
     INVOKER = 'invoker', 'Апостол'
     ARTIFICER = 'artificer', 'Артефактор'
     BARD = 'bard', 'Бард'
+    BLADESINGER = 'bladesinger', 'Блэйдсингер'
     VAMPIRE = 'vampire', 'Вампир'
     BARBARIAN = 'barbarian', 'Варвар'
     WARLORD = 'warlord', 'Военачальник'
@@ -275,7 +276,7 @@ class PowerFrequencyEnum(BaseNameValueDescriptionEnum):
     PASSIVE = 'PASSIVE', 'Пассивный'
     AT_WILL = 'AT_WILL', 'Неограниченный'
     ENCOUNTER = 'ENCOUNTER', 'На сцену'
-    DAYLY = 'DAYLY', 'На день'
+    DAILY = 'DAILY', 'На день'
 
 
 class PowerDamageTypeEnum(BaseNameValueDescriptionEnum):

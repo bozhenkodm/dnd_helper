@@ -371,6 +371,7 @@ class MagicItemTypeForm(forms.ModelForm):
     resist_thunder = forms.CharField(required=False, label='Звук')
     resist_force = forms.CharField(required=False, label='Силовое поле')
 
+    # Bonuses to saving throws
     save_charm = forms.CharField(required=False, label='Очарование')
     save_conjuration = forms.CharField(required=False, label='Иллюзия')
     save_fear = forms.CharField(required=False, label='Страх')

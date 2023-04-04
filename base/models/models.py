@@ -559,6 +559,7 @@ class NPC(
                     category=power.category(),
                     description=self.parse_string(power, string=power.description),
                     frequency_order=power.frequency_order,
+                    frequency=power.frequency.lower(),
                     properties=[
                         PowerPropertyDisplay(
                             title=prop.get_displayed_title(),
@@ -584,6 +585,7 @@ class NPC(
                         category=power.category(weapon),
                         description=self.parse_string(power, power.description),
                         frequency_order=power.frequency_order,
+                        frequency=power.frequency.lower(),
                         properties=[
                             PowerPropertyDisplay(
                                 **{
@@ -611,6 +613,7 @@ class NPC(
                             power, power.description, item=item
                         ),
                         frequency_order=power.frequency_order,
+                        frequency=power.frequency.lower(),
                         properties=[
                             PowerPropertyDisplay(
                                 **{

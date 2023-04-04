@@ -15,6 +15,7 @@ class PowerDisplay:
     category: str
     description: str
     frequency_order: int
+    frequency: str
     properties: list[PowerPropertyDisplay]
 
     def asdict(self):

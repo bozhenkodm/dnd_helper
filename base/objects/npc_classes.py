@@ -890,11 +890,11 @@ class HexbladeClass(WarlockClass):
     @property
     def available_weapon_types(self) -> Sequence[Type[WeaponType]]:
         if self.npc.subclass == self.SubclassEnum.FEY_PACT:
-            return (WinterMourningBlade,)
+            return WinterMourningBlade,
         if self.npc.subclass == self.SubclassEnum.INFERNAL_PACT:
-            return (AnnihilationBlade,)
+            return AnnihilationBlade,
         if self.npc.subclass == self.SubclassEnum.GLOOM_PACT:
-            return (ExquisiteAgonyScourge,)
+            return ExquisiteAgonyScourge,
         return ()
 
     @property
@@ -914,7 +914,6 @@ class HexbladeClass(WarlockClass):
         if self.npc.subclass == self.SubclassEnum.STAR_PACT:
             damage_modifier = self.npc.int_mod
         return base_bonus + (
-            self.npc._level_bonus
             + ((self.npc.level - 5) // 10) * 2
             + 2
             + damage_modifier
@@ -963,3 +962,20 @@ class MonkClass(NPCClass):
         if self.npc.subclass == self.SubclassEnum.STONE_FIST:
             return self.npc._tier + 2
         return 1
+
+
+class BladeSingerClass(WizardClass):
+    slug = NPCClassEnum.BLADESINGER
+    power_source = PowerSourceEnum.ARCANE
+    role = ClassRoleEnum.CONTROLLER
+    available_armor_types = (ArmorTypeIntEnum.CLOTH, ArmorTypeIntEnum.LEATHER)
+    available_weapon_categories = (WeaponCategoryIntEnum.SIMPLE, WeaponCategoryIntEnum.SIMPLE_RANGED, WeaponCategoryIntEnum.MILITARY, WeaponCategoryIntEnum.MILITARY_RANGED)
+    available_implement_types = (Wand, Sphere, Quaterstaff)
+
+    hit_points_per_level = 6
+    mandatory_skills = Skills(arcana=5)
+    trainable_skills = Skills(
+        acrobatics=5, athletics=5, intimidate=5, history=5, diplomacy=5, nature=5, perception=5
+    )
+    _will = 2
+    base_attack_abilities = (AbilitiesEnum.INTELLIGENCE,)

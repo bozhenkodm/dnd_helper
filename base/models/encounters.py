@@ -107,7 +107,7 @@ class Encounter(models.Model):
             participants.append(
                 EncounterParticipants(
                     encounter=self,
-                    name=npc.name,
+                    name=f"{npc.name}, {npc.klass}",
                     initiative=npc.initiative + DiceIntEnum.D20.roll(),
                     ac=npc.armor_class,
                     fortitude=npc.fortitude,

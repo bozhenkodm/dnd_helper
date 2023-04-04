@@ -5,7 +5,7 @@ class PrintableObjectType(BaseNameValueDescriptionEnum):
     ITEM = 'ITEM', 'Магический предмет'
     AT_WILL = 'AT_WILL', 'Неограниченный талант'
     ENCOUNTER = 'ENCOUNTER', 'Талант на сцену'
-    DAYLY = 'DAYLY', 'Талант на день'
+    DAILY = 'DAILY', 'Талант на день'
 
 
 class ColorsStyle(BaseNameValueDescriptionEnum):

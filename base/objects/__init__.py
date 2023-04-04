@@ -53,6 +53,7 @@ classes_tuple = (
     npc_classes.AvengerClass,
     npc_classes.BarbarianClass,
     npc_classes.BardClass,
+    npc_classes.BladeSingerClass,
     npc_classes.DruidClass,
     npc_classes.FighterClass,
     npc_classes.HexbladeClass,

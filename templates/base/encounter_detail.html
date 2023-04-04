@@ -67,7 +67,7 @@
 {% endfor %}
 </table>
 </div>
-
+<br>
 <div class="noprint">
     <form action="{% url 'encounter-change' pk=object.id %}" method="post">
         {% csrf_token %}

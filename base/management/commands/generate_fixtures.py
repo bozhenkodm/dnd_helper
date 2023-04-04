@@ -83,7 +83,7 @@ def generate_weapon_types_fixtures():
     max_pk = get_max_pk(WeaponType) + 1
     for weapon_type in weapon_types_tuple:
         try:
-            pk = WeaponType.objects.get(slug=weapon_type.slug).pk
+            pk = WeaponType.objects.get(slug=weapon_type.__name__).pk
         except WeaponType.DoesNotExist:
             pk = max_pk
             max_pk += 1
@@ -91,7 +91,7 @@ def generate_weapon_types_fixtures():
             {
                 "model": "base.weapontype",
                 "pk": pk,
-                "fields": {"name": weapon_type.name, "slug": weapon_type.slug},
+                "fields": {"name": weapon_type.name, "slug": weapon_type.__name__},
             }
         )
     with open(os.path.join(FIXTURE_PATH, 'weapon_types.json'), 'w') as f:
