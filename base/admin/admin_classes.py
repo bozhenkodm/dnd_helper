@@ -858,12 +858,25 @@ itl - бонус предмета, к которому принадлежит т
                 property.save()
 
 
+class FunctionalTemplateInline(admin.StackedInline):
+    model = Power
+    readonly_fields = ('name',)
+    fields = ('name',)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
 class FunctionalTemplateAdmin(admin.ModelAdmin):
     fields = (
         ('title', 'min_level'),
         ('armor_class_bonus', 'fortitude_bonus', 'reflex_bonus', 'will_bonus'),
         ('save_bonus', 'action_points_bonus', 'hit_points_per_level'),
     )
+    inlines = (FunctionalTemplateInline,)
 
 
 class PlayerCharactersAdmin(admin.ModelAdmin):

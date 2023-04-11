@@ -64,10 +64,11 @@ class NPCClass:
     )
     available_weapon_types: ClassVar[Sequence[Type[WeaponType]]] = ()
     available_implement_types: ClassVar[Sequence[Type[WeaponType]]] = ()
-    hit_points_per_level: ClassVar[int] = 8
+    hit_points_per_level_npc: ClassVar[int] = 8
+    hit_points_per_level_pc: ClassVar[int] = 5
 
-    # class SubclassEnum(IntDescriptionSubclassEnum):
-    #     pass
+    class SubclassEnum(IntDescriptionSubclassEnum):
+        pass
 
     def __init__(self, npc):
         self.npc = npc
@@ -135,7 +136,8 @@ class InvokerClass(NPCClass):
         Rod,
         Quaterstaff,
     )
-    hit_points_per_level = 6
+    hit_points_per_level_npc = 6
+    hit_points_per_level_pc = 4
     base_attack_abilities = (AbilitiesEnum.WISDOM,)
 
 
@@ -270,7 +272,8 @@ class BarbarianClass(NPCClass):
     )
     _fortitude = 2
     base_surges_per_day = 8
-    hit_points_per_level = 10
+    hit_points_per_level_npc = 10
+    hit_points_per_level_pc = 6
     base_attack_abilities = (AbilitiesEnum.STRENGTH,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -348,6 +351,7 @@ class FighterClass(NPCClass):
     trainable_skills = Skills(
         athletics=5, endurance=5, intimidate=5, streetwise=5, heal=5
     )
+    hit_points_per_level_pc = 6
     base_attack_abilities = (AbilitiesEnum.STRENGTH,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -419,7 +423,8 @@ class WizardClass(NPCClass):
     available_weapon_categories = ()
     available_weapon_types = (Dagger, Quaterstaff)
     available_implement_types = (Wand, Sphere, Quaterstaff)
-    hit_points_per_level = 6
+    hit_points_per_level_npc = 6
+    hit_points_per_level_pc = 4
     mandatory_skills = Skills(arcana=5)
     trainable_skills = Skills(
         history=5, diplomacy=5, dungeoneering=5, nature=5, insight=5, religion=5
@@ -486,9 +491,23 @@ class SeekerClass(NPCClass):
     power_source = PowerSourceEnum.PRIMAL
     role = ClassRoleEnum.CONTROLLER
     available_armor_types = (ArmorTypeIntEnum.CLOTH, ArmorTypeIntEnum.LEATHER)
-    available_weapon_categories = (WeaponCategoryIntEnum.SIMPLE, WeaponCategoryIntEnum.SIMPLE_RANGED, WeaponCategoryIntEnum.MILITARY_RANGED)
+    available_weapon_categories = (
+        WeaponCategoryIntEnum.SIMPLE,
+        WeaponCategoryIntEnum.SIMPLE_RANGED,
+        WeaponCategoryIntEnum.MILITARY_RANGED,
+    )
     mandatory_skills = Skills(nature=5)
-    trainable_skills = Skills(acrobatics=5, athletics=5, endurance=5, heal=5, insight=5, intimidate=5, nature=5, perception=5, stealth=5)
+    trainable_skills = Skills(
+        acrobatics=5,
+        athletics=5,
+        endurance=5,
+        heal=5,
+        insight=5,
+        intimidate=5,
+        nature=5,
+        perception=5,
+        stealth=5,
+    )
     _reflex = 1
     _will = 1
     base_surges_per_day = 7
@@ -497,6 +516,20 @@ class SeekerClass(NPCClass):
     class SubclassEnum(IntDescriptionSubclassEnum):
         SPIRITBOND = 1, 'Духовная связь'
         BLOODBOND = 2, 'Кровавая связь'
+
+    def attack_bonus(self, weapon=None, is_implement: bool = False) -> int:
+        result = super().attack_bonus(weapon, is_implement)
+        if self.npc.subclass == self.SubclassEnum.SPIRITBOND and (
+            weapon.data_instance.is_light_thrown or weapon.data_instance.is_heavy_thrown
+        ):
+            return result + 1
+        return result
+
+    def _armor_class_ability_bonus(self) -> int:
+        result = super()._armor_class_ability_bonus
+        if self.npc.subclass == self.SubclassEnum.SPIRITBOND:
+            result = max(self.npc.str_mod, result)
+        return result
 
 
 class AvengerClass(NPCClass):
@@ -590,6 +623,7 @@ class SwordmageClass(NPCClass):
         athletics=5, endurance=5, intimidate=5, history=5, diplomacy=5, insight=5
     )
     _will = 2
+    hit_points_per_level_pc = 6
     base_surges_per_day = 8
     base_attack_abilities = (AbilitiesEnum.INTELLIGENCE,)
 
@@ -634,6 +668,7 @@ class PaladinClass(NPCClass):
     _fortitude = 1
     _reflex = 1
     _will = 1
+    hit_points_per_level_pc = 6
     base_surges_per_day = 10
     base_attack_abilities = (AbilitiesEnum.STRENGTH, AbilitiesEnum.CHARISMA)
 
@@ -766,7 +801,8 @@ class WardenClass(NPCClass):
     trainable_skills = Skills(
         athletics=5, perception=5, endurance=5, intimidate=5, dungeoneering=5, heal=5
     )
-    hit_points_per_level = 10
+    hit_points_per_level_npc = 10
+    hit_points_per_level_pc = 7
     _fortitude = 1
     _will = 1
     base_surges_per_day = 9
@@ -890,11 +926,11 @@ class HexbladeClass(WarlockClass):
     @property
     def available_weapon_types(self) -> Sequence[Type[WeaponType]]:
         if self.npc.subclass == self.SubclassEnum.FEY_PACT:
-            return WinterMourningBlade,
+            return (WinterMourningBlade,)
         if self.npc.subclass == self.SubclassEnum.INFERNAL_PACT:
-            return AnnihilationBlade,
+            return (AnnihilationBlade,)
         if self.npc.subclass == self.SubclassEnum.GLOOM_PACT:
-            return ExquisiteAgonyScourge,
+            return (ExquisiteAgonyScourge,)
         return ()
 
     @property
@@ -913,11 +949,7 @@ class HexbladeClass(WarlockClass):
             damage_modifier = self.npc.con_mod
         if self.npc.subclass == self.SubclassEnum.STAR_PACT:
             damage_modifier = self.npc.int_mod
-        return base_bonus + (
-            + ((self.npc.level - 5) // 10) * 2
-            + 2
-            + damage_modifier
-        )
+        return base_bonus + (+((self.npc.level - 5) // 10) * 2 + 2 + damage_modifier)
 
 
 class MonkClass(NPCClass):
@@ -969,13 +1001,24 @@ class BladeSingerClass(WizardClass):
     power_source = PowerSourceEnum.ARCANE
     role = ClassRoleEnum.CONTROLLER
     available_armor_types = (ArmorTypeIntEnum.CLOTH, ArmorTypeIntEnum.LEATHER)
-    available_weapon_categories = (WeaponCategoryIntEnum.SIMPLE, WeaponCategoryIntEnum.SIMPLE_RANGED, WeaponCategoryIntEnum.MILITARY, WeaponCategoryIntEnum.MILITARY_RANGED)
+    available_weapon_categories = (
+        WeaponCategoryIntEnum.SIMPLE,
+        WeaponCategoryIntEnum.SIMPLE_RANGED,
+        WeaponCategoryIntEnum.MILITARY,
+        WeaponCategoryIntEnum.MILITARY_RANGED,
+    )
     available_implement_types = (Wand, Sphere, Quaterstaff)
 
-    hit_points_per_level = 6
+    hit_points_per_level_npc = 6
     mandatory_skills = Skills(arcana=5)
     trainable_skills = Skills(
-        acrobatics=5, athletics=5, intimidate=5, history=5, diplomacy=5, nature=5, perception=5
+        acrobatics=5,
+        athletics=5,
+        intimidate=5,
+        history=5,
+        diplomacy=5,
+        nature=5,
+        perception=5,
     )
     _will = 2
     base_attack_abilities = (AbilitiesEnum.INTELLIGENCE,)

@@ -191,7 +191,7 @@ class Power(models.Model):
             return 'Пассивный'
         if self.klass:
             return self.klass.get_name_display()
-        raise ValueError('Power unproperly configured')
+        raise ValueError('Power improperly configured')
 
     def attack_type(self, weapon=None):
         if (

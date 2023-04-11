@@ -111,7 +111,6 @@ class FantasyNameView(GenerateNameFormView):
         return self.name
 
 
-
 class RandomNameView(GenerateNameFormView):
     vovels = 'аеиоуэ'
     consolants = 'бвгджзклмнпрстфхцчш'
@@ -124,7 +123,6 @@ class RandomNameView(GenerateNameFormView):
             self.get_syllable() for _ in range(random.randint(1, 4))
         ).capitalize()
         return self.name
-
 
     def get_syllable(self):
         return (

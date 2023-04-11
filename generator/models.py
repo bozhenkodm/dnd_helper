@@ -79,5 +79,6 @@ class NPCName(models.Model):
             key=lambda x: x[0],
         )
 
+
 class BannedNamesVariants(models.Model):
     name = models.CharField(max_length=30, verbose_name='Имя', unique=True, null=False)

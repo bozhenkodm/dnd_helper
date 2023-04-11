@@ -7,6 +7,7 @@ from base.objects.races import Race
 
 INITIAL_DEFENCE_VALUE = 10
 
+
 class NPCProtocol(Protocol):
     klass_data_instance: NPCClass
     race_data_instance: Race
@@ -49,8 +50,8 @@ class NPCProtocol(Protocol):
     def _necklace_defence_bonus(self) -> int:
         ...
 
-class NPCDefenceMixin:
 
+class NPCDefenceMixin:
     @property
     def shield(self: NPCProtocol) -> ShieldTypeIntEnum:
         if not self.arms_slot:
