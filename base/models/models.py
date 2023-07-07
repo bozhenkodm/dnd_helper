@@ -377,9 +377,9 @@ class NPC(
         else:
             hit_points_per_level = self.klass_data_instance.hit_points_per_level_pc
         result = (
-                hit_points_per_level * self.level
-                + self.constitution
-                + self.klass_data_instance.hit_points_bonus
+            hit_points_per_level * self.level
+            + self.constitution
+            + self.klass_data_instance.hit_points_bonus
         )
         if self.functional_template:
             result += (

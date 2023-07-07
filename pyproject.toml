@@ -9,10 +9,10 @@ authors = ["Dmitry Bozhenko"]
 version = "1.0.0"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.11"
 Django = "^4.0.0"
 django-multiselectfield = "^0.1.12"
-pillow = "^9.0.0"
+pillow = "^10.0.0"
 
 [tool.poetry.dev-dependencies]
 black = "^23"
@@ -20,7 +20,7 @@ isort = "^5.7.0"
 ipython = "^8.0.0"
 flake8 = "^6.0.0"
 mypy = "^1.0"
-django-stubs = "^1.9.0"
+django-stubs = "^4.0.0"
 
 [tool.black]
 include = '\.py$'
