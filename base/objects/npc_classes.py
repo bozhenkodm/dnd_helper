@@ -525,6 +525,7 @@ class SeekerClass(NPCClass):
             return result + 1
         return result
 
+    @property
     def _armor_class_ability_bonus(self) -> int:
         result = super()._armor_class_ability_bonus
         if self.npc.subclass == self.SubclassEnum.SPIRITBOND:

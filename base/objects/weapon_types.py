@@ -94,7 +94,6 @@ class WeaponType:
 
 class ImplementType(WeaponType):
     name: ClassVar[str]
-    slug: ClassVar[str]
     category = WeaponCategoryIntEnum.IMPLEMENT
     damage_dice = None
     handedness = WeaponHandednessEnum.ONE
@@ -102,6 +101,16 @@ class ImplementType(WeaponType):
     range: ClassVar[int] = 0
     is_off_hand: ClassVar[bool] = True
     is_no_hand: ClassVar[bool] = False
+
+    @classmethod
+    def slug(cls):
+        snake_case = ""
+        for i, char in enumerate(cls.__name__):
+            if i > 0 and char.isupper():
+                snake_case += "_" + char.lower()
+            else:
+                snake_case += char.lower()
+        return snake_case
 
 
 class LongSword(WeaponType):
@@ -710,33 +719,27 @@ class RitualSickle(Sickle):
 
 class KiFocus(ImplementType):
     name = 'Фокусировка ци'
-    slug = 'ki_focus'
     is_off_hand = False
     is_no_hand = True
 
 
 class Totem(ImplementType):
     name = 'Тотем'
-    slug = 'totem'
 
 
 class Wand(ImplementType):
     name = 'Волшебная палочка'
-    slug = 'wand'
 
 
 class Rod(ImplementType):
     name = 'Жезл'
-    slug = 'rod'
 
 
 class HolySymbol(ImplementType):
     name = 'Символ веры'
-    slug = 'holy_symbol'
     is_off_hand = False
     is_no_hand = True
 
 
 class Sphere(ImplementType):
     name = 'Сфера'
-    slug = 'sphere'

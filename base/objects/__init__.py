@@ -152,4 +152,4 @@ weapon_types_tuple = (
     weapon_types.Sphere,
 )
 
-weapon_types_classes = {cls.__name__: cls for cls in weapon_types_tuple}
+weapon_types_classes = {cls.slug(): cls for cls in weapon_types_tuple}

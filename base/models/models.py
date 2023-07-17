@@ -504,13 +504,7 @@ class NPC(
             if weapon.data_instance.is_pure_implement:
                 return False
             # checking match of power and weapon range type
-            if (
-                PowerRangeTypeEnum[power.range_type].is_melee_weapon
-                and weapon.data_instance.is_melee
-                or PowerRangeTypeEnum[power.range_type].is_ranged_weapon
-                and weapon.data_instance.is_ranged
-            ):
-                return True
+            return True
         return False
 
     @property

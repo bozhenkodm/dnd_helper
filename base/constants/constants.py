@@ -252,8 +252,9 @@ class WeaponHandednessEnum(BaseNameValueDescriptionEnum):
     VERSATILE = (
         'versatile',
         'Универсальное',
-    )  # one handed, but can be used with two hands
+    )  # one-handed, but can be used with two hands
     # (with +1 to damage, unless user is small)
+    FREE = 'free', 'Не занимает руки'  # ki and symbols of faith
 
 
 class PowerSourceEnum(BaseNameValueDescriptionEnum):

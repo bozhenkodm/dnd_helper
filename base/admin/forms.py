@@ -91,7 +91,7 @@ class NPCModelForm(forms.ModelForm):
             self.fields['no_hand'] = forms.ModelChoiceField(
                 queryset=Weapon.objects.select_related('weapon_type', 'magic_item_type')
                 .filter(
-                    weapon_type__slug__in=(KiFocus.slug, HolySymbol.slug)
+                    weapon_type__slug__in=(KiFocus.slug(), HolySymbol.slug())
                     # TODO make it type, put it in database and filter by it
                 )
                 .order_by('level', 'weapon_type__name', 'magic_item_type__name'),
@@ -239,9 +239,22 @@ class NPCModelForm(forms.ModelForm):
                 self.add_error('sex', error)
                 self.add_error('race', error)
 
+    def check_pc_without_functional_template(self):
+        if (
+            not self.cleaned_data['is_bonus_applied']
+            and self.cleaned_data['functional_template']
+        ):
+            message = (
+                'Неигровые персонажи без бонуса уровня '
+                'не могут иметь функциональный шаблон'
+            )
+            self.add_error('functional_template', message)
+            self.add_error('is_bonus_applied', message)
+
     def clean(self) -> dict[str, Any] | None:
         self.instance: NPC
         if not self.instance.id:
+            self.check_pc_without_functional_template()
             return super().clean()
         primary_hand = self.cleaned_data.get('primary_hand')
         secondary_hand = self.cleaned_data.get('secondary_hand')

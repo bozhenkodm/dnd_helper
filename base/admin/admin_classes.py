@@ -650,6 +650,7 @@ class WeaponAdmin(admin.ModelAdmin):
     search_fields = ['magic_item_type__name', 'weapon_type__name']
     autocomplete_fields = ('weapon_type',)
     form = WeaponForm
+    save_as = True
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'magic_item_type':
