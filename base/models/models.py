@@ -11,7 +11,6 @@ from base.constants.constants import (
     ArmorTypeIntEnum,
     NPCClassEnum,
     NPCRaceEnum,
-    PowerRangeTypeEnum,
     SexEnum,
 )
 from base.managers import WeaponTypeQuerySet

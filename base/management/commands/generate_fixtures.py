@@ -14,7 +14,7 @@ FIXTURE_PATH = os.path.join(
 
 
 def get_max_pk(mdl: models.Model) -> int:
-    return mdl.objects.latest('id').id
+    return mdl.objects.latest('id').id  # type: ignore
 
 
 def generate_race_fixtures():

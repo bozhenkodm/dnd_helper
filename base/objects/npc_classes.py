@@ -54,7 +54,7 @@ class NPCClass:
     mandatory_skills: ClassVar[Skills] = Skills()
     trainable_skills: ClassVar[Skills] = Skills()
     skill_bonuses: ClassVar[Skills] = Skills()
-    available_armor_types: ClassVar[Sequence[ArmorTypeIntEnum]] = (
+    _available_armor_types: ClassVar[Sequence[ArmorTypeIntEnum]] = (
         ArmorTypeIntEnum.CLOTH,
     )
     available_shield_types: ClassVar[Sequence[ShieldTypeIntEnum]] = ()
@@ -76,6 +76,10 @@ class NPCClass:
     @property
     def hit_points_bonus(self) -> int:
         return 0
+
+    @property
+    def available_armor_types(self) -> Sequence[ArmorTypeIntEnum]:
+        return self._available_armor_types
 
     def attack_bonus(self, weapon=None, is_implement: bool = False) -> int:
         level_bonus = self.npc._level_bonus + self.npc.half_level
@@ -126,7 +130,7 @@ class InvokerClass(NPCClass):
     trainable_skills = Skills(
         endurance=5, history=5, intimidate=5, arcana=5, diplomacy=5, insight=5
     )
-    available_armor_types = (
+    _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
         ArmorTypeIntEnum.HIDE,
@@ -145,7 +149,7 @@ class ArtificerClass(NPCClass):
     slug = NPCClassEnum.ARTIFICER
     power_source = PowerSourceEnum.ARCANE
     role = ClassRoleEnum.LEADER
-    available_armor_types = (
+    _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
     )
@@ -163,7 +167,7 @@ class BardClass(NPCClass):
     slug = NPCClassEnum.BARD
     power_source = PowerSourceEnum.ARCANE
     role = ClassRoleEnum.LEADER
-    available_armor_types = (
+    _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
         ArmorTypeIntEnum.HIDE,
@@ -252,7 +256,7 @@ class BarbarianClass(NPCClass):
     slug = NPCClassEnum.BARBARIAN
     power_source = PowerSourceEnum.PRIMAL
     role = ClassRoleEnum.STRIKER
-    available_armor_types = (
+    _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
         ArmorTypeIntEnum.HIDE,
@@ -304,7 +308,7 @@ class WarlordClass(NPCClass):
     slug = NPCClassEnum.WARLORD
     power_source = PowerSourceEnum.MARTIAL
     role = ClassRoleEnum.LEADER
-    available_armor_types = (
+    _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
         ArmorTypeIntEnum.HIDE,
@@ -334,7 +338,7 @@ class FighterClass(NPCClass):
     power_source = PowerSourceEnum.MARTIAL
     role = ClassRoleEnum.DEFENDER
     base_surges_per_day = 9
-    available_armor_types = (
+    _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
         ArmorTypeIntEnum.HIDE,
@@ -420,7 +424,7 @@ class WizardClass(NPCClass):
     slug = NPCClassEnum.WIZARD
     power_source = PowerSourceEnum.ARCANE
     role = ClassRoleEnum.CONTROLLER
-    available_weapon_categories = ()
+    available_weapon_categories = []
     available_weapon_types = (Dagger, Quaterstaff)
     available_implement_types = (Wand, Sphere, Quaterstaff)
     hit_points_per_level_npc = 6
@@ -445,7 +449,7 @@ class DruidClass(NPCClass):
     slug = NPCClassEnum.DRUID
     power_source = PowerSourceEnum.PRIMAL
     role = ClassRoleEnum.CONTROLLER
-    available_armor_types = (
+    _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
         ArmorTypeIntEnum.HIDE,
@@ -472,7 +476,7 @@ class PriestClass(NPCClass):
     slug = NPCClassEnum.PRIEST
     power_source = PowerSourceEnum.DIVINE
     role = ClassRoleEnum.LEADER
-    available_armor_types = (
+    _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
         ArmorTypeIntEnum.HIDE,
@@ -490,7 +494,7 @@ class SeekerClass(NPCClass):
     slug = NPCClassEnum.SEEKER
     power_source = PowerSourceEnum.PRIMAL
     role = ClassRoleEnum.CONTROLLER
-    available_armor_types = (ArmorTypeIntEnum.CLOTH, ArmorTypeIntEnum.LEATHER)
+    _available_armor_types = (ArmorTypeIntEnum.CLOTH, ArmorTypeIntEnum.LEATHER)
     available_weapon_categories = (
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.SIMPLE_RANGED,
@@ -580,7 +584,7 @@ class WarlockClass(NPCClass):
     power_source = PowerSourceEnum.ARCANE
     role = ClassRoleEnum.STRIKER
     available_implement_types = (Wand, Rod, RitualDagger, RitualSickle)
-    available_armor_types = (
+    _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
     )
@@ -610,7 +614,7 @@ class SwordmageClass(NPCClass):
     slug = NPCClassEnum.SWORDMAGE
     power_source = PowerSourceEnum.ARCANE
     role = ClassRoleEnum.DEFENDER
-    available_armor_types = (
+    _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
     )
@@ -647,7 +651,7 @@ class PaladinClass(NPCClass):
     slug = NPCClassEnum.PALADIN
     power_source = PowerSourceEnum.DIVINE
     role = ClassRoleEnum.DEFENDER
-    available_armor_types = (
+    _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
         ArmorTypeIntEnum.HIDE,
@@ -678,7 +682,7 @@ class RogueClass(NPCClass):
     slug = NPCClassEnum.ROGUE
     power_source = PowerSourceEnum.MARTIAL
     role = ClassRoleEnum.STRIKER
-    available_armor_types = (
+    _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
     )
@@ -722,7 +726,7 @@ class RunepriestClass(NPCClass):
     slug = NPCClassEnum.RUNEPRIEST
     power_source = PowerSourceEnum.DIVINE
     role = ClassRoleEnum.LEADER
-    available_armor_types = (
+    _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
         ArmorTypeIntEnum.HIDE,
@@ -753,7 +757,7 @@ class RangerClass(NPCClass):
     slug = NPCClassEnum.RANGER
     power_source = PowerSourceEnum.MARTIAL
     role = ClassRoleEnum.STRIKER
-    available_armor_types = (
+    _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
         ArmorTypeIntEnum.HIDE,
@@ -787,7 +791,7 @@ class WardenClass(NPCClass):
     slug = NPCClassEnum.WARDEN
     power_source = PowerSourceEnum.PRIMAL
     role = ClassRoleEnum.DEFENDER
-    available_armor_types = (
+    _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
         ArmorTypeIntEnum.HIDE,
@@ -858,7 +862,7 @@ class ShamanClass(NPCClass):
     slug = NPCClassEnum.SHAMAN
     power_source = PowerSourceEnum.PRIMAL
     role = ClassRoleEnum.LEADER
-    available_armor_types = (
+    _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
     )
@@ -907,17 +911,17 @@ class HexbladeClass(WarlockClass):
 
     @property
     def available_armor_types(self) -> Sequence[ArmorTypeIntEnum]:
-        result = (
+        result = [
             ArmorTypeIntEnum.CLOTH,
             ArmorTypeIntEnum.LEATHER,
             ArmorTypeIntEnum.HIDE,
             ArmorTypeIntEnum.CHAINMAIL,
-        )
+        ]
         if self.npc.subclass in (
             self.SubclassEnum.INFERNAL_PACT,
             self.SubclassEnum.ELEMENTAL_PACT,
         ):
-            result += (ArmorTypeIntEnum.SCALE,)
+            result.append(ArmorTypeIntEnum.SCALE)
         return result
 
     @available_armor_types.setter
@@ -933,6 +937,10 @@ class HexbladeClass(WarlockClass):
         if self.npc.subclass == self.SubclassEnum.GLOOM_PACT:
             return (ExquisiteAgonyScourge,)
         return ()
+
+    @available_weapon_types.setter
+    def available_weapon_types(self, value):
+        pass
 
     @property
     def damage_bonus(self) -> int:
@@ -1001,13 +1009,13 @@ class BladeSingerClass(WizardClass):
     slug = NPCClassEnum.BLADESINGER
     power_source = PowerSourceEnum.ARCANE
     role = ClassRoleEnum.CONTROLLER
-    available_armor_types = (ArmorTypeIntEnum.CLOTH, ArmorTypeIntEnum.LEATHER)
-    available_weapon_categories = (
+    _available_armor_types = (ArmorTypeIntEnum.CLOTH, ArmorTypeIntEnum.LEATHER)
+    available_weapon_categories = [
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.SIMPLE_RANGED,
         WeaponCategoryIntEnum.MILITARY,
         WeaponCategoryIntEnum.MILITARY_RANGED,
-    )
+    ]
     available_implement_types = (Wand, Sphere, Quaterstaff)
 
     hit_points_per_level_npc = 6

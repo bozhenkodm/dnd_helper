@@ -1,4 +1,16 @@
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
+
+if TYPE_CHECKING:
+    from base.models.magic_items import (
+        ArmsSlotItem,
+        FeetSlotItem,
+        HeadSlotItem,
+        NeckSlotItem,
+        RingsSlotItem,
+        WaistSlotItem,
+        HandsSlotItem,
+    )
+    from base.models.models import FunctionalTemplate, Class, Armor
 
 from base.constants.constants import NPCClassEnum, ShieldTypeIntEnum
 from base.helpers import modifier
@@ -31,7 +43,7 @@ class NPCProtocol(Protocol):
     gloves_slot: "HandsSlotItem"
     functional_template: "FunctionalTemplate"
     klass: "Class"
-    race: "base.Race"
+    race: "Race"
     armor: "Armor"
 
     @property
