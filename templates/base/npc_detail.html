@@ -54,6 +54,8 @@
         {% endfor %}
     {% endfor%}
     <div class="npc-line attr-header"><span><b>Навыки:</b> {{ object.skills_text|join:"; " }}</span></div>
+    <div class="npc-line attr-header"><span><b>Примечания:</b></span></div>
+    <div class="npc-line"><span>{{ object.description|linebreaksbr }}</span></div>
     <div class="npc-line" >
         <table style="width: 100%">
             <tr>

@@ -101,7 +101,10 @@ class NPCClass:
         if self.npc.armor:
             if self.npc.armor.armor_type in self.available_armor_types:
                 result += self.npc.armor.armor_class
-            result += min(self.npc.armor.enchantment, self.npc._magic_threshold)
+            if self.npc.is_bonus_applied:
+                result += min(self.npc.armor.enchantment, self.npc._magic_threshold)
+            else:
+                result += self.npc.armor.enchantment
         if not self.npc.armor or self.npc.armor.is_light:
             result += self._armor_class_ability_bonus
         return result

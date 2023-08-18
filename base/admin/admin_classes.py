@@ -280,6 +280,7 @@ class NPCAdmin(admin.ModelAdmin):
             'subclass',
         ),
         ('level', 'is_bonus_applied'),
+        'description',
         (
             'base_strength',
             'base_constitution',
