@@ -336,7 +336,6 @@ class NPCAdmin(admin.ModelAdmin):
     list_per_page = 15
     form = NPCModelForm
 
-
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = super().get_queryset(request)
         query = models.Q(owner=request.user)

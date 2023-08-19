@@ -244,6 +244,14 @@ class FunctionalTemplate(models.Model):
         return self.title
 
 
+class ParagonPath(models.Model):
+    MIN_LEVEL = 11
+
+    title = models.CharField(max_length=50, null=False, verbose_name=_('Title'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('Description'))
+    klass = models.ForeignKey(Class, on_delete=models.CASCADE, verbose_name=_('Class'))
+
+
 class NPC(
     NPCDefenceMixin, NPCAbilityAbstract, NPCSkillMixin, PowerMixin, NPCMagicItemAbstract
 ):
@@ -256,11 +264,7 @@ class NPC(
     name = models.CharField(verbose_name=_('Name'), max_length=50)
     description = models.TextField(verbose_name=_('Description'), null=True, blank=True)
     creation_step = models.PositiveSmallIntegerField(default=1)
-    race = models.ForeignKey(
-        Race,
-        on_delete=models.CASCADE,
-        verbose_name=_('Race'),
-    )
+    race = models.ForeignKey(Race, on_delete=models.CASCADE, verbose_name=_('Race'))
     klass = models.ForeignKey(
         Class,
         on_delete=models.CASCADE,
