@@ -251,11 +251,24 @@ class NPCModelForm(forms.ModelForm):
             self.add_error('functional_template', message)
             self.add_error('is_bonus_applied', message)
 
+    def check_npc_without_paragon_path(self):
+        if (
+            self.cleaned_data['is_bonus_applied']
+            and self.cleaned_data['paragon_path']
+        ):
+            message = (
+                'Неигровые персонажи c бонусом уровня '
+                'не могут иметь путь совершенства'
+            )
+            self.add_error('paragon_path', message)
+            self.add_error('is_bonus_applied', message)
+
     def clean(self) -> dict[str, Any] | None:
         self.instance: NPC
         if not self.instance.id:
             self.check_pc_without_functional_template()
             return super().clean()
+        self.check_npc_without_paragon_path()
         primary_hand = self.cleaned_data.get('primary_hand')
         secondary_hand = self.cleaned_data.get('secondary_hand')
         shield_is_in_hand = bool(
