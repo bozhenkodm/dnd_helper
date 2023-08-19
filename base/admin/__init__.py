@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.contrib.auth.models import Group, User
 
 from base.admin.admin_classes import (
     ArmorAdmin,
@@ -42,6 +41,3 @@ admin.site.register(PlayerCharacters, PlayerCharactersAdmin)
 admin.site.register(MagicItemType, MagicItemTypeAdmin)
 admin.site.register(SimpleMagicItem, MagicItemAdmin)
 admin.site.register(ArmsSlotItem, ArmsItemSlotAdmin)
-
-admin.site.unregister(Group)
-admin.site.unregister(User)

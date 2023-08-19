@@ -7,6 +7,7 @@ from django.contrib import admin
 from django.contrib.admin.utils import quote
 from django.core.files.images import ImageFile
 from django.db import models
+from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.http import HttpRequest, HttpResponseRedirect
 from django.urls import reverse
@@ -334,6 +335,24 @@ class NPCAdmin(admin.ModelAdmin):
     list_filter = (RaceListFilter, KlassListFilter, 'functional_template')
     list_per_page = 15
     form = NPCModelForm
+
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        qs = super().get_queryset(request)
+        query = models.Q(owner=request.user)
+        if request.user.is_superuser:
+            query |= models.Q(owner__isnull=True)
+        qs.filter(query)
+        return qs
+
+    def has_view_or_change_permission(self, request: HttpRequest, obj=None) -> bool:
+        if obj is None:
+            return super().has_view_or_change_permission(request, obj)
+        if request.user.is_superuser and obj.owner is None:
+            return True
+        if request.user == obj.owner:
+            return True
+        return False
 
     def response_post_save_add(self, request: HttpRequest, obj) -> HttpResponseRedirect:
         if '_next' in request.POST:

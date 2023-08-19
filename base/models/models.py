@@ -2,6 +2,7 @@ import re
 from functools import cached_property
 from typing import Sequence
 
+from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -250,6 +251,8 @@ class NPC(
         verbose_name = 'NPC'
         verbose_name_plural = 'NPCS'
 
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
     name = models.CharField(verbose_name=_('Name'), max_length=50)
     description = models.TextField(verbose_name=_('Description'), null=True, blank=True)
     creation_step = models.PositiveSmallIntegerField(default=1)
@@ -361,6 +364,10 @@ class NPC(
     def _magic_threshold(self) -> int:
         """Maximum magic item bonus"""
         return (self.level - 1) // 5
+
+    @_magic_threshold.setter
+    def _magic_threshold(self, value: int):
+        pass
 
     @property
     def _level_bonus(self) -> int:

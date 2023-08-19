@@ -325,12 +325,7 @@ class PowerMixin:
     }
 
     klass_data_instance: NPCClass
-
-    @property
-    def _magic_threshold(self) -> int:
-        # for mypy check only
-        # TODO rewrite mypy satisfaction to something more valid
-        return 0
+    _magic_threshold: int
 
     @property
     def _power_attrs(self):
