@@ -18,5 +18,5 @@ class PowerDisplay:
     frequency: str
     properties: list[PowerPropertyDisplay]
 
-    def asdict(self):
+    def asdict(self) -> dict:
         return asdict(self)

@@ -60,7 +60,7 @@ class NPCModelForm(forms.ModelForm):
                 required=False,
             )
             self.fields['powers'] = forms.ModelMultipleChoiceField(
-                queryset=Power.objects.with_frequency_order()
+                queryset=Power.objects.with_frequency_order()  # type: ignore
                 .filter(klass=self.instance.klass, level__lte=self.instance.level)
                 .order_by('level', 'frequency_order'),
                 label='Таланты',
@@ -252,10 +252,7 @@ class NPCModelForm(forms.ModelForm):
             self.add_error('is_bonus_applied', message)
 
     def check_npc_without_paragon_path(self):
-        if (
-            self.cleaned_data['is_bonus_applied']
-            and self.cleaned_data['paragon_path']
-        ):
+        if self.cleaned_data['is_bonus_applied'] and self.cleaned_data['paragon_path']:
             message = (
                 'Неигровые персонажи c бонусом уровня '
                 'не могут иметь путь совершенства'

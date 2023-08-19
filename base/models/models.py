@@ -568,7 +568,7 @@ class NPC(
             )
         return template.format(*calculated_expressions)
 
-    def powers_calculated(self) -> typing.Sequence[PowerDisplay]:
+    def powers_calculated(self) -> typing.Sequence[dict]:
         """
         calculated powers for npc html page
         """
@@ -582,7 +582,7 @@ class NPC(
         if self.paragon_path:
             powers_qs |= self.paragon_path.powers.filter(level__lte=self.level)
 
-        powers: list[PowerDisplay] = []
+        powers: list[dict] = []
         for power in powers_qs.ordered_by_frequency():
             powers.append(
                 PowerDisplay(
@@ -604,7 +604,7 @@ class NPC(
                     ],
                 ).asdict()
             )
-        for power in self.powers.ordered_by_frequency().filter(
+        for power in self.powers.ordered_by_frequency().filter(  # type: ignore
             accessory_type__in=(AccessoryTypeEnum.WEAPON, AccessoryTypeEnum.IMPLEMENT)
         ):
             for weapon in self.wielded_weapons:
@@ -635,6 +635,8 @@ class NPC(
                     ).asdict()
                 )
         for item in self.magic_items:
+            if not item.magic_item_type:
+                continue
             for power in item.magic_item_type.powers.ordered_by_frequency():
                 powers.append(
                     PowerDisplay(
