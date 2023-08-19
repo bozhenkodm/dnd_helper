@@ -1,5 +1,6 @@
 import io
 import subprocess
+import textwrap
 from copy import deepcopy
 
 from django import forms
@@ -202,6 +203,10 @@ class KlassListFilter(admin.SimpleListFilter):
             return queryset.filter(klass__name=self.value())
 
 
+class ParagonPathAdmin(admin.ModelAdmin):
+    pass
+
+
 class NPCAdmin(admin.ModelAdmin):
     # change_form_template = 'admin/base/npc/change_form.html'
     steps = {
@@ -281,6 +286,7 @@ class NPCAdmin(admin.ModelAdmin):
             'subclass',
         ),
         ('level', 'is_bonus_applied'),
+        'paragon_path',
         'description',
         (
             'base_strength',
@@ -737,7 +743,13 @@ class PowerAdmin(admin.ModelAdmin):
         ('range_type', 'range', 'burst'),
         'syntax',
     ]
-    list_filter = ('frequency', 'klass', RaceListFilter, 'functional_template')
+    list_filter = (
+        'frequency',
+        'klass',
+        RaceListFilter,
+        'functional_template',
+        'paragon_path',
+    )
     inlines = (PowerPropertyInline,)
     readonly_fields = ('syntax',)
     ordering = ('klass', 'level', 'frequency')
@@ -746,25 +758,27 @@ class PowerAdmin(admin.ModelAdmin):
 
     @admin.display(description='Синтаксис')
     def syntax(self, obj):
-        return '''
-str - модификатор силы
-con - модификатор телосложения
-dex - модификатор ловкости
-int - модификатор интеллекта
-wis - модификатор мудрости
-cha - модификатор харизмы
-wpn - урон от оружия (кубы + бонус зачарования)
-lvl - уровень персонажа
-dmg - бонус урона (= бонусу за уровень + бонусу урона от класса)
-atk - бонус атаки (= бонусу за уровень + пол уровня + бонус атаки от класса)
-eht - зачарование оружия
-itl - бонус предмета, к которому принадлежит талант
+        return textwrap.dedent(
+            '''
+            str - модификатор силы
+            con - модификатор телосложения
+            dex - модификатор ловкости
+            int - модификатор интеллекта
+            wis - модификатор мудрости
+            cha - модификатор харизмы
+            wpn - урон от оружия (кубы + бонус зачарования)
+            lvl - уровень персонажа
+            dmg - бонус урона (= бонусу за уровень + бонусу урона от класса)
+            atk - бонус атаки (= бонусу за уровень + пол уровня + бонус атаки от класса)
+            eht - зачарование оружия
+            itl - бонус предмета, к которому принадлежит талант
 
-Выражения начинаются со знака $.
-поддерживаются операции +, -, *, / с целыми числами, ^ (max), _ (min).
-Атака по умолчанию $[ATTACK_ATTRIBUTE]+atk+[power.attack_bonus]
-Урон по умолчанию $wpn+dmg / $[damage_dice]+dmg+[ATTACK_ATTRIBUTE]
-'''
+            Выражения начинаются со знака $.
+            поддерживаются операции +, -, *, / с целыми числами, ^ (max), _ (min).
+            Атака по умолчанию $[ATTACK_ATTRIBUTE]+atk+[power.attack_bonus]
+            Урон по умолчанию $wpn+dmg / $[damage_dice]+dmg+[ATTACK_ATTRIBUTE]
+            '''
+        )
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'race':
@@ -784,6 +798,7 @@ itl - бонус предмета, к которому принадлежит т
                 'race',
                 ('klass', 'subclass'),
                 'functional_template',
+                'paragon_path',
                 'magic_item_type',
             )
         result = super().get_fields(request, obj)[:]

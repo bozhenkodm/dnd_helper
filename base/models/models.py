@@ -1,4 +1,5 @@
 import re
+import typing
 from functools import cached_property
 from typing import Sequence
 
@@ -245,11 +246,18 @@ class FunctionalTemplate(models.Model):
 
 
 class ParagonPath(models.Model):
+    class Meta:
+        verbose_name = _('Paragon path')
+        verbose_name_plural = _('Paragon paths')
+
     MIN_LEVEL = 11
 
     title = models.CharField(max_length=50, null=False, verbose_name=_('Title'))
     description = models.TextField(null=True, blank=True, verbose_name=_('Description'))
     klass = models.ForeignKey(Class, on_delete=models.CASCADE, verbose_name=_('Class'))
+
+    def __str__(self):
+        return f'{self.title} ({self.klass})'
 
 
 class NPC(
@@ -278,6 +286,13 @@ class NPC(
         FunctionalTemplate,
         on_delete=models.CASCADE,
         verbose_name=_('Functional template'),
+        null=True,
+        blank=True,
+    )
+    paragon_path = models.ForeignKey(
+        'base.ParagonPath',
+        verbose_name=_('Paragon path'),
+        on_delete=models.CASCADE,
         null=True,
         blank=True,
     )
@@ -342,8 +357,14 @@ class NPC(
         return (
             f'{self.name}'
             f'{f" ({self.functional_template}) " if self.functional_template else " "}'
-            f'{self.race} {self.klass} {self.level} уровня'
+            f'{self.race} {self.full_class} {self.level} уровня'
         )
+
+    @property
+    def full_class(self):
+        if self.paragon_path:
+            return f'{self.klass} ({self.paragon_path})'
+        return self.klass
 
     @cached_property
     def race_data_instance(self):
@@ -547,7 +568,7 @@ class NPC(
             )
         return template.format(*calculated_expressions)
 
-    def powers_calculated(self):
+    def powers_calculated(self) -> typing.Sequence[PowerDisplay]:
         """
         calculated powers for npc html page
         """
@@ -558,7 +579,10 @@ class NPC(
         if self.functional_template:
             powers_qs |= self.functional_template.powers.filter(level=0)
 
-        powers = []
+        if self.paragon_path:
+            powers_qs |= self.paragon_path.powers.filter(level__lte=self.level)
+
+        powers: list[PowerDisplay] = []
         for power in powers_qs.ordered_by_frequency():
             powers.append(
                 PowerDisplay(

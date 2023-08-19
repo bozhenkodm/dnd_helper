@@ -9,6 +9,7 @@ from base.admin.admin_classes import (
     MagicItemAdmin,
     MagicItemTypeAdmin,
     NPCAdmin,
+    ParagonPathAdmin,
     PlayerCharactersAdmin,
     PowerAdmin,
     RaceAdmin,
@@ -22,6 +23,7 @@ from base.models.models import (
     Armor,
     Class,
     FunctionalTemplate,
+    ParagonPath,
     Race,
     Weapon,
     WeaponType,
@@ -31,6 +33,7 @@ from base.models.powers import Power
 admin.site.register(Race, RaceAdmin)
 admin.site.register(Class, ClassAdmin)
 admin.site.register(NPC, NPCAdmin)
+admin.site.register(ParagonPath, ParagonPathAdmin)
 admin.site.register(Encounter, EncounterAdmin)
 admin.site.register(Armor, ArmorAdmin)
 admin.site.register(WeaponType, WeaponTypeAdmin)

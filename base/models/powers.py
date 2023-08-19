@@ -74,6 +74,14 @@ class Power(models.Model):
         null=True,
         related_name='powers',
     )
+    paragon_path = models.ForeignKey(
+        'base.ParagonPath',
+        verbose_name=_('Paragon path'),
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='powers',
+    )
     magic_item_type = models.ForeignKey(
         'MagicItemType',
         verbose_name=_('Magic item type'),
@@ -153,6 +161,8 @@ class Power(models.Model):
             )
         if self.magic_item_type:
             return f'{self.name} - {self.magic_item_type}'
+        if self.paragon_path:
+            return f'{self.name}, {self.paragon_path}'
         return self.name
 
     @property
@@ -176,6 +186,8 @@ class Power(models.Model):
             return self.magic_item_type.name
         if self.functional_template:
             return self.functional_template.title
+        if self.paragon_path:
+            return self.paragon_path.title
         if self.race:
             return self.race.get_name_display()
         if self.accessory_type in (
@@ -278,6 +290,10 @@ class Power(models.Model):
 
 
 class PowerProperty(models.Model):
+    class Meta:
+        verbose_name = _('PowerProperty')
+        verbose_name_plural = _('PowersProperties')
+
     power = models.ForeignKey(
         Power,
         verbose_name=_('Power'),
