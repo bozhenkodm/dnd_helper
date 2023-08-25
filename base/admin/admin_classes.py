@@ -302,6 +302,7 @@ class NPCAdmin(admin.ModelAdmin):
         # 'base_attack_ability',
         'mandatory_skills',
         'trained_skills',
+        'trained_weapons',
         (
             'armor',
             'arms_slot',
@@ -331,6 +332,7 @@ class NPCAdmin(admin.ModelAdmin):
     autocomplete_fields = (
         'race',
         'klass',
+        'trained_weapons',
         'weapons',
         'primary_hand',
         'secondary_hand',
@@ -800,6 +802,7 @@ class PowerAdmin(admin.ModelAdmin):
                 'functional_template',
                 'paragon_path',
                 'magic_item_type',
+                ('frequency', 'action_type'),
             )
         result = super().get_fields(request, obj)[:]
         if obj.klass:

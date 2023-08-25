@@ -376,20 +376,24 @@ class PowerMixin:
                     is_implement=power.accessory_type == AccessoryTypeEnum.IMPLEMENT,
                 )
                 # armament enchantment
-                + max(
-                    weapon and weapon.enchantment or 0 - self._magic_threshold,
-                    0,
+                + self.enhancement_with_magic_threshold(
+                    weapon and weapon.enchantment or 0
                 )
-                # power attack bonus should be added
-                # to string when creating power property
+                # power attack bonus will be added to power string
+                # during the power property creation
             )
         if token == PowersVariables.DMG:
             # TODO separate damage bonus and enchantment
-            return self.klass_data_instance.damage_bonus + max(
-                (weapon and weapon.enchantment or 0) - self._magic_threshold, 0
+            return (
+                self.klass_data_instance.damage_bonus
+                + self.enhancement_with_magic_threshold(
+                    weapon and weapon.enchantment or 0
+                )
             )
         if token == PowersVariables.EHT:
-            return max((weapon and weapon.enchantment or 0) - self._magic_threshold, 0)
+            return self.enhancement_with_magic_threshold(
+                weapon and weapon.enchantment or 0
+            )
         if token == PowersVariables.ITL:
             if not item:
                 raise PowerInconsistent(_("This power doesn't use magic item"))
@@ -397,6 +401,9 @@ class PowerMixin:
         if token in self._power_attrs:
             return self._power_attrs[token]
         return DiceRoll.from_str(token)
+
+    def enhancement_with_magic_threshold(self, enhancement: int) -> int:
+        return max((0, enhancement - self._magic_threshold))
 
     def calculate_reverse_polish_notation(
         self, expression: str, power, weapon=None, secondary_weapon=None, item=None

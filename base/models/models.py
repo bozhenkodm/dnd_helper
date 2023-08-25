@@ -311,6 +311,11 @@ class NPC(
     )
 
     trained_skills = models.ManyToManyField(Skill, verbose_name=_('Trained skills'))
+    trained_weapons = models.ManyToManyField(
+        WeaponType,
+        verbose_name=_('Trained weapon'),
+        help_text=_('Weapon training in addition to training by race and class'),
+    )
 
     armor = models.ForeignKey(
         Armor, verbose_name=_('Armor'), null=True, on_delete=models.SET_NULL
@@ -357,13 +362,15 @@ class NPC(
         return (
             f'{self.name}'
             f'{f" ({self.functional_template}) " if self.functional_template else " "}'
-            f'{self.race} {self.full_class} {self.level} уровня'
+            f'{self.race} {self.full_class_name} {self.level} уровня'
         )
 
     @property
-    def full_class(self):
+    def full_class_name(self):
         if self.paragon_path:
             return f'{self.klass} ({self.paragon_path})'
+        if self.functional_template:
+            return f'{self.klass} ({self.functional_template})'
         return self.klass
 
     @cached_property
@@ -388,7 +395,9 @@ class NPC(
     @property
     def _magic_threshold(self) -> int:
         """Maximum magic item bonus"""
-        return (self.level - 1) // 5
+        if self.is_bonus_applied:
+            return (self.level - 1) // 5
+        return 0
 
     @_magic_threshold.setter
     def _magic_threshold(self, value: int):
@@ -501,6 +510,7 @@ class NPC(
                 in map(int, self.klass_data_instance.available_weapon_categories),
                 type(data_instance) in self.klass_data_instance.available_weapon_types,
                 type(data_instance) in self.race_data_instance.available_weapon_types,
+                weapon.weapon_type in self.trained_weapons.all(),
             )
         )
 
