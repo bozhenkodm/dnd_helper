@@ -1,7 +1,7 @@
 from dataclasses import asdict, dataclass
 from typing import Sequence
 
-from base.constants.constants import SkillsEnum
+from base.constants.constants import SkillEnum
 
 
 @dataclass
@@ -67,13 +67,13 @@ class Skills:
         )
 
     @classmethod
-    def init_with_const(cls, skills: Sequence[SkillsEnum], value: int) -> "Skills":
+    def init_with_const(cls, skills: Sequence[SkillEnum], value: int) -> "Skills":
         return Skills(**{skill.lvalue: value for skill in skills})
 
     @property
-    def enum_objects(self) -> list[SkillsEnum]:
+    def enum_objects(self) -> list[SkillEnum]:
         return [
-            SkillsEnum[skill_name.upper()]
+            SkillEnum[skill_name.upper()]
             for skill_name, value in asdict(self).items()
             if value
         ]

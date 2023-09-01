@@ -1,6 +1,6 @@
 from django.db import models
 
-from base.constants.constants import AbilitiesEnum
+from base.constants.constants import AbilityEnum
 from base.fields import MultiSelectField  # type: ignore
 from base.helpers import modifier
 from base.objects.abilities import Abilities
@@ -12,8 +12,8 @@ class Ability(models.Model):
         ordering = ('ordering',)
 
     title = models.CharField(
-        choices=AbilitiesEnum.generate_choices(),
-        max_length=AbilitiesEnum.max_length(),
+        choices=AbilityEnum.generate_choices(),
+        max_length=AbilityEnum.max_length(),
         primary_key=True,
     )
     ordering = models.PositiveSmallIntegerField(default=1)
@@ -54,49 +54,49 @@ class NPCAbilityAbstract(models.Model):
     )
     base_attack_ability = MultiSelectField(
         verbose_name='Атакующие характеристики',
-        choices=AbilitiesEnum.generate_choices(is_sorted=False),
+        choices=AbilityEnum.generate_choices(is_sorted=False),
         null=True,
         blank=True,
     )
 
     level4_bonus_abilities = MultiSelectField(
         verbose_name='Бонус характеристики на 4 уровне',
-        choices=AbilitiesEnum.generate_choices(is_sorted=False),
+        choices=AbilityEnum.generate_choices(is_sorted=False),
         max_choices=2,
         null=True,
         blank=True,
     )
     level8_bonus_abilities = MultiSelectField(
         verbose_name='Бонус характеристики на 8 уровне',
-        choices=AbilitiesEnum.generate_choices(is_sorted=False),
+        choices=AbilityEnum.generate_choices(is_sorted=False),
         max_choices=2,
         null=True,
         blank=True,
     )
     level14_bonus_abilities = MultiSelectField(
         verbose_name='Бонус характеристики на 14 уровне',
-        choices=AbilitiesEnum.generate_choices(is_sorted=False),
+        choices=AbilityEnum.generate_choices(is_sorted=False),
         max_choices=2,
         null=True,
         blank=True,
     )
     level18_bonus_abilities = MultiSelectField(
         verbose_name='Бонус характеристики на 18 уровне',
-        choices=AbilitiesEnum.generate_choices(is_sorted=False),
+        choices=AbilityEnum.generate_choices(is_sorted=False),
         max_choices=2,
         null=True,
         blank=True,
     )
     level24_bonus_abilities = MultiSelectField(
         verbose_name='Бонус характеристики на 24 уровне',
-        choices=AbilitiesEnum.generate_choices(is_sorted=False),
+        choices=AbilityEnum.generate_choices(is_sorted=False),
         max_choices=2,
         null=True,
         blank=True,
     )
     level28_bonus_abilities = MultiSelectField(
         verbose_name='Бонус характеристики на 28 уровне',
-        choices=AbilitiesEnum.generate_choices(is_sorted=False),
+        choices=AbilityEnum.generate_choices(is_sorted=False),
         max_choices=2,
         null=True,
         blank=True,
@@ -137,7 +137,7 @@ class NPCAbilityAbstract(models.Model):
 
     @property
     def _tier_attrs_bonus(self) -> Abilities:
-        return Abilities(**{ability.lvalue: self._tier for ability in AbilitiesEnum})
+        return Abilities(**{ability.lvalue: self._tier for ability in AbilityEnum})
 
     @property
     def _base_abilities(self) -> Abilities:
@@ -150,7 +150,7 @@ class NPCAbilityAbstract(models.Model):
             charisma=self.base_charisma,
         )
 
-    def _calculate_ability_bonus(self, ability: AbilitiesEnum) -> int:
+    def _calculate_ability_bonus(self, ability: AbilityEnum) -> int:
         abilities = (
             self._initial_abilities_bonuses
             + self._tier_attrs_bonus
@@ -161,27 +161,27 @@ class NPCAbilityAbstract(models.Model):
 
     @property
     def strength(self) -> int:
-        return self._calculate_ability_bonus(AbilitiesEnum.STRENGTH)
+        return self._calculate_ability_bonus(AbilityEnum.STRENGTH)
 
     @property
     def constitution(self) -> int:
-        return self._calculate_ability_bonus(AbilitiesEnum.CONSTITUTION)
+        return self._calculate_ability_bonus(AbilityEnum.CONSTITUTION)
 
     @property
     def dexterity(self) -> int:
-        return self._calculate_ability_bonus(AbilitiesEnum.DEXTERITY)
+        return self._calculate_ability_bonus(AbilityEnum.DEXTERITY)
 
     @property
     def intelligence(self) -> int:
-        return self._calculate_ability_bonus(AbilitiesEnum.INTELLIGENCE)
+        return self._calculate_ability_bonus(AbilityEnum.INTELLIGENCE)
 
     @property
     def wisdom(self) -> int:
-        return self._calculate_ability_bonus(AbilitiesEnum.WISDOM)
+        return self._calculate_ability_bonus(AbilityEnum.WISDOM)
 
     @property
     def charisma(self) -> int:
-        return self._calculate_ability_bonus(AbilitiesEnum.CHARISMA)
+        return self._calculate_ability_bonus(AbilityEnum.CHARISMA)
 
     @property
     def str_mod(self) -> int:
@@ -207,7 +207,7 @@ class NPCAbilityAbstract(models.Model):
     def cha_mod(self) -> int:
         return modifier(self.charisma)
 
-    def get_ability_text(self, ability: AbilitiesEnum) -> str:
+    def get_ability_text(self, ability: AbilityEnum) -> str:
         ability_value = getattr(self, ability.lvalue)
         mod = modifier(ability_value)
         return (
@@ -217,4 +217,4 @@ class NPCAbilityAbstract(models.Model):
 
     @property
     def abilities_texts(self) -> list[str]:
-        return list(self.get_ability_text(ability) for ability in AbilitiesEnum)
+        return list(self.get_ability_text(ability) for ability in AbilityEnum)

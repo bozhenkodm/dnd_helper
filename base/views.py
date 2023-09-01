@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import DetailView, TemplateView
 
-from base.constants.constants import SkillsEnum
+from base.constants.constants import SkillEnum
 from base.forms import EncounterChangeInitiativeForm
 from base.models import NPC, Encounter
 from base.models.encounters import EncounterParticipants
@@ -20,7 +20,7 @@ class NPCDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         skills = (
             (item[1], getattr(obj, item[0].lower()))
-            for item in SkillsEnum.generate_choices()
+            for item in SkillEnum.generate_choices()
         )
         context['skills'] = skills
         return context

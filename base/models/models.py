@@ -560,7 +560,9 @@ class NPC(
         secondary_weapon: Weapon | None = None,
         item: ItemAbstract | None = None,
     ):
-        pattern = r'\$(\S{3,})\b'  # gets substring from '$' to next whitespace
+        pattern = r'\$(\S+)\b'  # gets substring from '$' to next whitespace
+        # TODO fix parsing cases with ")" as a last character.
+        #  Now it's unmatched by regexp
         expressions_to_calculate = re.findall(pattern, string)
         template = re.sub(
             pattern, '{}', string
@@ -590,7 +592,8 @@ class NPC(
             powers_qs |= self.functional_template.powers.filter(level=0)
 
         if self.paragon_path:
-            powers_qs |= self.paragon_path.powers.filter(level__lte=self.level)
+            powers_qs |= self.paragon_path.powers.filter(level__lte=self.level).exclude(  # type: ignore
+            accessory_type__in=(AccessoryTypeEnum.WEAPON, AccessoryTypeEnum.IMPLEMENT))
 
         powers: list[dict] = []
         for power in powers_qs.ordered_by_frequency():
@@ -614,9 +617,14 @@ class NPC(
                     ],
                 ).asdict()
             )
-        for power in self.powers.ordered_by_frequency().filter(  # type: ignore
+        power_weapon_qs = self.powers.ordered_by_frequency().filter(  # type: ignore
             accessory_type__in=(AccessoryTypeEnum.WEAPON, AccessoryTypeEnum.IMPLEMENT)
-        ):
+        )
+        if self.paragon_path:
+            power_weapon_qs |= self.paragon_path.powers.ordered_by_frequency().filter(  # type: ignore
+            accessory_type__in=(AccessoryTypeEnum.WEAPON, AccessoryTypeEnum.IMPLEMENT)
+        )
+        for power in power_weapon_qs:
             for weapon in self.wielded_weapons:
                 if not self.is_weapon_proper_for_power(power=power, weapon=weapon):
                     continue

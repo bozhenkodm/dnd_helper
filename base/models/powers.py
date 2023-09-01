@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 
 from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
-    AbilitiesEnum,
+    AbilityEnum,
     AccessoryTypeEnum,
     DefenceTypeEnum,
     DiceIntEnum,
@@ -15,7 +15,7 @@ from base.constants.constants import (
     PowerFrequencyEnum,
     PowerPropertyTitle,
     PowerRangeTypeEnum,
-    PowersVariables,
+    PowerVariables,
 )
 from base.exceptions import PowerInconsistent
 from base.fields import MultiSelectField  # type: ignore
@@ -93,8 +93,8 @@ class Power(models.Model):
     level = models.SmallIntegerField(verbose_name=_('Level'), default=0)
     attack_ability = models.CharField(
         verbose_name=_('Attack ability'),
-        choices=AbilitiesEnum.generate_choices(is_sorted=False),
-        max_length=AbilitiesEnum.max_length(),
+        choices=AbilityEnum.generate_choices(is_sorted=False),
+        max_length=AbilityEnum.max_length(),
         null=True,
         blank=True,
     )
@@ -346,13 +346,13 @@ class PowerMixin:
     @property
     def _power_attrs(self):
         return {
-            PowersVariables.STR: self.str_mod,
-            PowersVariables.CON: self.con_mod,
-            PowersVariables.DEX: self.dex_mod,
-            PowersVariables.INT: self.int_mod,
-            PowersVariables.WIS: self.wis_mod,
-            PowersVariables.CHA: self.cha_mod,
-            PowersVariables.LVL: self.level,
+            PowerVariables.STR: self.str_mod,
+            PowerVariables.CON: self.con_mod,
+            PowerVariables.DEX: self.dex_mod,
+            PowerVariables.INT: self.int_mod,
+            PowerVariables.WIS: self.wis_mod,
+            PowerVariables.CHA: self.cha_mod,
+            PowerVariables.LVL: self.level,
         }
 
     def calculate_token(
@@ -360,16 +360,16 @@ class PowerMixin:
     ) -> int | DiceRoll:
         if token.isdigit():
             return int(token)
-        if token == PowersVariables.WPN:
+        if token == PowerVariables.WPN:
             weapon = weapon or self.primary_hand  # type: ignore
             if not weapon:
                 raise PowerInconsistent(_("This power doesn't use weapon"))
             return weapon.damage_roll.treshhold(self._magic_threshold)
-        if token == PowersVariables.WPS:
+        if token == PowerVariables.WPS:
             if not secondary_weapon:
                 raise PowerInconsistent(_("This power doesn't use off-hand weapon"))
             return secondary_weapon.damage_roll.treshhold(self._magic_threshold)
-        if token == PowersVariables.ATK:
+        if token == PowerVariables.ATK:
             return (
                 self.klass_data_instance.attack_bonus(
                     weapon,
@@ -382,7 +382,7 @@ class PowerMixin:
                 # power attack bonus will be added to power string
                 # during the power property creation
             )
-        if token == PowersVariables.DMG:
+        if token == PowerVariables.DMG:
             # TODO separate damage bonus and enchantment
             return (
                 self.klass_data_instance.damage_bonus
@@ -390,11 +390,11 @@ class PowerMixin:
                     weapon and weapon.enchantment or 0
                 )
             )
-        if token == PowersVariables.EHT:
+        if token == PowerVariables.EHT:
             return self.enhancement_with_magic_threshold(
                 weapon and weapon.enchantment or 0
             )
-        if token == PowersVariables.ITL:
+        if token == PowerVariables.ITL:
             if not item:
                 raise PowerInconsistent(_("This power doesn't use magic item"))
             return item.level

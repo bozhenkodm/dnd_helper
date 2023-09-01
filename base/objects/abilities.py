@@ -1,6 +1,6 @@
 from dataclasses import asdict, dataclass
 
-from base.constants.constants import AbilitiesEnum
+from base.constants.constants import AbilityEnum
 
 
 @dataclass
@@ -23,9 +23,9 @@ class Abilities:
         )
 
     @property
-    def enum_objects(self) -> list[AbilitiesEnum]:
+    def enum_objects(self) -> list[AbilityEnum]:
         return [
-            AbilitiesEnum[ability_name.upper()]
+            AbilityEnum[ability_name.upper()]
             for ability_name, value in asdict(self).items()
             if value
         ]

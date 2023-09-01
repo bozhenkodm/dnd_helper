@@ -12,7 +12,7 @@ from base.constants.constants import (
     NPCRaceEnum,
     SexEnum,
     ShieldTypeIntEnum,
-    SkillsEnum,
+    SkillEnum,
     WeaponHandednessEnum,
 )
 from base.models import NPC
@@ -437,7 +437,7 @@ class MagicItemTypeForm(forms.ModelForm):
             'save': {},
         }
         skills = {}
-        for skill in SkillsEnum:
+        for skill in SkillEnum:
             field = skill.value.lower()
             if self.cleaned_data[field]:
                 skills[field] = self.cleaned_data[field]

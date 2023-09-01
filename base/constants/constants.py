@@ -10,7 +10,7 @@ class SexEnum(BaseNameValueDescriptionEnum):
     N = 'N', 'Н/Д'
 
 
-class AbilitiesEnum(BaseNameValueDescriptionEnum):
+class AbilityEnum(BaseNameValueDescriptionEnum):
     STRENGTH = 'strength', 'Сила'
     CONSTITUTION = 'constitution', 'Телосложение'
     DEXTERITY = 'dexterity', 'Ловкость'
@@ -20,7 +20,7 @@ class AbilitiesEnum(BaseNameValueDescriptionEnum):
 
 
 # noinspection PyArgumentList
-class PowersVariables(str, Enum):
+class PowerVariables(str, Enum):
     def _generate_next_value_(name, start, count, last_values):
         return name.lower()
 
@@ -128,7 +128,7 @@ class NPCClassEnum(BaseNameValueDescriptionEnum):
     SHAMAN = 'shaman', 'Шаман'
 
 
-class SkillsEnum(BaseNameValueDescriptionEnum):
+class SkillEnum(BaseNameValueDescriptionEnum):
     ACROBATICS = 'acrobatics', 'Акробатика'
     ATHLETICS = 'athletics', 'Атлетика'
     PERCEPTION = 'perception', 'Внимательность'
@@ -153,13 +153,13 @@ class SkillsEnum(BaseNameValueDescriptionEnum):
 
     def get_base_ability(self):
         if self in (self.ACROBATICS, self.STEALTH, self.THIEVERY):
-            return AbilitiesEnum.DEXTERITY
+            return AbilityEnum.DEXTERITY
         if self in (self.ARCANA, self.HISTORY, self.RELIGION):
-            return AbilitiesEnum.INTELLIGENCE
+            return AbilityEnum.INTELLIGENCE
         if self == self.ATHLETICS:
-            return AbilitiesEnum.STRENGTH
+            return AbilityEnum.STRENGTH
         if self in (self.BLUFF, self.DIPLOMACY, self.INTIMIDATE, self.STREETWISE):
-            return AbilitiesEnum.CHARISMA
+            return AbilityEnum.CHARISMA
         if self in (
             self.DUNGEONEERING,
             self.HEAL,
@@ -167,9 +167,9 @@ class SkillsEnum(BaseNameValueDescriptionEnum):
             self.NATURE,
             self.PERCEPTION,
         ):
-            return AbilitiesEnum.WISDOM
+            return AbilityEnum.WISDOM
         if self == self.ENDURANCE:
-            return AbilitiesEnum.CONSTITUTION
+            return AbilityEnum.CONSTITUTION
 
 
 class ArmorTypeIntEnum(IntDescriptionEnum):

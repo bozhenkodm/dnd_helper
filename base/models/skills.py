@@ -2,7 +2,7 @@ from dataclasses import asdict
 
 from django.db import models
 
-from base.constants.constants import SkillsEnum
+from base.constants.constants import SkillEnum
 from base.models.abilities import Ability
 from base.objects.npc_classes import NPCClass
 from base.objects.races import Race
@@ -14,8 +14,8 @@ class Skill(models.Model):
         ordering = ('ordering',)
 
     title = models.CharField(
-        choices=SkillsEnum.generate_choices(),
-        max_length=SkillsEnum.max_length(),
+        choices=SkillEnum.generate_choices(),
+        max_length=SkillEnum.max_length(),
         primary_key=True,
     )
     based_on = models.ForeignKey(Ability, on_delete=models.CASCADE, null=False)
@@ -38,16 +38,16 @@ class NPCSkillMixin:
         return Skills(
             **{
                 skill.value: getattr(self, f'{skill.get_base_ability()[:3]}_mod')
-                for skill in SkillsEnum
+                for skill in SkillEnum
             }
         )
 
     @property
     def skills(self) -> Skills:
-        half_level = Skills.init_with_const(SkillsEnum.sequence(), self.half_level)
+        half_level = Skills.init_with_const(SkillEnum.sequence(), self.half_level)
         trained_skills = Skills.init_with_const(
             [
-                SkillsEnum[trained_skill.title.upper()]
+                SkillEnum[trained_skill.title.upper()]
                 for trained_skill in self.trained_skills.all()  # type: ignore
             ],
             5,
@@ -56,11 +56,11 @@ class NPCSkillMixin:
         mandatory_skills = self.klass_data_instance.mandatory_skills
         penalty = Skills.init_with_const(
             (
-                SkillsEnum.ACROBATICS,
-                SkillsEnum.ATHLETICS,
-                SkillsEnum.THIEVERY,
-                SkillsEnum.ENDURANCE,
-                SkillsEnum.STEALTH,
+                SkillEnum.ACROBATICS,
+                SkillEnum.ATHLETICS,
+                SkillEnum.THIEVERY,
+                SkillEnum.ENDURANCE,
+                SkillEnum.STEALTH,
             ),
             value=self.armor.skill_penalty + self.shield.skill_penalty,  # type: ignore
         )
@@ -162,11 +162,11 @@ class NPCSkillMixin:
     def skills_text(self) -> list[str]:
         result = []
         ordinary_skills = self.skill_mod_bonus + Skills.init_with_const(
-            SkillsEnum.sequence(), self.half_level
+            SkillEnum.sequence(), self.half_level
         )
         for skill, value in asdict(self.skills).items():
             if getattr(ordinary_skills, skill) != value:
-                description = SkillsEnum[
+                description = SkillEnum[
                     skill.upper()
                 ].description  # type: ignore[attr-defined]
                 result.append(f'{description}' f' +{value}')
