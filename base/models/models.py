@@ -313,6 +313,7 @@ class NPC(
     trained_skills = models.ManyToManyField(Skill, verbose_name=_('Trained skills'))
     trained_weapons = models.ManyToManyField(
         WeaponType,
+        blank=True,
         verbose_name=_('Trained weapon'),
         help_text=_('Weapon training in addition to training by race and class'),
     )

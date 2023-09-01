@@ -208,70 +208,6 @@ class ParagonPathAdmin(admin.ModelAdmin):
 
 
 class NPCAdmin(admin.ModelAdmin):
-    # change_form_template = 'admin/base/npc/change_form.html'
-    steps = {
-        NPCCreationStepEnum.BASE: (
-            ('name', 'sex'),
-            ('race', 'functional_template'),
-            'klass',
-            ('level', 'is_bonus_applied'),
-        ),
-        NPCCreationStepEnum.BASE_ABILITIES: [
-            # ( add dynamically
-            #     'subclass',
-            # ),
-            (
-                'base_strength',
-                'base_constitution',
-                'base_dexterity',
-            ),
-            (
-                'base_intelligence',
-                'base_wisdom',
-                'base_charisma',
-            ),
-            'var_bonus_ability',
-        ],
-        NPCCreationStepEnum.LEVEL_BONUS_ABILITIES: [
-            # add dynamically depending on level
-            # 'level4_bonus_abilities',
-            # 'level8_bonus_abilities',
-            # 'level14_bonus_abilities',
-            # 'level18_bonus_abilities',
-            # 'level24_bonus_abilities',
-            # 'level28_bonus_abilities',
-        ],
-        NPCCreationStepEnum.SKILLS: (
-            'mandatory_skills',
-            'trained_skills',
-        ),
-        NPCCreationStepEnum.ITEMS: (
-            (
-                'armor',
-                'arms_slot',
-            ),
-            'weapons',
-            (
-                'neck_slot',
-                'head_slot',
-            ),
-            (
-                'waist_slot',
-                'feet_slot',
-                'gloves_slot',
-            ),
-            (
-                'left_ring_slot',
-                'right_ring_slot',
-            ),
-        ),
-        NPCCreationStepEnum.WEAPONS: (
-            'primary_hand',
-            'secondary_hand',
-            'no_hand',
-            'powers',
-        ),
-    }
     fields = [
         (
             'name',
@@ -420,6 +356,7 @@ class NPCAdmin(admin.ModelAdmin):
                     'sex',
                 ),
                 'description',
+                'is_bonus_applied',
                 (
                     'race',
                     'functional_template',
@@ -438,57 +375,8 @@ class NPCAdmin(admin.ModelAdmin):
                 ),
             )
         result = self.fields[:]
-        result.insert(7, self.get_level_abilities_bonus_fields(obj))
+        result.insert(8, self.get_level_abilities_bonus_fields(obj))
         return result
-
-    def get_steps(self, obj=None):
-        steps = deepcopy(self.steps)
-        steps[NPCCreationStepEnum.LEVEL_BONUS_ABILITIES].extend(
-            self.get_level_abilities_bonus_fields(obj)
-        )
-        if obj and getattr(obj.klass_data_instance, 'SubclassEnum', False):
-            steps[NPCCreationStepEnum.BASE_ABILITIES].insert(0, 'subclass')
-        return steps
-
-    def get_fieldsets(self, request: HttpRequest, obj=None):
-        if obj and obj.creation_step > 6:
-            return super(NPCAdmin, self).get_fieldsets(request, obj)
-        if not obj:
-            current_step = 1
-        else:
-            current_step = obj.creation_step
-        steps = self.get_steps(obj)
-        return tuple(
-            (
-                step.description,  # type: ignore
-                {
-                    'fields': steps[step],
-                    'classes': ('collapse',) if step != current_step else (),
-                },
-            )
-            for step in NPCCreationStepEnum
-            if step <= current_step
-        )
-
-    def get_readonly_fields(self, request, obj=None):
-        readonly_fields = set(super().get_readonly_fields(request, obj))
-        for step, fields in self.get_steps(obj).items():
-            if not obj and step == NPCCreationStepEnum.BASE:
-                break
-            if obj.creation_step > NPCCreationStepEnum.WEAPONS:
-                break
-            if step >= obj.creation_step:
-                break
-            if isinstance(fields, str):
-                readonly_fields.add(fields)
-                continue
-            for field in fields:
-                if isinstance(field, str):
-                    readonly_fields.add(field)
-                else:
-                    for nested_field in field:
-                        readonly_fields.add(nested_field)
-        return readonly_fields
 
     @admin.display(description='Тренированные навыки')
     def mandatory_skills(self, obj):
