@@ -1,50 +1,52 @@
-from django.db import models
-from django.utils.translation import gettext_lazy as _
 from typing import Protocol
 
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
 EXPERIENCE_BY_LEVEL = [
-0,
-1000,
-2250,
-3750,
-5500,
-7500,
-10000,
-13000,
-16500,
-20500,
-26000,
-32000,
-39000,
-47000,
-57000,
-69000,
-83000,
-99000,
-119000,
-143000,
-175000,
-210000,
-255000,
-310000,
-375000,
-450000,
-550000,
-675000,
-825000,
-1000000,
+    0,
+    1000,
+    2250,
+    3750,
+    5500,
+    7500,
+    10000,
+    13000,
+    16500,
+    20500,
+    26000,
+    32000,
+    39000,
+    47000,
+    57000,
+    69000,
+    83000,
+    99000,
+    119000,
+    143000,
+    175000,
+    210000,
+    255000,
+    310000,
+    375000,
+    450000,
+    550000,
+    675000,
+    825000,
+    1000000,
 ]
+
 
 class NPCProtocol(Protocol):
     level: int
+    experience: int
+
 
 class NPCExperienceAbstract(models.Model):
     class Meta:
         abstract = True
 
-    experience = models.IntegerField(
-        verbose_name=_('Experience'), default=0
-    )
+    experience = models.IntegerField(verbose_name=_('Experience'), default=0)
 
     @property
     def level_by_experience(self: NPCProtocol) -> int:

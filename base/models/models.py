@@ -17,9 +17,9 @@ from base.constants.constants import (
 )
 from base.managers import WeaponTypeQuerySet
 from base.models.abilities import Ability, NPCAbilityAbstract
+from base.models.defences import NPCDefenceMixin
 from base.models.experience import NPCExperienceAbstract
 from base.models.magic_items import ItemAbstract, NPCMagicItemAbstract
-from base.models.defences import NPCDefenceMixin
 from base.models.powers import Power, PowerMixin
 from base.models.skills import NPCSkillMixin, Skill
 from base.objects import npc_klasses, race_classes, weapon_types_classes
@@ -262,7 +262,12 @@ class ParagonPath(models.Model):
 
 
 class NPC(
-    NPCDefenceMixin, NPCExperienceAbstract, NPCAbilityAbstract, NPCSkillMixin, PowerMixin, NPCMagicItemAbstract
+    NPCDefenceMixin,
+    NPCExperienceAbstract,
+    NPCAbilityAbstract,
+    NPCSkillMixin,
+    PowerMixin,
+    NPCMagicItemAbstract,
 ):
     class Meta:
         verbose_name = 'NPC'
@@ -594,8 +599,12 @@ class NPC(
             powers_qs |= self.functional_template.powers.filter(level=0)
 
         if self.paragon_path:
-            powers_qs |= self.paragon_path.powers.filter(level__lte=self.level).exclude(  # type: ignore
-            accessory_type__in=(AccessoryTypeEnum.WEAPON, AccessoryTypeEnum.IMPLEMENT))
+            powers_qs |= self.paragon_path.powers.filter(level__lte=self.level).exclude(
+                accessory_type__in=(
+                    AccessoryTypeEnum.WEAPON,
+                    AccessoryTypeEnum.IMPLEMENT,
+                )
+            )
 
         powers: list[dict] = []
         for power in powers_qs.ordered_by_frequency():
@@ -623,9 +632,14 @@ class NPC(
             accessory_type__in=(AccessoryTypeEnum.WEAPON, AccessoryTypeEnum.IMPLEMENT)
         )
         if self.paragon_path:
-            power_weapon_qs |= self.paragon_path.powers.ordered_by_frequency().filter(  # type: ignore
-            accessory_type__in=(AccessoryTypeEnum.WEAPON, AccessoryTypeEnum.IMPLEMENT)
-        )
+            power_weapon_qs |= (
+                self.paragon_path.powers.ordered_by_frequency().filter(  # type: ignore
+                    accessory_type__in=(
+                        AccessoryTypeEnum.WEAPON,
+                        AccessoryTypeEnum.IMPLEMENT,
+                    )
+                )
+            )
         for power in power_weapon_qs:
             for weapon in self.wielded_weapons:
                 if not self.is_weapon_proper_for_power(power=power, weapon=weapon):
