@@ -17,8 +17,9 @@ from base.constants.constants import (
 )
 from base.managers import WeaponTypeQuerySet
 from base.models.abilities import Ability, NPCAbilityAbstract
+from base.models.experience import NPCExperienceAbstract
 from base.models.magic_items import ItemAbstract, NPCMagicItemAbstract
-from base.models.mixins.defences import NPCDefenceMixin
+from base.models.defences import NPCDefenceMixin
 from base.models.powers import Power, PowerMixin
 from base.models.skills import NPCSkillMixin, Skill
 from base.objects import npc_klasses, race_classes, weapon_types_classes
@@ -261,7 +262,7 @@ class ParagonPath(models.Model):
 
 
 class NPC(
-    NPCDefenceMixin, NPCAbilityAbstract, NPCSkillMixin, PowerMixin, NPCMagicItemAbstract
+    NPCDefenceMixin, NPCExperienceAbstract, NPCAbilityAbstract, NPCSkillMixin, PowerMixin, NPCMagicItemAbstract
 ):
     class Meta:
         verbose_name = 'NPC'

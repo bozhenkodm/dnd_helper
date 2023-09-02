@@ -221,7 +221,8 @@ class NPCAdmin(admin.ModelAdmin):
             'klass',
             'subclass',
         ),
-        ('level', 'is_bonus_applied'),
+        'is_bonus_applied',
+        ('level', 'experience'),
         'paragon_path',
         'description',
         (
@@ -296,17 +297,6 @@ class NPCAdmin(admin.ModelAdmin):
         if request.user == obj.owner:
             return True
         return False
-
-    def response_post_save_add(self, request: HttpRequest, obj) -> HttpResponseRedirect:
-        if '_next' in request.POST:
-            opts = obj._meta
-            obj_url = reverse(
-                'admin:%s_%s_change' % (opts.app_label, opts.model_name),
-                args=(quote(obj.pk),),
-                current_app=self.admin_site.name,
-            )
-            return HttpResponseRedirect(obj_url)
-        return super(NPCAdmin, self).response_post_save_add(request, obj)
 
     def response_post_save_change(
         self, request: HttpRequest, obj

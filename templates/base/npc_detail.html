@@ -34,8 +34,11 @@
 <body>
 <div class="pagenotbreak" style="width: 700px; font-size: large">
 <div class="npc-line">
-        <div class="npc-header" style="float: left; width: 50%"><span><b>{{ object.name }} ({{ object.get_sex_display }})</b></span></div>
-        <div class="npc-header" style="float: right; width: 50%"><span style="float: right">{{ object.race }} {{ object.klass }} {{ object.level }} уровня</span></div>
+    <div class="npc-header" style="float: left; width: 50%"><span><b>{{ object.name }} ({{ object.get_sex_display }})</b></span></div>
+    <div class="npc-header" style="float: right; width: 50%"><span style="float: right">{{ object.race }} {{ object.klass }} {{ object.level }} уровня</span></div>
+    {% if not object.is_bonus_applied %}
+        <div class="npc-line"><span>Опыт: {{ object.experience }}</span></div>
+    {% endif %}
     </div>
     <div class="npc-line">
         <div><span>Хиты {{ object.max_hit_points }}; Ранен {{ object.bloodied }}; Исцеление {{ object.surge }}; Исцелений {{ object.surges }}</span></div>
