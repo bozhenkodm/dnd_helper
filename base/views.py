@@ -4,12 +4,18 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import View
-from django.views.generic import DetailView, TemplateView
+from django.views.generic import DetailView, FormView, TemplateView
 
 from base.constants.constants import SkillEnum
-from base.forms import EncounterChangeInitiativeForm
+from base.forms.encounter import EncounterChangeInitiativeForm
+from base.forms.npc import NPCModelForm
 from base.models import NPC, Encounter
 from base.models.encounters import EncounterParticipants
+
+
+class NPCFormView(FormView):
+    form_class = NPCModelForm
+    template_name = 'base/npc_form.html'
 
 
 class NPCDetailView(DetailView):

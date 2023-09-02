@@ -46,8 +46,13 @@ class NpcGeneratorView(TemplateView):
             'race': npc['race'].id,
         }
 
-        context['npc_create_link'] = (
+        context['npc_create_link_admin'] = (
             reverse('admin:base_npc_add')
+            + '?'
+            + '&'.join((f'{name}={value}' for name, value in query_params.items()))
+        )
+        context['npc_create_link'] = (
+            reverse('npc_create')
             + '?'
             + '&'.join((f'{name}={value}' for name, value in query_params.items()))
         )

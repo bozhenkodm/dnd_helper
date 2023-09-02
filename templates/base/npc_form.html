@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<style>
+.formfield {
+    margin: 10px;
+}
+.help {
+    font-size: 70%;
+    display: inline;
+    margin-left: 10px;
+}
+</style>
+<head>
+    <meta charset="UTF-8">
+    <title>Создание NPC</title>
+</head>
+<body>
+<form method="post">{% csrf_token %}
+    <div class="formfield">
+        {{ form.name.errors }}
+        {{ form.name.label_tag }} {{ form.name }}
+        {% if form.name.help_text %}
+        <p class="help">{{ form.name.help_text|safe }}</p>
+        {% endif %}
+    </div>
+    <div class="formfield">
+        {{ form.sex.errors }}
+        {{ form.sex.label_tag }} {{ form.sex }}
+        {% if form.sex.help_text %}
+        <p class="help">{{ form.sex.help_text|safe }}</p>
+        {% endif %}
+    </div>
+    <div class="formfield">
+        {{ form.race.errors }}
+        {{ form.race.label_tag }} {{ form.race }}
+        {% if form.race.help_text %}
+        <p class="help">{{ form.race.help_text|safe }}</p>
+        {% endif %}
+    </div>
+    <div class="formfield">
+        {{ form.functional_template.errors }}
+        {{ form.functional_template.label_tag }} {{ form.functional_template }}
+        {% if form.functional_template.help_text %}
+        <p class="help">{{ form.functional_template.help_text|safe }}</p>
+        {% endif %}
+    </div>
+    <div class="formfield">
+        {{ form.klass.errors }}
+        {{ form.klass.label_tag }} {{ form.klass }}
+        {% if form.klass.help_text %}
+        <p class="help">{{ form.klass.help_text|safe }}</p>
+        {% endif %}
+    </div>
+    <div class="formfield">
+        {{ form.subclass.errors }}
+        {{ form.subclass.label_tag }} {{ form.subclass }}
+        {% if form.subclass.help_text %}
+        <p class="help">{{ form.subclass.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.is_bonus_applied.errors }}
+        {{ form.is_bonus_applied.label_tag }} {{ form.is_bonus_applied }}
+        {% if form.is_bonus_applied.help_text %}
+        <p class="help">{{ form.is_bonus_applied.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.level.errors }}
+        {{ form.level.label_tag }} {{ form.level }}
+        {% if form.level.help_text %}
+        <p class="help">{{ form.level.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.experience.errors }}
+        {{ form.experience.label_tag }} {{ form.experience }}
+        {% if form.experience.help_text %}
+        <p class="help">{{ form.experience.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.paragon_path.errors }}
+        {{ form.paragon_path.label_tag }} {{ form.paragon_path }}
+        {% if form.paragon_path.help_text %}
+        <p class="help">{{ form.paragon_path.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.description.errors }}
+        {{ form.description.label_tag }} {{ form.description }}
+        {% if form.description.help_text %}
+        <p class="help">{{ form.description.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.base_strength.errors }}
+        {{ form.base_strength.label_tag }} {{ form.base_strength }}
+        {% if form.base_strength.help_text %}
+        <p class="help">{{ form.base_strength.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.base_constitution.errors }}
+        {{ form.base_constitution.label_tag }} {{ form.base_constitution }}
+        {% if form.base_constitution.help_text %}
+        <p class="help">{{ form.base_constitution.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.base_dexterity.errors }}
+        {{ form.base_dexterity.label_tag }} {{ form.base_dexterity }}
+        {% if form.base_dexterity.help_text %}
+        <p class="help">{{ form.base_dexterity.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.base_intelligence.errors }}
+        {{ form.base_intelligence.label_tag }} {{ form.base_intelligence }}
+        {% if form.base_intelligence.help_text %}
+        <p class="help">{{ form.base_intelligence.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.base_wisdom.errors }}
+        {{ form.base_wisdom.label_tag }} {{ form.base_wisdom }}
+        {% if form.base_wisdom.help_text %}
+        <p class="help">{{ form.base_wisdom.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.base_charisma.errors }}
+        {{ form.base_charisma.label_tag }} {{ form.base_charisma }}
+        {% if form.base_charisma.help_text %}
+        <p class="help">{{ form.base_charisma.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.var_bonus_ability.errors }}
+        {{ form.var_bonus_ability.label_tag }} {{ form.var_bonus_ability }}
+        {% if form.var_bonus_ability.help_text %}
+        <p class="help">{{ form.var_bonus_ability.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.trained_skills.errors }}
+        {{ form.trained_skills.label_tag }} {{ form.trained_skills }}
+        {% if form.trained_skills.help_text %}
+        <p class="help">{{ form.trained_skills.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.trained_weapons.errors }}
+        {{ form.trained_weapons.label_tag }} {{ form.trained_weapons }}
+        {% if form.trained_weapons.help_text %}
+        <p class="help">{{ form.trained_weapons.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.armor.errors }}
+        {{ form.armor.label_tag }} {{ form.armor }}
+        {% if form.armor.help_text %}
+        <p class="help">{{ form.armor.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.arms_slot.errors }}
+        {{ form.arms_slot.label_tag }} {{ form.arms_slot }}
+        {% if form.arms_slot.help_text %}
+        <p class="help">{{ form.arms_slot.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.weapons.errors }}
+        {{ form.weapons.label_tag }} {{ form.weapons }}
+        {% if form.weapons.help_text %}
+        <p class="help">{{ form.weapons.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.primary_hand.errors }}
+        {{ form.primary_hand.label_tag }} {{ form.primary_hand }}
+        {% if form.primary_hand.help_text %}
+        <p class="help">{{ form.primary_hand.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.secondary_hand.errors }}
+        {{ form.secondary_hand.label_tag }} {{ form.secondary_hand }}
+        {% if form.secondary_hand.help_text %}
+        <p class="help">{{ form.secondary_hand.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.no_hand.errors }}
+        {{ form.no_hand.label_tag }} {{ form.no_hand }}
+        {% if form.no_hand.help_text %}
+        <p class="help">{{ form.no_hand.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.neck_slot.errors }}
+        {{ form.neck_slot.label_tag }} {{ form.neck_slot }}
+        {% if form.neck_slot.help_text %}
+        <p class="help">{{ form.neck_slot.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.head_slot.errors }}
+        {{ form.head_slot.label_tag }} {{ form.head_slot }}
+        {% if form.head_slot.help_text %}
+        <p class="help">{{ form.head_slot.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.waist_slot.errors }}
+        {{ form.waist_slot.label_tag }} {{ form.waist_slot }}
+        {% if form.waist_slot.help_text %}
+        <p class="help">{{ form.waist_slot.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.feet_slot.errors }}
+        {{ form.feet_slot.label_tag }} {{ form.feet_slot }}
+        {% if form.feet_slot.help_text %}
+        <p class="help">{{ form.feet_slot.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.gloves_slot.errors }}
+        {{ form.gloves_slot.label_tag }} {{ form.gloves_slot }}
+        {% if form.gloves_slot.help_text %}
+        <p class="help">{{ form.gloves_slot.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.left_ring_slot.errors }}
+        {{ form.left_ring_slot.label_tag }} {{ form.left_ring_slot }}
+        {% if form.left_ring_slot.help_text %}
+        <p class="help">{{ form.left_ring_slot.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.right_ring_slot.errors }}
+        {{ form.right_ring_slot.label_tag }} {{ form.right_ring_slot }}
+        {% if form.right_ring_slot.help_text %}
+        <p class="help">{{ form.right_ring_slot.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div class="formfield">
+        {{ form.powers.errors }}
+        {{ form.powers.label_tag }} {{ form.powers }}
+        {% if form.powers.help_text %}
+        <p class="help">{{ form.powers.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+
+    <input type="submit" value="Save">
+</form>
+</body>
+</html>

@@ -5,9 +5,11 @@ from base.views import (
     EncounterDetailView,
     MainView,
     NPCDetailView,
+    NPCFormView,
 )
 
 urlpatterns = [
+    path('npc/create/', NPCFormView.as_view(), name='npc_create'),
     path('npc/detail/<pk>', NPCDetailView.as_view(), name='npc'),
     path('encounter/detail/<pk>', EncounterDetailView.as_view(), name='encounter'),
     path(
