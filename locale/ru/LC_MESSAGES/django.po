@@ -22,7 +22,7 @@ msgstr ""
 
 #: base/models/experience.py:49
 msgid "Experience"
-msgstr ""
+msgstr "Oпыт"
 
 #: base/models/magic_items.py:12 base/models/magic_items.py:66
 #: base/models/powers.py:87

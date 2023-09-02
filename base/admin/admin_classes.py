@@ -301,11 +301,6 @@ class NPCAdmin(admin.ModelAdmin):
             return HttpResponseRedirect(request.path)
         return super(NPCAdmin, self).response_post_save_change(request, obj)
 
-    def save_form(self, request, form, change):
-        if '_next' in request.POST:
-            form.instance.creation_step += 1
-        return super(NPCAdmin, self).save_form(request, form, change)
-
     def get_object(self, request, object_id, from_field=None):
         self.object = super().get_object(request, object_id, from_field)
         return self.object
