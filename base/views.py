@@ -1,6 +1,6 @@
 from typing import Any
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import View
@@ -11,6 +11,15 @@ from base.forms.encounter import EncounterChangeInitiativeForm
 from base.forms.npc import NPCModelForm
 from base.models import NPC, Encounter
 from base.models.encounters import EncounterParticipants
+from base.objects import npc_klasses
+
+
+class SubclassOptionsView(View):
+    def get(self, request, *args, **kwargs):
+        klass_value = request.GET.get('klass')
+        klass_instance = npc_klasses.get(klass_value)
+        subclass_enum = klass_instance.SubclassEnum
+        return JsonResponse(dict(subclass_enum.generate_choices()))
 
 
 class NPCFormView(FormView):

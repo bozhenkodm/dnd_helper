@@ -402,11 +402,3 @@ class MagicItemSlot(BaseNameValueDescriptionEnum):
     WONDROUS_ITEMS = 'wondrous_items', 'Чудесный предмет'
     TATOO = 'tatoo', 'Татуировка'
 
-
-class NPCCreationStepEnum(IntDescriptionEnum):
-    BASE = 1, 'Базовая информация'
-    BASE_ABILITIES = 2, 'Базовые характеристики'
-    LEVEL_BONUS_ABILITIES = 3, 'Бонусы характеристик от уровня'
-    SKILLS = 4, 'Навыки'
-    ITEMS = 5, 'Предметы'
-    WEAPONS = 6, 'Вооружение'

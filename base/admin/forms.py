@@ -8,7 +8,6 @@ from base.constants.constants import (
     DefenceTypeEnum,
     MagicItemSlot,
     NPCClassEnum,
-    NPCCreationStepEnum,
     NPCRaceEnum,
     SexEnum,
     ShieldTypeIntEnum,
@@ -72,8 +71,6 @@ class NPCModelForm(forms.ModelForm):
                     coerce=int,
                     choices=subclass_enum.generate_choices(),
                     label='Подкласс',
-                    required=self.instance.creation_step
-                    == NPCCreationStepEnum.BASE_ABILITIES,
                 )
             weapon_queryset = Weapon.objects.select_related(
                 'weapon_type', 'magic_item_type'

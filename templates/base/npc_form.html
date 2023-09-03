@@ -10,6 +10,29 @@
     margin-left: 10px;
 }
 </style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Function to toggle visibility of field2 container
+        function toggleField2Visibility() {
+            var field1Value = $('#{{ form.klass.id_for_label }}').val(); // Get the value of field1
+
+            if (field1Value != '') {
+                $('#subclass_field').show(); // Show field2 container
+            } else {
+                $('#subclass_field').hide(); // Hide field2 container
+            }
+        }
+
+        // Initial toggle
+        toggleField2Visibility();
+
+        // Detect changes in field1
+        $('#{{ form.klass.id_for_label }}').on('change', function () {
+            toggleField2Visibility();
+        });
+    });
+</script>
 <head>
     <meta charset="UTF-8">
     <title>Создание NPC</title>
@@ -38,20 +61,13 @@
         {% endif %}
     </div>
     <div class="formfield">
-        {{ form.functional_template.errors }}
-        {{ form.functional_template.label_tag }} {{ form.functional_template }}
-        {% if form.functional_template.help_text %}
-        <p class="help">{{ form.functional_template.help_text|safe }}</p>
-        {% endif %}
-    </div>
-    <div class="formfield">
         {{ form.klass.errors }}
         {{ form.klass.label_tag }} {{ form.klass }}
         {% if form.klass.help_text %}
         <p class="help">{{ form.klass.help_text|safe }}</p>
         {% endif %}
     </div>
-    <div class="formfield">
+    <div id="subclass_field" class="formfield">
         {{ form.subclass.errors }}
         {{ form.subclass.label_tag }} {{ form.subclass }}
         {% if form.subclass.help_text %}
@@ -64,6 +80,20 @@
         {{ form.is_bonus_applied.label_tag }} {{ form.is_bonus_applied }}
         {% if form.is_bonus_applied.help_text %}
         <p class="help">{{ form.is_bonus_applied.help_text|safe }}</p>
+        {% endif %}
+    </div>
+    <div class="formfield">
+        {{ form.functional_template.errors }}
+        {{ form.functional_template.label_tag }} {{ form.functional_template }}
+        {% if form.functional_template.help_text %}
+        <p class="help">{{ form.functional_template.help_text|safe }}</p>
+        {% endif %}
+    </div>
+    <div class="formfield">
+        {{ form.paragon_path.errors }}
+        {{ form.paragon_path.label_tag }} {{ form.paragon_path }}
+        {% if form.paragon_path.help_text %}
+        <p class="help">{{ form.paragon_path.help_text|safe }}</p>
         {% endif %}
     </div>
 
@@ -83,13 +113,6 @@
         {% endif %}
     </div>
 
-    <div class="formfield">
-        {{ form.paragon_path.errors }}
-        {{ form.paragon_path.label_tag }} {{ form.paragon_path }}
-        {% if form.paragon_path.help_text %}
-        <p class="help">{{ form.paragon_path.help_text|safe }}</p>
-        {% endif %}
-    </div>
 
     <div class="formfield">
         {{ form.description.errors }}
