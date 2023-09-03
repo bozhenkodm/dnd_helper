@@ -22,6 +22,25 @@
             } else {
                 $('#subclass_field').hide(); // Hide field2 container
             }
+
+            $.ajax({
+                url: '/api/v1/subclass-options/',
+                data: { 'klass': field1Value },
+                dataType: 'json',
+                success: function (data) {
+                    // Update the options of field2 based on the response
+                    var field2Select = $('#{{ form.subclass.id_for_label }}');
+                    field2Select.empty(); // Clear existing options
+
+                    // Add the updated options
+                    $.each(data, function (index, option) {
+                        field2Select.append($('<option>', {
+                            value: index,
+                            text: option
+                        }));
+                    });
+                }
+            });
         }
 
         // Initial toggle

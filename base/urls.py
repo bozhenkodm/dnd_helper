@@ -9,7 +9,7 @@ from base.views import (
 )
 
 api_urlpatterns = [
-    path('api/v1/subclass-options', SubclassOptionsView.as_view(), name='subclass_options')
+    path('api/v1/subclass-options/', SubclassOptionsView.as_view(), name='subclass_options')
 ]
 
 urlpatterns = [

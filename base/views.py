@@ -9,15 +9,18 @@ from django.views.generic import DetailView, FormView, TemplateView
 from base.constants.constants import SkillEnum
 from base.forms.encounter import EncounterChangeInitiativeForm
 from base.forms.npc import NPCModelForm
-from base.models import NPC, Encounter
+from base.models import NPC, Encounter, Class
 from base.models.encounters import EncounterParticipants
 from base.objects import npc_klasses
 
 
 class SubclassOptionsView(View):
     def get(self, request, *args, **kwargs):
-        klass_value = request.GET.get('klass')
-        klass_instance = npc_klasses.get(klass_value)
+        klass_id = request.GET.get('klass')
+        klass = Class.objects.get(id=klass_id)
+        klass_instance = npc_klasses.get(klass.name)
+        if not klass_instance:
+            return JsonResponse({})
         subclass_enum = klass_instance.SubclassEnum
         return JsonResponse(dict(subclass_enum.generate_choices()))
 
