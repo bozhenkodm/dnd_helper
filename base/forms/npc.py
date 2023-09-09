@@ -11,13 +11,14 @@ class NPCModelForm(forms.ModelForm):
         fields = '__all__'
 
     sex = forms.ChoiceField(
-        choices=SexEnum.generate_choices(is_sorted=False), label='Пол',
+        choices=SexEnum.generate_choices(is_sorted=False),
+        label='Пол',
         widget=forms.RadioSelect,
     )
 
     subclass = forms.TypedChoiceField(
-                    coerce=int,
-                    choices=IntDescriptionSubclassEnum.generate_choices(),
-                    label='Подкласс',
-                    show_hidden_initial=True,
-                )
+        coerce=int,
+        choices=IntDescriptionSubclassEnum.generate_choices(),
+        label='Подкласс',
+        show_hidden_initial=True,
+    )

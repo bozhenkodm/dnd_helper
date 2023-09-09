@@ -5,11 +5,16 @@ from base.views import (
     EncounterDetailView,
     MainView,
     NPCDetailView,
-    NPCFormView, SubclassOptionsView,
+    NPCFormView,
+    SubclassOptionsView,
 )
 
 api_urlpatterns = [
-    path('api/v1/subclass-options/', SubclassOptionsView.as_view(), name='subclass_options')
+    path(
+        'api/v1/subclass-options/',
+        SubclassOptionsView.as_view(),
+        name='subclass_options',
+    )
 ]
 
 urlpatterns = [

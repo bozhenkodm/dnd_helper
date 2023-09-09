@@ -9,7 +9,7 @@ from django.views.generic import DetailView, FormView, TemplateView
 from base.constants.constants import SkillEnum
 from base.forms.encounter import EncounterChangeInitiativeForm
 from base.forms.npc import NPCModelForm
-from base.models import NPC, Encounter, Class
+from base.models import NPC, Class, Encounter
 from base.models.encounters import EncounterParticipants
 from base.objects import npc_klasses
 
@@ -17,7 +17,10 @@ from base.objects import npc_klasses
 class SubclassOptionsView(View):
     def get(self, request, *args, **kwargs):
         klass_id = request.GET.get('klass')
-        klass = Class.objects.get(id=klass_id)
+        try:
+            klass = Class.objects.get(id=klass_id)
+        except Class.DoesNotExist:
+            return JsonResponse({})
         klass_instance = npc_klasses.get(klass.name)
         if not klass_instance:
             return JsonResponse({})

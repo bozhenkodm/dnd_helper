@@ -13,11 +13,11 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function () {
-        // Function to toggle visibility of field2 container
-        function toggleField2Visibility() {
-            var field1Value = $('#{{ form.klass.id_for_label }}').val(); // Get the value of field1
+        // Function to toggle visibility of subclass container
+        function toggleSubclassVisibility() {
+            var klassValue = $('#{{ form.klass.id_for_label }}').val();
 
-            if (field1Value != '') {
+            if (klassValue != '') {
                 $('#subclass_field').show(); // Show field2 container
             } else {
                 $('#subclass_field').hide(); // Hide field2 container
@@ -25,7 +25,7 @@
 
             $.ajax({
                 url: '/api/v1/subclass-options/',
-                data: { 'klass': field1Value },
+                data: { 'klass': klassValue },
                 dataType: 'json',
                 success: function (data) {
                     // Update the options of field2 based on the response
@@ -43,12 +43,38 @@
             });
         }
 
-        // Initial toggle
-        toggleField2Visibility();
+        function toggleParagonPathAndFunctionalTemplateVisibility() {
+            var isBonusAppliedValue = $('#{{ form.is_bonus_applied.id_for_label }}').prop('checked');
 
-        // Detect changes in field1
+            if (isBonusAppliedValue) {
+                // Show the paragon path field
+                $('#paragon_path_field').show();
+
+                // Hide the functional template field and clear its values
+                $('#functional_template_field').hide();
+                $('#{{ form.functional_template.id_for_label }}').val(''); // Clear the value of the functional template field
+            } else {
+                // Hide the paragon path field and clear its values
+                $('#paragon_path_field').hide();
+                $('#{{ form.paragon_path.id_for_label }}').val(''); // Clear the value of the paragon path field
+
+                // Show the functional template field
+                $('#functional_template_field').show();
+            }
+        }
+
+        // Initial toggle
+        toggleSubclassVisibility();
+        toggleParagonPathAndFunctionalTemplateVisibility();
+
+        // Detect changes in klass field
         $('#{{ form.klass.id_for_label }}').on('change', function () {
-            toggleField2Visibility();
+            toggleSubclassVisibility();
+        });
+
+        // Detect changes in is_bonus_applied field
+        $('#{{ form.is_bonus_applied.id_for_label }}').on('change', function () {
+            toggleParagonPathAndFunctionalTemplateVisibility();
         });
     });
 </script>
@@ -63,6 +89,13 @@
         {{ form.name.label_tag }} {{ form.name }}
         {% if form.name.help_text %}
         <p class="help">{{ form.name.help_text|safe }}</p>
+        {% endif %}
+    </div>
+    <div class="formfield">
+        {{ form.description.errors }}
+        {{ form.description.label_tag }} {{ form.description }}
+        {% if form.description.help_text %}
+        <p class="help">{{ form.description.help_text|safe }}</p>
         {% endif %}
     </div>
     <div class="formfield">
@@ -93,29 +126,6 @@
         <p class="help">{{ form.subclass.help_text|safe }}</p>
         {% endif %}
     </div>
-
-    <div class="formfield">
-        {{ form.is_bonus_applied.errors }}
-        {{ form.is_bonus_applied.label_tag }} {{ form.is_bonus_applied }}
-        {% if form.is_bonus_applied.help_text %}
-        <p class="help">{{ form.is_bonus_applied.help_text|safe }}</p>
-        {% endif %}
-    </div>
-    <div class="formfield">
-        {{ form.functional_template.errors }}
-        {{ form.functional_template.label_tag }} {{ form.functional_template }}
-        {% if form.functional_template.help_text %}
-        <p class="help">{{ form.functional_template.help_text|safe }}</p>
-        {% endif %}
-    </div>
-    <div class="formfield">
-        {{ form.paragon_path.errors }}
-        {{ form.paragon_path.label_tag }} {{ form.paragon_path }}
-        {% if form.paragon_path.help_text %}
-        <p class="help">{{ form.paragon_path.help_text|safe }}</p>
-        {% endif %}
-    </div>
-
     <div class="formfield">
         {{ form.level.errors }}
         {{ form.level.label_tag }} {{ form.level }}
@@ -123,21 +133,32 @@
         <p class="help">{{ form.level.help_text|safe }}</p>
         {% endif %}
     </div>
-
+    <div class="formfield">
+        {{ form.is_bonus_applied.errors }}
+        {{ form.is_bonus_applied.label_tag }} {{ form.is_bonus_applied }}
+        {% if form.is_bonus_applied.help_text %}
+        <p class="help">{{ form.is_bonus_applied.help_text|safe }}</p>
+        {% endif %}
+    </div>
+    <div id="functional_template_field" class="formfield">
+        {{ form.functional_template.errors }}
+        {{ form.functional_template.label_tag }} {{ form.functional_template }}
+        {% if form.functional_template.help_text %}
+        <p class="help">{{ form.functional_template.help_text|safe }}</p>
+        {% endif %}
+    </div>
+    <div id="paragon_path_field" class="formfield">
+        {{ form.paragon_path.errors }}
+        {{ form.paragon_path.label_tag }} {{ form.paragon_path }}
+        {% if form.paragon_path.help_text %}
+        <p class="help">{{ form.paragon_path.help_text|safe }}</p>
+        {% endif %}
+    </div>
     <div class="formfield">
         {{ form.experience.errors }}
         {{ form.experience.label_tag }} {{ form.experience }}
         {% if form.experience.help_text %}
         <p class="help">{{ form.experience.help_text|safe }}</p>
-        {% endif %}
-    </div>
-
-
-    <div class="formfield">
-        {{ form.description.errors }}
-        {{ form.description.label_tag }} {{ form.description }}
-        {% if form.description.help_text %}
-        <p class="help">{{ form.description.help_text|safe }}</p>
         {% endif %}
     </div>
 
