@@ -401,4 +401,3 @@ class MagicItemSlot(BaseNameValueDescriptionEnum):
     RING = 'ring', 'Кольца'
     WONDROUS_ITEMS = 'wondrous_items', 'Чудесный предмет'
     TATOO = 'tatoo', 'Татуировка'
-

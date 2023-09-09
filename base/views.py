@@ -19,7 +19,7 @@ class SubclassOptionsView(View):
         klass_id = request.GET.get('klass')
         try:
             klass = Class.objects.get(id=klass_id)
-        except Class.DoesNotExist:
+        except (Class.DoesNotExist, ValueError):
             return JsonResponse({})
         klass_instance = npc_klasses.get(klass.name)
         if not klass_instance:

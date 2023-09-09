@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <style>
+.form-row {
+    display: flex; /* Use flexbox for horizontal layout */
+}
 .formfield {
     margin: 10px;
 }
@@ -126,12 +129,21 @@
         <p class="help">{{ form.subclass.help_text|safe }}</p>
         {% endif %}
     </div>
-    <div class="formfield">
-        {{ form.level.errors }}
-        {{ form.level.label_tag }} {{ form.level }}
-        {% if form.level.help_text %}
-        <p class="help">{{ form.level.help_text|safe }}</p>
-        {% endif %}
+    <div class="form-row">
+        <div class="formfield">
+            {{ form.level.errors }}
+            {{ form.level.label_tag }} {{ form.level }}
+            {% if form.level.help_text %}
+            <p class="help">{{ form.level.help_text|safe }}</p>
+            {% endif %}
+        </div>
+        <div class="formfield">
+            {{ form.experience.errors }}
+            {{ form.experience.label_tag }} {{ form.experience }}
+            {% if form.experience.help_text %}
+            <p class="help">{{ form.experience.help_text|safe }}</p>
+            {% endif %}
+        </div>
     </div>
     <div class="formfield">
         {{ form.is_bonus_applied.errors }}
@@ -154,62 +166,54 @@
         <p class="help">{{ form.paragon_path.help_text|safe }}</p>
         {% endif %}
     </div>
-    <div class="formfield">
-        {{ form.experience.errors }}
-        {{ form.experience.label_tag }} {{ form.experience }}
-        {% if form.experience.help_text %}
-        <p class="help">{{ form.experience.help_text|safe }}</p>
-        {% endif %}
+    <div class="form-row">
+        <div class="formfield">
+            {{ form.base_strength.errors }}
+            {{ form.base_strength.label_tag }} {{ form.base_strength }}
+            {% if form.base_strength.help_text %}
+            <p class="help">{{ form.base_strength.help_text|safe }}</p>
+            {% endif %}
+        </div>
+        <div class="formfield">
+            {{ form.base_constitution.errors }}
+            {{ form.base_constitution.label_tag }} {{ form.base_constitution }}
+            {% if form.base_constitution.help_text %}
+            <p class="help">{{ form.base_constitution.help_text|safe }}</p>
+            {% endif %}
+        </div>
     </div>
-
-    <div class="formfield">
-        {{ form.base_strength.errors }}
-        {{ form.base_strength.label_tag }} {{ form.base_strength }}
-        {% if form.base_strength.help_text %}
-        <p class="help">{{ form.base_strength.help_text|safe }}</p>
-        {% endif %}
+    <div class="form-row">
+        <div class="formfield">
+            {{ form.base_dexterity.errors }}
+            {{ form.base_dexterity.label_tag }} {{ form.base_dexterity }}
+            {% if form.base_dexterity.help_text %}
+            <p class="help">{{ form.base_dexterity.help_text|safe }}</p>
+            {% endif %}
+        </div>
+        <div class="formfield">
+            {{ form.base_intelligence.errors }}
+            {{ form.base_intelligence.label_tag }} {{ form.base_intelligence }}
+            {% if form.base_intelligence.help_text %}
+            <p class="help">{{ form.base_intelligence.help_text|safe }}</p>
+            {% endif %}
+        </div>
     </div>
-
-    <div class="formfield">
-        {{ form.base_constitution.errors }}
-        {{ form.base_constitution.label_tag }} {{ form.base_constitution }}
-        {% if form.base_constitution.help_text %}
-        <p class="help">{{ form.base_constitution.help_text|safe }}</p>
-        {% endif %}
+    <div class="form-row">
+        <div class="formfield">
+            {{ form.base_wisdom.errors }}
+            {{ form.base_wisdom.label_tag }} {{ form.base_wisdom }}
+            {% if form.base_wisdom.help_text %}
+            <p class="help">{{ form.base_wisdom.help_text|safe }}</p>
+            {% endif %}
+        </div>
+        <div class="formfield">
+            {{ form.base_charisma.errors }}
+            {{ form.base_charisma.label_tag }} {{ form.base_charisma }}
+            {% if form.base_charisma.help_text %}
+            <p class="help">{{ form.base_charisma.help_text|safe }}</p>
+            {% endif %}
+        </div>
     </div>
-
-    <div class="formfield">
-        {{ form.base_dexterity.errors }}
-        {{ form.base_dexterity.label_tag }} {{ form.base_dexterity }}
-        {% if form.base_dexterity.help_text %}
-        <p class="help">{{ form.base_dexterity.help_text|safe }}</p>
-        {% endif %}
-    </div>
-
-    <div class="formfield">
-        {{ form.base_intelligence.errors }}
-        {{ form.base_intelligence.label_tag }} {{ form.base_intelligence }}
-        {% if form.base_intelligence.help_text %}
-        <p class="help">{{ form.base_intelligence.help_text|safe }}</p>
-        {% endif %}
-    </div>
-
-    <div class="formfield">
-        {{ form.base_wisdom.errors }}
-        {{ form.base_wisdom.label_tag }} {{ form.base_wisdom }}
-        {% if form.base_wisdom.help_text %}
-        <p class="help">{{ form.base_wisdom.help_text|safe }}</p>
-        {% endif %}
-    </div>
-
-    <div class="formfield">
-        {{ form.base_charisma.errors }}
-        {{ form.base_charisma.label_tag }} {{ form.base_charisma }}
-        {% if form.base_charisma.help_text %}
-        <p class="help">{{ form.base_charisma.help_text|safe }}</p>
-        {% endif %}
-    </div>
-
     <div class="formfield">
         {{ form.var_bonus_ability.errors }}
         {{ form.var_bonus_ability.label_tag }} {{ form.var_bonus_ability }}
