@@ -526,7 +526,7 @@ class SeekerClass(NPCClass):
     def attack_bonus(self, weapon=None, is_implement: bool = False) -> int:
         result = super().attack_bonus(weapon, is_implement)
         if self.npc.subclass == self.SubclassEnum.SPIRITBOND and (
-            weapon.data_instance.is_light_thrown or weapon.data_instance.is_heavy_thrown
+            weapon.data_instance.thrown
         ):
             return result + 1
         return result

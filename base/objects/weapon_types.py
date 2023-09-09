@@ -1,15 +1,16 @@
 from dataclasses import dataclass
-from typing import ClassVar, Literal, Sequence
+from typing import ClassVar, Literal, Optional, Sequence
 
 from base.constants.constants import (
     DiceIntEnum,
     PowerActionTypeEnum,
+    ThrownWeaponType,
     WeaponCategoryIntEnum,
     WeaponGroupEnum,
     WeaponHandednessEnum,
 )
 
-RangedLoadAction = Literal[PowerActionTypeEnum.FREE, PowerActionTypeEnum.MINOR, None]
+RangedLoadAction = Literal[PowerActionTypeEnum.FREE, PowerActionTypeEnum.MINOR]
 
 
 @dataclass
@@ -29,12 +30,11 @@ class WeaponType:
 
     # properties
     brutal: ClassVar[int] = 0
+    thrown: ClassVar[Optional[ThrownWeaponType]] = None
     is_off_hand: ClassVar[bool] = False
-    is_light_thrown: ClassVar[bool] = False
-    is_heavy_thrown: ClassVar[bool] = False
     is_high_crit: ClassVar[bool] = False
     is_reach: ClassVar[bool] = False
-    load: ClassVar[RangedLoadAction] = None
+    load: ClassVar[Optional[RangedLoadAction]] = None
     is_small: ClassVar[bool] = False
     is_defensive: ClassVar[bool] = False
 
@@ -43,12 +43,13 @@ class WeaponType:
         return cls.__name__
 
     @classmethod
-    def properties(cls) -> dict[str, int | bool | RangedLoadAction]:
+    def properties(
+        cls,
+    ) -> dict[str, int | bool | RangedLoadAction | ThrownWeaponType | None]:
         return {
             'brutal': cls.brutal,
+            'thrown': cls.thrown,
             'off_hand': cls.is_off_hand,
-            'light_thrown': cls.is_light_thrown,
-            'heavy_thrown': cls.is_heavy_thrown,
             'high_crit': cls.is_high_crit,
             'reach': cls.is_reach,
             'load': cls.load,
@@ -100,7 +101,6 @@ class ImplementType(WeaponType):
     prof_bonus = 0
     range: ClassVar[int] = 0
     is_off_hand: ClassVar[bool] = True
-    is_no_hand: ClassVar[bool] = False
 
     @classmethod
     def slug(cls):
@@ -135,8 +135,8 @@ class Dagger(WeaponType):
     category = WeaponCategoryIntEnum.SIMPLE
     damage_dice = DiceIntEnum.D4
     prof_bonus = 3
+    thrown = ThrownWeaponType.LIGHT
     is_off_hand = True
-    is_light_thrown = True
     range = 5
 
 
@@ -145,7 +145,7 @@ class Javelin(WeaponType):
     group = WeaponGroupEnum.SPEAR
     category = WeaponCategoryIntEnum.SIMPLE
     damage_dice = DiceIntEnum.D6
-    is_heavy_thrown = True
+    thrown = ThrownWeaponType.HEAVY
     range = 10
 
 
@@ -171,7 +171,7 @@ class ShortSpear(WeaponType):
     group = WeaponGroupEnum.SPEAR
     category = WeaponCategoryIntEnum.SIMPLE
     damage_dice = DiceIntEnum.D6
-    is_light_thrown = True
+    thrown = ThrownWeaponType.LIGHT
     is_off_hand = True
     is_small = True
     range = 5
@@ -265,7 +265,7 @@ class Handaxe(WeaponType):
     category = WeaponCategoryIntEnum.MILITARY
     damage_dice = DiceIntEnum.D6
     is_off_hand = True
-    is_heavy_thrown = True
+    thrown = ThrownWeaponType.HEAVY
     range = 5
 
 
@@ -328,7 +328,7 @@ class ThrowingHammer(WeaponType):
     damage_dice = DiceIntEnum.D6
     range = 5
     is_off_hand = True
-    is_heavy_thrown = True
+    thrown = ThrownWeaponType.HEAVY
 
 
 class Trident(WeaponType):
@@ -337,7 +337,7 @@ class Trident(WeaponType):
     category = WeaponCategoryIntEnum.MILITARY
     damage_dice = DiceIntEnum.D8
     range = 3
-    is_heavy_thrown = True
+    thrown = ThrownWeaponType.HEAVY
     handedness = WeaponHandednessEnum.VERSATILE
 
 
@@ -477,7 +477,7 @@ class Kukri(Dagger):
     category = WeaponCategoryIntEnum.SUPERIOR
     damage_dice = DiceIntEnum.D6
     brutal = 1
-    is_light_thrown = False
+    thrown = None  # type: ignore
     is_off_hand = True
     range = 0
     prof_bonus = 2
@@ -487,7 +487,7 @@ class ParryingDagger(Dagger):
     name = 'Защитный кинжал (сай)'
     category = WeaponCategoryIntEnum.SUPERIOR
     damage_dice = DiceIntEnum.D4
-    is_light_thrown = False
+    thrown = None  # type: ignore
     is_off_hand = True
     is_defensive = True
     range = 0
@@ -500,7 +500,7 @@ class Tratnyr(WeaponType):
     category = WeaponCategoryIntEnum.SUPERIOR
     damage_dice = DiceIntEnum.D8
     handedness = WeaponHandednessEnum.VERSATILE
-    is_heavy_thrown = True
+    thrown = ThrownWeaponType.HEAVY
     range = 10
 
 
@@ -637,7 +637,7 @@ class Shuriken(WeaponType):
     category = WeaponCategoryIntEnum.SUPERIOR_RANGED
     damage_dice = DiceIntEnum.D4
     range = 6
-    is_light_thrown = True
+    thrown = ThrownWeaponType.LIGHT
     prof_bonus = 3
 
 
@@ -720,7 +720,7 @@ class RitualSickle(Sickle):
 class KiFocus(ImplementType):
     name = 'Фокусировка ци'
     is_off_hand = False
-    is_no_hand = True
+    handedness = WeaponHandednessEnum.FREE
 
 
 class Totem(ImplementType):
@@ -738,7 +738,7 @@ class Rod(ImplementType):
 class HolySymbol(ImplementType):
     name = 'Символ веры'
     is_off_hand = False
-    is_no_hand = True
+    handedness = WeaponHandednessEnum.FREE
 
 
 class Sphere(ImplementType):

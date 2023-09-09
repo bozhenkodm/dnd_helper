@@ -401,3 +401,8 @@ class MagicItemSlot(BaseNameValueDescriptionEnum):
     RING = 'ring', 'Кольца'
     WONDROUS_ITEMS = 'wondrous_items', 'Чудесный предмет'
     TATOO = 'tatoo', 'Татуировка'
+
+
+class ThrownWeaponType(BaseNameValueDescriptionEnum):
+    LIGHT = 'light', 'Лёгкое'
+    HEAVY = 'heavy', 'Тяжёлое'
