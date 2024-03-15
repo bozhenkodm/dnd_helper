@@ -236,18 +236,6 @@ class NPCModelForm(forms.ModelForm):
                 self.add_error('sex', error)
                 self.add_error('race', error)
 
-    def check_pc_without_functional_template(self):
-        if (
-            not self.cleaned_data['is_bonus_applied']
-            and self.cleaned_data['functional_template']
-        ):
-            message = (
-                'Неигровые персонажи без бонуса уровня '
-                'не могут иметь функциональный шаблон'
-            )
-            self.add_error('functional_template', message)
-            self.add_error('is_bonus_applied', message)
-
     def check_npc_without_paragon_path(self):
         if self.cleaned_data['is_bonus_applied'] and self.cleaned_data['paragon_path']:
             message = (
@@ -260,7 +248,6 @@ class NPCModelForm(forms.ModelForm):
     def clean(self) -> dict[str, Any] | None:
         self.instance: NPC
         if not self.instance.id:
-            self.check_pc_without_functional_template()
             return super().clean()
         self.check_npc_without_paragon_path()
         primary_hand = self.cleaned_data.get('primary_hand')

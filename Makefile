@@ -1,6 +1,7 @@
 rerun:
 	poetry run python manage.py makemigrations
 	poetry run python manage.py migrate
+	poetry run python manage.py collectstatic --noinput
 	poetry run black -S .
 	poetry run isort .
 	poetry run flake8

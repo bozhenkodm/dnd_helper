@@ -307,9 +307,7 @@ class NPC(
         choices=SexEnum.generate_choices(is_sorted=False),
         verbose_name=_('Sex'),
     )
-    level = models.PositiveSmallIntegerField(
-        verbose_name=_('Level'),
-    )
+    level = models.PositiveSmallIntegerField(verbose_name=_('Level'), default=1)
     is_bonus_applied = models.BooleanField(
         verbose_name='Применять бонус за уровень?',
         help_text='Бонус за уровень уменьшает количество исцелений',

@@ -13,7 +13,8 @@ class DiceRoll:
     def __str__(self) -> str:
         if not self.addendant:
             return (
-                f'{self.rolls}' f'{self.dice.description}'  # type: ignore[attr-defined]
+                f'{self.rolls}'
+                f'{self.dice.description}'  # type: ignore[attr-defined]
             )
         return (
             f'{self.rolls}'

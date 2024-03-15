@@ -48,19 +48,19 @@ class NPCProtocol(Protocol):
 
     @property
     def _defence_level_bonus(self) -> int:
-        ...
+        pass
 
     @property
     def _shield_bonus(self) -> int:
-        ...
+        pass
 
     @property
     def shield(self) -> ShieldTypeIntEnum:
-        ...
+        pass
 
     @property
     def _necklace_defence_bonus(self) -> int:
-        ...
+        pass
 
 
 class NPCDefenceMixin:

@@ -10,15 +10,15 @@ version = "1.0.0"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-Django = "^4.0.0"
+Django = "^5.0.0"
 django-multiselectfield = "^0.1.12"
 pillow = "^10.0.0"
 
 [tool.poetry.dev-dependencies]
-black = "^23"
+black = "^24"
 isort = "^5.7.0"
 ipython = "^8.0.0"
-flake8 = "^6.0.0"
+flake8 = "^7.0.0"
 mypy = "^1.0"
 django-stubs = "^4.0.0"
 
@@ -26,3 +26,25 @@ django-stubs = "^4.0.0"
 include = '\.py$'
 skip-string-normalization = true
 target-version = ['py38']
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+combine_as_imports = true
+
+[tool.flake8]
+max-line-length = 88
+exclude = [
+    ".git",
+    "__pycache__",
+    "docs/source/conf.py",
+    "old",
+    "build",
+    "dist",
+    "*/migrations",
+    "settings.py",
+    "base/models/__init__.py"
+]
+ignore = ["W503", "E402"]

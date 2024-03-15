@@ -8,7 +8,7 @@ from django.core.files.images import ImageFile
 from django.db import models
 from django.db.models import QuerySet
 from django.db.transaction import atomic
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 
 from base.admin.forms import (
@@ -204,11 +204,16 @@ class ParagonPathAdmin(admin.ModelAdmin):
 
 
 class NPCAdmin(admin.ModelAdmin):
+    # TODO fix NPC creation process
+    class Meta:
+        js = ('base/npc_custom.js',)
+
     fields = [
         (
             'name',
             'sex',
         ),
+        'is_bonus_applied',
         (
             'race',
             'functional_template',
@@ -217,9 +222,7 @@ class NPCAdmin(admin.ModelAdmin):
             'klass',
             'subclass',
         ),
-        'is_bonus_applied',
         ('level', 'experience'),
-        'paragon_path',
         'description',
         (
             'base_strength',
@@ -233,6 +236,12 @@ class NPCAdmin(admin.ModelAdmin):
         ),
         'var_bonus_ability',
         # 'base_attack_ability',
+        # 'level4_bonus_abilities',
+        # 'level8_bonus_abilities',
+        # 'level14_bonus_abilities',
+        # 'level18_bonus_abilities',
+        # 'level24_bonus_abilities',
+        # 'level28_bonus_abilities',
         'mandatory_skills',
         'trained_skills',
         'trained_weapons',
@@ -294,13 +303,6 @@ class NPCAdmin(admin.ModelAdmin):
             return True
         return False
 
-    def response_post_save_change(
-        self, request: HttpRequest, obj
-    ) -> HttpResponseRedirect:
-        if '_next' in request.POST:
-            return HttpResponseRedirect(request.path)
-        return super(NPCAdmin, self).response_post_save_change(request, obj)
-
     def get_object(self, request, object_id, from_field=None):
         self.object = super().get_object(request, object_id, from_field)
         return self.object
@@ -340,9 +342,8 @@ class NPCAdmin(admin.ModelAdmin):
                 'is_bonus_applied',
                 (
                     'race',
-                    'functional_template',
+                    'klass',
                 ),
-                'klass',
                 'level',
                 (
                     'base_strength',
@@ -356,7 +357,12 @@ class NPCAdmin(admin.ModelAdmin):
                 ),
             )
         result = self.fields[:]
-        result.insert(8, self.get_level_abilities_bonus_fields(obj))
+        if not obj.is_bonus_applied:
+            result[2] = (
+                'race',
+                'paragon_path',
+            )
+        result.insert(9, self.get_level_abilities_bonus_fields(obj))
         return result
 
     @admin.display(description='Тренированные навыки')

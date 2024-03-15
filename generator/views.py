@@ -39,9 +39,11 @@ class NpcGeneratorView(TemplateView):
         ] + NPCName.generate_links()
 
         query_params = {
-            'name': ' '.join((npc['first_name'], npc['last_name']))
-            if npc['last_name']
-            else npc['first_name'],
+            'name': (
+                ' '.join((npc['first_name'], npc['last_name']))
+                if npc['last_name']
+                else npc['first_name']
+            ),
             'sex': npc['sex'],
             'race': npc['race'].id,
         }

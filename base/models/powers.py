@@ -132,7 +132,7 @@ class Power(models.Model):
         blank=True,
     )
     available_weapon_types = models.ManyToManyField(
-        'WeaponType',
+        'base.WeaponType',
         verbose_name=_('Weapon requirement'),
         help_text=_('for powers with weapons'),
         blank=True,
