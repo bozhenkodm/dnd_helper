@@ -5,9 +5,9 @@ from base.constants.base import BaseNameValueDescriptionEnum, IntDescriptionEnum
 
 
 class SexEnum(BaseNameValueDescriptionEnum):
-    M = 'M', 'Муж'
-    F = 'F', 'Жен'
-    N = 'N', 'Н/Д'
+    M = auto(), 'Муж'
+    F = auto(), 'Жен'
+    N = auto(), 'Н/Д'
 
 
 class AbilityEnum(BaseNameValueDescriptionEnum):
@@ -55,97 +55,103 @@ class VisionEnum(BaseNameValueDescriptionEnum):
 
 
 class NPCRaceEnum(BaseNameValueDescriptionEnum):
-    BUGBEAR = 'BUGBEAR', 'Багбир'
-    VRYLOKA = 'VRYLOKA', 'Врылока'
-    HAMADRYAD = 'HAMADRYAD', 'Гамадриада'
-    GITHZERAI = 'GITHZERAI', 'Гитзерай'
-    GNOME = 'GNOME', 'Гном'
-    GNOLL = 'GNOLL', 'Гнолл'
-    GOBLIN = 'GOBLIN', 'Гоблин'
-    GOLIATH = 'GOLIATH', 'Голиаф'
-    DWARF = 'DWARF', 'Дварф'
-    DEVA = 'DEVA', 'Дев'
-    GENASI_EARTHSOUL = 'GENASI_EARTHSOUL', 'Дженази, земля'
-    GENASI_FIRESOUL = 'GENASI_FIRESOUL', 'Дженази, огонь'
-    GENASI_STORMSOUL = 'GENASI_STORMSOUL', 'Дженази, шторм'
-    GENASI_WATERSOUL = 'GENASI_WATERSOUL', 'Дженази, вода'
-    GENASI_WINDSOUL = 'GENASI_WINDSOUL', 'Дженази, ветер'
-    WILDEN = 'WILDEN', 'Дикарь'
-    DOPPELGANGER = 'DOPPELGANGER', 'Доппельгангер'
-    DRAGONBORN = 'DRAGONBORN', 'Драконорожденный'
-    DROW = 'DROW', 'Дроу'
-    DUERGAR = 'DUERGAR', 'Дуэргар'
-    KALASHTAR = 'KALASHTAR', 'Калаштар'
-    KENKU = 'KENKU', 'Кенку'
-    KOBOLD = 'KOBOLD', 'Кобольд'
-    WARFORGED = 'WARFORGED', 'Кованый'
-    BLADELING = 'BLADELING', 'Мечерождённый'
-    MINOTAUR = 'MINOTAUR', 'Минотавр'
-    MUL = 'MUL', 'Мул'
-    ORC = 'ORC', 'Орк'
-    HALFELF = 'HALFELF', 'Полуэльф'
-    HALFLING = 'HALFLING', 'Полурослик'
-    HALFORC = 'HALFORC', 'Полуорк'
-    PIXIE = 'PIXIE', 'Пикси'
-    SATYR = 'SATYR', 'Сатир'
-    TIEFLING = 'TIEFLING', 'Тифлинг'
-    THRI_KREEN = 'THRI_KREEN', 'Три-крин'
-    HOBGOBLIN = 'HOBGOBLIN', 'Хобгоблин'
-    HUMAN = 'HUMAN', 'Человек'
-    SHADAR_KAI = 'SHADAR_KAI', 'Шадар-Кай'
-    SHIFTER_RAZORCLAW = 'SHIFTER_RAZORCLAW', 'Шифтер, бритволапый'
-    SHIFTER_LONGTEETH = 'SHIFTER_LONGTEETH', 'Шифтер, длиннозубый'
-    ELADRIN = 'ELADRIN', 'Эладрин'
-    ELF = 'ELF', 'Эльф'
+    BUGBEAR = auto(), 'Багбир'
+    VRYLOKA = auto(), 'Врылока'
+    HAMADRYAD = auto(), 'Гамадриада'
+    GITHZERAI = auto(), 'Гитзерай'
+    GNOME = auto(), 'Гном'
+    GNOLL = auto(), 'Гнолл'
+    GOBLIN = auto(), 'Гоблин'
+    GOLIATH = auto(), 'Голиаф'
+    DWARF = auto(), 'Дварф'
+    DEVA = auto(), 'Дев'
+    GENASI_EARTHSOUL = auto(), 'Дженази, земля'
+    GENASI_FIRESOUL = auto(), 'Дженази, огонь'
+    GENASI_STORMSOUL = auto(), 'Дженази, шторм'
+    GENASI_WATERSOUL = auto(), 'Дженази, вода'
+    GENASI_WINDSOUL = auto(), 'Дженази, ветер'
+    WILDEN = auto(), 'Дикарь'
+    DOPPELGANGER = auto(), 'Доппельгангер'
+    DRAGONBORN = auto(), 'Драконорожденный'
+    DROW = auto(), 'Дроу'
+    DUERGAR = auto(), 'Дуэргар'
+    KALASHTAR = auto(), 'Калаштар'
+    KENKU = auto(), 'Кенку'
+    KOBOLD = auto(), 'Кобольд'
+    WARFORGED = auto(), 'Кованый'
+    BLADELING = auto(), 'Мечерождённый'
+    MINOTAUR = auto(), 'Минотавр'
+    MUL = auto(), 'Мул'
+    ORC = auto(), 'Орк'
+    HALFELF = auto(), 'Полуэльф'
+    HALFLING = auto(), 'Полурослик'
+    HALFORC = auto(), 'Полуорк'
+    PIXIE = auto(), 'Пикси'
+    SATYR = auto(), 'Сатир'
+    TIEFLING = auto(), 'Тифлинг'
+    THRI_KREEN = auto(), 'Три-крин'
+    HOBGOBLIN = auto(), 'Хобгоблин'
+    HUMAN = auto(), 'Человек'
+    SHADAR_KAI = auto(), 'Шадар-Кай'
+    SHIFTER_RAZORCLAW = auto(), 'Шифтер, бритволапый'
+    SHIFTER_LONGTEETH = auto(), 'Шифтер, длиннозубый'
+    ELADRIN = auto(), 'Эладрин'
+    ELF = auto(), 'Эльф'
 
 
 class NPCClassEnum(BaseNameValueDescriptionEnum):
-    INVOKER = 'invoker', 'Апостол'
-    ARTIFICER = 'artificer', 'Артефактор'
-    BARD = 'bard', 'Бард'
-    BLADESINGER = 'bladesinger', 'Блэйдсингер'
-    VAMPIRE = 'vampire', 'Вампир'
-    BARBARIAN = 'barbarian', 'Варвар'
-    WARLORD = 'warlord', 'Военачальник'
-    WARPRIEST = 'warpriest', 'Военный священник (жрец)'
-    FIGHTER = 'fighter', 'Воин'
-    WIZARD = 'wizard', 'Волшебник'
-    DRUID = 'druid', 'Друид'
-    PRIEST = 'priest', 'Жрец'
-    SEEKER = 'seeker', 'Ловчий'
-    AVENGER = 'avenger', 'Каратель'
-    WARLOCK = 'warlock', 'Колдун'
-    SWORDMAGE = 'swordmage', 'Мечник-маг'
-    MONK = 'monk', 'Монах'
-    PALADIN = 'paladin', 'Паладин'
-    ROGUE = 'rogue', 'Плут'
-    RUNEPRIEST = 'runepriest', 'Рунный жрец'
-    RANGER = 'ranger', 'Следопыт'
-    RANGER_MELEE = 'ranger_melee', 'Следопыт (Рукопашник)'
-    HEXBLADE = 'hexblade', 'Хексблэйд (колдун)'
-    WARDEN = 'warden', 'Хранитель'
-    SORCERER = 'sorcerer', 'Чародей'
-    SHAMAN = 'shaman', 'Шаман'
+    def _generate_next_value_(name, start, count, last_values):
+        return str(name).lower()
+
+    INVOKER = auto(), 'Апостол'
+    ARTIFICER = auto(), 'Артефактор'
+    BARD = auto(), 'Бард'
+    BLADESINGER = auto(), 'Блэйдсингер'
+    VAMPIRE = auto(), 'Вампир'
+    BARBARIAN = auto(), 'Варвар'
+    WARLORD = auto(), 'Военачальник'
+    WARPRIEST = auto(), 'Военный священник (жрец)'
+    FIGHTER = auto(), 'Воин'
+    WIZARD = auto(), 'Волшебник'
+    DRUID = auto(), 'Друид'
+    PRIEST = auto(), 'Жрец'
+    SEEKER = auto(), 'Ловчий'
+    AVENGER = auto(), 'Каратель'
+    WARLOCK = auto(), 'Колдун'
+    SWORDMAGE = auto(), 'Мечник-маг'
+    MONK = auto(), 'Монах'
+    PALADIN = auto(), 'Паладин'
+    ROGUE = auto(), 'Плут'
+    RUNEPRIEST = auto(), 'Рунный жрец'
+    RANGER = auto(), 'Следопыт'
+    RANGER_MELEE = auto(), 'Следопыт (Рукопашник)'
+    HEXBLADE = auto(), 'Хексблэйд (колдун)'
+    WARDEN = auto(), 'Хранитель'
+    SORCERER = auto(), 'Чародей'
+    SHAMAN = auto(), 'Шаман'
 
 
 class SkillEnum(BaseNameValueDescriptionEnum):
-    ACROBATICS = 'acrobatics', 'Акробатика'
-    ATHLETICS = 'athletics', 'Атлетика'
-    PERCEPTION = 'perception', 'Внимательность'
-    THIEVERY = 'thievery', 'Воровство'
-    ENDURANCE = 'endurance', 'Выносливость'
-    INTIMIDATE = 'intimidate', 'Запугивание'
-    STREETWISE = 'streetwise', 'Знание улиц'
-    HISTORY = 'history', 'История'
-    ARCANA = 'arcana', 'Магия'
-    BLUFF = 'bluff', 'Обман'
-    DIPLOMACY = 'diplomacy', 'Переговоры'
-    DUNGEONEERING = 'dungeoneering', 'Подземелья'
-    NATURE = 'nature', 'Природа'
-    INSIGHT = 'insight', 'Проницательность'
-    RELIGION = 'religion', 'Религия'
-    STEALTH = 'stealth', 'Скрытность'
-    HEAL = 'heal', 'Целительство'
+    def _generate_next_value_(name, start, count, last_values):
+        return str(name).lower()
+
+    ACROBATICS = auto(), 'Акробатика'
+    ATHLETICS = auto(), 'Атлетика'
+    PERCEPTION = auto(), 'Внимательность'
+    THIEVERY = auto(), 'Воровство'
+    ENDURANCE = auto(), 'Выносливость'
+    INTIMIDATE = auto(), 'Запугивание'
+    STREETWISE = auto(), 'Знание улиц'
+    HISTORY = auto(), 'История'
+    ARCANA = auto(), 'Магия'
+    BLUFF = auto(), 'Обман'
+    DIPLOMACY = auto(), 'Переговоры'
+    DUNGEONEERING = auto(), 'Подземелья'
+    NATURE = auto(), 'Природа'
+    INSIGHT = auto(), 'Проницательность'
+    RELIGION = auto(), 'Религия'
+    STEALTH = auto(), 'Скрытность'
+    HEAL = auto(), 'Целительство'
 
     @classmethod
     def sequence(cls):
@@ -201,22 +207,25 @@ class ShieldTypeIntEnum(IntDescriptionEnum):
 
 
 class WeaponGroupEnum(BaseNameValueDescriptionEnum):
+    def _generate_next_value_(name, start, count, last_values):
+        return str(name).lower()
+
     # Melee
-    AXE = 'axe', 'Топор'
-    MACE = 'mace', 'Булава'
-    LIGHT_BLADE = 'light_blade', 'Лёгкий клинок'
-    SPEAR = 'spear', 'Копьё'
-    STAFF = 'staff', 'Посох'
-    FLAIL = 'flail', 'Цеп'
-    HEAVY_BLADE = 'heavy_blade', 'Тяжелый клинок'
-    HAMMER = 'hammer', 'Молот'
-    PICK = 'pick', 'Кирка'
-    POLEARM = 'polearm', 'Древковое'
-    UNARMED = 'unarmed', 'Безоружное'
+    AXE = auto(), 'Топор'
+    MACE = auto(), 'Булава'
+    LIGHT_BLADE = auto(), 'Лёгкий клинок'
+    SPEAR = auto(), 'Копьё'
+    STAFF = auto(), 'Посох'
+    FLAIL = auto(), 'Цеп'
+    HEAVY_BLADE = auto(), 'Тяжелый клинок'
+    HAMMER = auto(), 'Молот'
+    PICK = auto(), 'Кирка'
+    POLEARM = auto(), 'Древковое'
+    UNARMED = auto(), 'Безоружное'
     # Ranged
-    SLING = 'sling', 'Праща'
-    CROSSBOW = 'crossbow', 'Арбалет'
-    BOW = 'bow', 'Лук'
+    SLING = auto(), 'Праща'
+    CROSSBOW = auto(), 'Арбалет'
+    BOW = auto(), 'Лук'
 
 
 class WeaponCategoryIntEnum(IntDescriptionEnum):
@@ -247,105 +256,114 @@ class DiceIntEnum(IntDescriptionEnum):
 
 
 class WeaponHandednessEnum(BaseNameValueDescriptionEnum):
-    ONE = 'one', 'Одноручное'
-    TWO = 'two', 'Двуручное'
+    def _generate_next_value_(name, start, count, last_values):
+        return str(name).lower()
+
+    ONE = auto(), 'Одноручное'
+    TWO = auto(), 'Двуручное'
     VERSATILE = (
         'versatile',
         'Универсальное',
     )  # one-handed, but can be used with two hands
     # (with +1 to damage, unless user is small)
-    FREE = 'free', 'Не занимает руки'  # ki and symbols of faith
+    FREE = auto(), 'Не занимает руки'  # ki and symbols of faith
 
 
 class PowerSourceEnum(BaseNameValueDescriptionEnum):
-    MARTIAL = 'martial', 'Воинский'
-    DIVINE = 'divine', 'Духовный'
-    ARCANE = 'arcane', 'Магический'
-    PRIMAL = 'primal', 'Первородный'
-    SHADOW = 'shadow', 'Теневой'
-    PSIONIC = 'psionic', 'Псионический'
+    def _generate_next_value_(name, start, count, last_values):
+        return str(name).lower()
+
+    MARTIAL = auto(), 'Воинский'
+    DIVINE = auto(), 'Духовный'
+    ARCANE = auto(), 'Магический'
+    PRIMAL = auto(), 'Первородный'
+    SHADOW = auto(), 'Теневой'
+    PSIONIC = auto(), 'Псионический'
 
 
 class ClassRoleEnum(BaseNameValueDescriptionEnum):
-    STRIKER = 'striker', 'Атакующий'
-    DEFENDER = 'defender', 'Защитник'
-    CONTROLLER = 'controller', 'Контроллер'
-    LEADER = 'leader', 'Лидер'
+    def _generate_next_value_(name, start, count, last_values):
+        return str(name).lower()
+
+    STRIKER = auto(), 'Атакующий'
+    DEFENDER = auto(), 'Защитник'
+    CONTROLLER = auto(), 'Контроллер'
+    LEADER = auto(), 'Лидер'
 
 
 class PowerFrequencyEnum(BaseNameValueDescriptionEnum):
-    PASSIVE = 'PASSIVE', 'Пассивный'
-    AT_WILL = 'AT_WILL', 'Неограниченный'
-    ENCOUNTER = 'ENCOUNTER', 'На сцену'
-    DAILY = 'DAILY', 'На день'
+    PASSIVE = auto(), 'Пассивный'
+    AT_WILL = auto(), 'Неограниченный'
+    ENCOUNTER = auto(), 'На сцену'
+    DAILY = auto(), 'На день'
 
 
 class PowerDamageTypeEnum(BaseNameValueDescriptionEnum):
-    NONE = 'NONE', ''
-    ACID = 'ACID', 'Кислота'
-    COLD = 'COLD', 'Холод'
-    FIRE = 'FIRE', 'Огонь'
-    LIGHTNING = 'LIGHTNING', 'Электричество'
-    NECROTIC = 'NECROTIC', 'Некротическая энергия'
-    POISON = 'POISON', 'Яд'
-    PSYCHIC = 'PSYCHIC', 'Психическая энергия'
-    RADIANT = 'RADIANT', 'Излучение'
-    THUNDER = 'THUNDER', 'Звук'
-    FORCE = 'FORCE', 'Силовое поле'
+    NONE = auto(), ''
+    ACID = auto(), 'Кислота'
+    COLD = auto(), 'Холод'
+    FIRE = auto(), 'Огонь'
+    LIGHTNING = auto(), 'Электричество'
+    NECROTIC = auto(), 'Некротическая энергия'
+    POISON = auto(), 'Яд'
+    PSYCHIC = auto(), 'Психическая энергия'
+    RADIANT = auto(), 'Излучение'
+    THUNDER = auto(), 'Звук'
+    FORCE = auto(), 'Силовое поле'
 
 
 class PowerEffectTypeEnum(BaseNameValueDescriptionEnum):
-    NONE = 'NONE', ''
-    CHARM = 'CHARM', 'Очарование'
-    CONJURATION = 'CONJURATION', 'Иллюзия'
-    FEAR = 'FEAR', 'Страх'
-    HEALING = 'HEALING', 'Исцеление'
-    INVIGORATING = 'INVIGORATING', 'Укрепляющий'
-    POLYMORPH = 'POLYMORPH', 'Превращение'
-    RAGE = 'RAGE', 'Ярость'
-    RATTLING = 'RATTLING', 'Ужасающий'
-    RELIABLE = 'RELIABLE', 'Надежный'
-    SLEEP = 'SLEEP', 'Сон'
-    STANCE = 'STANCE', 'Стойка'
-    TELEPORTATION = 'TELEPORTATION', 'Телепортация'
-    ZONE = 'ZONE', 'Зона'
+    NONE = auto(), ''
+    CHARM = auto(), 'Очарование'
+    CONJURATION = auto(), 'Иллюзия'
+    FEAR = auto(), 'Страх'
+    HEALING = auto(), 'Исцеление'
+    INVIGORATING = auto(), 'Укрепляющий'
+    POLYMORPH = auto(), 'Превращение'
+    RAGE = auto(), 'Ярость'
+    RATTLING = auto(), 'Ужасающий'
+    RELIABLE = auto(), 'Надежный'
+    SLEEP = auto(), 'Сон'
+    STANCE = auto(), 'Стойка'
+    TELEPORTATION = auto(), 'Телепортация'
+    ZONE = auto(), 'Зона'
 
 
 class PowerActionTypeEnum(BaseNameValueDescriptionEnum):
-    STANDARD = 'STANDARD', 'Стандартное действие'
-    MINOR = 'MINOR', 'Малое действие'
-    FREE = 'FREE', 'Свободное действие'
-    MOVEMENT = 'MOVEMENT', 'Действие движения'
-    PROVOKED = 'PROVOKED', 'Провоцированное действие'
-    INTERRUPT = 'INTERRUPT', 'Немедленное прерывание'
-    REACTION = 'REACTION', 'Немедленный ответ'
-    NO_ACTION = 'NO_ACTION', 'Нет действия'
+    STANDARD = auto(), 'Стандартное действие'
+    MINOR = auto(), 'Малое действие'
+    FREE = auto(), 'Свободное действие'
+    MOVEMENT = auto(), 'Действие движения'
+    PROVOKED = auto(), 'Провоцированное действие'
+    INTERRUPT = auto(), 'Немедленное прерывание'
+    REACTION = auto(), 'Немедленный ответ'
+    NO_ACTION = auto(), 'Нет действия'
 
 
 class AccessoryTypeEnum(BaseNameValueDescriptionEnum):
-    IMPLEMENT = 'IMPLEMENT', 'Инструмент'
-    WEAPON = 'WEAPON', 'Оружие'
-    TWO_WEAPONS = 'TWO_WEAPONS', 'Два оружия'
+    IMPLEMENT = auto(), 'Инструмент'
+    WEAPON = auto(), 'Оружие'
+    TWO_WEAPONS = auto(), 'Два оружия'
     # WEAPON_AND_IMPLEMENT = 'WEAPON_AND_IMPLEMENT', 'Оружие и инструмент'
 
 
 class DefenceTypeEnum(BaseNameValueDescriptionEnum):
-    ARMOR_CLASS = 'ARMOR_CLASS', 'КД'
-    FORTITUDE = 'FORTITUDE', 'Стойкость'
-    REFLEX = 'REFLEX', 'Реакция'
-    WILL = 'WILL', 'Воля'
+    ARMOR_CLASS = auto(), 'КД'
+    FORTITUDE = auto(), 'Стойкость'
+    REFLEX = auto(), 'Реакция'
+    WILL = auto(), 'Воля'
 
 
 class PowerRangeTypeEnum(BaseNameValueDescriptionEnum):
-    MELEE_WEAPON = 'MELEE_WEAPON', 'Рукопашное оружие'
-    MELEE = 'MELEE', 'Рукопашное'
-    RANGED = 'RANGED', 'Дальнобойное'
-    MELEE_RANGED_WEAPON = 'MELEE_RANGED_WEAPON', 'Рукопашное или дальнобойное оружие'
-    RANGED_WEAPON = 'RANGED_WEAPON', 'Дальнобойное оружие'
-    BURST = 'BURST', 'Вспышка'
-    BLAST = 'BLAST', 'Волна'
-    WALL = 'WALL', 'Стена'
-    PERSONAL = 'PERSONAL', 'Персональный'
+    MELEE_WEAPON = auto(), 'Рукопашное оружие'
+    MELEE = auto(), 'Рукопашное'
+    RANGED = auto(), 'Дальнобойное'
+    MELEE_RANGED_WEAPON = auto(), 'Рукопашное или дальнобойное оружие'
+    RANGED_WEAPON = auto(), 'Дальнобойное оружие'
+    BURST = auto(), 'Вспышка'
+    BLAST = auto(), 'Волна'
+    WALL = auto(), 'Стена'
+    PERSONAL = auto(), 'Персональный'
 
     def default_target(self):
         if self in (
@@ -372,37 +390,43 @@ class PowerRangeTypeEnum(BaseNameValueDescriptionEnum):
 
 
 class PowerPropertyTitle(BaseNameValueDescriptionEnum):
-    ATTACK = 'ATTACK', 'Атака'
-    HIT = 'HIT', 'Попадание'
-    MISS = 'MISS', 'Промах'
-    EFFECT = 'EFFECT', 'Эффект'
-    REQUIREMENT = 'REQUIREMENT', 'Требование'
-    TRIGGER = 'TRIGGER', 'Триггер'
-    SPECIAL = 'SPECIAL', 'Особенность'
-    TARGET = 'TARGET', 'Цель'
-    OTHER = 'OTHER', 'Другое'
+    ATTACK = auto(), 'Атака'
+    HIT = auto(), 'Попадание'
+    MISS = auto(), 'Промах'
+    EFFECT = auto(), 'Эффект'
+    REQUIREMENT = auto(), 'Требование'
+    TRIGGER = auto(), 'Триггер'
+    SPECIAL = auto(), 'Особенность'
+    TARGET = auto(), 'Цель'
+    OTHER = auto(), 'Другое'
 
 
 class MagicItemCategory(BaseNameValueDescriptionEnum):
-    COMMON = 'COMMON', 'Обычный'
-    UNCOMMON = 'UNCOMMON', 'Необычный'
-    RARE = 'RARE', 'Редкий'
+    COMMON = auto(), 'Обычный'
+    UNCOMMON = auto(), 'Необычный'
+    RARE = auto(), 'Редкий'
 
 
 class MagicItemSlot(BaseNameValueDescriptionEnum):
-    WEAPON = 'weapon', 'Оружие'
-    ARMOR = 'armor', 'Броня'
-    NECK = 'neck', 'Шея'
-    HEAD = 'head', 'Голова'
-    ARMS = 'arms', 'Предплечья/Щит'
-    FEET = 'feet', 'Обувь'
-    HANDS = 'hands', 'Перчатки'
-    WAIST = 'waist', 'Пояс'
-    RING = 'ring', 'Кольца'
-    WONDROUS_ITEMS = 'wondrous_items', 'Чудесный предмет'
-    TATOO = 'tatoo', 'Татуировка'
+    def _generate_next_value_(name, start, count, last_values):
+        return str(name).lower()
+
+    WEAPON = auto(), 'Оружие'
+    ARMOR = auto(), 'Броня'
+    NECK = auto(), 'Шея'
+    HEAD = auto(), 'Голова'
+    ARMS = auto(), 'Предплечья/Щит'
+    FEET = auto(), 'Обувь'
+    HANDS = auto(), 'Перчатки'
+    WAIST = auto(), 'Пояс'
+    RING = auto(), 'Кольца'
+    WONDROUS_ITEMS = auto(), 'Чудесный предмет'
+    TATOO = auto(), 'Татуировка'
 
 
 class ThrownWeaponType(BaseNameValueDescriptionEnum):
-    LIGHT = 'light', 'Лёгкое'
-    HEAVY = 'heavy', 'Тяжёлое'
+    def _generate_next_value_(name, start, count, last_values):
+        return str(name).lower()
+
+    LIGHT = auto(), 'Лёгкое'
+    HEAVY = auto(), 'Тяжёлое'

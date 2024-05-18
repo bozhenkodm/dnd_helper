@@ -63,7 +63,7 @@ class WeaponType:
         return self.range * 2
 
     def damage(self, weapon_number=1):
-        return f'{self.dice_number*weapon_number}{self.damage_dice.description}'
+        return f'{self.dice_number * weapon_number}{self.damage_dice.description}'
 
     @classmethod
     def has_group(cls, group: WeaponGroupEnum) -> bool:

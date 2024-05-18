@@ -91,7 +91,7 @@ class WeaponType(models.Model):
 
     def damage(self, weapon_number=1) -> str:
         return (
-            f'{self.data_instance.dice_number*weapon_number}'
+            f'{self.data_instance.dice_number * weapon_number}'
             f'{self.data_instance.damage_dice.description}'
         )
 
