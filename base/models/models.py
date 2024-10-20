@@ -15,6 +15,7 @@ from base.constants.constants import (
     NPCRaceEnum,
     SexEnum,
 )
+from base.exceptions import PowerInconsistent
 from base.managers import WeaponTypeQuerySet
 from base.models.abilities import Ability, NPCAbilityAbstract
 from base.models.defences import NPCDefenceMixin
@@ -163,7 +164,7 @@ class Weapon(ItemAbstract):
             return melee_attack_type
         if is_ranged:
             return ranged_attack_type
-        raise ValueError(_('Wrong attack type'))
+        raise PowerInconsistent(_('Wrong attack type'))
 
 
 class Race(models.Model):
@@ -606,26 +607,30 @@ class NPC(
 
         powers: list[dict] = []
         for power in powers_qs.ordered_by_frequency():
-            powers.append(
-                PowerDisplay(
-                    name=power.name,
-                    keywords=power.keywords(),
-                    category=power.category(),
-                    description=self.parse_string(power, string=power.description),
-                    frequency_order=power.frequency_order,
-                    frequency=power.frequency.lower(),
-                    properties=[
-                        PowerPropertyDisplay(
-                            title=prop.get_displayed_title(),
-                            description=self.parse_string(
-                                power, string=prop.get_displayed_description()
-                            ),
-                            debug=prop.get_displayed_description(),
-                        )
-                        for prop in self.valid_properties(power)
-                    ],
-                ).asdict()
-            )
+            try:
+                powers.append(
+                    PowerDisplay(
+                        name=power.name,
+                        keywords=power.keywords(),
+                        category=power.category(),
+                        description=self.parse_string(power, string=power.description),
+                        frequency_order=power.frequency_order,
+                        frequency=power.frequency.lower(),
+                        properties=[
+                            PowerPropertyDisplay(
+                                title=prop.get_displayed_title(),
+                                description=self.parse_string(
+                                    power, string=prop.get_displayed_description()
+                                ),
+                                debug=prop.get_displayed_description(),
+                            )
+                            for prop in self.valid_properties(power)
+                        ],
+                    ).asdict()
+                )
+            except PowerInconsistent as e:
+                print(f"{power} dispay is not created with error: {e}")
+                continue
         power_weapon_qs = self.powers.ordered_by_frequency().filter(  # type: ignore
             accessory_type__in=(AccessoryTypeEnum.WEAPON, AccessoryTypeEnum.IMPLEMENT)
         )
@@ -642,58 +647,67 @@ class NPC(
             for weapon in self.wielded_weapons:
                 if not self.is_weapon_proper_for_power(power=power, weapon=weapon):
                     continue
-                powers.append(
-                    PowerDisplay(
-                        name=power.name,
-                        keywords=power.keywords(weapon),
-                        category=power.category(weapon),
-                        description=self.parse_string(power, power.description),
-                        frequency_order=power.frequency_order,
-                        frequency=power.frequency.lower(),
-                        properties=[
-                            PowerPropertyDisplay(
-                                **{
-                                    'title': prop.get_displayed_title(),
-                                    'description': self.parse_string(
-                                        power,
-                                        string=prop.get_displayed_description(),
-                                        weapon=weapon,
-                                    ),
-                                    'debug': prop.description,
-                                }
-                            )
-                            for prop in self.valid_properties(power)
-                        ],
-                    ).asdict()
-                )
+                try:
+                    powers.append(
+                        PowerDisplay(
+                            name=power.name,
+                            keywords=power.keywords(weapon),
+                            category=power.category(weapon),
+                            description=self.parse_string(power, power.description),
+                            frequency_order=power.frequency_order,
+                            frequency=power.frequency.lower(),
+                            properties=[
+                                PowerPropertyDisplay(
+                                    **{
+                                        'title': prop.get_displayed_title(),
+                                        'description': self.parse_string(
+                                            power,
+                                            string=prop.get_displayed_description(),
+                                            weapon=weapon,
+                                        ),
+                                        'debug': prop.description,
+                                    }
+                                )
+                                for prop in self.valid_properties(power)
+                            ],
+                        ).asdict()
+                    )
+                except PowerInconsistent as e:
+                    print(f"{power} dispay is not created with error: {e}")
+                    continue
+
         for item in self.magic_items:
             if not item.magic_item_type:
                 continue
             for power in item.magic_item_type.powers.ordered_by_frequency():
-                powers.append(
-                    PowerDisplay(
-                        name=power.name,
-                        keywords=power.keywords(),
-                        category=power.category(),
-                        description=self.parse_string(
-                            power, power.description, item=item
-                        ),
-                        frequency_order=power.frequency_order,
-                        frequency=power.frequency.lower(),
-                        properties=[
-                            PowerPropertyDisplay(
-                                **{
-                                    'title': prop.get_displayed_title(),
-                                    'description': self.parse_string(
-                                        power,
-                                        string=prop.get_displayed_description(),
-                                        item=item,
-                                    ),
-                                    'debug': prop.description,
-                                }
-                            )
-                            for prop in self.valid_properties(power)
-                        ],
-                    ).asdict()
-                )
+                try:
+                    powers.append(
+                        PowerDisplay(
+                            name=power.name,
+                            keywords=power.keywords(),
+                            category=power.category(),
+                            description=self.parse_string(
+                                power, power.description, item=item
+                            ),
+                            frequency_order=power.frequency_order,
+                            frequency=power.frequency.lower(),
+                            properties=[
+                                PowerPropertyDisplay(
+                                    **{
+                                        'title': prop.get_displayed_title(),
+                                        'description': self.parse_string(
+                                            power,
+                                            string=prop.get_displayed_description(),
+                                            item=item,
+                                        ),
+                                        'debug': prop.description,
+                                    }
+                                )
+                                for prop in self.valid_properties(power)
+                            ],
+                        ).asdict()
+                    )
+                except PowerInconsistent as e:
+                    print(f"{power} dispay is not created with error: {e}")
+                    continue
         return sorted(powers, key=lambda x: x['frequency_order'])

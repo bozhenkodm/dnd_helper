@@ -265,28 +265,25 @@ class Power(models.Model):
     def keywords(self, weapon=None):
         if self.frequency == PowerFrequencyEnum.PASSIVE:
             return ''
-        try:
-            return filter(
-                None,
-                (
-                    self.get_action_type_display(),
-                    self.get_accessory_type_display() if self.accessory_type else '',
-                    self.get_frequency_display(),
-                    self.attack_type(weapon),
-                )
-                + tuple(
-                    PowerDamageTypeEnum[type_].description  # type: ignore
-                    for type_ in self.damage_type
-                    if type_ != PowerDamageTypeEnum.NONE
-                )
-                + tuple(
-                    PowerEffectTypeEnum[type_].description  # type: ignore
-                    for type_ in self.effect_type
-                    if type_ != PowerEffectTypeEnum.NONE
-                ),
+        return filter(
+            None,
+            (
+                self.get_action_type_display(),
+                self.get_accessory_type_display() if self.accessory_type else '',
+                self.get_frequency_display(),
+                self.attack_type(weapon),
             )
-        except PowerInconsistent:
-            return 'Ошибка при создании таланта'
+            + tuple(
+                PowerDamageTypeEnum[type_].description  # type: ignore
+                for type_ in self.damage_type
+                if type_ != PowerDamageTypeEnum.NONE
+            )
+            + tuple(
+                PowerEffectTypeEnum[type_].description  # type: ignore
+                for type_ in self.effect_type
+                if type_ != PowerEffectTypeEnum.NONE
+            ),
+        )
 
 
 class PowerProperty(models.Model):
