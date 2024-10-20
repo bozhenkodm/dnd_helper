@@ -1,7 +1,7 @@
 from django.db import models
+from multiselectfield import MultiSelectField
 
 from base.constants.constants import AbilityEnum
-from base.fields import MultiSelectField  # type: ignore
 from base.helpers import modifier
 from base.objects.abilities import Abilities
 from base.objects.races import Race
