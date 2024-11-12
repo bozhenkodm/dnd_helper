@@ -298,7 +298,6 @@ class Power(models.Model):
         return '\n'.join(result)
 
 
-
 class PowerProperty(models.Model):
     class Meta:
         verbose_name = _('PowerProperty')

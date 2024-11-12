@@ -256,8 +256,12 @@ class ParagonPath(models.Model):
 
     title = models.CharField(max_length=50, null=False, verbose_name=_('Title'))
     description = models.TextField(null=True, blank=True, verbose_name=_('Description'))
-    klass = models.ForeignKey(Class, on_delete=models.CASCADE, verbose_name=_('Class'))
-    race = models.ForeignKey(Race, on_delete=models.CASCADE, verbose_name=_('Race'))
+    klass = models.ForeignKey(
+        Class, on_delete=models.CASCADE, verbose_name=_('Class'), null=True
+    )
+    race = models.ForeignKey(
+        Race, on_delete=models.CASCADE, verbose_name=_('Race'), null=True
+    )
 
     def __str__(self):
         if self.klass:

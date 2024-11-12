@@ -11,12 +11,15 @@ class SexEnum(BaseNameValueDescriptionEnum):
 
 
 class AbilityEnum(BaseNameValueDescriptionEnum):
-    STRENGTH = 'strength', 'Сила'
-    CONSTITUTION = 'constitution', 'Телосложение'
-    DEXTERITY = 'dexterity', 'Ловкость'
-    INTELLIGENCE = 'intelligence', 'Интеллект'
-    WISDOM = 'wisdom', 'Мудрость'
-    CHARISMA = 'charisma', 'Харизма'
+    def _generate_next_value_(name, start, count, last_values):
+        return name.lower()
+
+    STRENGTH = auto(), 'Сила'
+    CONSTITUTION = auto(), 'Телосложение'
+    DEXTERITY = auto(), 'Ловкость'
+    INTELLIGENCE = auto(), 'Интеллект'
+    WISDOM = auto(), 'Мудрость'
+    CHARISMA = auto(), 'Харизма'
 
 
 # noinspection PyArgumentList
@@ -41,17 +44,17 @@ class PowerVariables(str, Enum):
 
 
 class SizeEnum(BaseNameValueDescriptionEnum):
-    TINY = 'TINY', 'Крошечный'
-    SMALL = 'SMALL', 'Маленький'
-    AVERAGE = 'AVERAGE', 'Средний'
-    BIG = 'BIG', 'Большой'
-    LARGE = 'LARGE', 'Огромный'
+    TINY = auto(), 'Крошечный'
+    SMALL = auto(), 'Маленький'
+    AVERAGE = auto(), 'Средний'
+    BIG = auto(), 'Большой'
+    LARGE = auto(), 'Огромный'
 
 
 class VisionEnum(BaseNameValueDescriptionEnum):
-    NORMAL = 'NORMAL', 'Обычное'
-    TWILIGHT = 'TWILIGHT', 'Сумеречное'
-    DARK = 'DARK', 'Тёмное'
+    NORMAL = auto(), 'Обычное'
+    TWILIGHT = auto(), 'Сумеречное'
+    DARK = auto(), 'Тёмное'
 
 
 class NPCRaceEnum(BaseNameValueDescriptionEnum):
@@ -262,7 +265,7 @@ class WeaponHandednessEnum(BaseNameValueDescriptionEnum):
     ONE = auto(), 'Одноручное'
     TWO = auto(), 'Двуручное'
     VERSATILE = (
-        'versatile',
+        auto(),
         'Универсальное',
     )  # one-handed, but can be used with two hands
     # (with +1 to damage, unless user is small)

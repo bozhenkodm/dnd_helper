@@ -60,8 +60,8 @@ coverage.xml
 local_settings.py
 *.sqlite3
 *.sqlite3-journal
-media
-static
+media/
+static/
 base/fixtures/class.json
 base/fixtures/race.json
 base/fixtures/weapon_types.json
