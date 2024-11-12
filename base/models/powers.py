@@ -285,6 +285,19 @@ class Power(models.Model):
             ),
         )
 
+    @property
+    def text(self) -> str:
+        result = []
+        for prop in self.properties.all():
+            if prop.title == PowerPropertyTitle.OTHER:
+                title, description = prop.description.split(':')
+            else:
+                title = PowerPropertyTitle[prop.title].description
+                description = prop.description
+            result.append(f'{title}: {description}')
+        return '\n'.join(result)
+
+
 
 class PowerProperty(models.Model):
     class Meta:

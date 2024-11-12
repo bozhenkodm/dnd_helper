@@ -257,9 +257,13 @@ class ParagonPath(models.Model):
     title = models.CharField(max_length=50, null=False, verbose_name=_('Title'))
     description = models.TextField(null=True, blank=True, verbose_name=_('Description'))
     klass = models.ForeignKey(Class, on_delete=models.CASCADE, verbose_name=_('Class'))
+    race = models.ForeignKey(Race, on_delete=models.CASCADE, verbose_name=_('Race'))
 
     def __str__(self):
-        return f'{self.title} ({self.klass})'
+        if self.klass:
+            return f'{self.title} ({self.klass})'
+        else:
+            return f'{self.title} ({self.race})'
 
 
 class NPC(
@@ -374,7 +378,7 @@ class NPC(
     @property
     def full_class_name(self):
         if self.paragon_path:
-            return f'{self.klass} ({self.paragon_path})'
+            return f'{self.klass} ({self.paragon_path.title})'
         if self.functional_template:
             return f'{self.klass} ({self.functional_template})'
         return self.klass

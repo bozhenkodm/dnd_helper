@@ -237,7 +237,9 @@ class NPCModelForm(forms.ModelForm):
                 self.add_error('race', error)
 
     def check_npc_without_paragon_path(self):
-        if self.cleaned_data['is_bonus_applied'] and self.cleaned_data['paragon_path']:
+        if self.cleaned_data['is_bonus_applied'] and self.cleaned_data.get(
+            'paragon_path'
+        ):
             message = (
                 'Неигровые персонажи c бонусом уровня '
                 'не могут иметь путь совершенства'

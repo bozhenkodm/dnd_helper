@@ -34,8 +34,27 @@ from base.constants.constants import (
 from base.models import Class, Race
 from base.models.encounters import Combatants, CombatantsPC
 from base.models.magic_items import MagicItemType, SimpleMagicItem
+from base.models.models import ParagonPath
 from base.models.powers import Power, PowerProperty
 from base.objects import npc_klasses, race_classes
+
+
+class PowerInline(admin.TabularInline):
+    model = Power
+    fields = ('name', 'power_text')
+    readonly_fields = fields
+
+    @admin.display(description='Текст таланта')
+    def power_text(self, obj) -> str:
+        if not obj.id:
+            return '-'
+        return obj.text
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
 
 
 @admin.action(description='Социализировать расы')
@@ -54,6 +73,7 @@ class RaceAdmin(admin.ModelAdmin):
     list_display = ('name', 'is_sociable')
     search_fields = ('name_display',)
     actions = (make_sociable, make_unsociable)
+    inlines = (PowerInline,)
 
     def get_queryset(self, request):
         qs = super().get_queryset(request).annotate(title=NPCRaceEnum.generate_case())
@@ -64,7 +84,7 @@ class RaceAdmin(admin.ModelAdmin):
             return 'name', 'const_ability_bonus', 'var_ability_bonus'
         return ()
 
-    @admin.display(description='Постоянныe бонусs характеристик')
+    @admin.display(description='Постоянныe бонусы характеристик')
     def const_ability_bonus(self, obj) -> str:
         if not obj.id:
             return '-'
@@ -200,7 +220,7 @@ class KlassListFilter(admin.SimpleListFilter):
 
 
 class ParagonPathAdmin(admin.ModelAdmin):
-    pass
+    inlines = (PowerInline,)
 
 
 class NPCAdmin(admin.ModelAdmin):
@@ -314,6 +334,8 @@ class NPCAdmin(admin.ModelAdmin):
             ).order_by('title')
         if db_field.name == 'klass':
             kwargs['queryset'] = Class.objects.order_by('name')
+        if db_field.name == 'paragon_path':
+            kwargs['queryset'] = ParagonPath.objects.filter(klass=self.object.klass)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_level_abilities_bonus_fields(self, obj) -> list[str]:
@@ -432,6 +454,9 @@ class EncounterAdmin(admin.ModelAdmin):
                 for npc in obj.npcs.all()
             )
         )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(is_passed=False)
 
 
 class ArmorAdmin(admin.ModelAdmin):
@@ -771,25 +796,13 @@ class PowerAdmin(admin.ModelAdmin):
                 property.save()
 
 
-class FunctionalTemplateInline(admin.StackedInline):
-    model = Power
-    readonly_fields = ('name',)
-    fields = ('name',)
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-
 class FunctionalTemplateAdmin(admin.ModelAdmin):
     fields = (
         ('title', 'min_level'),
         ('armor_class_bonus', 'fortitude_bonus', 'reflex_bonus', 'will_bonus'),
         ('save_bonus', 'action_points_bonus', 'hit_points_per_level'),
     )
-    inlines = (FunctionalTemplateInline,)
+    inlines = (PowerInline,)
 
 
 class PlayerCharactersAdmin(admin.ModelAdmin):
@@ -861,6 +874,7 @@ class MagicItemTypeAdmin(admin.ModelAdmin):
     ]
 
     readonly_fields = ('image_tag',)
+    inlines = (PowerInline,)
     form = MagicItemTypeForm
 
     @admin.display(description='Картинка')
