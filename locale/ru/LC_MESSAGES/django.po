@@ -226,7 +226,7 @@ msgstr "Путь совершенства"
 
 #: base/models/models.py:253
 msgid "Paragon paths"
-msgstr "Пути совершентсва"
+msgstr "Пути совершенства"
 
 #: base/models/models.py:258 base/models/models.py:280 base/models/powers.py:35
 msgid "Description"

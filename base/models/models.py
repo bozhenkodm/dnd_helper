@@ -257,10 +257,10 @@ class ParagonPath(models.Model):
     title = models.CharField(max_length=50, null=False, verbose_name=_('Title'))
     description = models.TextField(null=True, blank=True, verbose_name=_('Description'))
     klass = models.ForeignKey(
-        Class, on_delete=models.CASCADE, verbose_name=_('Class'), null=True
+        Class, on_delete=models.CASCADE, verbose_name=_('Class'), null=True, blank=True
     )
     race = models.ForeignKey(
-        Race, on_delete=models.CASCADE, verbose_name=_('Race'), null=True
+        Race, on_delete=models.CASCADE, verbose_name=_('Race'), null=True, blank=True
     )
 
     def __str__(self):

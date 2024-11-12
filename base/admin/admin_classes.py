@@ -17,6 +17,7 @@ from base.admin.forms import (
     MagicItemForm,
     MagicItemTypeForm,
     NPCModelForm,
+    ParagonPathForm,
     WeaponForm,
     WeaponTypeForm,
 )
@@ -221,6 +222,7 @@ class KlassListFilter(admin.SimpleListFilter):
 
 class ParagonPathAdmin(admin.ModelAdmin):
     inlines = (PowerInline,)
+    form = ParagonPathForm
 
 
 class NPCAdmin(admin.ModelAdmin):
@@ -335,7 +337,9 @@ class NPCAdmin(admin.ModelAdmin):
         if db_field.name == 'klass':
             kwargs['queryset'] = Class.objects.order_by('name')
         if db_field.name == 'paragon_path':
-            kwargs['queryset'] = ParagonPath.objects.filter(klass=self.object.klass)
+            kwargs['queryset'] = ParagonPath.objects.filter(
+                models.Q(klass=self.object.klass) | models.Q(race=self.object.race)
+            )
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_level_abilities_bonus_fields(self, obj) -> list[str]:

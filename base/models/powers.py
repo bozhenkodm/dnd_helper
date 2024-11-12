@@ -288,6 +288,8 @@ class Power(models.Model):
     @property
     def text(self) -> str:
         result = []
+        if self.description:
+            result.append(self.description)
         for prop in self.properties.all():
             if prop.title == PowerPropertyTitle.OTHER:
                 title, description = prop.description.split(':')

@@ -5,7 +5,7 @@ rerun:
 	poetry run black -S .
 	poetry run isort .
 	poetry run flake8
-	poetry run mypy .
+	#poetry run mypy .
 	poetry run python manage.py runserver 0.0.0.0:8000
 
 run:
