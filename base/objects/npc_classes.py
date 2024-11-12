@@ -847,9 +847,9 @@ class SorcererClass(NPCClass):
     @property
     def damage_bonus(self) -> int:
         if self.npc.subclass == self.SubclassEnum.DRAGON_MAGIC:
-            return self.npc._level_bonus + self.npc.strength + 2 * self.npc._tier
+            return self.npc._level_bonus + self.npc.str_mod + 2 * self.npc._tier
         elif self.npc.subclass == self.SubclassEnum.WILD_MAGIC:
-            return self.npc._level_bonus + self.npc.dexterity + 2 * self.npc._tier
+            return self.npc._level_bonus + self.npc.dex_mod + 2 * self.npc._tier
         return 0
 
     @property
