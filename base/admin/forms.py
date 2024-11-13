@@ -419,24 +419,24 @@ class MagicItemTypeForm(forms.ModelForm):
 
     def clean(self):
         super(MagicItemTypeForm, self).clean()
-        properties = {
-            'defences': {},
-            'skills': {},
-            'resist': {},
-            'save': {},
-        }
-        skills = {}
-        for skill in SkillEnum:
-            field = skill.value.lower()
-            if self.cleaned_data[field]:
-                skills[field] = self.cleaned_data[field]
-        if skills:
-            properties['skills'] = skills
-        defences = {}
-        for defence in DefenceTypeEnum:
-            field = defence.value.lower()
-            if self.cleaned_data[field]:
-                defences[field] = self.cleaned_data[field]
-        if defences:
-            properties['defences'] = defences
-        self.cleaned_data['properties'] = properties
+        # properties = {
+        #     'defences': {},
+        #     'skills': {},
+        #     'resist': {},
+        #     'save': {},
+        # }
+        # skills = {}
+        # for skill in SkillEnum:
+        #     field = skill.value.lower()
+        #     if self.cleaned_data[field]:
+        #         skills[field] = self.cleaned_data[field]
+        # if skills:
+        #     properties['skills'] = skills
+        # defences = {}
+        # for defence in DefenceTypeEnum:
+        #     field = defence.value.lower()
+        #     if self.cleaned_data[field]:
+        #         defences[field] = self.cleaned_data[field]
+        # if defences:
+        #     properties['defences'] = defences
+        # self.cleaned_data['properties'] = properties

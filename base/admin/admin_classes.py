@@ -838,43 +838,43 @@ class MagicItemTypeAdmin(admin.ModelAdmin):
                 )
             },
         ),
-        (
-            'Свойства (Навыки)',
-            {
-                'fields': (
-                    'acrobatics',
-                    'athletics',
-                    'perception',
-                    'thievery',
-                    'endurance',
-                    'intimidate',
-                    'streetwise',
-                    'history',
-                    'arcana',
-                    'bluff',
-                    'diplomacy',
-                    'dungeoneering',
-                    'nature',
-                    'insight',
-                    'religion',
-                    'stealth',
-                    'heal',
-                ),
-                'classes': ('collapse',),
-            },
-        ),
-        (
-            'Свойства (Защиты)',
-            {
-                'fields': (
-                    'armor_class',
-                    'fortitude',
-                    'reflex',
-                    'will',
-                ),
-                'classes': ('collapse',),
-            },
-        ),
+        # (
+        #     'Свойства (Навыки)',
+        #     {
+        #         'fields': (
+        #             'acrobatics',
+        #             'athletics',
+        #             'perception',
+        #             'thievery',
+        #             'endurance',
+        #             'intimidate',
+        #             'streetwise',
+        #             'history',
+        #             'arcana',
+        #             'bluff',
+        #             'diplomacy',
+        #             'dungeoneering',
+        #             'nature',
+        #             'insight',
+        #             'religion',
+        #             'stealth',
+        #             'heal',
+        #         ),
+        #         'classes': ('collapse',),
+        #     },
+        # ),
+        # (
+        #     'Свойства (Защиты)',
+        #     {
+        #         'fields': (
+        #             'armor_class',
+        #             'fortitude',
+        #             'reflex',
+        #             'will',
+        #         ),
+        #         'classes': ('collapse',),
+        #     },
+        # ),
     ]
 
     readonly_fields = ('image_tag',)
@@ -895,25 +895,21 @@ class MagicItemTypeAdmin(admin.ModelAdmin):
 
             image_field = ImageFile(io.BytesIO(output), name=f'MagicItem_{obj.id}.png')
             obj.picture = image_field
-        if (
-            len(obj.level_range()) == 1
-            and len(obj.slots) == 1
-            and obj.slots[0]
-            not in (
-                MagicItemSlot.WEAPON,
-                MagicItemSlot.ARMOR,
-                MagicItemSlot.ARMS,
-                MagicItemSlot.NECK,
-            )
-        ):
-            magic_item = SimpleMagicItem(magic_item_type=obj, level=obj.min_level)
-            magic_item.save()
+
+        for level in obj.level_range():
+            for slot in obj.slots:
+                if not MagicItemSlot(slot).is_simple():
+                    continue
+                if not SimpleMagicItem.objects.filter(magic_item_type=obj, level=level).count():
+                    magic_item = SimpleMagicItem(magic_item_type=obj, level=level)
+                    magic_item.save()
         obj.save()
 
 
 class MagicItemAdmin(admin.ModelAdmin):
     form = MagicItemForm
     save_as = True
+    ordering = ('magic_item_type__name', '-level')
 
 
 class ArmsItemSlotAdmin(admin.ModelAdmin):

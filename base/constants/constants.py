@@ -426,6 +426,14 @@ class MagicItemSlot(BaseNameValueDescriptionEnum):
     WONDROUS_ITEMS = auto(), 'Чудесный предмет'
     TATOO = auto(), 'Татуировка'
 
+    def is_simple(self) -> bool:
+        return self not in (
+            self.WEAPON,
+            self.ARMOR,
+            self.ARMS,
+            self.NECK,
+        )
+
 
 class ThrownWeaponType(BaseNameValueDescriptionEnum):
     def _generate_next_value_(name, start, count, last_values):
