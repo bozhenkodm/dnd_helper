@@ -441,3 +441,49 @@ class ThrownWeaponType(BaseNameValueDescriptionEnum):
 
     LIGHT = auto(), 'Лёгкое'
     HEAVY = auto(), 'Тяжёлое'
+
+
+class BonusSource(BaseNameValueDescriptionEnum):
+    CLASS = auto(), 'Бонус класса'
+    RACE = auto(), 'Расовый бонус'
+    POWER = auto(), 'Бонус таланта'
+    FEAT = auto(), 'Бонус черты'
+    ITEM = auto(), 'Бонус предмета'
+
+
+class BonusType(BaseNameValueDescriptionEnum):
+    STRENGTH = auto(), 'Сила'
+    CONSTITUTION = auto(), 'Телосложение'
+    DEXTERITY = auto(), 'Ловкость'
+    INTELLIGENCE = auto(), 'Интеллект'
+    WISDOM = auto(), 'Мудрость'
+    CHARISMA = auto(), 'Харизма'
+    # --------------------------------
+    ACROBATICS = auto(), 'Акробатика'
+    ATHLETICS = auto(), 'Атлетика'
+    PERCEPTION = auto(), 'Внимательность'
+    THIEVERY = auto(), 'Воровство'
+    ENDURANCE = auto(), 'Выносливость'
+    INTIMIDATE = auto(), 'Запугивание'
+    STREETWISE = auto(), 'Знание улиц'
+    HISTORY = auto(), 'История'
+    ARCANA = auto(), 'Магия'
+    BLUFF = auto(), 'Обман'
+    DIPLOMACY = auto(), 'Переговоры'
+    DUNGEONEERING = auto(), 'Подземелья'
+    NATURE = auto(), 'Природа'
+    INSIGHT = auto(), 'Проницательность'
+    RELIGION = auto(), 'Религия'
+    STEALTH = auto(), 'Скрытность'
+    HEAL = auto(), 'Целительство'
+    # --------------------------------
+    ARMOR_CLASS = auto(), 'КД'
+    FORTITUDE = auto(), 'Стойкость'
+    REFLEX = auto(), 'Реакция'
+    WILL = auto(), 'Воля'
+    # --------------------------------
+    SPEED = auto(), 'Скорость'
+    INITIATIVE = auto(), 'Инициатива'
+    SURGE = auto(), 'Значение исцеления'
+    SURGES = auto(), 'Количество исцелений'
+    ATTACK = auto(), 'Атака'

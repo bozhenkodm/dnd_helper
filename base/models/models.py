@@ -18,6 +18,7 @@ from base.constants.constants import (
 from base.exceptions import PowerInconsistent
 from base.managers import WeaponTypeQuerySet
 from base.models.abilities import Ability, NPCAbilityAbstract
+from base.models.bonuses import Bonus
 from base.models.defences import NPCDefenceMixin
 from base.models.experience import NPCExperienceAbstract
 from base.models.magic_items import ItemAbstract, NPCMagicItemAbstract
@@ -184,12 +185,12 @@ class Race(models.Model):
     var_ability_bonus = models.ManyToManyField(
         Ability, related_name='races', verbose_name='Выборочные бонусы характеристик'
     )
-
     is_sociable = models.BooleanField(
         verbose_name=_('Is race social?'),
         default=True,
         help_text=_('Social races are used for random npc generation'),
     )
+    bonus = models.ManyToManyField(Bonus, verbose_name=_('Bonus'), blank=True)
 
     def __str__(self):
         return NPCRaceEnum[self.name].description
@@ -373,11 +374,7 @@ class NPC(
 
     def __str__(self):
         # TODO localization
-        return (
-            f'{self.name}'
-            f'{f" ({self.functional_template}) " if self.functional_template else " "}'
-            f'{self.race} {self.full_class_name} {self.level} уровня'
-        )
+        return f'{self.name} {self.race} {self.full_class_name} {self.level} уровня'
 
     @property
     def full_class_name(self):

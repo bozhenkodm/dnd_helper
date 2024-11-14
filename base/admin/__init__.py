@@ -16,6 +16,7 @@ from base.admin.admin_classes import (
     WeaponAdmin,
     WeaponTypeAdmin,
 )
+from base.models.bonuses import Bonus
 from base.models.encounters import Encounter, PlayerCharacters
 from base.models.magic_items import ArmsSlotItem, MagicItemType, SimpleMagicItem
 from base.models.models import (
@@ -44,3 +45,4 @@ admin.site.register(PlayerCharacters, PlayerCharactersAdmin)
 admin.site.register(MagicItemType, MagicItemTypeAdmin)
 admin.site.register(SimpleMagicItem, MagicItemAdmin)
 admin.site.register(ArmsSlotItem, ArmsItemSlotAdmin)
+admin.site.register(Bonus)

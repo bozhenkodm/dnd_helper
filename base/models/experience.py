@@ -50,7 +50,6 @@ class NPCExperienceAbstract(models.Model):
 
     @property
     def level_by_experience(self: NPCProtocol) -> int:
-        # TODO make it O(log(n)), shame on you
         level = 1
         for level, exp in enumerate(EXPERIENCE_BY_LEVEL, start=1):
             if self.experience == exp:
@@ -58,3 +57,7 @@ class NPCExperienceAbstract(models.Model):
             if self.experience > exp:
                 return level - 1
         return level
+
+    @property
+    def experience_by_level(self: NPCProtocol) -> int:
+        return EXPERIENCE_BY_LEVEL[self.level - 1]

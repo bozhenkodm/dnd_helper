@@ -69,7 +69,13 @@ def make_unsociable(modeladmin, request, queryset) -> None:
 
 
 class RaceAdmin(admin.ModelAdmin):
-    fields = ('name', 'const_ability_bonus', 'var_ability_bonus', 'is_sociable')
+    fields = (
+        'name',
+        'const_ability_bonus',
+        'var_ability_bonus',
+        'is_sociable',
+        'bonus',
+    )
     list_filter = ('is_sociable',)
     list_display = ('name', 'is_sociable')
     search_fields = ('name_display',)
@@ -399,6 +405,8 @@ class NPCAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
         for power in obj.powers.filter(level=0):
             obj.powers.remove(power)
+        if not obj.experience:
+            obj.experience = obj.experience_by_level
         obj.save()
 
     def save_related(self, request, form, formsets, change):
@@ -414,9 +422,19 @@ class NPCAdmin(admin.ModelAdmin):
 class CombatantsInlineAdmin(admin.TabularInline):
     model = Combatants
 
+    def get_extra(self, request, obj=None, **kwargs):
+        if not obj:
+            return self.extra
+        return 0
+
 
 class CombatantsPCSInlineAdmin(admin.TabularInline):
     model = CombatantsPC
+
+    def get_extra(self, request, obj=None, **kwargs):
+        if not obj:
+            return self.extra
+        return 0
 
 
 @admin.action(description='Отметить пройденной')
@@ -900,7 +918,9 @@ class MagicItemTypeAdmin(admin.ModelAdmin):
             for slot in obj.slots:
                 if not MagicItemSlot(slot).is_simple():
                     continue
-                if not SimpleMagicItem.objects.filter(magic_item_type=obj, level=level).count():
+                if not SimpleMagicItem.objects.filter(
+                    magic_item_type=obj, level=level
+                ).count():
                     magic_item = SimpleMagicItem(magic_item_type=obj, level=level)
                     magic_item.save()
         obj.save()

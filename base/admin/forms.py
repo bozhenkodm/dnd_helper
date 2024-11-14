@@ -11,7 +11,6 @@ from base.constants.constants import (
     NPCRaceEnum,
     SexEnum,
     ShieldTypeIntEnum,
-    SkillEnum,
     WeaponHandednessEnum,
 )
 from base.models import NPC
@@ -398,7 +397,6 @@ class MagicItemTypeForm(forms.ModelForm):
     # save_immobilized = forms.CharField(required=False, label='Обездвиживание')
     # save_restrained = forms.CharField(required=False, label='Удерживание')
     # save_damage = forms.CharField(required=False, label='Урон')
-    # TODO add the rest of conditions that can be saved
 
     # speed = forms.CharField(required=False, label='Скорость')
     # initiative = forms.CharField(required=False, label='Инициатива')

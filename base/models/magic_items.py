@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
 
 from base.constants.constants import MagicItemCategory, MagicItemSlot, ShieldTypeIntEnum
+from base.models.bonuses import Bonus
 
 
 class MagicItemType(models.Model):
@@ -69,6 +70,9 @@ class ItemAbstract(models.Model):
         blank=True,
     )
     level = models.SmallIntegerField(verbose_name=_('Level'), default=0)
+    bonus = models.ForeignKey(
+        Bonus, verbose_name=_('Bonus'), null=True, on_delete=models.SET_NULL, blank=True
+    )
 
     @property
     def enchantment(self):
