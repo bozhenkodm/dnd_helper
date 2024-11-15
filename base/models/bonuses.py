@@ -29,9 +29,8 @@ class Bonus(models.Model):
         null=True,
         blank=True,
     )
-    value = models.PositiveSmallIntegerField(default=0, verbose_name=_('Value'))
-    text_value = models.CharField(
-        verbose_name=_('Text value'), null=True, blank=True, max_length=100
+    value = models.CharField(
+        verbose_name=_('Value'), null=True, blank=True, max_length=100
     )
 
     def __str__(self):
