@@ -305,12 +305,6 @@ class WeaponForm(ItemAbstractForm):
         fields = '__all__'
 
 
-class ArmorForm(ItemAbstractForm):
-    class Meta:
-        model = Armor
-        fields = '__all__'
-
-
 class MagicItemForm(ItemAbstractForm):
     class Meta:
         model = SimpleMagicItem

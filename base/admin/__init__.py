@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from base.admin.admin_classes import (
-    ArmorAdmin,
+    ArmorTypeAdmin,
     ArmsItemSlotAdmin,
     ClassAdmin,
     EncounterAdmin,
@@ -21,7 +21,7 @@ from base.models.encounters import Encounter, PlayerCharacters
 from base.models.magic_items import ArmsSlotItem, MagicItemType, SimpleMagicItem
 from base.models.models import (
     NPC,
-    Armor,
+    ArmorType,
     Class,
     FunctionalTemplate,
     ParagonPath,
@@ -36,7 +36,7 @@ admin.site.register(Class, ClassAdmin)
 admin.site.register(NPC, NPCAdmin)
 admin.site.register(ParagonPath, ParagonPathAdmin)
 admin.site.register(Encounter, EncounterAdmin)
-admin.site.register(Armor, ArmorAdmin)
+admin.site.register(ArmorType, ArmorTypeAdmin)
 admin.site.register(WeaponType, WeaponTypeAdmin)
 admin.site.register(Weapon, WeaponAdmin)
 admin.site.register(Power, PowerAdmin)

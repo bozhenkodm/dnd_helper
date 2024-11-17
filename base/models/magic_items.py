@@ -5,15 +5,12 @@ from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
 
 from base.constants.constants import MagicItemCategory, MagicItemSlot, ShieldTypeIntEnum
-from base.models.bonuses import Bonus
 
 
 class MagicItemType(models.Model):
     class Meta:
         verbose_name = _('Magic item type')
-        # verbose_name = 'Тип магического предмета'
-        # verbose_name_plural = _('Magic item types')
-        verbose_name_plural = 'Типы магических предметов'
+        verbose_name_plural = _('Magic item types')
 
     name = models.CharField(verbose_name=_('Title'), max_length=100)
     min_level = models.PositiveSmallIntegerField(
@@ -58,6 +55,21 @@ class MagicItemType(models.Model):
         )
 
 
+# class MagicArmorType(MagicItemType):
+#     class Meta:
+#         verbose_name = _('Magic armor type')
+#         verbose_name_plural = _('Magic armor types')
+#
+#     armor_type = models.SmallIntegerField(
+#         verbose_name=_('Armor type'),
+#         choices=ArmorTypeIntEnum.generate_choices(),
+#     )
+#     bonus_armor_class = models.SmallIntegerField(
+#         verbose_name=_('Additional armor class'),
+#         default=0,
+#     )
+
+
 class ItemAbstract(models.Model):
     class Meta:
         abstract = True
@@ -70,9 +82,6 @@ class ItemAbstract(models.Model):
         blank=True,
     )
     level = models.SmallIntegerField(verbose_name=_('Level'), default=0)
-    bonus = models.ForeignKey(
-        Bonus, verbose_name=_('Bonus'), null=True, on_delete=models.SET_NULL, blank=True
-    )
 
     @property
     def enchantment(self):

@@ -30,23 +30,54 @@ from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
 from base.objects.weapon_types import WeaponType as WeaponTypeClass
 
 
-class Armor(ItemAbstract):
+class ArmorType(models.Model):
     class Meta:
-        verbose_name = _('Armor')
-        verbose_name_plural = _('Armors')
+        verbose_name = _('Armor type')
+        verbose_name_plural = _('Armor types')
 
-    armor_type = models.SmallIntegerField(
+    name = models.CharField(verbose_name=_('Title'), max_length=100)
+    base_armor_type = models.SmallIntegerField(
         verbose_name=_('Armor type'),
         choices=ArmorTypeIntEnum.generate_choices(),
     )
     bonus_armor_class = models.SmallIntegerField(
         verbose_name=_('Additional armor class'),
         default=0,
-        help_text=_('For high level magic armor'),
     )
     speed_penalty = models.SmallIntegerField(verbose_name=_('Speed penalty'), default=0)
     skill_penalty = models.SmallIntegerField(
         verbose_name=_('Skills penalty'), default=0
+    )
+    minimal_enhancement = models.SmallIntegerField(
+        verbose_name=_('Minimal enhancement'), default=0
+    )
+
+    def __str__(self) -> str:
+        return f'{self.get_base_armor_type_display()}, {self.name}'
+
+    @property
+    def armor_class(self) -> int:
+        return self.base_armor_type + self.bonus_armor_class
+
+    @property
+    def is_light(self) -> bool:
+        return self.base_armor_type in (
+            ArmorTypeIntEnum.CLOTH,
+            ArmorTypeIntEnum.LEATHER,
+            ArmorTypeIntEnum.HIDE,
+        )
+
+
+class Armor(ItemAbstract):
+    class Meta:
+        verbose_name = _('Armor')
+        verbose_name_plural = _('Armors')
+
+    armor_type = models.ForeignKey(
+        ArmorType,
+        verbose_name=_('Armor type'),
+        on_delete=models.SET_NULL,
+        null=True,
     )
 
     def __str__(self) -> str:
@@ -54,17 +85,32 @@ class Armor(ItemAbstract):
 
     @property
     def armor_class(self) -> int:
-        return self.armor_type + self.bonus_armor_class
+        return (
+            self.armor_type.base_armor_type
+            + self.armor_type.bonus_armor_class
+            + self.enchantment
+        )
+
+    @property
+    def speed_penalty(self):
+        return self.armor_type.speed_penalty
+
+    @property
+    def skill_penalty(self):
+        return self.armor_type.skill_penalty
 
     @property
     def name(self) -> str:
         if not self.magic_item_type:
-            return self.get_armor_type_display()
-        return f'{self.get_armor_type_display()}, {self.magic_item_type.name}'
+            return self.armor_type.get_base_armor_type_display()
+        return (
+            f'{self.armor_type.get_base_armor_type_display()}, '
+            f'{self.magic_item_type.name}'
+        )
 
     @property
     def is_light(self) -> bool:
-        return self.armor_type in (
+        return self.armor_type.base_armor_type in (
             ArmorTypeIntEnum.CLOTH,
             ArmorTypeIntEnum.LEATHER,
             ArmorTypeIntEnum.HIDE,

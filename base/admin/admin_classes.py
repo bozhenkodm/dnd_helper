@@ -12,7 +12,6 @@ from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 
 from base.admin.forms import (
-    ArmorForm,
     ArmsSlotItemForm,
     MagicItemForm,
     MagicItemTypeForm,
@@ -24,7 +23,6 @@ from base.admin.forms import (
 from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
     AccessoryTypeEnum,
-    ArmorTypeIntEnum,
     MagicItemSlot,
     NPCClassEnum,
     NPCRaceEnum,
@@ -481,26 +479,16 @@ class EncounterAdmin(admin.ModelAdmin):
         return super().get_queryset(request).filter(is_passed=False)
 
 
-class ArmorAdmin(admin.ModelAdmin):
+class ArmorTypeAdmin(admin.ModelAdmin):
     fields = (
-        'armor_type',
-        'armor_class',
+        'base_armor_type',
         'bonus_armor_class',
+        'armor_class',
         'speed_penalty',
         'skill_penalty',
-        'magic_item_type',
-        'level',
     )
     readonly_fields = ('armor_class',)
-    form = ArmorForm
-    ordering = ('-level', 'armor_type')
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == 'magic_item_type':
-            kwargs['queryset'] = MagicItemType.objects.filter(
-                slots__contains=MagicItemSlot.ARMOR.value
-            ).order_by('name')
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    ordering = ('base_armor_type', 'minimal_enhancement')
 
     @admin.display(description='Класс доспеха')
     def armor_class(self, obj):
@@ -508,18 +496,43 @@ class ArmorAdmin(admin.ModelAdmin):
             return '-'
         return obj.armor_class
 
-    def get_queryset(self, request):
-        return (
-            super(ArmorAdmin, self)
-            .get_queryset(request)
-            .annotate(
-                displayed_name=ArmorTypeIntEnum.generate_value_description_case(
-                    field='armor_type'
-                )
-            )
-            # .order_by('armor_type', 'level')
-            # .order_by('displayed_name', 'level')
-        )
+
+# class ArmorAdmin(admin.ModelAdmin):
+#     fields = (
+#         'armor_type',
+#         'armor_class',
+#         'bonus_armor_class',
+#         'speed_penalty',
+#         'skill_penalty',
+#         'magic_item_type',
+#         'level',
+#     )
+#     readonly_fields = ('armor_class',)
+#     form = ArmorForm
+#
+#     def formfield_for_foreignkey(self, db_field, request, **kwargs):
+#         if db_field.name == 'magic_item_type':
+#             kwargs['queryset'] = MagicItemType.objects.filter(
+#                 slots__contains=MagicItemSlot.ARMOR.value
+#             ).order_by('name')
+#         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+#
+#     @admin.display(description='Класс доспеха')
+#     def armor_class(self, obj):
+#         if not obj.id:
+#             return '-'
+#         return obj.armor_class
+#
+#     def get_queryset(self, request):
+#         return (
+#             super(ArmorAdmin, self)
+#             .get_queryset(request)
+#             .annotate(
+#                 displayed_name=ArmorTypeIntEnum.generate_value_description_case(
+#                     field='armor_type'
+#                 )
+#             )
+#         )
 
 
 class WeaponTypeAdmin(admin.ModelAdmin):

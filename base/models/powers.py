@@ -307,8 +307,8 @@ class Power(models.Model):
 
 class PowerProperty(models.Model):
     class Meta:
-        verbose_name = _('PowerProperty')
-        verbose_name_plural = _('PowersProperties')
+        verbose_name = _('Power Property')
+        verbose_name_plural = _('Power Properties')
 
     power = models.ForeignKey(
         Power,
