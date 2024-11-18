@@ -4,7 +4,12 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
 
-from base.constants.constants import MagicItemCategory, MagicItemSlot, ShieldTypeIntEnum
+from base.constants.constants import (
+    ArmorTypeIntEnum,
+    MagicItemCategory,
+    MagicItemSlot,
+    ShieldTypeIntEnum,
+)
 
 
 class MagicItemType(models.Model):
@@ -42,7 +47,7 @@ class MagicItemType(models.Model):
         min_choices=1,
         null=True,
     )
-    properties = models.JSONField(null=True)
+    # properties = models.JSONField(null=True)
 
     def __str__(self) -> str:
         return self.name
@@ -55,19 +60,22 @@ class MagicItemType(models.Model):
         )
 
 
-# class MagicArmorType(MagicItemType):
-#     class Meta:
-#         verbose_name = _('Magic armor type')
-#         verbose_name_plural = _('Magic armor types')
-#
-#     armor_type = models.SmallIntegerField(
-#         verbose_name=_('Armor type'),
-#         choices=ArmorTypeIntEnum.generate_choices(),
-#     )
-#     bonus_armor_class = models.SmallIntegerField(
-#         verbose_name=_('Additional armor class'),
-#         default=0,
-#     )
+class MagicArmorType(MagicItemType):
+    class Meta:
+        verbose_name = _('Magic armor type')
+        verbose_name_plural = _('Magic armor types')
+
+    armor_type_slots = MultiSelectField(
+        verbose_name=_('Armor type slots'),
+        choices=ArmorTypeIntEnum.generate_choices(),
+        min_choices=1,
+        null=False,
+    )
+
+    # def clean(self):
+    #     if MagicItemSlot.ARMOR not in self.slots:
+    #         raise ValidationError(_("Magic armor type object must have armor slot."))
+    #     super().clean()
 
 
 class ItemAbstract(models.Model):

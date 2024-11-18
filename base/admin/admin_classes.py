@@ -1,18 +1,19 @@
 import io
 import subprocess
 import textwrap
+from functools import reduce
 
 from django import forms
 from django.contrib import admin
 from django.core.files.images import ImageFile
 from django.db import models
-from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 
 from base.admin.forms import (
     ArmsSlotItemForm,
+    MagicArmorTypeForm,
     MagicItemForm,
     MagicItemTypeForm,
     NPCModelForm,
@@ -33,7 +34,7 @@ from base.constants.constants import (
 from base.models import Class, Race
 from base.models.encounters import Combatants, CombatantsPC
 from base.models.magic_items import MagicItemType, SimpleMagicItem
-from base.models.models import ParagonPath
+from base.models.models import Armor, ArmorType, ParagonPath
 from base.models.powers import Power, PowerProperty
 from base.objects import npc_klasses, race_classes
 
@@ -312,7 +313,7 @@ class NPCAdmin(admin.ModelAdmin):
     list_per_page = 15
     form = NPCModelForm
 
-    def get_queryset(self, request: HttpRequest) -> QuerySet:
+    def get_queryset(self, request: HttpRequest) -> models.QuerySet:
         qs = super().get_queryset(request)
         query = models.Q(owner=request.user)
         if request.user.is_superuser:
@@ -849,76 +850,16 @@ class PlayerCharactersAdmin(admin.ModelAdmin):
     )
 
 
-class MagicItemTypeAdmin(admin.ModelAdmin):
+class MagicItemTypeAdminBase(admin.ModelAdmin):
     ordering = ('name',)
-    fieldsets = [
-        (
-            None,
-            {
-                'fields': (
-                    'name',
-                    'slots',
-                    'min_level',
-                    'step',
-                    'max_level',
-                    'category',
-                    'picture',
-                    'upload_from_clipboard',
-                    'image_tag',
-                    'source',
-                )
-            },
-        ),
-        # (
-        #     'Свойства (Навыки)',
-        #     {
-        #         'fields': (
-        #             'acrobatics',
-        #             'athletics',
-        #             'perception',
-        #             'thievery',
-        #             'endurance',
-        #             'intimidate',
-        #             'streetwise',
-        #             'history',
-        #             'arcana',
-        #             'bluff',
-        #             'diplomacy',
-        #             'dungeoneering',
-        #             'nature',
-        #             'insight',
-        #             'religion',
-        #             'stealth',
-        #             'heal',
-        #         ),
-        #         'classes': ('collapse',),
-        #     },
-        # ),
-        # (
-        #     'Свойства (Защиты)',
-        #     {
-        #         'fields': (
-        #             'armor_class',
-        #             'fortitude',
-        #             'reflex',
-        #             'will',
-        #         ),
-        #         'classes': ('collapse',),
-        #     },
-        # ),
-    ]
-
     readonly_fields = ('image_tag',)
     inlines = (PowerInline,)
-    form = MagicItemTypeForm
 
     @admin.display(description='Картинка')
     def image_tag(self, obj):
         return mark_safe(f'<img src="{obj.picture.url}" />')
 
-    @atomic
     def save_model(self, request, obj, form, change):
-        super(MagicItemTypeAdmin, self).save_model(request, obj, form, change)
         if form.cleaned_data['upload_from_clipboard']:
             bashCommand = 'xclip -selection clipboard -t image/png -o'
             process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
@@ -926,6 +867,28 @@ class MagicItemTypeAdmin(admin.ModelAdmin):
 
             image_field = ImageFile(io.BytesIO(output), name=f'MagicItem_{obj.id}.png')
             obj.picture = image_field
+        super().save_model(request, obj, form, change)
+
+
+class MagicItemTypeAdmin(MagicItemTypeAdminBase):
+    fields = (
+        'name',
+        'slots',
+        'min_level',
+        'step',
+        'max_level',
+        'category',
+        'picture',
+        'upload_from_clipboard',
+        'image_tag',
+        'source',
+    )
+
+    form = MagicItemTypeForm
+
+    @atomic
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
 
         for level in obj.level_range():
             for slot in obj.slots:
@@ -936,7 +899,47 @@ class MagicItemTypeAdmin(admin.ModelAdmin):
                 ).count():
                     magic_item = SimpleMagicItem(magic_item_type=obj, level=level)
                     magic_item.save()
-        obj.save()
+
+
+class MagicArmorTypeAdmin(MagicItemTypeAdminBase):
+    fields = (
+        'name',
+        'armor_type_slots',
+        'min_level',
+        'step',
+        'max_level',
+        'category',
+        'picture',
+        'upload_from_clipboard',
+        'image_tag',
+        'source',
+    )
+    form = MagicArmorTypeForm
+
+    @atomic
+    def save_model(self, request, obj, form, change):
+        obj.slots = [MagicItemSlot.ARMOR.value]
+        super().save_model(request, obj, form, change)
+        print('1' * 88)
+        print(obj.slots)
+        armor_types = ArmorType.objects.filter(
+            reduce(
+                lambda x, y: x | y,
+                (
+                    models.Q(base_armor_type__contains=slot)
+                    for slot in obj.armor_type_slots
+                ),
+            )
+        )
+        for level in obj.level_range():
+            for armor_type in armor_types:
+                if not Armor.objects.filter(
+                    magic_item_type=obj, armor_type=armor_type, level=level
+                ).count():
+                    magic_item = Armor(
+                        magic_item_type=obj, armor_type=armor_type, level=level
+                    )
+                    magic_item.save()
 
 
 class MagicItemAdmin(admin.ModelAdmin):

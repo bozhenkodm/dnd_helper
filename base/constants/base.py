@@ -1,5 +1,5 @@
 from enum import Enum, IntEnum
-from typing import Sequence
+from typing import Callable, Sequence
 
 from django.db import models
 
@@ -19,6 +19,7 @@ class BaseNameValueDescriptionEnum(str, Enum):
         cls,
         is_sorted: bool = True,
         start_with: Sequence["BaseNameValueDescriptionEnum"] = (),
+        condition: Callable["BaseNameValueDescriptionEnum", bool] = lambda: True,
     ) -> list[tuple[str, str]]:
         result = [(item.value, item.description) for item in start_with]  # type: ignore
         if is_sorted:
