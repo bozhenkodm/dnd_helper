@@ -13,7 +13,6 @@ if TYPE_CHECKING:
     from base.models.models import FunctionalTemplate, Class, Armor
 
 from base.constants.constants import NPCClassEnum, ShieldTypeIntEnum
-from base.helpers import modifier
 from base.objects.npc_classes import NPCClass
 from base.objects.races import Race
 
@@ -26,12 +25,12 @@ class NPCProtocol(Protocol):
     half_level: int
     _level_bonus: int
     _tier: int
-    strength: int
-    constitution: int
-    dexterity: int
-    intelligence: int
-    wisdom: int
-    charisma: int
+    str_mod: int
+    con_mod: int
+    dex_mod: int
+    int_mod: int
+    wis_mod: int
+    cha_mod: int
     # armor:
     arms_slot: "ArmsSlotItem"
     neck_slot: "NeckSlotItem"
@@ -105,7 +104,7 @@ class NPCDefenceMixin:
     def fortitude(self: NPCProtocol) -> int:
         return (
             self._defence_level_bonus
-            + max(map(modifier, (self.strength, self.constitution)))
+            + max(self.str_mod, self.con_mod)
             + (
                 self.functional_template.fortitude_bonus
                 if self.functional_template
@@ -120,7 +119,7 @@ class NPCDefenceMixin:
     def reflex(self: NPCProtocol) -> int:
         result = (
             self._defence_level_bonus
-            + max(map(modifier, (self.dexterity, self.intelligence)))
+            + max(self.dex_mod, self.int_mod)
             + (self.functional_template.reflex_bonus if self.functional_template else 0)
             + self.race_data_instance.reflex
             + self.klass_data_instance.reflex
@@ -136,7 +135,7 @@ class NPCDefenceMixin:
     def will(self: NPCProtocol) -> int:
         return (
             self._defence_level_bonus
-            + max(map(modifier, (self.wisdom, self.charisma)))
+            + max(self.wis_mod, self.cha_mod)
             + (self.functional_template.will_bonus if self.functional_template else 0)
             + self.race_data_instance.will
             + self.klass_data_instance.will

@@ -22,6 +22,7 @@ from base.models.magic_items import (
     MagicArmItemType,
     MagicArmorType,
     MagicItemType,
+    MagicWeaponType,
     NeckSlotItem,
     RingsSlotItem,
     SimpleMagicItem,
@@ -357,4 +358,10 @@ class MagicArmorTypeForm(MagicItemTypeFormBase):
 class MagicArmItemTypeForm(MagicItemTypeFormBase):
     class Meta:
         model = MagicArmItemType
+        fields = '__all__'
+
+
+class MagicWeaponTypeForm(MagicItemTypeFormBase):
+    class Meta:
+        model = MagicWeaponType
         fields = '__all__'

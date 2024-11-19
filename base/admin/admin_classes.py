@@ -18,6 +18,7 @@ from base.admin.forms import (
     MagicArmorTypeForm,
     MagicItemForm,
     MagicItemTypeForm,
+    MagicWeaponTypeForm,
     NPCModelForm,
     ParagonPathForm,
     WeaponForm,
@@ -38,7 +39,7 @@ from base.constants.constants import (
 from base.models import Class, Race
 from base.models.encounters import Combatants, CombatantsPC
 from base.models.magic_items import ArmsSlotItem, MagicItemType, SimpleMagicItem
-from base.models.models import Armor, ArmorType, ParagonPath
+from base.models.models import Armor, ArmorType, ParagonPath, Weapon, WeaponType
 from base.models.powers import Power, PowerProperty
 from base.objects import npc_klasses, race_classes
 
@@ -489,8 +490,10 @@ class EncounterAdmin(admin.ModelAdmin):
 
 class ArmorTypeAdmin(admin.ModelAdmin):
     fields = (
+        'name',
         'base_armor_type',
         'bonus_armor_class',
+        'minimal_enhancement',
         'armor_class',
         'speed_penalty',
         'skill_penalty',
@@ -952,13 +955,46 @@ class MagicArmorTypeAdmin(MagicItemTypeAdminBase):
                 ),
             )
         )
-        for level in obj.level_range():
-            for armor_type in armor_types:
+        for armor_type in armor_types:
+            for level in obj.level_range():
+                if (level - 1) // 5 + 1 < armor_type.minimal_enhancement:
+                    continue
                 if not Armor.objects.filter(
                     magic_item_type=obj, armor_type=armor_type, level=level
                 ).count():
                     magic_item = Armor(
                         magic_item_type=obj, armor_type=armor_type, level=level
+                    )
+                    magic_item.save()
+
+
+class MagicWeaponTypeAdmin(MagicItemTypeAdminBase):
+    fields = (
+        'name',
+        'weapon_type_slots',
+        'min_level',
+        'step',
+        'max_level',
+        'category',
+        'picture',
+        'upload_from_clipboard',
+        'image_tag',
+        'source',
+    )
+    form = MagicWeaponTypeForm
+
+    @atomic
+    def save_model(self, request, obj, form, change):
+        obj.slots = [MagicItemSlot.WEAPON.value]
+        super().save_model(request, obj, form, change)
+        weapon_types = WeaponType.objects.filter(slug__in=obj.weapon_type_slots)
+        for weapon_type in weapon_types:
+            for level in obj.level_range():
+                if not Weapon.objects.filter(
+                    magic_item_type=obj, weapon_type=weapon_type, level=level
+                ).count():
+                    magic_item = Weapon(
+                        magic_item_type=obj, weapon_type=weapon_type, level=level
                     )
                     magic_item.save()
 

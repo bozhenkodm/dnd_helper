@@ -11,6 +11,7 @@ from base.admin.admin_classes import (
     MagicArmorTypeAdmin,
     MagicItemAdmin,
     MagicItemTypeAdmin,
+    MagicWeaponTypeAdmin,
     NPCAdmin,
     ParagonPathAdmin,
     PlayerCharactersAdmin,
@@ -26,6 +27,7 @@ from base.models.magic_items import (
     MagicArmItemType,
     MagicArmorType,
     MagicItemType,
+    MagicWeaponType,
     SimpleMagicItem,
 )
 from base.models.models import (
@@ -55,6 +57,7 @@ admin.site.register(FunctionalTemplate, FunctionalTemplateAdmin)
 admin.site.register(PlayerCharacters, PlayerCharactersAdmin)
 admin.site.register(MagicItemType, MagicItemTypeAdmin)
 admin.site.register(MagicArmorType, MagicArmorTypeAdmin)
+admin.site.register(MagicWeaponType, MagicWeaponTypeAdmin)
 admin.site.register(MagicArmItemType, MagicArmItemTypeAdmin)
 admin.site.register(SimpleMagicItem, MagicItemAdmin)
 admin.site.register(ArmsSlotItem, ArmsItemSlotAdmin)

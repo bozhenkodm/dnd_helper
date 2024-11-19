@@ -12,7 +12,6 @@ from base.constants.constants import (
     WeaponCategoryIntEnum,
     WeaponHandednessEnum,
 )
-from base.helpers import modifier
 from base.objects.skills import Skills
 from base.objects.weapon_types import (
     AnnihilationBlade,
@@ -35,7 +34,7 @@ from base.objects.weapon_types import (
     Spear,
     Sphere,
     Totem,
-    UnarmedMonkStrile,
+    UnarmedMonkStrike,
     Wand,
     WeaponType,
     WinterMourningBlade,
@@ -93,17 +92,17 @@ class NPCClass:
 
     @property
     def _armor_class_ability_bonus(self) -> int:
-        return max(map(modifier, (self.npc.intelligence, self.npc.dexterity)))
+        return max(self.npc.int_mod, self.npc.dex_mod)
 
     @property
     def armor_class_bonus(self) -> int:
         result = 0
         if self.npc.armor:
-            if self.npc.armor.armor_type in self.available_armor_types:
+            if self.npc.armor.armor_type.base_armor_type in self.available_armor_types:
                 result += self.npc.armor.armor_class
-            result += self.npc.enhancement_with_magic_threshold(
-                self.npc.armor.enhancement
-            )
+            # result += self.npc.enhancement_with_magic_threshold(
+            #     self.npc.armor.enhancement
+            # )
         if not self.npc.armor or self.npc.armor.is_light:
             result += self._armor_class_ability_bonus
         return result
@@ -240,7 +239,8 @@ class VampireClass(NPCClass):
     def armor_class_bonus(self) -> int:
         result = super().armor_class_bonus
         if not self.npc.shield and (
-            not self.npc.armor or self.npc.armor.armor_type == ArmorTypeIntEnum.CLOTH
+            not self.npc.armor
+            or self.npc.armor.armor_type.base_armor_type == ArmorTypeIntEnum.CLOTH
         ):
             # Рефлексы вампира
             result += 2
@@ -367,7 +367,7 @@ class FighterClass(NPCClass):
         TEMPPEST = 4, 'Воин вихрь'
         BRAWLER = 5, 'Воин задира'
 
-    def _is_browler_and_properly_armed(self) -> bool:
+    def _is_brawler_and_properly_armed(self) -> bool:
         # brawler fighter should have melee weapon in just one hand
         if any(
             (
@@ -387,14 +387,14 @@ class FighterClass(NPCClass):
     @property
     def armor_class_bonus(self) -> int:
         result = super().armor_class_bonus
-        if self._is_browler_and_properly_armed():
+        if self._is_brawler_and_properly_armed():
             result += 1
         return result
 
     @property
     def fortitude(self) -> int:
         result = 2  # base fighter fortitude bonus
-        if self._is_browler_and_properly_armed():
+        if self._is_brawler_and_properly_armed():
             result += 2
         return result
 
@@ -575,7 +575,8 @@ class AvengerClass(NPCClass):
     def armor_class_bonus(self) -> int:
         result = super().armor_class_bonus
         if not self.npc.shield and (
-            not self.npc.armor or self.npc.armor.armor_type == ArmorTypeIntEnum.CLOTH
+            not self.npc.armor
+            or self.npc.armor.armor_type.base_armor_type == ArmorTypeIntEnum.CLOTH
         ):
             result += 3
         return result
@@ -983,7 +984,7 @@ class MonkClass(NPCClass):
     )
     available_weapon_categories = ()
     available_accesories = (Quaterstaff, Club, Dagger, Spear, Sling, Shuriken)
-    available_weapon_types = available_accesories + (UnarmedMonkStrile,)
+    available_weapon_types = available_accesories + (UnarmedMonkStrike,)
     available_implement_types = available_accesories + (KiFocus,)
     base_attack_abilities = (AbilityEnum.DEXTERITY,)
 

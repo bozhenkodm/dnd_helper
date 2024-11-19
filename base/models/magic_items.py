@@ -10,6 +10,7 @@ from base.constants.constants import (
     MagicItemSlot,
     ShieldTypeIntEnum,
 )
+from base.objects import weapon_types_tuple
 
 
 class MagicItemType(models.Model):
@@ -88,6 +89,23 @@ class MagicArmItemType(MagicItemType):
     )
 
 
+class MagicWeaponType(MagicItemType):
+    class Meta:
+        verbose_name = _('Magic weapon type')
+        verbose_name_plural = _('Magic weapon types')
+
+    weapon_type_slots = MultiSelectField(
+        verbose_name=_('Weapon type'),
+        choices=sorted(
+            (w.slug(), w.name)
+            for w in sorted(weapon_types_tuple, key=lambda x: x.name)
+            if not w.is_magic_item
+        ),
+        null=False,
+        min_choices=1,
+    )
+
+
 class ItemAbstract(models.Model):
     class Meta:
         abstract = True
@@ -106,6 +124,10 @@ class ItemAbstract(models.Model):
         if not self.magic_item_type:
             return 0
         return (self.level - 1) // 5 + 1
+
+    @enhancement.setter
+    def enhancement(self, value):
+        pass
 
     @property
     def price(self):

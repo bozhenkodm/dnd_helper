@@ -38,6 +38,9 @@ class WeaponType:
     is_small: ClassVar[bool] = False
     is_defensive: ClassVar[bool] = False
 
+    # property shows if weapon is a magic item itself
+    is_magic_item: ClassVar[bool] = False
+
     @classmethod
     def slug(cls):
         return cls.__name__
@@ -668,6 +671,7 @@ class WinterMourningBlade(WeaponType):
     category = WeaponCategoryIntEnum.SUPERIOR
     damage_dice = DiceIntEnum.D10
     prof_bonus = 3
+    is_magic_item = True
 
 
 class AnnihilationBlade(WeaponType):
@@ -675,6 +679,7 @@ class AnnihilationBlade(WeaponType):
     group = WeaponGroupEnum.HEAVY_BLADE
     category = WeaponCategoryIntEnum.SUPERIOR
     damage_dice = DiceIntEnum.D12
+    is_magic_item = True
 
 
 class ExquisiteAgonyScourge(WeaponType):
@@ -683,6 +688,7 @@ class ExquisiteAgonyScourge(WeaponType):
     category = WeaponCategoryIntEnum.SUPERIOR
     damage_dice = DiceIntEnum.D10
     is_reach = True
+    is_magic_item = True
 
 
 class ChaosBlade(WeaponType):
@@ -692,9 +698,10 @@ class ChaosBlade(WeaponType):
     dice_number = 2
     damage_dice = DiceIntEnum.D4
     is_high_crit = True
+    is_magic_item = True
 
 
-class UnarmedMonkStrile(WeaponType):
+class UnarmedMonkStrike(WeaponType):
     name = 'Безоружный удар монаха'
     group = WeaponGroupEnum.UNARMED
     category = WeaponCategoryIntEnum.SUPERIOR
@@ -705,10 +712,12 @@ class UnarmedMonkStrile(WeaponType):
 
 class RitualDagger(Dagger):
     name = 'Ритуальный кинжал'
+    is_magic_item = True
 
 
 class RitualSickle(Sickle):
     name = 'Ритуальный серп'
+    is_magic_item = True
 
 
 # Double axe 	AV 	+2 	1d10/1d10  	Axe 	Double weapon, off-hand
