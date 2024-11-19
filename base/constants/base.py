@@ -1,5 +1,5 @@
 from enum import Enum, IntEnum
-from typing import Callable, Sequence
+from typing import Any, Callable, Sequence
 
 from django.db import models
 
@@ -19,19 +19,25 @@ class BaseNameValueDescriptionEnum(str, Enum):
         cls,
         is_sorted: bool = True,
         start_with: Sequence["BaseNameValueDescriptionEnum"] = (),
-        condition: Callable["BaseNameValueDescriptionEnum", bool] = lambda: True,
+        condition: Callable[[Any], bool] = lambda x: True,
     ) -> list[tuple[str, str]]:
         result = [(item.value, item.description) for item in start_with]  # type: ignore
         if is_sorted:
             result.extend(
                 sorted(
-                    ((item.value, item.description) for item in cls),  # type: ignore
+                    (
+                        (item.value, item.description)
+                        for item in cls
+                        if condition(item)
+                    ),  # type: ignore
                     key=lambda x: x[1],
                 )
             )
         else:
             result.extend(
-                (item.value, item.description) for item in cls  # type: ignore
+                (item.value, item.description)
+                for item in cls
+                if condition(item)  # type: ignore
             )
         return result
 
@@ -80,9 +86,13 @@ class IntDescriptionEnum(IntEnum):
         return obj
 
     @classmethod
-    def generate_choices(cls):
+    def generate_choices(
+        cls,
+        condition: Callable[["BaseNameValueDescriptionEnum"], bool] = lambda x: True,
+    ):
         return sorted(
-            ((item.value, item.description) for item in cls), key=lambda x: x[0]
+            ((item.value, item.description) for item in cls if condition(item)),
+            key=lambda x: x[0],
         )
 
     @property

@@ -19,6 +19,7 @@ from base.models.magic_items import (
     FeetSlotItem,
     HandsSlotItem,
     HeadSlotItem,
+    MagicArmItemType,
     MagicArmorType,
     MagicItemType,
     NeckSlotItem,
@@ -169,7 +170,8 @@ class NPCModelForm(forms.ModelForm):
             and primary_hand.data_instance.handedness == WeaponHandednessEnum.TWO
         ):
             error = ValidationError(
-                'Когда в основной руке двуручное оружие, вторая должна быть пустой'
+                'Двуручное оружие занимает обе руки, '
+                'во второй руке не может быть другого оружия'
             )
             if secondary_hand:
                 self.add_error('secondary_hand', error)
@@ -349,4 +351,10 @@ class MagicItemTypeForm(MagicItemTypeFormBase):
 class MagicArmorTypeForm(MagicItemTypeFormBase):
     class Meta:
         model = MagicArmorType
+        fields = '__all__'
+
+
+class MagicArmItemTypeForm(MagicItemTypeFormBase):
+    class Meta:
+        model = MagicArmItemType
         fields = '__all__'

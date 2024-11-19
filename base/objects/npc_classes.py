@@ -102,7 +102,7 @@ class NPCClass:
             if self.npc.armor.armor_type in self.available_armor_types:
                 result += self.npc.armor.armor_class
             result += self.npc.enhancement_with_magic_threshold(
-                self.npc.armor.enchantment
+                self.npc.armor.enhancement
             )
         if not self.npc.armor or self.npc.armor.is_light:
             result += self._armor_class_ability_bonus

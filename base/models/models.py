@@ -81,14 +81,14 @@ class Armor(ItemAbstract):
     )
 
     def __str__(self) -> str:
-        return f'{self.name}, +{self.enchantment}'
+        return f'{self.name}, +{self.enhancement}'
 
     @property
     def armor_class(self) -> int:
         return (
             self.armor_type.base_armor_type
             + self.armor_type.bonus_armor_class
-            + self.enchantment
+            + self.enhancement
         )
 
     @property
@@ -101,11 +101,13 @@ class Armor(ItemAbstract):
 
     @property
     def name(self) -> str:
-        if not self.magic_item_type:
-            return self.armor_type.get_base_armor_type_display()
+        magic_item_type = (
+            f', {self.magic_item_type.name}' if self.magic_item_type else ''
+        )
         return (
-            f'{self.armor_type.get_base_armor_type_display()}, '
-            f'{self.magic_item_type.name}'
+            f'{self.armor_type.get_base_armor_type_display()} '
+            f'({self.armor_type.name})'
+            f'{magic_item_type}'
         )
 
     @property
@@ -155,7 +157,7 @@ class Weapon(ItemAbstract):
     )
 
     def __str__(self):
-        return f'{self.title}, +{self.enchantment}'
+        return f'{self.title}, +{self.enhancement}'
 
     @property
     def title(self) -> str:
@@ -165,7 +167,7 @@ class Weapon(ItemAbstract):
 
     @property
     def damage(self):
-        if not self.enchantment:
+        if not self.enhancement:
             return (
                 f'{self.data_instance.dice_number}'
                 f'{self.data_instance.damage_dice.description}'
@@ -173,7 +175,7 @@ class Weapon(ItemAbstract):
         return (
             f'{self.data_instance.dice_number}'
             f'{self.data_instance.damage_dice.description} + '
-            f'{self.enchantment}'
+            f'{self.enhancement}'
         )
 
     @property
@@ -181,7 +183,7 @@ class Weapon(ItemAbstract):
         return DiceRoll(
             rolls=self.weapon_type.data_instance.dice_number,
             dice=self.weapon_type.data_instance.damage_dice,
-            addendant=self.enchantment,
+            addendant=self.enhancement,
         )
 
     @property

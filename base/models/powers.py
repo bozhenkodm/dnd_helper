@@ -393,7 +393,7 @@ class PowerMixin:
                 )
                 # armament enchantment
                 + self.enhancement_with_magic_threshold(
-                    weapon and weapon.enchantment or 0
+                    weapon and weapon.enhancement or 0
                 )
                 # power attack bonus will be added to power string
                 # during the power property creation
@@ -402,12 +402,12 @@ class PowerMixin:
             return (
                 self.klass_data_instance.damage_bonus
                 + self.enhancement_with_magic_threshold(
-                    weapon and weapon.enchantment or 0
+                    weapon and weapon.enhancement or 0
                 )
             )
         if token == PowerVariables.EHT:
             return self.enhancement_with_magic_threshold(
-                weapon and weapon.enchantment or 0
+                weapon and weapon.enhancement or 0
             )
         if token == PowerVariables.ITL:
             if not item:

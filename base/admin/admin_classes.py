@@ -7,12 +7,14 @@ from django import forms
 from django.contrib import admin
 from django.core.files.images import ImageFile
 from django.db import models
+from django.db.models.functions import Floor
 from django.db.transaction import atomic
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 
 from base.admin.forms import (
     ArmsSlotItemForm,
+    MagicArmItemTypeForm,
     MagicArmorTypeForm,
     MagicItemForm,
     MagicItemTypeForm,
@@ -24,16 +26,18 @@ from base.admin.forms import (
 from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
     AccessoryTypeEnum,
+    ArmorTypeIntEnum,
     MagicItemSlot,
     NPCClassEnum,
     NPCRaceEnum,
     PowerFrequencyEnum,
     PowerPropertyTitle,
     PowerRangeTypeEnum,
+    ShieldTypeIntEnum,
 )
 from base.models import Class, Race
 from base.models.encounters import Combatants, CombatantsPC
-from base.models.magic_items import MagicItemType, SimpleMagicItem
+from base.models.magic_items import ArmsSlotItem, MagicItemType, SimpleMagicItem
 from base.models.models import Armor, ArmorType, ParagonPath
 from base.models.powers import Power, PowerProperty
 from base.objects import npc_klasses, race_classes
@@ -306,10 +310,16 @@ class NPCAdmin(admin.ModelAdmin):
         'primary_hand',
         'secondary_hand',
         'no_hand',
+        'armor',
     )
     filter_horizontal = ('powers',)
     search_fields = ('name',)
-    list_filter = (RaceListFilter, KlassListFilter, 'functional_template')
+    list_filter = (
+        RaceListFilter,
+        KlassListFilter,
+        'functional_template',
+        'paragon_path',
+    )
     list_per_page = 15
     form = NPCModelForm
 
@@ -347,7 +357,7 @@ class NPCAdmin(admin.ModelAdmin):
             )
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    def get_level_abilities_bonus_fields(self, obj) -> list[str]:
+    def _get_level_abilities_bonus_fields(self, obj) -> list[str]:
         result = []
         level_attrs_bonuses = {
             4: 'level4_bonus_abilities',
@@ -393,20 +403,20 @@ class NPCAdmin(admin.ModelAdmin):
                 'race',
                 'paragon_path',
             )
-        result.insert(9, self.get_level_abilities_bonus_fields(obj))
+        result.insert(9, self._get_level_abilities_bonus_fields(obj))
         return result
 
     @admin.display(description='Тренированные навыки')
     def mandatory_skills(self, obj):
         return obj.klass_data_instance.mandatory_skills.display_non_zero()
 
+    @atomic
     def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
         for power in obj.powers.filter(level=0):
             obj.powers.remove(power)
         if not obj.experience:
             obj.experience = obj.experience_by_level
-        obj.save()
+        super().save_model(request, obj, form, change)
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
@@ -476,9 +486,6 @@ class EncounterAdmin(admin.ModelAdmin):
             )
         )
 
-    def get_queryset(self, request):
-        return super().get_queryset(request).filter(is_passed=False)
-
 
 class ArmorTypeAdmin(admin.ModelAdmin):
     fields = (
@@ -498,42 +505,58 @@ class ArmorTypeAdmin(admin.ModelAdmin):
         return obj.armor_class
 
 
-# class ArmorAdmin(admin.ModelAdmin):
-#     fields = (
-#         'armor_type',
-#         'armor_class',
-#         'bonus_armor_class',
-#         'speed_penalty',
-#         'skill_penalty',
-#         'magic_item_type',
-#         'level',
-#     )
-#     readonly_fields = ('armor_class',)
-#     form = ArmorForm
-#
-#     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-#         if db_field.name == 'magic_item_type':
-#             kwargs['queryset'] = MagicItemType.objects.filter(
-#                 slots__contains=MagicItemSlot.ARMOR.value
-#             ).order_by('name')
-#         return super().formfield_for_foreignkey(db_field, request, **kwargs)
-#
-#     @admin.display(description='Класс доспеха')
-#     def armor_class(self, obj):
-#         if not obj.id:
-#             return '-'
-#         return obj.armor_class
-#
-#     def get_queryset(self, request):
-#         return (
-#             super(ArmorAdmin, self)
-#             .get_queryset(request)
-#             .annotate(
-#                 displayed_name=ArmorTypeIntEnum.generate_value_description_case(
-#                     field='armor_type'
-#                 )
-#             )
-#         )
+class ArmorAdmin(admin.ModelAdmin):
+    fields = (
+        'armor_type',
+        'magic_item_type',
+        'level',
+    )
+    ordering = ('level', 'armor_type__base_armor_type')
+    readonly_fields = ('armor_class',)
+    search_fields = (
+        'armor_type__name',
+        'displayed_name',
+        'magic_item_type__name',
+        'enhancement',
+    )
+
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        return {}
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'magic_item_type':
+            kwargs['queryset'] = MagicItemType.objects.filter(
+                slots__contains=MagicItemSlot.ARMOR.value
+            ).order_by('name')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    @admin.display(description='Класс доспеха')
+    def armor_class(self, obj):
+        if not obj.id:
+            return '-'
+        return obj.armor_class
+
+    def get_queryset(self, request):
+        return (
+            super(ArmorAdmin, self)
+            .get_queryset(request)
+            .annotate(
+                displayed_name=ArmorTypeIntEnum.generate_value_description_case(
+                    field='armor_type__base_armor_type'
+                ),
+                enhancement=models.Case(
+                    models.When(
+                        magic_item_type__isnull=False,
+                        then=Floor((models.F('level') - 1) / 5) + 1,
+                    ),
+                    default=0,
+                ),
+                # TODO move queries to manager
+            )
+        )
 
 
 class WeaponTypeAdmin(admin.ModelAdmin):
@@ -634,7 +657,7 @@ class WeaponAdmin(admin.ModelAdmin):
 
     @admin.display(description='Урон')
     def damage(self, obj):
-        return f'{obj.weapon_type.data_instance.damage()} + {obj.enchantment}'
+        return f'{obj.weapon_type.data_instance.damage()} + {obj.enhancement}'
 
 
 class PowerPropertyInline(admin.TabularInline):
@@ -920,8 +943,6 @@ class MagicArmorTypeAdmin(MagicItemTypeAdminBase):
     def save_model(self, request, obj, form, change):
         obj.slots = [MagicItemSlot.ARMOR.value]
         super().save_model(request, obj, form, change)
-        print('1' * 88)
-        print(obj.slots)
         armor_types = ArmorType.objects.filter(
             reduce(
                 lambda x, y: x | y,
@@ -938,6 +959,37 @@ class MagicArmorTypeAdmin(MagicItemTypeAdminBase):
                 ).count():
                     magic_item = Armor(
                         magic_item_type=obj, armor_type=armor_type, level=level
+                    )
+                    magic_item.save()
+
+
+class MagicArmItemTypeAdmin(MagicItemTypeAdminBase):
+    fields = (
+        'name',
+        'shield_slots',
+        'min_level',
+        'step',
+        'max_level',
+        'category',
+        'picture',
+        'upload_from_clipboard',
+        'image_tag',
+        'source',
+    )
+    form = MagicArmItemTypeForm
+
+    @atomic
+    def save_model(self, request, obj, form, change):
+        obj.slots = [MagicItemSlot.ARMS.value]
+        super().save_model(request, obj, form, change)
+        slots = obj.shield_slots if obj.shield_slots else (ShieldTypeIntEnum.NONE,)
+        for level in obj.level_range():
+            for slot in slots:
+                if not ArmsSlotItem.objects.filter(
+                    magic_item_type=obj, shield=slot, level=level
+                ).count():
+                    magic_item = ArmsSlotItem(
+                        magic_item_type=obj, shield=slot, level=level
                     )
                     magic_item.save()
 

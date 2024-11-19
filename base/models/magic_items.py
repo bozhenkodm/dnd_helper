@@ -72,10 +72,20 @@ class MagicArmorType(MagicItemType):
         null=False,
     )
 
-    # def clean(self):
-    #     if MagicItemSlot.ARMOR not in self.slots:
-    #         raise ValidationError(_("Magic armor type object must have armor slot."))
-    #     super().clean()
+
+class MagicArmItemType(MagicItemType):
+    class Meta:
+        verbose_name = _('Magic shield/arms slot item type')
+        verbose_name_plural = _('Magic shield/arms slot item types')
+
+    shield_slots = MultiSelectField(
+        verbose_name=_('Shield slots'),
+        choices=ShieldTypeIntEnum.generate_choices(
+            condition=lambda x: x != ShieldTypeIntEnum.NONE
+        ),
+        null=True,
+        blank=True,
+    )
 
 
 class ItemAbstract(models.Model):
@@ -92,7 +102,7 @@ class ItemAbstract(models.Model):
     level = models.SmallIntegerField(verbose_name=_('Level'), default=0)
 
     @property
-    def enchantment(self):
+    def enhancement(self):
         if not self.magic_item_type:
             return 0
         return (self.level - 1) // 5 + 1
@@ -106,10 +116,8 @@ class ItemAbstract(models.Model):
 
 class SimpleMagicItem(ItemAbstract):
     class Meta:
-        verbose_name = 'Магический предмет'
-        # verbose_name = _('Magic item')
-        verbose_name_plural = 'Магические предметы'
-        # verbose_name_plural = _('Magic items')
+        verbose_name = _('Magic item')
+        verbose_name_plural = _('Magic items')
         unique_together = ('magic_item_type', 'level')
 
     SLOT: ClassVar[MagicItemSlot]
@@ -126,7 +134,7 @@ class NeckSlotItem(SimpleMagicItem):
 
     @property
     def defence_bonus(self):
-        return self.enchantment
+        return self.enhancement
 
 
 class HeadSlotItem(SimpleMagicItem):
@@ -145,10 +153,8 @@ class FeetSlotItem(SimpleMagicItem):
 
 class ArmsSlotItem(ItemAbstract):
     class Meta:
-        # verbose_name = _('Hand item/shield')
-        # verbose_name_plural = _('Hand items/shields')
-        verbose_name = 'Предмет на руки/щит'
-        verbose_name_plural = 'Предметы на руки/щиты'
+        verbose_name = _('Hand item/shield')
+        verbose_name_plural = _('Hand items/shields')
         unique_together = ('magic_item_type', 'level', 'shield')
 
     SLOT = MagicItemSlot.ARMS
