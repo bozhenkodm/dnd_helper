@@ -45,35 +45,35 @@ class NPCModelForm(forms.ModelForm):
     )
     neck_slot = forms.ModelChoiceField(
         queryset=NeckSlotItem.objects.select_related('magic_item_type').filter(
-            magic_item_type__slots__contains=NeckSlotItem.SLOT.value
+            magic_item_type__slot=NeckSlotItem.SLOT.value
         ),
         label='Предмет на шею',
         required=False,
     )
     head_slot = forms.ModelChoiceField(
         queryset=HeadSlotItem.objects.select_related('magic_item_type').filter(
-            magic_item_type__slots__contains=HeadSlotItem.SLOT.value
+            magic_item_type__slot=HeadSlotItem.SLOT.value
         ),
         label='Предмет на голову',
         required=False,
     )
     waist_slot = forms.ModelChoiceField(
         queryset=WaistSlotItem.objects.select_related('magic_item_type').filter(
-            magic_item_type__slots__contains=WaistSlotItem.SLOT.value
+            magic_item_type__slot=WaistSlotItem.SLOT.value
         ),
         label='Предмет на пояс',
         required=False,
     )
     feet_slot = forms.ModelChoiceField(
         queryset=FeetSlotItem.objects.select_related('magic_item_type').filter(
-            magic_item_type__slots__contains=FeetSlotItem.SLOT.value
+            magic_item_type__slot=FeetSlotItem.SLOT.value
         ),
         label='Предмет на ноги',
         required=False,
     )
     arms_slot = forms.ModelChoiceField(
         queryset=ArmsSlotItem.objects.select_related('magic_item_type').filter(
-            magic_item_type__slots__contains=ArmsSlotItem.SLOT.value
+            magic_item_type__slot=ArmsSlotItem.SLOT.value
         ),
         label='Предмет на предплечья',
         required=False,
@@ -81,7 +81,7 @@ class NPCModelForm(forms.ModelForm):
 
     left_ring_slot = forms.ModelChoiceField(
         queryset=RingsSlotItem.objects.select_related('magic_item_type').filter(
-            magic_item_type__slots__contains=RingsSlotItem.SLOT.value
+            magic_item_type__slot=RingsSlotItem.SLOT.value
         ),
         label='Кольцо на левую руку',
         required=False,
@@ -89,14 +89,14 @@ class NPCModelForm(forms.ModelForm):
 
     right_ring_slot = forms.ModelChoiceField(
         queryset=RingsSlotItem.objects.select_related('magic_item_type').filter(
-            magic_item_type__slots__contains=RingsSlotItem.SLOT.value
+            magic_item_type__slot=RingsSlotItem.SLOT.value
         ),
         label='Кольцо на правую руку',
         required=False,
     )
     gloves_slot = forms.ModelChoiceField(
         queryset=HandsSlotItem.objects.select_related('magic_item_type').filter(
-            magic_item_type__slots__contains=HandsSlotItem.SLOT.value
+            magic_item_type__slot=HandsSlotItem.SLOT.value
         ),
         label='Предмет на кисти',
         required=False,

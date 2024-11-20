@@ -431,7 +431,6 @@ class MagicItemSlot(BaseNameValueDescriptionEnum):
             self.WEAPON,
             self.ARMOR,
             self.ARMS,
-            self.NECK,
         )
 
 

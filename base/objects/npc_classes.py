@@ -15,21 +15,29 @@ from base.constants.constants import (
 from base.objects.skills import Skills
 from base.objects.weapon_types import (
     AnnihilationBlade,
+    Broadsword,
     Club,
     Dagger,
     ExquisiteAgonyScourge,
+    Falchion,
+    Glaive,
+    Greatsword,
     HandCrossbow,
     HolySymbol,
+    Khopesh,
     KiFocus,
     Longspear,
     LongSword,
     Quaterstaff,
+    Rapier,
     RitualDagger,
     RitualSickle,
     Rod,
     Scimitar,
+    Scythe,
     ShortSword,
     Shuriken,
+    Sickle,
     Sling,
     Spear,
     Sphere,
@@ -622,9 +630,19 @@ class SwordmageClass(NPCClass):
         ArmorTypeIntEnum.LEATHER,
     )
     available_weapon_types = (
+        Dagger,
+        Sickle,
+        Scythe,
         LongSword,
         ShortSword,
-    )  # TODO Fill it up
+        Broadsword,
+        Khopesh,
+        Rapier,
+        Scimitar,
+        Falchion,
+        Glaive,
+        Greatsword,
+    )
     available_implement_types = available_weapon_types
     mandatory_skills = Skills(arcana=5)
     trainable_skills = Skills(

@@ -42,13 +42,12 @@ class MagicItemType(models.Model):
         null=True,
         blank=True,
     )
-    slots = MultiSelectField(
-        verbose_name=_('Slots'),
+    slot = models.CharField(
+        verbose_name=_('Slot'),
         choices=MagicItemSlot.generate_choices(),
-        min_choices=1,
+        max_length=MagicItemSlot.max_length(),
         null=True,
     )
-    # properties = models.JSONField(null=True)
 
     def __str__(self) -> str:
         return self.name

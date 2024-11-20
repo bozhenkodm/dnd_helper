@@ -73,19 +73,6 @@ class NPCModelForm(forms.ModelForm):
                     choices=subclass_enum.generate_choices(),
                     label='Подкласс',
                 )
-            weapon_queryset = Weapon.objects.select_related(
-                'weapon_type', 'magic_item_type'
-            ).order_by('level', 'weapon_type__name', 'magic_item_type__name')
-            if self.instance.weapons.count():
-                weapon_queryset = weapon_queryset.filter(
-                    id__in=self.instance.weapons.values_list('id', flat=True)
-                )
-            self.fields['primary_hand'] = forms.ModelChoiceField(
-                queryset=weapon_queryset, label='Основная рука', required=False
-            )
-            self.fields['secondary_hand'] = forms.ModelChoiceField(
-                queryset=weapon_queryset, label='Вторичная рука', required=False
-            )
             self.fields['no_hand'] = forms.ModelChoiceField(
                 queryset=Weapon.objects.select_related('weapon_type', 'magic_item_type')
                 .filter(
@@ -98,35 +85,35 @@ class NPCModelForm(forms.ModelForm):
             )
             self.fields['neck_slot'] = forms.ModelChoiceField(
                 queryset=NeckSlotItem.objects.select_related('magic_item_type').filter(
-                    magic_item_type__slots__contains=NeckSlotItem.SLOT.value
+                    magic_item_type__slot=NeckSlotItem.SLOT.value
                 ),
                 label='Предмет на шею',
                 required=False,
             )
             self.fields['head_slot'] = forms.ModelChoiceField(
                 queryset=HeadSlotItem.objects.select_related('magic_item_type').filter(
-                    magic_item_type__slots__contains=HeadSlotItem.SLOT.value
+                    magic_item_type__slot=HeadSlotItem.SLOT.value
                 ),
                 label='Предмет на голову',
                 required=False,
             )
             self.fields['waist_slot'] = forms.ModelChoiceField(
                 queryset=WaistSlotItem.objects.select_related('magic_item_type').filter(
-                    magic_item_type__slots__contains=WaistSlotItem.SLOT.value
+                    magic_item_type__slot=WaistSlotItem.SLOT.value
                 ),
                 label='Предмет на пояс',
                 required=False,
             )
             self.fields['feet_slot'] = forms.ModelChoiceField(
                 queryset=FeetSlotItem.objects.select_related('magic_item_type').filter(
-                    magic_item_type__slots__contains=FeetSlotItem.SLOT.value
+                    magic_item_type__slot=FeetSlotItem.SLOT.value
                 ),
                 label='Предмет на ноги',
                 required=False,
             )
             self.fields['arms_slot'] = forms.ModelChoiceField(
                 queryset=ArmsSlotItem.objects.select_related('magic_item_type').filter(
-                    magic_item_type__slots__contains=ArmsSlotItem.SLOT.value
+                    magic_item_type__slot=ArmsSlotItem.SLOT.value
                 ),
                 label='Предмет на предплечья',
                 required=False,
@@ -134,7 +121,7 @@ class NPCModelForm(forms.ModelForm):
 
             self.fields['left_ring_slot'] = forms.ModelChoiceField(
                 queryset=RingsSlotItem.objects.select_related('magic_item_type').filter(
-                    magic_item_type__slots__contains=RingsSlotItem.SLOT.value
+                    magic_item_type__slot=RingsSlotItem.SLOT.value
                 ),
                 label='Кольцо на левую руку',
                 required=False,
@@ -142,14 +129,14 @@ class NPCModelForm(forms.ModelForm):
 
             self.fields['right_ring_slot'] = forms.ModelChoiceField(
                 queryset=RingsSlotItem.objects.select_related('magic_item_type').filter(
-                    magic_item_type__slots__contains=RingsSlotItem.SLOT.value
+                    magic_item_type__slot=RingsSlotItem.SLOT.value
                 ),
                 label='Кольцо на правую руку',
                 required=False,
             )
             self.fields['gloves_slot'] = forms.ModelChoiceField(
                 queryset=HandsSlotItem.objects.select_related('magic_item_type').filter(
-                    magic_item_type__slots__contains=HandsSlotItem.SLOT.value
+                    magic_item_type__slot=HandsSlotItem.SLOT.value
                 ),
                 label='Предмет на кисти',
                 required=False,
@@ -326,7 +313,7 @@ class ArmsSlotItemForm(ItemAbstractForm):
     def __init__(self, *args, **kwargs):
         super(ArmsSlotItemForm, self).__init__(*args, **kwargs)
         self.fields['magic_item_type'].queryset = MagicItemType.objects.filter(
-            slots__contains=MagicItemSlot.ARMS.value
+            slot=MagicItemSlot.ARMS.value
         )
 
     shield = forms.ChoiceField(

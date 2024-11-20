@@ -21,7 +21,12 @@ from base.models.abilities import Ability, NPCAbilityAbstract
 from base.models.bonuses import Bonus
 from base.models.defences import NPCDefenceMixin
 from base.models.experience import NPCExperienceAbstract
-from base.models.magic_items import ItemAbstract, NPCMagicItemAbstract
+from base.models.magic_items import (
+    ItemAbstract,
+    MagicArmorType,
+    MagicWeaponType,
+    NPCMagicItemAbstract,
+)
 from base.models.powers import Power, PowerMixin
 from base.models.skills import NPCSkillMixin, Skill
 from base.objects import npc_klasses, race_classes, weapon_types_classes
@@ -117,6 +122,20 @@ class Armor(ItemAbstract):
             ArmorTypeIntEnum.LEATHER,
             ArmorTypeIntEnum.HIDE,
         )
+
+    @classmethod
+    def create_on_base(
+        cls, armor_type: ArmorType, magic_armor_type: MagicArmorType, level: int
+    ):
+        if (level - 1) // 5 + 1 < armor_type.minimal_enhancement:
+            return
+        if not cls.objects.filter(
+            magic_item_type=magic_armor_type, armor_type=armor_type, level=level
+        ).count():
+            magic_item = cls(
+                magic_item_type=magic_armor_type, armor_type=armor_type, level=level
+            )
+            magic_item.save()
 
 
 class WeaponType(models.Model):
@@ -214,6 +233,18 @@ class Weapon(ItemAbstract):
         if is_ranged:
             return ranged_attack_type
         raise PowerInconsistent(_('Wrong attack type'))
+
+    @classmethod
+    def create_on_base(
+        cls, weapon_type: WeaponType, magic_weapon_type: MagicWeaponType, level: int
+    ):
+        if not cls.objects.filter(
+            magic_item_type=magic_weapon_type, weapon_type=weapon_type, level=level
+        ).count():
+            magic_item = cls(
+                magic_item_type=magic_weapon_type, weapon_type=weapon_type, level=level
+            )
+            magic_item.save()
 
 
 class Race(models.Model):
@@ -382,15 +413,6 @@ class NPC(
 
     armor = models.ForeignKey(
         Armor, verbose_name=_('Armor'), null=True, on_delete=models.SET_NULL
-    )
-    weapons = models.ManyToManyField(
-        Weapon,
-        verbose_name=_('Armament'),
-        blank=True,
-        help_text=_(
-            'Armament posessed by character. '
-            'If list is not empty, weapons in hands are choose from it.'
-        ),
     )
     primary_hand = models.ForeignKey(
         Weapon,

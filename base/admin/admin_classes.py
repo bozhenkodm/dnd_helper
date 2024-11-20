@@ -38,7 +38,13 @@ from base.constants.constants import (
 )
 from base.models import Class, Race
 from base.models.encounters import Combatants, CombatantsPC
-from base.models.magic_items import ArmsSlotItem, MagicItemType, SimpleMagicItem
+from base.models.magic_items import (
+    ArmsSlotItem,
+    MagicArmorType,
+    MagicItemType,
+    MagicWeaponType,
+    SimpleMagicItem,
+)
 from base.models.models import Armor, ArmorType, ParagonPath, Weapon, WeaponType
 from base.models.powers import Power, PowerProperty
 from base.objects import npc_klasses, race_classes
@@ -307,7 +313,6 @@ class NPCAdmin(admin.ModelAdmin):
         'race',
         'klass',
         'trained_weapons',
-        'weapons',
         'primary_hand',
         'secondary_hand',
         'no_hand',
@@ -507,6 +512,15 @@ class ArmorTypeAdmin(admin.ModelAdmin):
             return '-'
         return obj.armor_class
 
+    @atomic
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        for magic_armor_type in MagicArmorType.objects.filter(
+            armor_type_slots__contains=obj.base_armor_type
+        ):
+            for level in magic_armor_type.level_range():
+                Armor.create_on_base(obj, magic_armor_type, level)
+
 
 class ArmorAdmin(admin.ModelAdmin):
     fields = (
@@ -532,7 +546,7 @@ class ArmorAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'magic_item_type':
             kwargs['queryset'] = MagicItemType.objects.filter(
-                slots__contains=MagicItemSlot.ARMOR.value
+                slot=MagicItemSlot.ARMOR.value
             ).order_by('name')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
@@ -624,6 +638,15 @@ class WeaponTypeAdmin(admin.ModelAdmin):
             return '-'
         return obj.data_instance.damage()
 
+    @atomic
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        for magic_weapon_type in MagicWeaponType.objects.filter(
+            weapon_type_slots__contains=obj.slug
+        ):
+            for level in magic_weapon_type.level_range():
+                Weapon.create_on_base(obj, magic_weapon_type, level)
+
 
 class WeaponAdmin(admin.ModelAdmin):
     ordering = (
@@ -639,12 +662,17 @@ class WeaponAdmin(admin.ModelAdmin):
     search_fields = ['magic_item_type__name', 'weapon_type__name']
     autocomplete_fields = ('weapon_type',)
     form = WeaponForm
-    save_as = True
+
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        return {}
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'magic_item_type':
             kwargs['queryset'] = MagicItemType.objects.filter(
-                slots__contains=MagicItemSlot.WEAPON.value
+                slot=MagicItemSlot.WEAPON.value
             ).order_by('name')
         return super(WeaponAdmin, self).formfield_for_foreignkey(
             db_field, request, **kwargs
@@ -899,7 +927,7 @@ class MagicItemTypeAdminBase(admin.ModelAdmin):
 class MagicItemTypeAdmin(MagicItemTypeAdminBase):
     fields = (
         'name',
-        'slots',
+        'slot',
         'min_level',
         'step',
         'max_level',
@@ -915,16 +943,15 @@ class MagicItemTypeAdmin(MagicItemTypeAdminBase):
     @atomic
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
+        if not MagicItemSlot(obj.slot).is_simple():
+            return
 
         for level in obj.level_range():
-            for slot in obj.slots:
-                if not MagicItemSlot(slot).is_simple():
-                    continue
-                if not SimpleMagicItem.objects.filter(
-                    magic_item_type=obj, level=level
-                ).count():
-                    magic_item = SimpleMagicItem(magic_item_type=obj, level=level)
-                    magic_item.save()
+            if not SimpleMagicItem.objects.filter(
+                magic_item_type=obj, level=level
+            ).count():
+                magic_item = SimpleMagicItem(magic_item_type=obj, level=level)
+                magic_item.save()
 
 
 class MagicArmorTypeAdmin(MagicItemTypeAdminBase):
@@ -944,7 +971,7 @@ class MagicArmorTypeAdmin(MagicItemTypeAdminBase):
 
     @atomic
     def save_model(self, request, obj, form, change):
-        obj.slots = [MagicItemSlot.ARMOR.value]
+        obj.slot = MagicItemSlot.ARMOR.value
         super().save_model(request, obj, form, change)
         armor_types = ArmorType.objects.filter(
             reduce(
@@ -957,15 +984,7 @@ class MagicArmorTypeAdmin(MagicItemTypeAdminBase):
         )
         for armor_type in armor_types:
             for level in obj.level_range():
-                if (level - 1) // 5 + 1 < armor_type.minimal_enhancement:
-                    continue
-                if not Armor.objects.filter(
-                    magic_item_type=obj, armor_type=armor_type, level=level
-                ).count():
-                    magic_item = Armor(
-                        magic_item_type=obj, armor_type=armor_type, level=level
-                    )
-                    magic_item.save()
+                Armor.create_on_base(armor_type, obj, level)
 
 
 class MagicWeaponTypeAdmin(MagicItemTypeAdminBase):
@@ -985,18 +1004,12 @@ class MagicWeaponTypeAdmin(MagicItemTypeAdminBase):
 
     @atomic
     def save_model(self, request, obj, form, change):
-        obj.slots = [MagicItemSlot.WEAPON.value]
+        obj.slot = MagicItemSlot.WEAPON.value
         super().save_model(request, obj, form, change)
         weapon_types = WeaponType.objects.filter(slug__in=obj.weapon_type_slots)
         for weapon_type in weapon_types:
             for level in obj.level_range():
-                if not Weapon.objects.filter(
-                    magic_item_type=obj, weapon_type=weapon_type, level=level
-                ).count():
-                    magic_item = Weapon(
-                        magic_item_type=obj, weapon_type=weapon_type, level=level
-                    )
-                    magic_item.save()
+                Weapon.create_on_base(weapon_type, obj, level)
 
 
 class MagicArmItemTypeAdmin(MagicItemTypeAdminBase):
@@ -1016,7 +1029,7 @@ class MagicArmItemTypeAdmin(MagicItemTypeAdminBase):
 
     @atomic
     def save_model(self, request, obj, form, change):
-        obj.slots = [MagicItemSlot.ARMS.value]
+        obj.slot = MagicItemSlot.ARMS.value
         super().save_model(request, obj, form, change)
         slots = obj.shield_slots if obj.shield_slots else (ShieldTypeIntEnum.NONE,)
         for level in obj.level_range():
@@ -1032,9 +1045,20 @@ class MagicArmItemTypeAdmin(MagicItemTypeAdminBase):
 
 class MagicItemAdmin(admin.ModelAdmin):
     form = MagicItemForm
-    save_as = True
     ordering = ('magic_item_type__name', '-level')
+
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        return {}
 
 
 class ArmsItemSlotAdmin(admin.ModelAdmin):
     form = ArmsSlotItemForm
+
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        return {}
