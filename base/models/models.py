@@ -1,5 +1,4 @@
 import re
-import typing
 from functools import cached_property
 from typing import Sequence
 
@@ -661,7 +660,7 @@ class NPC(
             )
         return template.format(*calculated_expressions)
 
-    def powers_calculated(self) -> typing.Sequence[dict]:
+    def powers_calculated(self) -> Sequence[dict]:
         """
         calculated powers for npc html page
         """

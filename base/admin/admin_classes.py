@@ -287,7 +287,6 @@ class NPCAdmin(admin.ModelAdmin):
             'armor',
             'arms_slot',
         ),
-        'weapons',
         'primary_hand',
         'secondary_hand',
         'no_hand',
