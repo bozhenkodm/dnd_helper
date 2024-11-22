@@ -1,13 +1,13 @@
 import io
 import subprocess
 import textwrap
+import urllib.parse
 from functools import reduce
 
 from django import forms
 from django.contrib import admin
 from django.core.files.images import ImageFile
 from django.db import models
-from django.db.models.functions import Floor
 from django.db.transaction import atomic
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
@@ -45,9 +45,10 @@ from base.models.magic_items import (
     MagicWeaponType,
     SimpleMagicItem,
 )
-from base.models.models import Armor, ArmorType, ParagonPath, Weapon, WeaponType
+from base.models.models import NPC, Armor, ArmorType, ParagonPath, Weapon, WeaponType
 from base.models.powers import Power, PowerProperty
 from base.objects import npc_klasses, race_classes
+from base.objects.weapon_types import HolySymbol, KiFocus
 
 
 class PowerInline(admin.TabularInline):
@@ -273,7 +274,7 @@ class NPCAdmin(admin.ModelAdmin):
             'base_charisma',
         ),
         'var_bonus_ability',
-        # 'base_attack_ability',
+        'base_attack_ability',
         # 'level4_bonus_abilities',
         # 'level8_bonus_abilities',
         # 'level14_bonus_abilities',
@@ -346,7 +347,7 @@ class NPCAdmin(admin.ModelAdmin):
         return False
 
     def get_object(self, request, object_id, from_field=None):
-        self.object = super().get_object(request, object_id, from_field)
+        self.object: NPC = super().get_object(request, object_id, from_field)
         return self.object
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -417,13 +418,17 @@ class NPCAdmin(admin.ModelAdmin):
 
     @atomic
     def save_model(self, request, obj, form, change):
-        for power in obj.powers.filter(level=0):
-            obj.powers.remove(power)
-        if not obj.experience:
-            obj.experience = obj.experience_by_level
+        # we remove all default powers on model save
+        # to add it during save related
+        if obj.id:
+            for power in obj.powers.filter(level=0):
+                obj.powers.remove(power)
+        obj.experience = max(obj.experience_by_level, obj.experience)
         super().save_model(request, obj, form, change)
 
     def save_related(self, request, form, formsets, change):
+        # we remove all default powers on model save
+        # to add it during save related
         super().save_related(request, form, formsets, change)
         obj = form.instance
         default_powers = Power.objects.filter(
@@ -557,20 +562,13 @@ class ArmorAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return (
-            super(ArmorAdmin, self)
+            super()
             .get_queryset(request)
+            .with_enhancement()
             .annotate(
                 displayed_name=ArmorTypeIntEnum.generate_value_description_case(
                     field='armor_type__base_armor_type'
                 ),
-                enhancement=models.Case(
-                    models.When(
-                        magic_item_type__isnull=False,
-                        then=Floor((models.F('level') - 1) / 5) + 1,
-                    ),
-                    default=0,
-                ),
-                # TODO move queries to manager
             )
         )
 
@@ -658,7 +656,7 @@ class WeaponAdmin(admin.ModelAdmin):
         'damage',
     )
     list_display = ('__str__',)
-    search_fields = ['magic_item_type__name', 'weapon_type__name']
+    search_fields = ['magic_item_type__name', 'weapon_type__name', 'enhancement']
     autocomplete_fields = ('weapon_type',)
     form = WeaponForm
 
@@ -667,6 +665,33 @@ class WeaponAdmin(admin.ModelAdmin):
         Return empty perms dict thus hiding the model from admin index.
         """
         return {}
+
+    @staticmethod
+    def _get_search_request_sender(request: HttpRequest):
+        # ugly workaround to filter results for autocomplete field
+        url_parts = urllib.parse.urlparse(request.get_full_path())
+        query_parts = urllib.parse.parse_qs(url_parts.query)
+        return (
+            query_parts['app_label'][0],
+            query_parts['model_name'][0],
+            query_parts['field_name'][0],
+        )
+
+    def get_search_results(self, request, queryset, search_term):
+        queryset, may_have_duplicates = super().get_search_results(
+            request, queryset, search_term
+        )
+        app_label, model_name, field_name = self._get_search_request_sender(request)
+        if app_label != 'base' or model_name != 'npc':
+            return queryset, may_have_duplicates
+        if field_name == 'no_hand':
+            queryset = queryset.filter(
+                weapon_type__slug__in=(KiFocus.slug(), HolySymbol.slug())
+            )
+        return queryset, may_have_duplicates
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).with_enhancement()
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'magic_item_type':
@@ -740,6 +765,7 @@ class PowerAdmin(admin.ModelAdmin):
         RaceListFilter,
         'functional_template',
         'paragon_path',
+        'skill',
     )
     inlines = (PowerPropertyInline,)
     readonly_fields = ('syntax',)
@@ -791,6 +817,7 @@ class PowerAdmin(admin.ModelAdmin):
                 'functional_template',
                 'paragon_path',
                 'magic_item_type',
+                'skill',
                 ('frequency', 'action_type'),
             )
         result = super().get_fields(request, obj)[:]

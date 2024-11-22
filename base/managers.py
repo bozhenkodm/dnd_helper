@@ -1,7 +1,21 @@
 from django.db import models
+from django.db.models.functions import Floor
 
 from base.constants.constants import PowerFrequencyEnum
 from base.objects import weapon_types_tuple
+
+
+class ItemAbstractQuerySet(models.QuerySet):
+    def with_enhancement(self):
+        return self.annotate(
+            enhancement=models.Case(
+                models.When(
+                    magic_item_type__isnull=False,
+                    then=Floor((models.F('level') - 1) / 5) + 1,
+                ),
+                default=0,
+            ),
+        )
 
 
 class WeaponTypeQuerySet(models.QuerySet):

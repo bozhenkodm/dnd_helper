@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
 
 from base.constants.constants import AbilityEnum
@@ -52,9 +53,10 @@ class NPCAbilityAbstract(models.Model):
         verbose_name='Выборочный бонус характеристики',
         null=True,
     )
-    base_attack_ability = MultiSelectField(
-        verbose_name='Атакующие характеристики',
+    base_attack_ability = models.CharField(
+        verbose_name=_('Base attack ability'),
         choices=AbilityEnum.generate_choices(is_sorted=False),
+        max_length=AbilityEnum.max_length(),
         null=True,
         blank=True,
     )

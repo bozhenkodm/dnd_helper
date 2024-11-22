@@ -696,7 +696,7 @@ class PaladinClass(NPCClass):
     _will = 1
     hit_points_per_level_pc = 6
     base_surges_per_day = 10
-    base_attack_abilities = (AbilityEnum.STRENGTH, AbilityEnum.CHARISMA)
+    base_attack_abilities = (AbilityEnum.CHARISMA, AbilityEnum.STRENGTH)
 
 
 class RogueClass(NPCClass):
@@ -795,7 +795,7 @@ class RangerClass(NPCClass):
     )
     _fortitude = 1
     _reflex = 1
-    base_attack_abilities = (AbilityEnum.STRENGTH, AbilityEnum.DEXTERITY)
+    base_attack_abilities = (AbilityEnum.DEXTERITY, AbilityEnum.STRENGTH)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         MARKSMAN = 1, 'Стрелок'

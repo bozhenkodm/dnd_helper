@@ -10,6 +10,7 @@ from base.constants.constants import (
     MagicItemSlot,
     ShieldTypeIntEnum,
 )
+from base.managers import ItemAbstractQuerySet
 from base.objects import weapon_types_tuple
 
 
@@ -108,6 +109,8 @@ class MagicWeaponType(MagicItemType):
 class ItemAbstract(models.Model):
     class Meta:
         abstract = True
+
+    objects = ItemAbstractQuerySet.as_manager()
 
     magic_item_type = models.ForeignKey(
         MagicItemType,

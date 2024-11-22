@@ -13,6 +13,7 @@ from base.constants.constants import (
     NPCClassEnum,
     NPCRaceEnum,
     SexEnum,
+    SkillEnum,
 )
 from base.exceptions import PowerInconsistent
 from base.managers import WeaponTypeQuerySet
@@ -462,6 +463,12 @@ class NPC(
         return npc_klasses.get(self.klass.name)(npc=self)
 
     @property
+    def all_trained_skills(self) -> list[SkillEnum]:
+        return self.klass_data_instance.mandatory_skills.enum_objects + [
+            SkillEnum(skill.title) for skill in self.trained_skills.all()
+        ]
+
+    @property
     def url(self):
         return reverse('npc', kwargs={'pk': self.pk})
 
@@ -747,12 +754,10 @@ class NPC(
                         ).asdict()
                     )
                 except PowerInconsistent as e:
-                    print(f"{power} dispay is not created with error: {e}")
+                    print(f"{power} display is not created with error: {e}")
                     continue
 
         for item in self.magic_items:
-            if not item.magic_item_type:
-                continue
             for power in item.magic_item_type.powers.ordered_by_frequency():
                 try:
                     powers.append(
@@ -782,6 +787,5 @@ class NPC(
                         ).asdict()
                     )
                 except PowerInconsistent as e:
-                    print(f"{power} dispay is not created with error: {e}")
-                    continue
-        return sorted(powers, key=lambda x: x['frequency_order'])
+                    print(f"{power} display is not created with error: {e}")
+        return sorted(powers, key=lambda x: (x['frequency_order'], x['name']))

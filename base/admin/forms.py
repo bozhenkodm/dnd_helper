@@ -3,8 +3,10 @@ from typing import Any
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.core.exceptions import ValidationError
+from django.db import models
 
 from base.constants.constants import (
+    AbilityEnum,
     MagicItemSlot,
     NPCClassEnum,
     NPCRaceEnum,
@@ -32,7 +34,6 @@ from base.models.models import Weapon, WeaponType
 from base.models.powers import Power
 from base.models.skills import Skill
 from base.objects import weapon_types_tuple
-from base.objects.weapon_types import HolySymbol, KiFocus
 
 
 class NPCModelForm(forms.ModelForm):
@@ -47,6 +48,7 @@ class NPCModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if self.instance.id:
+            self.instance: NPC
             klass_data_instance = self.instance.klass_data_instance
             self.fields['var_bonus_ability'] = forms.ModelChoiceField(
                 queryset=Ability.objects.filter(races=self.instance.race),
@@ -61,27 +63,29 @@ class NPCModelForm(forms.ModelForm):
             )
             self.fields['powers'] = forms.ModelMultipleChoiceField(
                 queryset=Power.objects.with_frequency_order()  # type: ignore
-                .filter(klass=self.instance.klass, level__lte=self.instance.level)
+                .filter(
+                    models.Q(klass=self.instance.klass, level__gt=0)
+                    | models.Q(race=self.instance.race, level__gt=0)
+                    | models.Q(skill__title__in=self.instance.all_trained_skills),
+                    level__lte=self.instance.level,
+                )
                 .order_by('level', 'frequency_order'),
                 label='Таланты',
                 widget=FilteredSelectMultiple('Таланты', False),
                 required=False,
             )
-            if subclass_enum := getattr(klass_data_instance, 'SubclassEnum', None):
+            if subclass_enum := getattr(klass_data_instance, 'SubclassEnum'):
                 self.fields['subclass'] = forms.TypedChoiceField(
                     coerce=int,
                     choices=subclass_enum.generate_choices(),
                     label='Подкласс',
                 )
-            self.fields['no_hand'] = forms.ModelChoiceField(
-                queryset=Weapon.objects.select_related('weapon_type', 'magic_item_type')
-                .filter(
-                    weapon_type__slug__in=(KiFocus.slug(), HolySymbol.slug())
-                    # TODO make it type, put it in database and filter by it
-                )
-                .order_by('level', 'weapon_type__name', 'magic_item_type__name'),
-                label='Инструмент не в руку',
-                required=False,
+            self.fields['base_attack_ability'] = forms.ChoiceField(
+                choices=AbilityEnum.generate_choices(
+                    is_sorted=False,
+                    start_with=self.instance.klass_data_instance.base_attack_abilities,
+                ),
+                initial=self.instance.klass_data_instance.base_attack_abilities[0],
             )
             self.fields['neck_slot'] = forms.ModelChoiceField(
                 queryset=NeckSlotItem.objects.select_related('magic_item_type').filter(
@@ -273,7 +277,7 @@ class WeaponTypeForm(forms.ModelForm):
         choices=[
             (cls.slug, f'{cls.name}')
             for cls in weapon_types_tuple
-            if cls.slug not in set(WeaponType.objects.values_list('slug', flat=True))
+            if cls.slug() not in set(WeaponType.objects.values_list('slug', flat=True))
         ],
         label='Название',
     )
@@ -324,7 +328,6 @@ class ArmsSlotItemForm(ItemAbstractForm):
 
 
 class MagicItemTypeFormBase(forms.ModelForm):
-
     upload_from_clipboard = forms.BooleanField(
         required=False, label='Загрузить из буфера обмена', initial=False
     )

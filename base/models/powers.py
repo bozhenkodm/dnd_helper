@@ -91,6 +91,14 @@ class Power(models.Model):
         blank=True,
         related_name='powers',
     )
+    skill = models.ForeignKey(
+        'base.Skill',
+        verbose_name=_('Skill'),
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='powers',
+    )
     level = models.SmallIntegerField(verbose_name=_('Level'), default=0)
     attack_ability = models.CharField(
         verbose_name=_('Attack ability'),
@@ -153,9 +161,11 @@ class Power(models.Model):
 
     def __str__(self):
         if self.race:
-            return f'{self.name}, {self.race.get_name_display()}'
+            return (
+                f'{self.name}, ({self.race.get_name_display()}), {self.level} уровень'
+            )
         if self.functional_template:
-            return f'{self.name}, {self.functional_template}'
+            return f'{self.name}, ({self.functional_template})'
         if self.klass:
             return (
                 f'{self.name}, '
@@ -167,7 +177,9 @@ class Power(models.Model):
         if self.magic_item_type:
             return f'{self.name} - {self.magic_item_type}'
         if self.paragon_path:
-            return f'{self.name}, {self.paragon_path}'
+            return f'{self.name}, ({self.paragon_path}), {self.level} уровень'
+        if self.skill:
+            return f'{self.name}, ({self.skill}), {self.level} уровень'
         return self.name
 
     @property
@@ -296,7 +308,7 @@ class Power(models.Model):
         if self.description:
             result.append(self.description)
         for prop in self.properties.all():
-            if prop.title == PowerPropertyTitle.OTHER:
+            if not prop.title or prop.title == PowerPropertyTitle.OTHER:
                 title, description = prop.description.split(':')
             else:
                 title = PowerPropertyTitle[prop.title].description
