@@ -1,4 +1,4 @@
-from enum import Enum, auto
+from enum import Enum, StrEnum, auto
 from random import randint
 
 from base.constants.base import BaseNameValueDescriptionEnum, IntDescriptionEnum
@@ -23,7 +23,7 @@ class AbilityEnum(BaseNameValueDescriptionEnum):
 
 
 # noinspection PyArgumentList
-class PowerVariables(str, Enum):
+class PowerVariables(StrEnum):
     def _generate_next_value_(name, start, count, last_values):
         return name.lower()
 
@@ -37,9 +37,12 @@ class PowerVariables(str, Enum):
     WPS = auto()  # secondary weapon damage dice
     LVL = auto()
     DMG = auto()  # damage bonus
+    DMS = auto()  # secondary weapon damage bonus
     ATK = auto()  # attack bonus =
     # (class bonus + half level + level bonus + enhancement). NOT +POWER ATTACK BONUS
+    ATS = auto()  # secondary weapon attack bonus
     EHT = auto()  # armament enhancement
+    EHS = auto()  # secondary weapon armament enhancement
     ITL = auto()  # item level
 
 

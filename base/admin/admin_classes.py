@@ -156,7 +156,7 @@ class ClassAdmin(admin.ModelAdmin):
         try:
             return ', '.join(
                 armor_type.description
-                for armor_type in npc_klasses[obj.name].available_armor_types
+                for armor_type in npc_klasses[obj.name]._available_armor_types
             )
         except TypeError:
             return '-'  # fixme dynamic armor list
@@ -784,6 +784,7 @@ class PowerAdmin(admin.ModelAdmin):
             wis - модификатор мудрости
             cha - модификатор харизмы
             wpn - урон от оружия (кубы + бонус зачарования)
+            wps - урон от вторичного оружия (кубы + бонус зачарования)
             lvl - уровень персонажа
             dmg - бонус урона (= бонусу за уровень + бонусу урона от класса)
             atk - бонус атаки (= бонусу за уровень + пол уровня + бонус атаки от класса)

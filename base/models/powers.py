@@ -195,8 +195,7 @@ class Power(models.Model):
 
     def category(
         self,
-        primary_weapon=None,
-        secondary_weapon=None,
+        weapons=None,
     ):
         # TODO localization
         if self.magic_item_type:
@@ -211,9 +210,9 @@ class Power(models.Model):
             AccessoryTypeEnum.WEAPON,
             AccessoryTypeEnum.IMPLEMENT,
         ):
-            return str(primary_weapon)
+            return str(weapons[0])
         if self.accessory_type == AccessoryTypeEnum.TWO_WEAPONS:
-            return f'{primary_weapon}, {secondary_weapon}'
+            return f'{weapons[0]}, {weapons[1]}'
         if self.level % 2 == 0 and self.level > 0:
             return 'Приём'
         if self.frequency == PowerFrequencyEnum.PASSIVE:
@@ -279,7 +278,7 @@ class Power(models.Model):
             )
         raise PowerInconsistent(_('Wrong attack type'))
 
-    def keywords(self, weapon=None):
+    def keywords(self, weapons=()):
         if self.frequency == PowerFrequencyEnum.PASSIVE:
             return ''
         return filter(
@@ -288,8 +287,8 @@ class Power(models.Model):
                 self.get_action_type_display(),
                 self.get_accessory_type_display() if self.accessory_type else '',
                 self.get_frequency_display(),
-                self.attack_type(weapon),
             )
+            + tuple(self.attack_type(weapon) for weapon in weapons if weapon)
             + tuple(
                 PowerDamageTypeEnum[type_].description  # type: ignore
                 for type_ in self.damage_type
@@ -383,43 +382,57 @@ class PowerMixin:
             PowerVariables.LVL: self.level,
         }
 
+    def _calculate_weapon_damage(self, weapon):
+        if not weapon:
+            # TODO deal with error message
+            raise PowerInconsistent(_("This power doesn't use weapon"))
+        return weapon.damage_roll.treshhold(self._magic_threshold)
+
+    def _calculate_attack(self, weapon, is_implement: bool):
+        return (
+            self.klass_data_instance.attack_bonus(weapon, is_implement=is_implement)
+            # armament enchantment
+            + self.enhancement_with_magic_threshold(weapon and weapon.enhancement or 0)
+            # power attack bonus will be added to power string
+            # during the power property creation
+        )
+
+    def _calculate_damage_bonus(self, weapon):
+        return (
+            self.klass_data_instance.damage_bonus
+            + self.enhancement_with_magic_threshold(weapon and weapon.enhancement or 0)
+        )
+
     def calculate_token(
         self, token: str, power, weapon=None, secondary_weapon=None, item=None
     ) -> int | DiceRoll:
         if token.isdigit():
             return int(token)
         if token == PowerVariables.WPN:
-            weapon = weapon or self.primary_hand  # type: ignore
-            if not weapon:
-                raise PowerInconsistent(_("This power doesn't use weapon"))
-            return weapon.damage_roll.treshhold(self._magic_threshold)
+            return self._calculate_weapon_damage(weapon)
         if token == PowerVariables.WPS:
-            if not secondary_weapon:
-                raise PowerInconsistent(_("This power doesn't use off-hand weapon"))
-            return secondary_weapon.damage_roll.treshhold(self._magic_threshold)
+            return self._calculate_weapon_damage(secondary_weapon)
         if token == PowerVariables.ATK:
-            return (
-                self.klass_data_instance.attack_bonus(
-                    weapon,
-                    is_implement=power.accessory_type == AccessoryTypeEnum.IMPLEMENT,
-                )
-                # armament enchantment
-                + self.enhancement_with_magic_threshold(
-                    weapon and weapon.enhancement or 0
-                )
-                # power attack bonus will be added to power string
-                # during the power property creation
+            return self._calculate_attack(
+                weapon,
+                power.accessory_type == AccessoryTypeEnum.IMPLEMENT,
+            )
+        if token == PowerVariables.ATS:
+            return self._calculate_attack(
+                secondary_weapon,
+                power.accessory_type == AccessoryTypeEnum.IMPLEMENT,
             )
         if token == PowerVariables.DMG:
-            return (
-                self.klass_data_instance.damage_bonus
-                + self.enhancement_with_magic_threshold(
-                    weapon and weapon.enhancement or 0
-                )
-            )
+            return self._calculate_damage_bonus(weapon)
+        if token == PowerVariables.DMS:
+            return self._calculate_damage_bonus(secondary_weapon)
         if token == PowerVariables.EHT:
             return self.enhancement_with_magic_threshold(
                 weapon and weapon.enhancement or 0
+            )
+        if token == PowerVariables.EHS:
+            return self.enhancement_with_magic_threshold(
+                secondary_weapon and secondary_weapon.enhancement or 0
             )
         if token == PowerVariables.ITL:
             if not item:

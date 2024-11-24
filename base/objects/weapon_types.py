@@ -517,7 +517,7 @@ class TrippleHeadedFlail(WeaponType):
 
 
 class Waraxe(WeaponType):
-    name = 'Боевой топор'
+    name = 'Отличный боевой топор'
     group = WeaponGroupEnum.AXE
     category = WeaponCategoryIntEnum.SUPERIOR
     damage_dice = DiceIntEnum.D12

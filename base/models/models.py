@@ -558,12 +558,6 @@ class NPC(
         return self.race_data_instance.speed
 
     @property
-    def wielded_weapons(self) -> Sequence[Weapon]:
-        return tuple(
-            filter(None, (self.primary_hand, self.secondary_hand, self.no_hand))
-        )
-
-    @property
     def items(self):
         return tuple(
             filter(
@@ -589,8 +583,15 @@ class NPC(
     def magic_items(self) -> Sequence[ItemAbstract]:
         return tuple(filter(lambda x: getattr(x, 'magic_item_type'), self.items))
 
-    def is_weapon_proficient(self, weapon) -> bool:
+    def is_weapon_proficient(self, weapon: Weapon) -> bool:
+        print(weapon)
         data_instance = weapon.data_instance
+        print(data_instance.category)
+        print(
+            data_instance.category
+            in map(int, self.klass_data_instance.available_weapon_categories)
+        )
+        print(list(map(int, self.klass_data_instance.available_weapon_categories)))
         return any(
             (
                 data_instance.category
@@ -601,39 +602,71 @@ class NPC(
             )
         )
 
-    def is_implement_proficient(self, weapon) -> bool:
-        return (
-            type(weapon.data_instance)
-            in self.klass_data_instance.available_implement_types
+    def is_implement_proficient(self, weapon: Weapon) -> bool:
+        return any(
+            (
+                type(weapon.data_instance)
+                in self.klass_data_instance.available_implement_types,
+                weapon.weapon_type in self.trained_weapons.all(),
+            )
         )
 
-    def is_weapon_proper_for_power(
-        self, power: Power, weapon: Weapon | None = None
-    ) -> bool:
-        weapon = weapon or self.primary_hand or self.secondary_hand
-        if not weapon:
-            return False
-        available_weapon_types = power.available_weapon_types
-        # checking available weapon types match
-        if (
-            available_weapon_types.count()
-            and weapon.weapon_type not in available_weapon_types.all()
-        ):
-            return False
-        if power.accessory_type == AccessoryTypeEnum.IMPLEMENT:
-            return self.is_implement_proficient(weapon)
+    def wielded_weapons(self, accessory_type: AccessoryTypeEnum) -> list[tuple[Weapon]]:
+        result = []
+        match accessory_type:
+            case AccessoryTypeEnum.WEAPON:
+                for weapon in (self.primary_hand, self.secondary_hand):
+                    if weapon and self.is_weapon_proficient(weapon):
+                        result.append((weapon,))
+            case AccessoryTypeEnum.IMPLEMENT:
+                for weapon in (self.primary_hand, self.secondary_hand, self.no_hand):
+                    if weapon and self.is_implement_proficient(weapon):
+                        result.append((weapon,))
+            case AccessoryTypeEnum.TWO_WEAPONS:
+                if (
+                    self.primary_hand
+                    and self.secondary_hand
+                    and self.is_weapon_proficient(self.primary_hand)
+                    and self.is_weapon_proficient(self.secondary_hand)
+                ):
+                    result.append((self.primary_hand, self.secondary_hand))
+        return result
 
-        if (
-            power.accessory_type == AccessoryTypeEnum.WEAPON
-            and power.accessory_type
-            in (AccessoryTypeEnum.WEAPON, AccessoryTypeEnum.TWO_WEAPONS)
-        ):
-            # pure implements can't be used with weapon powers
-            if weapon.data_instance.is_pure_implement:
-                return False
-            # checking match of power and weapon range type
+    @staticmethod
+    def _is_weapon_available_for_power(power: Power, weapon: Weapon) -> bool:
+        if not power.available_weapon_types.count():
             return True
-        return False
+        return weapon.weapon_type in power.available_weapon_types.all()
+
+    def proper_weapons_for_power(self, power: Power) -> Sequence[tuple[Weapon]]:
+        result = []
+        print(power)
+        match power.accessory_type:
+            case AccessoryTypeEnum.WEAPON:
+                for weapon in (self.primary_hand, self.secondary_hand):
+                    if (
+                        weapon
+                        and self.is_weapon_proficient(weapon)
+                        and self._is_weapon_available_for_power(power, weapon)
+                        and not weapon.data_instance.is_pure_implement
+                    ):
+                        result.append((weapon,))
+            case AccessoryTypeEnum.IMPLEMENT:
+                for weapon in (self.primary_hand, self.secondary_hand, self.no_hand):
+                    if weapon and self.is_implement_proficient(weapon):
+                        result.append((weapon,))
+            case AccessoryTypeEnum.TWO_WEAPONS:
+                if (
+                    self.primary_hand
+                    and self.secondary_hand
+                    and self.is_weapon_proficient(self.primary_hand)
+                    and self.is_weapon_proficient(self.secondary_hand)
+                    and self._is_weapon_available_for_power(power, self.primary_hand)
+                    and self._is_weapon_available_for_power(power, self.secondary_hand)
+                ):
+                    result.append((self.primary_hand, self.secondary_hand))
+        print(result)
+        return result
 
     @property
     def inventory_text(self):
@@ -643,10 +676,17 @@ class NPC(
         self,
         power: Power,  # TODO refactor function signature
         string: str,
-        weapon: Weapon | None = None,
-        secondary_weapon: Weapon | None = None,
+        weapons: Sequence[Weapon] | None = None,
         item: ItemAbstract | None = None,
     ):
+        try:
+            primaty_weapon = weapons[0]
+        except (TypeError, IndexError):
+            primaty_weapon = None
+        try:
+            secondary_weapon = weapons[1]
+        except (TypeError, IndexError):
+            secondary_weapon = None
         pattern = r'\$(\S+)\b'  # gets substring from '$' to next whitespace
         # TODO fix parsing cases with ")" as a last character.
         #  Now it's unmatched by regexp
@@ -660,7 +700,7 @@ class NPC(
                 self.evaluate_power_expression(
                     string=expression,
                     power=power,
-                    weapon=weapon,
+                    weapon=primaty_weapon,
                     secondary_weapon=secondary_weapon,
                     item=item,
                 )
@@ -679,11 +719,8 @@ class NPC(
             powers_qs |= self.functional_template.powers.filter(level=0)
 
         if self.paragon_path:
-            powers_qs |= self.paragon_path.powers.filter(level__lte=self.level).exclude(
-                accessory_type__in=(
-                    AccessoryTypeEnum.WEAPON,
-                    AccessoryTypeEnum.IMPLEMENT,
-                )
+            powers_qs |= self.paragon_path.powers.filter(
+                level__lte=self.level, accessory_type__isnull=True
             )
 
         powers: list[dict] = []
@@ -713,27 +750,22 @@ class NPC(
                 print(f"{power} dispay is not created with error: {e}")
                 continue
         power_weapon_qs = self.powers.ordered_by_frequency().filter(  # type: ignore
-            accessory_type__in=(AccessoryTypeEnum.WEAPON, AccessoryTypeEnum.IMPLEMENT)
+            accessory_type__isnull=False
         )
         if self.paragon_path:
             power_weapon_qs |= (
                 self.paragon_path.powers.ordered_by_frequency().filter(  # type: ignore
-                    accessory_type__in=(
-                        AccessoryTypeEnum.WEAPON,
-                        AccessoryTypeEnum.IMPLEMENT,
-                    )
+                    accessory_type__isnull=False
                 )
             )
         for power in power_weapon_qs:
-            for weapon in self.wielded_weapons:
-                if not self.is_weapon_proper_for_power(power=power, weapon=weapon):
-                    continue
+            for weapons in self.proper_weapons_for_power(power):
                 try:
                     powers.append(
                         PowerDisplay(
                             name=power.name,
-                            keywords=power.keywords(weapon),
-                            category=power.category(weapon),
+                            keywords=power.keywords(weapons),
+                            category=power.category(weapons),
                             description=self.parse_string(power, power.description),
                             frequency_order=power.frequency_order,
                             frequency=power.frequency.lower(),
@@ -744,7 +776,7 @@ class NPC(
                                         'description': self.parse_string(
                                             power,
                                             string=prop.get_displayed_description(),
-                                            weapon=weapon,
+                                            weapons=weapons,
                                         ),
                                         'debug': prop.description,
                                     }
