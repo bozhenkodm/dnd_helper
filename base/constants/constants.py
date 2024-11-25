@@ -1,4 +1,4 @@
-from enum import Enum, StrEnum, auto
+from enum import StrEnum, auto
 from random import randint
 
 from base.constants.base import BaseNameValueDescriptionEnum, IntDescriptionEnum

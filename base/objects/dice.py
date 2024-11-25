@@ -50,7 +50,7 @@ class DiceRoll:
     def roll(self) -> int:
         return self.dice.roll(self.rolls) + self.addendant
 
-    def treshhold(self, value) -> 'DiceRoll':
+    def threshold(self, value) -> 'DiceRoll':
         self.addendant = max(self.addendant - value, 0)
         return self
 

@@ -1,4 +1,5 @@
 import operator
+from typing import TYPE_CHECKING
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -23,6 +24,10 @@ from base.managers import PowerQueryset
 from base.models.bonuses import Bonus
 from base.objects.dice import DiceRoll
 from base.objects.npc_classes import NPCClass
+from base.objects.weapon_types import KiFocus
+
+if TYPE_CHECKING:
+    from base.models.models import Weapon
 
 
 class Power(models.Model):
@@ -369,6 +374,7 @@ class PowerMixin:
 
     klass_data_instance: NPCClass
     _magic_threshold: int
+    no_hand: "Weapon"
 
     @property
     def _power_attrs(self):
@@ -382,25 +388,50 @@ class PowerMixin:
             PowerVariables.LVL: self.level,
         }
 
-    def _calculate_weapon_damage(self, weapon):
+    @property
+    def _is_no_hand_implement_ki_focus(self) -> bool:
+        if not self.no_hand:
+            return False
+        return self.no_hand.weapon_type.slug == KiFocus.slug()
+
+    def _can_get_bonus_from_implement_to_weapon(self, accessory_type: AccessoryTypeEnum):
+        return (
+                self._is_no_hand_implement_ki_focus
+                and self.is_implement_proficient(self.no_hand)
+                and accessory_type in (AccessoryTypeEnum.WEAPON, AccessoryTypeEnum.TWO_WEAPONS)
+        )
+
+    def _calculate_weapon_damage(self, weapon: "Weapon", accessory_type: AccessoryTypeEnum):
         if not weapon:
             # TODO deal with error message
             raise PowerInconsistent(_("This power doesn't use weapon"))
-        return weapon.damage_roll.treshhold(self._magic_threshold)
+        damage_roll = weapon.damage_roll
+        if self._can_get_bonus_from_implement_to_weapon(accessory_type):
+            damage_roll.addendant = max(damage_roll.addendant, self.no_hand.enhancement)
+        return damage_roll.threshold(self._magic_threshold)
 
-    def _calculate_attack(self, weapon, is_implement: bool):
+    def _calculate_attack(self, weapon: "Weapon", accessory_type: AccessoryTypeEnum):
+        if not weapon:
+            # TODO deal with error message
+            raise PowerInconsistent(_("This power doesn't use weapon"))
+        enhancement = weapon.enhancement
+        if self._can_get_bonus_from_implement_to_weapon(accessory_type):
+            enhancement = max(enhancement, self.no_hand.enhancement)
         return (
-            self.klass_data_instance.attack_bonus(weapon, is_implement=is_implement)
+            self.klass_data_instance.attack_bonus(weapon, is_implement=accessory_type == AccessoryTypeEnum.IMPLEMENT)
             # armament enchantment
-            + self.enhancement_with_magic_threshold(weapon and weapon.enhancement or 0)
+            + self.enhancement_with_magic_threshold(enhancement)
             # power attack bonus will be added to power string
             # during the power property creation
         )
 
-    def _calculate_damage_bonus(self, weapon):
+    def _calculate_damage_bonus(self, weapon: "Weapon", accessory_type: AccessoryTypeEnum):
+        enhancement = weapon and weapon.enhancement or 0
+        if self._can_get_bonus_from_implement_to_weapon(accessory_type):
+            enhancement = max(enhancement, self.no_hand.enhancement)
         return (
             self.klass_data_instance.damage_bonus
-            + self.enhancement_with_magic_threshold(weapon and weapon.enhancement or 0)
+            + self.enhancement_with_magic_threshold(enhancement)
         )
 
     def calculate_token(
@@ -409,23 +440,23 @@ class PowerMixin:
         if token.isdigit():
             return int(token)
         if token == PowerVariables.WPN:
-            return self._calculate_weapon_damage(weapon)
+            return self._calculate_weapon_damage(weapon, power.accessory_type)
         if token == PowerVariables.WPS:
-            return self._calculate_weapon_damage(secondary_weapon)
+            return self._calculate_weapon_damage(secondary_weapon, power.accessory_type)
         if token == PowerVariables.ATK:
             return self._calculate_attack(
                 weapon,
-                power.accessory_type == AccessoryTypeEnum.IMPLEMENT,
+                power.accessory_type,
             )
         if token == PowerVariables.ATS:
             return self._calculate_attack(
                 secondary_weapon,
-                power.accessory_type == AccessoryTypeEnum.IMPLEMENT,
+                power.accessory_type,
             )
         if token == PowerVariables.DMG:
-            return self._calculate_damage_bonus(weapon)
+            return self._calculate_damage_bonus(weapon, power.accessory_type)
         if token == PowerVariables.DMS:
-            return self._calculate_damage_bonus(secondary_weapon)
+            return self._calculate_damage_bonus(secondary_weapon, power.accessory_type)
         if token == PowerVariables.EHT:
             return self.enhancement_with_magic_threshold(
                 weapon and weapon.enhancement or 0

@@ -434,6 +434,7 @@ class NPCAdmin(admin.ModelAdmin):
         default_powers = Power.objects.filter(
             models.Q(klass=obj.klass) & models.Q(subclass__in=(obj.subclass, 0))
         ).filter(level=0)
+        print(default_powers)
         for power in default_powers:
             obj.powers.add(power)
 
@@ -787,8 +788,11 @@ class PowerAdmin(admin.ModelAdmin):
             wps - урон от вторичного оружия (кубы + бонус зачарования)
             lvl - уровень персонажа
             dmg - бонус урона (= бонусу за уровень + бонусу урона от класса)
+            dms - бонус урона вторичного оружия
             atk - бонус атаки (= бонусу за уровень + пол уровня + бонус атаки от класса)
+            atk - бонус атаки вторичного оружия
             eht - зачарование оружия
+            ehs - зачарование вторичного оружия
             itl - бонус предмета, к которому принадлежит талант
 
             Выражения начинаются со знака $.

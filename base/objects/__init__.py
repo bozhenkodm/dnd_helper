@@ -139,6 +139,7 @@ weapon_types_tuple = (
     weapon_types.Tratnyr,
     weapon_types.Trident,
     weapon_types.TrippleHeadedFlail,
+    weapon_types.UnarmedMonkStrike,
     weapon_types.WarPick,
     weapon_types.Waraxe,
     weapon_types.Warhammer,

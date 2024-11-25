@@ -584,14 +584,7 @@ class NPC(
         return tuple(filter(lambda x: getattr(x, 'magic_item_type'), self.items))
 
     def is_weapon_proficient(self, weapon: Weapon) -> bool:
-        print(weapon)
         data_instance = weapon.data_instance
-        print(data_instance.category)
-        print(
-            data_instance.category
-            in map(int, self.klass_data_instance.available_weapon_categories)
-        )
-        print(list(map(int, self.klass_data_instance.available_weapon_categories)))
         return any(
             (
                 data_instance.category
@@ -611,27 +604,6 @@ class NPC(
             )
         )
 
-    def wielded_weapons(self, accessory_type: AccessoryTypeEnum) -> list[tuple[Weapon]]:
-        result = []
-        match accessory_type:
-            case AccessoryTypeEnum.WEAPON:
-                for weapon in (self.primary_hand, self.secondary_hand):
-                    if weapon and self.is_weapon_proficient(weapon):
-                        result.append((weapon,))
-            case AccessoryTypeEnum.IMPLEMENT:
-                for weapon in (self.primary_hand, self.secondary_hand, self.no_hand):
-                    if weapon and self.is_implement_proficient(weapon):
-                        result.append((weapon,))
-            case AccessoryTypeEnum.TWO_WEAPONS:
-                if (
-                    self.primary_hand
-                    and self.secondary_hand
-                    and self.is_weapon_proficient(self.primary_hand)
-                    and self.is_weapon_proficient(self.secondary_hand)
-                ):
-                    result.append((self.primary_hand, self.secondary_hand))
-        return result
-
     @staticmethod
     def _is_weapon_available_for_power(power: Power, weapon: Weapon) -> bool:
         if not power.available_weapon_types.count():
@@ -640,7 +612,6 @@ class NPC(
 
     def proper_weapons_for_power(self, power: Power) -> Sequence[tuple[Weapon]]:
         result = []
-        print(power)
         match power.accessory_type:
             case AccessoryTypeEnum.WEAPON:
                 for weapon in (self.primary_hand, self.secondary_hand):
@@ -665,7 +636,6 @@ class NPC(
                     and self._is_weapon_available_for_power(power, self.secondary_hand)
                 ):
                     result.append((self.primary_hand, self.secondary_hand))
-        print(result)
         return result
 
     @property
@@ -680,7 +650,7 @@ class NPC(
         item: ItemAbstract | None = None,
     ):
         try:
-            primaty_weapon = weapons[0]
+            primaty_weapon = weapons[0] or weapons[2]
         except (TypeError, IndexError):
             primaty_weapon = None
         try:
@@ -722,7 +692,6 @@ class NPC(
             powers_qs |= self.paragon_path.powers.filter(
                 level__lte=self.level, accessory_type__isnull=True
             )
-
         powers: list[dict] = []
         for power in powers_qs.ordered_by_frequency():
             try:
