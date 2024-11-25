@@ -415,7 +415,7 @@ class FighterClass(NPCClass):
                 not self.npc.shield
                 and weapon.weapon_type.data_instance.handedness
                 != WeaponHandednessEnum.ONE
-                and self.npc.weapons.count() == 1
+                and bool(self.npc.primary_hand) != bool(self.npc.secondary_hand)  # xor
             ):
                 return result + 1
         if self.npc.subclass == self.SubclassEnum.GUARDIAN:
@@ -423,7 +423,7 @@ class FighterClass(NPCClass):
                 return result + 1
         if self.npc.subclass == self.SubclassEnum.TEMPPEST:
             if (
-                self.npc.weapons.count() == 2
+                self.npc.primary_hand and self.npc.secondary_hand
                 and weapon.weapon_type.data_instance.is_off_hand
             ):
                 return result + 1
