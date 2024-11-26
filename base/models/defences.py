@@ -127,7 +127,7 @@ class NPCDefenceMixin:
         )
         result += self._shield_bonus
         if self.klass.name == NPCClassEnum.BARBARIAN:
-            if not self.shield and self.armor.is_light:
+            if not self.shield and self.armor and self.armor.is_light:
                 result += self._tier + 1
         return result
 

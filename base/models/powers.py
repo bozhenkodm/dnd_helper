@@ -418,7 +418,7 @@ class PowerMixin:
     def _calculate_attack(self, weapon: "Weapon", accessory_type: AccessoryTypeEnum):
         if not weapon:
             # TODO deal with error message
-            raise PowerInconsistent(_("This power doesn't use weapon"))
+            return self.klass_data_instance.attack_bonus()
         enhancement = weapon.enhancement
         if self._can_get_bonus_from_implement_to_weapon(accessory_type):
             enhancement = max(enhancement, self.no_hand.enhancement)

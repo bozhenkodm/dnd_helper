@@ -434,7 +434,6 @@ class NPCAdmin(admin.ModelAdmin):
         default_powers = Power.objects.filter(
             models.Q(klass=obj.klass) & models.Q(subclass__in=(obj.subclass, 0))
         ).filter(level=0)
-        print(default_powers)
         for power in default_powers:
             obj.powers.add(power)
 
@@ -583,13 +582,7 @@ class WeaponTypeAdmin(admin.ModelAdmin):
     ordering = ('name',)
     list_display = ('name',)
     search_fields = ('name',)
-    readonly_fields = (
-        'category',
-        'group',
-        'prof_bonus',
-        'damage',
-        'properties'
-    )
+    readonly_fields = ('category', 'group', 'prof_bonus', 'damage', 'properties')
     save_as = True
     form = WeaponTypeForm
 

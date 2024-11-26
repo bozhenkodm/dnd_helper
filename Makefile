@@ -40,3 +40,7 @@ load_data:
 messages:
 	poetry run python manage.py makemessages --locale=ru
 	poetry run python manage.py compilemessages
+
+test:
+	cp db.sqlite3 db_test.sqlite3
+	poetry run pytest

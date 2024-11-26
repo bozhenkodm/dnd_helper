@@ -52,6 +52,6 @@ exclude = [
 ignore = ["W503", "E402"]
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "dnd_helper.settings"
-python_files = "tests.py test_*.py *_tests.py"
+DJANGO_SETTINGS_MODULE = "dnd_helper.test_settings"
+python_files = "tests.py test_*.py"
 

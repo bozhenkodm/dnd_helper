@@ -716,7 +716,7 @@ class NPC(
                     ).asdict()
                 )
             except PowerInconsistent as e:
-                print(f"{power} dispay is not created with error: {e}")
+                print(f"{power} display is not created with error: {e}")
                 continue
         power_weapon_qs = self.powers.ordered_by_frequency().filter(  # type: ignore
             accessory_type__isnull=False

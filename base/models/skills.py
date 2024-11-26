@@ -54,6 +54,8 @@ class NPCSkillMixin:
         )
         race_bonus = self.race_data_instance.skill_bonuses
         mandatory_skills = self.klass_data_instance.mandatory_skills
+        armor_skill_penalty = self.armor.skill_penalty if self.armor else 0  # type: ignore
+        shield_skill_penalty = self.shield.skill_penalty if self.shield else 0  # type: ignore
         penalty = Skills.init_with_const(
             (
                 SkillEnum.ACROBATICS,
@@ -62,7 +64,7 @@ class NPCSkillMixin:
                 SkillEnum.ENDURANCE,
                 SkillEnum.STEALTH,
             ),
-            value=self.armor.skill_penalty + self.shield.skill_penalty,  # type: ignore
+            value=armor_skill_penalty + shield_skill_penalty,
         )
         return (
             half_level
