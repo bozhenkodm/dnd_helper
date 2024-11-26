@@ -61,6 +61,30 @@ class WeaponType:
             'versatile': cls.handedness == WeaponHandednessEnum.VERSATILE,
         }
 
+    @classmethod
+    def properties_text(cls) -> str:
+        # TODO localization
+        result = []
+        if cls.brutal:
+            result.append(f'Жестокое {cls.brutal}')
+        if cls.thrown:
+            result.append(f'{cls.thrown.description} метательное')
+        if cls.is_off_hand:
+            result.append('Дополнительное')
+        if cls.is_high_crit:
+            result.append('Высококритичное')
+        if cls.is_reach:
+            result.append('Досягаемость')
+        if cls.load:
+            result.append(f'Зарядка: {cls.load.description}')
+        if cls.is_small:
+            result.append('Маленькое')
+        if cls.is_defensive:
+            result.append('Защитное')
+        if cls.handedness == WeaponHandednessEnum.VERSATILE:
+            result.append('Универсальное')
+        return ', '.join(result)
+
     @property
     def max_range(self):
         return self.range * 2
@@ -90,10 +114,6 @@ class WeaponType:
     @property
     def is_ranged(self) -> bool:
         return bool(self.range)
-
-    @property
-    def is_melee_and_ranged(self):
-        return self.is_melee and self.is_ranged
 
 
 class ImplementType(WeaponType):
