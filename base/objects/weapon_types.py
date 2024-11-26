@@ -81,8 +81,6 @@ class WeaponType:
             result.append('Маленькое')
         if cls.is_defensive:
             result.append('Защитное')
-        if cls.handedness == WeaponHandednessEnum.VERSATILE:
-            result.append('Универсальное')
         return ', '.join(result)
 
     @property

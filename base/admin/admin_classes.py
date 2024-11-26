@@ -593,6 +593,7 @@ class WeaponTypeAdmin(admin.ModelAdmin):
                 'group',
                 'prof_bonus',
                 'damage',
+                'handedness',
                 'properties',
             )
         return (
@@ -611,6 +612,12 @@ class WeaponTypeAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
+
+    @admin.display(description='Одноручное/двуручное')
+    def handedness(self, obj):
+        if not obj.id:
+            return '-'
+        return obj.data_instance.handedness.description
 
     @admin.display(description='Свойства оружия')
     def properties(self, obj):
