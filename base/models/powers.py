@@ -394,14 +394,19 @@ class PowerMixin:
             return False
         return self.no_hand.weapon_type.slug == KiFocus.slug()
 
-    def _can_get_bonus_from_implement_to_weapon(self, accessory_type: AccessoryTypeEnum):
+    def _can_get_bonus_from_implement_to_weapon(
+        self, accessory_type: AccessoryTypeEnum
+    ):
         return (
-                self._is_no_hand_implement_ki_focus
-                and self.is_implement_proficient(self.no_hand)
-                and accessory_type in (AccessoryTypeEnum.WEAPON, AccessoryTypeEnum.TWO_WEAPONS)
+            self._is_no_hand_implement_ki_focus
+            and self.is_implement_proficient(self.no_hand)
+            and accessory_type
+            in (AccessoryTypeEnum.WEAPON, AccessoryTypeEnum.TWO_WEAPONS)
         )
 
-    def _calculate_weapon_damage(self, weapon: "Weapon", accessory_type: AccessoryTypeEnum):
+    def _calculate_weapon_damage(
+        self, weapon: "Weapon", accessory_type: AccessoryTypeEnum
+    ):
         if not weapon:
             # TODO deal with error message
             raise PowerInconsistent(_("This power doesn't use weapon"))
@@ -418,14 +423,18 @@ class PowerMixin:
         if self._can_get_bonus_from_implement_to_weapon(accessory_type):
             enhancement = max(enhancement, self.no_hand.enhancement)
         return (
-            self.klass_data_instance.attack_bonus(weapon, is_implement=accessory_type == AccessoryTypeEnum.IMPLEMENT)
+            self.klass_data_instance.attack_bonus(
+                weapon, is_implement=accessory_type == AccessoryTypeEnum.IMPLEMENT
+            )
             # armament enchantment
             + self.enhancement_with_magic_threshold(enhancement)
             # power attack bonus will be added to power string
             # during the power property creation
         )
 
-    def _calculate_damage_bonus(self, weapon: "Weapon", accessory_type: AccessoryTypeEnum):
+    def _calculate_damage_bonus(
+        self, weapon: "Weapon", accessory_type: AccessoryTypeEnum
+    ):
         enhancement = weapon and weapon.enhancement or 0
         if self._can_get_bonus_from_implement_to_weapon(accessory_type):
             enhancement = max(enhancement, self.no_hand.enhancement)

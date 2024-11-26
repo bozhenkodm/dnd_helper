@@ -497,6 +497,11 @@ class EncounterAdmin(admin.ModelAdmin):
             )
         )
 
+    @atomic
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        obj.roll_initiative()
+
 
 class ArmorTypeAdmin(admin.ModelAdmin):
     fields = (
@@ -583,6 +588,7 @@ class WeaponTypeAdmin(admin.ModelAdmin):
         'group',
         'prof_bonus',
         'damage',
+        'properties'
     )
     save_as = True
     form = WeaponTypeForm
@@ -594,6 +600,7 @@ class WeaponTypeAdmin(admin.ModelAdmin):
                 'group',
                 'prof_bonus',
                 'damage',
+                'properties',
             )
         return (
             'slug',
@@ -611,6 +618,12 @@ class WeaponTypeAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
+
+    @admin.display(description='Свойства оружия')
+    def properties(self, obj):
+        if not obj.id:
+            return '-'
+        return obj.data_instance.properties_text()
 
     @admin.display(description='Категория оружия')
     def category(self, obj):

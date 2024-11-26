@@ -423,7 +423,8 @@ class FighterClass(NPCClass):
                 return result + 1
         if self.npc.subclass == self.SubclassEnum.TEMPPEST:
             if (
-                self.npc.primary_hand and self.npc.secondary_hand
+                self.npc.primary_hand
+                and self.npc.secondary_hand
                 and weapon.weapon_type.data_instance.is_off_hand
             ):
                 return result + 1
