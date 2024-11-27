@@ -6,6 +6,7 @@ from multiselectfield import MultiSelectField
 
 from base.constants.constants import (
     ArmorTypeIntEnum,
+    DiceIntEnum,
     MagicItemCategory,
     MagicItemSlot,
     ShieldTypeIntEnum,
@@ -104,6 +105,19 @@ class MagicWeaponType(MagicItemType):
         null=False,
         min_choices=1,
     )
+    crit_dice = models.SmallIntegerField(
+        verbose_name=_('Crit dice'),
+        choices=DiceIntEnum.generate_choices(condition=lambda x: x < DiceIntEnum.D20),
+        null=True,
+        blank=True,
+        default=DiceIntEnum.D6,
+    )
+    crit_property = models.CharField(
+        verbose_name=_('Crit property'),
+        max_length=50,
+        null=True,
+        blank=True,
+    )
 
 
 class ItemAbstract(models.Model):
@@ -159,6 +173,9 @@ class NeckSlotItem(SimpleMagicItem):
     @property
     def defence_bonus(self):
         return self.enhancement
+
+    def __str__(self):
+        return f'{self.magic_item_type}, +{self.enhancement}'
 
 
 class HeadSlotItem(SimpleMagicItem):

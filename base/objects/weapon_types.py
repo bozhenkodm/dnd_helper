@@ -46,22 +46,6 @@ class WeaponType:
         return cls.__name__
 
     @classmethod
-    def properties(
-        cls,
-    ) -> dict[str, int | bool | RangedLoadAction | ThrownWeaponType | None]:
-        return {
-            'brutal': cls.brutal,
-            'thrown': cls.thrown,
-            'off_hand': cls.is_off_hand,
-            'high_crit': cls.is_high_crit,
-            'reach': cls.is_reach,
-            'load': cls.load,
-            'small': cls.is_small,
-            'defensive': cls.is_defensive,
-            'versatile': cls.handedness == WeaponHandednessEnum.VERSATILE,
-        }
-
-    @classmethod
     def properties_text(cls) -> str:
         # TODO localization
         result = []
@@ -726,6 +710,7 @@ class UnarmedMonkStrike(WeaponType):
     damage_dice = DiceIntEnum.D8
     prof_bonus = 3
     is_off_hand = True
+    is_magic_item = True
 
 
 class RitualDagger(Dagger):

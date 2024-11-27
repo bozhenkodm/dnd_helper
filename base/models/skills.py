@@ -54,8 +54,12 @@ class NPCSkillMixin:
         )
         race_bonus = self.race_data_instance.skill_bonuses
         mandatory_skills = self.klass_data_instance.mandatory_skills
-        armor_skill_penalty = self.armor.skill_penalty if self.armor else 0  # type: ignore
-        shield_skill_penalty = self.shield.skill_penalty if self.shield else 0  # type: ignore
+        armor_skill_penalty = (
+            self.armor.skill_penalty if self.armor else 0  # type: ignore
+        )
+        shield_skill_penalty = (
+            self.shield.skill_penalty if self.shield else 0  # type: ignore
+        )
         penalty = Skills.init_with_const(
             (
                 SkillEnum.ACROBATICS,

@@ -350,7 +350,7 @@ class AccessoryTypeEnum(BaseNameValueDescriptionEnum):
     IMPLEMENT = auto(), 'Инструмент'
     WEAPON = auto(), 'Оружие'
     TWO_WEAPONS = auto(), 'Два оружия'
-    # WEAPON_AND_IMPLEMENT = 'WEAPON_AND_IMPLEMENT', 'Оружие и инструмент'
+    WEAPON_AND_IMPLEMENT = auto(), 'Оружие и инструмент'
 
 
 class DefenceTypeEnum(BaseNameValueDescriptionEnum):

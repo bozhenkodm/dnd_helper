@@ -14,6 +14,7 @@ from base.constants.constants import (
     NPCRaceEnum,
     SexEnum,
     SkillEnum,
+    WeaponHandednessEnum,
 )
 from base.exceptions import PowerInconsistent
 from base.managers import WeaponTypeQuerySet
@@ -147,6 +148,12 @@ class WeaponType(models.Model):
 
     name = models.CharField(verbose_name=_('Title'), max_length=30)
     slug = models.CharField(verbose_name='Slug', max_length=30, unique=True)
+    handedness = models.CharField(
+        verbose_name=_('Handedness'),
+        choices=WeaponHandednessEnum.generate_choices(),
+        max_length=WeaponHandednessEnum.max_length(),
+        null=True,
+    )
 
     def __str__(self) -> str:
         return self.name
@@ -644,7 +651,7 @@ class NPC(
 
     def parse_string(
         self,
-        power: Power,  # TODO refactor function signature
+        power: Power,
         string: str,
         weapons: Sequence[Weapon] | None = None,
         item: ItemAbstract | None = None,

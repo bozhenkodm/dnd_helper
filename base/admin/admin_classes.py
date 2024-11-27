@@ -1039,6 +1039,8 @@ class MagicWeaponTypeAdmin(MagicItemTypeAdminBase):
         'step',
         'max_level',
         'category',
+        'crit_dice',
+        'crit_property',
         'picture',
         'upload_from_clipboard',
         'image_tag',
@@ -1054,6 +1056,8 @@ class MagicWeaponTypeAdmin(MagicItemTypeAdminBase):
         for weapon_type in weapon_types:
             for level in obj.level_range():
                 Weapon.create_on_base(weapon_type, obj, level)
+        nwt = WeaponType.objects.exclude(slug__in=obj.weapon_type_slots)
+        Weapon.objects.filter(weapon_type__in=nwt, magic_item_type=obj).delete()
 
 
 class MagicArmItemTypeAdmin(MagicItemTypeAdminBase):

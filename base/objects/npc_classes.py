@@ -88,6 +88,10 @@ class NPCClass:
     def available_armor_types(self) -> Sequence[ArmorTypeIntEnum]:
         return self._available_armor_types
 
+    @available_armor_types.setter
+    def available_armor_types(self, value):
+        pass
+
     def attack_bonus(self, weapon=None, is_implement: bool = False) -> int:
         level_bonus = self.npc._level_bonus + self.npc.half_level
         if weapon and not is_implement and self.npc.is_weapon_proficient(weapon=weapon):
