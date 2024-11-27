@@ -4,6 +4,8 @@ import pytest
 from django.conf import settings
 
 from base.models import NPC
+from base.models.models import WeaponType
+from base.objects import weapon_types_classes
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -27,3 +29,11 @@ def test_npcs_are_valid(client):
             pytest.fail(f'npc: {npc}, error: {e}', pytrace=True)
         else:
             assert response.status_code == 200, npc
+
+
+@pytest.mark.django_db
+def test_weapon_type_handedness_matches_db():
+    for wt in WeaponType.objects.all():
+        assert (
+            wt.handedness == weapon_types_classes[wt.slug].handedness
+        ), f'{wt} has inconsistent handedness'

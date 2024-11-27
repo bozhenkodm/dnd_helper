@@ -1,7 +1,7 @@
 from django import forms
 
 from base.constants.base import IntDescriptionSubclassEnum
-from base.constants.constants import SexEnum
+from base.constants.constants import SexEnum, WeaponHandednessEnum
 from base.models import NPC
 from base.models.magic_items import (
     ArmsSlotItem,
@@ -35,10 +35,7 @@ class NPCModelForm(forms.ModelForm):
     )
     no_hand = forms.ModelChoiceField(
         queryset=Weapon.objects.select_related('weapon_type', 'magic_item_type')
-        .filter(
-            weapon_type__slug__in=(KiFocus.slug(), HolySymbol.slug())
-            # TODO make it type, put it in database and filter by it
-        )
+        .filter(weapon_type__handedness=WeaponHandednessEnum.FREE)
         .order_by('level', 'weapon_type__name', 'magic_item_type__name'),
         label='Инструмент не в руку',
         required=False,
