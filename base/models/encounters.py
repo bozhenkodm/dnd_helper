@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.transaction import atomic
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 from base.constants.constants import DiceIntEnum
 from base.managers import EncounterParticipantsQuerySet
@@ -29,6 +30,22 @@ class PlayerCharacters(models.Model):
         return self.name
 
 
+class PCParty(models.Model):
+    class Meta:
+        verbose_name = _('Party')
+        verbose_name_plural = _('Parties')
+
+    name = models.CharField(
+        verbose_name=_('Name'), default='', blank=True, max_length=20
+    )
+    members = models.ManyToManyField(PlayerCharacters, verbose_name=_('Members'))
+
+    def __str__(self):
+        members = ', '.join(self.members.values_list('name', flat=True))
+        name = f'{self.name}: ' if self.name else ''
+        return f'{name}{members}'
+
+
 class Encounter(models.Model):
     class Meta:
         verbose_name = 'Сцена'
@@ -42,6 +59,13 @@ class Encounter(models.Model):
     description = models.TextField(verbose_name='Описание', null=True, blank=True)
     roll_for_players = models.BooleanField(
         verbose_name='Кидать инициативу за игроков?', default=False
+    )
+    party = models.ForeignKey(
+        PCParty,
+        verbose_name=_('Party'),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
     )
     npcs = models.ManyToManyField(NPC, verbose_name='Мастерские персонажи', blank=True)
     turn_number = models.PositiveSmallIntegerField(verbose_name='Номер хода', default=1)
@@ -83,6 +107,13 @@ class Encounter(models.Model):
         self.participants.all().delete()
         self.turn_number = 1
         participants = []
+        if self.party:
+            for pc in self.party.members.all():
+                if self.combatants_pcs.filter(pc=pc).count():
+                    continue
+                cpc = CombatantsPC(pc=pc, encounter=self)
+                cpc.save()
+                self.combatants_pcs.add(cpc)
         for combatant in self.combatants_pcs.all():
             if self.roll_for_players:
                 initiative = combatant.pc.initiative + DiceIntEnum.D20.roll()

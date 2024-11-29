@@ -157,10 +157,7 @@ class NPCModelForm(forms.ModelForm):
     def check_two_handed_weapon_held_with_two_hands(
         self, primary_hand, secondary_hand, shield_is_in_hand: bool
     ) -> None:
-        if (
-            primary_hand
-            and primary_hand.data_instance.handedness == WeaponHandednessEnum.TWO
-        ):
+        if primary_hand and primary_hand.handedness == WeaponHandednessEnum.TWO:
             error = ValidationError(
                 'Двуручное оружие занимает обе руки, '
                 'во второй руке не может быть другого оружия'
@@ -173,22 +170,19 @@ class NPCModelForm(forms.ModelForm):
     def check_two_weapons_in_two_hands(self, primary_hand, secondary_hand) -> None:
         if (
             primary_hand
-            and primary_hand.data_instance.handedness
+            and primary_hand.handedness
             != WeaponHandednessEnum.TWO  # one-handed or versatile
             and secondary_hand
         ):
             klass_data_instance = self.instance.klass_data_instance
             if (
-                (
-                    klass_data_instance.slug == NPCClassEnum.RANGER
-                    and self.cleaned_data['subclass']
-                    == klass_data_instance.SubclassEnum.TWO_HANDED.value
-                    or klass_data_instance.slug == NPCClassEnum.BARBARIAN
-                    and self.cleaned_data['subclass']
-                    == klass_data_instance.SubclassEnum.WHIRLING.value
-                )
-                and secondary_hand.data_instance.handedness == WeaponHandednessEnum.TWO
-            ):
+                klass_data_instance.slug == NPCClassEnum.RANGER
+                and self.cleaned_data['subclass']
+                == klass_data_instance.SubclassEnum.TWO_HANDED.value
+                or klass_data_instance.slug == NPCClassEnum.BARBARIAN
+                and self.cleaned_data['subclass']
+                == klass_data_instance.SubclassEnum.WHIRLING.value
+            ) and secondary_hand.handedness == WeaponHandednessEnum.TWO:
                 self.add_error(
                     'secondary_hand',
                     ValidationError(
@@ -275,7 +269,7 @@ class WeaponTypeForm(forms.ModelForm):
 
     slug = forms.ChoiceField(
         choices=[
-            (cls.slug, f'{cls.name}')
+            (cls.slug(), f'{cls.name}')
             for cls in weapon_types_tuple
             if cls.slug() not in set(WeaponType.objects.values_list('slug', flat=True))
         ],

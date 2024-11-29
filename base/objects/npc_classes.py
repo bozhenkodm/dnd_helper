@@ -389,8 +389,7 @@ class FighterClass(NPCClass):
                 self.npc.primary_hand
                 and not self.npc.primary_hand.data_instance.is_melee,
                 self.npc.primary_hand
-                and self.npc.primary_hand.data_instance.handedness
-                == WeaponHandednessEnum.TWO,
+                and self.npc.primary_hand.handedness == WeaponHandednessEnum.TWO,
             )
         ):
             return False
@@ -417,13 +416,12 @@ class FighterClass(NPCClass):
         if self.npc.subclass == self.SubclassEnum.GREAT_WEAPON:
             if (
                 not self.npc.shield
-                and weapon.weapon_type.data_instance.handedness
-                != WeaponHandednessEnum.ONE
+                and weapon.weapon_type.handedness != WeaponHandednessEnum.ONE
                 and bool(self.npc.primary_hand) != bool(self.npc.secondary_hand)  # xor
             ):
                 return result + 1
         if self.npc.subclass == self.SubclassEnum.GUARDIAN:
-            if weapon.weapon_type.data_instance.handedness != WeaponHandednessEnum.TWO:
+            if weapon.weapon_type.handedness != WeaponHandednessEnum.TWO:
                 return result + 1
         if self.npc.subclass == self.SubclassEnum.TEMPPEST:
             if (
