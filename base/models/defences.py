@@ -113,6 +113,9 @@ class NPCDefenceMixin:
             + self.race_data_instance.fortitude
             + self.klass_data_instance.fortitude
             + self._necklace_defence_bonus
+            + self.armor.armor_type.fortitude_bonus
+            if self.armor
+            else 0
         )
 
     @property
@@ -124,6 +127,9 @@ class NPCDefenceMixin:
             + self.race_data_instance.reflex
             + self.klass_data_instance.reflex
             + self._necklace_defence_bonus
+            + self.armor.armor_type.reflex
+            if self.armor
+            else 0
         )
         result += self._shield_bonus
         if self.klass.name == NPCClassEnum.BARBARIAN:
@@ -140,4 +146,7 @@ class NPCDefenceMixin:
             + self.race_data_instance.will
             + self.klass_data_instance.will
             + self._necklace_defence_bonus
+            + self.armor.armor_type.will_bonus
+            if self.armor
+            else 0
         )

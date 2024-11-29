@@ -32,8 +32,11 @@ def test_npcs_are_valid(client):
 
 
 @pytest.mark.django_db
-def test_weapon_type_handedness_matches_db():
+def test_objects_db_consistency():
     for wt in WeaponType.objects.all():
         assert (
             wt.handedness == weapon_types_classes[wt.slug].handedness
         ), f'{wt} has inconsistent handedness'
+        assert (
+            wt.category == weapon_types_classes[wt.slug].category
+        ), f'{wt} has inconsistent category'

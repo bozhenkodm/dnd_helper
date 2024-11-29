@@ -21,7 +21,7 @@ from base.admin.admin_classes import (
     WeaponTypeAdmin,
 )
 from base.models.bonuses import Bonus
-from base.models.encounters import Encounter, PlayerCharacters
+from base.models.encounters import Encounter, PCParty, PlayerCharacters
 from base.models.magic_items import (
     ArmsSlotItem,
     MagicArmItemType,
@@ -48,6 +48,7 @@ admin.site.register(Class, ClassAdmin)
 admin.site.register(NPC, NPCAdmin)
 admin.site.register(ParagonPath, ParagonPathAdmin)
 admin.site.register(Encounter, EncounterAdmin)
+admin.site.register(PCParty)
 admin.site.register(ArmorType, ArmorTypeAdmin)
 admin.site.register(WeaponType, WeaponTypeAdmin)
 admin.site.register(Power, PowerAdmin)
