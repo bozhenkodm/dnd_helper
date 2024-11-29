@@ -273,6 +273,7 @@ class WeaponHandednessEnum(BaseNameValueDescriptionEnum):
     )  # one-handed, but can be used with two hands
     # (with +1 to damage, unless user is small)
     FREE = auto(), 'Не занимает руки'  # ki and symbols of faith
+    DOUBLE = auto(), 'Двойное'
 
 
 class PowerSourceEnum(BaseNameValueDescriptionEnum):

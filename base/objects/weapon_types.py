@@ -37,6 +37,7 @@ class WeaponType:
     load: ClassVar[Optional[RangedLoadAction]] = None
     is_small: ClassVar[bool] = False
     is_defensive: ClassVar[bool] = False
+    is_big: ClassVar[bool] = False
 
     # property shows if weapon is a magic item itself
     is_magic_item: ClassVar[bool] = False
@@ -723,10 +724,81 @@ class RitualSickle(Sickle):
     is_magic_item = True
 
 
-# Double axe 	AV 	+2 	1d10/1d10  	Axe 	Double weapon, off-hand
-# Double flail 	AV 	+2 	1d8/1d8 Flail 	Double weapon, defensive, off-hand
-# Double sword 	AV 	+3 	1d6/1d6 Light blade 	Double weapon, defensive, off-hand
-# Urgrosh 	AV 	+2 	1d12/1d6 Axe, spear 	Double weapon, defensive, off-hand
+class DoubleAxe(WeaponType):
+    name = 'Двойной топор'
+    group = WeaponGroupEnum.AXE
+    category = WeaponCategoryIntEnum.SUPERIOR
+    damage_dice = DiceIntEnum.D10
+    handedness = WeaponHandednessEnum.DOUBLE
+    is_big = True
+
+
+class DoubleAxeSecondEnd(WeaponType):
+    name = 'Двойной топор (второй конец)'
+    group = WeaponGroupEnum.AXE
+    category = WeaponCategoryIntEnum.SUPERIOR
+    damage_dice = DiceIntEnum.D10
+    handedness = WeaponHandednessEnum.DOUBLE
+    is_off_hand = True
+
+
+class DoubleFlail(WeaponType):
+    name = 'Двойной цеп'
+    group = WeaponGroupEnum.FLAIL
+    category = WeaponCategoryIntEnum.SUPERIOR
+    damage_dice = DiceIntEnum.D8
+    handedness = WeaponHandednessEnum.DOUBLE
+    is_big = True
+    is_defensive = True
+
+
+class DoubleFlailSecondEnd(WeaponType):
+    name = 'Двойной цеп (второй конец)'
+    group = WeaponGroupEnum.FLAIL
+    category = WeaponCategoryIntEnum.SUPERIOR
+    damage_dice = DiceIntEnum.D8
+    handedness = WeaponHandednessEnum.DOUBLE
+    is_off_hand = True
+
+
+class DoubleSword(WeaponType):
+    name = 'Двойной меч'
+    group = WeaponGroupEnum.LIGHT_BLADE
+    category = WeaponCategoryIntEnum.SUPERIOR
+    damage_dice = DiceIntEnum.D6
+    handedness = WeaponHandednessEnum.DOUBLE
+    prof_bonus = 3
+    is_off_hand = True
+    is_defensive = True
+
+
+class DoubleSwordSecondEnd(WeaponType):
+    name = 'Двойной меч (второй конец)'
+    group = WeaponGroupEnum.LIGHT_BLADE
+    category = WeaponCategoryIntEnum.SUPERIOR
+    damage_dice = DiceIntEnum.D6
+    handedness = WeaponHandednessEnum.DOUBLE
+    prof_bonus = 3
+    is_off_hand = True
+
+
+class Urgrosh(WeaponType):
+    name = 'Ургрош'
+    group = WeaponGroupEnum.AXE
+    category = WeaponCategoryIntEnum.SUPERIOR
+    damage_dice = DiceIntEnum.D12
+    handedness = WeaponHandednessEnum.DOUBLE
+    is_big = True
+    is_defensive = True
+
+
+class UrgroshSecondEnd(WeaponType):
+    name = 'Ургрош (второй конец)'
+    group = WeaponGroupEnum.SPEAR
+    category = WeaponCategoryIntEnum.SUPERIOR
+    damage_dice = DiceIntEnum.D6
+    handedness = WeaponHandednessEnum.DOUBLE
+    is_off_hand = True
 
 
 class KiFocus(ImplementType):

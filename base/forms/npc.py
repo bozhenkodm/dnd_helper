@@ -13,7 +13,6 @@ from base.models.magic_items import (
     WaistSlotItem,
 )
 from base.models.models import Weapon
-from base.objects.weapon_types import HolySymbol, KiFocus
 
 
 class NPCModelForm(forms.ModelForm):

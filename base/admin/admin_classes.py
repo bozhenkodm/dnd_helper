@@ -47,7 +47,7 @@ from base.models.magic_items import (
 )
 from base.models.models import NPC, Armor, ArmorType, ParagonPath, Weapon, WeaponType
 from base.models.powers import Power, PowerProperty
-from base.objects import npc_klasses, race_classes
+from base.objects import npc_klasses, race_classes, weapon_types_classes
 from base.objects.weapon_types import HolySymbol, KiFocus
 
 
@@ -465,6 +465,7 @@ class EncounterAdmin(admin.ModelAdmin):
     fields = (
         'short_description',
         'roll_for_players',
+        'party',
         ('npcs', 'npc_links'),
         'encounter_link',
         'is_passed',
@@ -511,6 +512,9 @@ class ArmorTypeAdmin(admin.ModelAdmin):
         'armor_class',
         'speed_penalty',
         'skill_penalty',
+        'fortitude_bonus',
+        'reflex_bonus',
+        'will_bonus',
     )
     readonly_fields = ('armor_class',)
     ordering = ('base_armor_type', 'minimal_enhancement')
@@ -580,9 +584,10 @@ class ArmorAdmin(admin.ModelAdmin):
 
 class WeaponTypeAdmin(admin.ModelAdmin):
     ordering = ('name',)
-    list_display = ('name',)
+    list_display = ('name', 'category', 'handedness')
     search_fields = ('name',)
-    readonly_fields = ('category', 'group', 'prof_bonus', 'damage', 'properties')
+    readonly_fields = ('group', 'prof_bonus', 'damage', 'properties')
+    list_filter = ('handedness', 'category')
     save_as = True
     form = WeaponTypeForm
 
@@ -595,6 +600,7 @@ class WeaponTypeAdmin(admin.ModelAdmin):
                 'damage',
                 'handedness',
                 'properties',
+                'primary_end',
             )
         return (
             'slug',
@@ -602,28 +608,24 @@ class WeaponTypeAdmin(admin.ModelAdmin):
             'group',
             'prof_bonus',
             'damage',
+            'handedness',
+            'primary_end',
         )
 
-    def has_add_permission(self, request: HttpRequest) -> bool:
-        return False
+    # def has_add_permission(self, request: HttpRequest) -> bool:
+    #     return False
 
-    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
+    # def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
+    #     return False
 
-    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
+    # def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+    #     return False
 
     @admin.display(description='Свойства оружия')
     def properties(self, obj):
         if not obj.id:
             return '-'
         return obj.data_instance.properties_text()
-
-    @admin.display(description='Категория оружия')
-    def category(self, obj):
-        if not obj.id:
-            return '-'
-        return obj.data_instance.category.description
 
     @admin.display(description='Группа оружия')
     def group(self, obj):
@@ -645,6 +647,8 @@ class WeaponTypeAdmin(admin.ModelAdmin):
 
     @atomic
     def save_model(self, request, obj, form, change):
+        if not obj.id:
+            obj.name = weapon_types_classes[obj.slug].name
         super().save_model(request, obj, form, change)
         for magic_weapon_type in MagicWeaponType.objects.filter(
             weapon_type_slots__contains=obj.slug

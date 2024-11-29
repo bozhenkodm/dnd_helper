@@ -14,6 +14,7 @@ from base.constants.constants import (
     NPCRaceEnum,
     SexEnum,
     SkillEnum,
+    WeaponCategoryIntEnum,
     WeaponHandednessEnum,
 )
 from base.exceptions import PowerInconsistent
@@ -56,6 +57,16 @@ class ArmorType(models.Model):
     )
     minimal_enhancement = models.SmallIntegerField(
         verbose_name=_('Minimal enhancement'), default=0
+    )
+    # TODO replace with bonus model logic when implemented
+    fortitude_bonus = models.PositiveSmallIntegerField(
+        verbose_name=_('Fortitude bonus'), default=0
+    )
+    reflex_bonus = models.PositiveSmallIntegerField(
+        verbose_name=_('Reflex bonus'), default=0
+    )
+    will_bonus = models.PositiveSmallIntegerField(
+        verbose_name=_('Will bonus'), default=0
     )
 
     def __str__(self) -> str:
@@ -146,16 +157,31 @@ class WeaponType(models.Model):
 
     objects = WeaponTypeQuerySet.as_manager()
 
-    name = models.CharField(verbose_name=_('Title'), max_length=30)
-    slug = models.CharField(verbose_name='Slug', max_length=30, unique=True)
+    name = models.CharField(
+        verbose_name=_('Title'), max_length=30, null=True, blank=True
+    )
+    slug = models.CharField(verbose_name='Slug', max_length=30, unique=True, blank=True)
     handedness = models.CharField(
         verbose_name=_('Handedness'),
-        choices=WeaponHandednessEnum.generate_choices(),
+        choices=WeaponHandednessEnum.generate_choices(is_sorted=False),
         max_length=WeaponHandednessEnum.max_length(),
         null=True,
     )
+    category = models.PositiveSmallIntegerField(
+        verbose_name=_('Category'),
+        choices=WeaponCategoryIntEnum.generate_choices(),
+    )
+    primary_end = models.OneToOneField(
+        "self",
+        verbose_name=_('Primary end'),
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='secondary_end',
+    )
 
     def __str__(self) -> str:
+        # return weapon_types_classes[self.slug].name
         return self.name
 
     @cached_property
@@ -219,6 +245,10 @@ class Weapon(ItemAbstract):
     @property
     def prof_bonus(self):
         return self.data_instance.prof_bonus
+
+    @cached_property
+    def handedness(self):
+        return self.weapon_type.handedness
 
     def get_attack_type(self, is_melee: bool, is_ranged: bool) -> str:
         # TODO localization
