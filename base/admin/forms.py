@@ -160,7 +160,7 @@ class NPCModelForm(forms.ModelForm):
         if primary_hand and primary_hand.handedness == WeaponHandednessEnum.TWO:
             error = ValidationError(
                 'Двуручное оружие занимает обе руки, '
-                'во второй руке не может быть другого оружия'
+                'во второй руке не может быть другого предмета'
             )
             if secondary_hand:
                 self.add_error('secondary_hand', error)
@@ -204,6 +204,26 @@ class NPCModelForm(forms.ModelForm):
                         'Во второй руке можно держать только дополнительное оружие'
                     ),
                 )
+
+    def check_double_weapon(
+        self, primary_hand, secondary_hand, shield_is_in_hand: bool
+    ):
+        if secondary_hand and hasattr(secondary_hand.weapon_type, 'secondary_end'):
+            self.add_error(
+                'secondary_hand',
+                ValidationError('Двойное оружие должно располагаться в основной руке'),
+            )
+        if (
+            primary_hand
+            and hasattr(primary_hand.weapon_type, 'secondary_end')
+            and (secondary_hand or shield_is_in_hand)
+        ):
+            message = 'Для двойного оружия должна быть свободна вторая рука'
+            self.add_error('primary_hand', ValidationError(message))
+            if secondary_hand:
+                self.add_error('secondary_hand', ValidationError(message))
+            if shield_is_in_hand:
+                self.add_error('arms_slot', ValidationError(message))
 
     def check_proper_sex(self) -> None:
         if 'race' in self.cleaned_data:
@@ -249,6 +269,7 @@ class NPCModelForm(forms.ModelForm):
             primary_hand, secondary_hand, shield_is_in_hand
         )
         self.check_two_weapons_in_two_hands(primary_hand, secondary_hand)
+        self.check_double_weapon(primary_hand, secondary_hand, shield_is_in_hand)
 
         return super().clean()
 

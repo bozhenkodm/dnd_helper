@@ -42,6 +42,8 @@ class WeaponType:
     # property shows if weapon is a magic item itself
     is_magic_item: ClassVar[bool] = False
 
+    primary_end: ClassVar[Optional["WeaponType"]] = None
+
     @classmethod
     def slug(cls):
         return cls.__name__
@@ -740,6 +742,7 @@ class DoubleAxeSecondEnd(WeaponType):
     damage_dice = DiceIntEnum.D10
     handedness = WeaponHandednessEnum.DOUBLE
     is_off_hand = True
+    primary_end = DoubleAxe
 
 
 class DoubleFlail(WeaponType):
@@ -759,6 +762,7 @@ class DoubleFlailSecondEnd(WeaponType):
     damage_dice = DiceIntEnum.D8
     handedness = WeaponHandednessEnum.DOUBLE
     is_off_hand = True
+    primary_end = DoubleFlail
 
 
 class DoubleSword(WeaponType):
@@ -780,6 +784,7 @@ class DoubleSwordSecondEnd(WeaponType):
     handedness = WeaponHandednessEnum.DOUBLE
     prof_bonus = 3
     is_off_hand = True
+    primary_end = DoubleSword
 
 
 class Urgrosh(WeaponType):
@@ -799,6 +804,7 @@ class UrgroshSecondEnd(WeaponType):
     damage_dice = DiceIntEnum.D6
     handedness = WeaponHandednessEnum.DOUBLE
     is_off_hand = True
+    primary_end = Urgrosh
 
 
 class KiFocus(ImplementType):
