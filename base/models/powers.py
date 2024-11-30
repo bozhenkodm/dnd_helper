@@ -1,5 +1,6 @@
 import operator
-from typing import TYPE_CHECKING
+import re
+from typing import TYPE_CHECKING, Sequence
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -22,9 +23,10 @@ from base.constants.constants import (
 from base.exceptions import PowerInconsistent
 from base.managers import PowerQueryset
 from base.models.bonuses import Bonus
+from base.models.magic_items import ItemAbstract
 from base.objects.dice import DiceRoll
 from base.objects.npc_classes import NPCClass
-from base.objects.powers_output import PowerDisplay
+from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
 from base.objects.weapon_types import KiFocus
 
 if TYPE_CHECKING:
@@ -201,7 +203,7 @@ class Power(models.Model):
 
     def category(
         self,
-        weapons=None,
+        weapons: Sequence["Weapon"] = None,
     ):
         # TODO localization
         if self.magic_item_type:
@@ -290,7 +292,7 @@ class Power(models.Model):
             )
         raise PowerInconsistent(_('Wrong attack type'))
 
-    def keywords(self, weapons=()) -> str:
+    def keywords(self, weapons: Sequence["Weapon"] = ()) -> str:
         if self.frequency == PowerFrequencyEnum.PASSIVE:
             return ''
         return ', '.join(
@@ -453,28 +455,33 @@ class PowerMixin:
         )
 
     def calculate_token(
-        self, token: str, power, weapon=None, secondary_weapon=None, item=None
+        self,
+        token: str,
+        accessory_type: AccessoryTypeEnum,
+        weapon=None,
+        secondary_weapon=None,
+        item=None,
     ) -> int | DiceRoll:
         if token.isdigit():
             return int(token)
         if token == PowerVariables.WPN:
-            return self._calculate_weapon_damage(weapon, power.accessory_type)
+            return self._calculate_weapon_damage(weapon, accessory_type)
         if token == PowerVariables.WPS:
-            return self._calculate_weapon_damage(secondary_weapon, power.accessory_type)
+            return self._calculate_weapon_damage(secondary_weapon, accessory_type)
         if token == PowerVariables.ATK:
             return self._calculate_attack(
                 weapon,
-                power.accessory_type,
+                accessory_type,
             )
         if token == PowerVariables.ATS:
             return self._calculate_attack(
                 secondary_weapon,
-                power.accessory_type,
+                accessory_type,
             )
         if token == PowerVariables.DMG:
-            return self._calculate_damage_bonus(weapon, power.accessory_type)
+            return self._calculate_damage_bonus(weapon, accessory_type)
         if token == PowerVariables.DMS:
-            return self._calculate_damage_bonus(secondary_weapon, power.accessory_type)
+            return self._calculate_damage_bonus(secondary_weapon, accessory_type)
         if token == PowerVariables.EHT:
             return self.enhancement_with_magic_threshold(
                 weapon and weapon.enhancement or 0
@@ -495,7 +502,12 @@ class PowerMixin:
         return max((0, enhancement - self._magic_threshold))
 
     def calculate_reverse_polish_notation(
-        self, expression: str, power, weapon=None, secondary_weapon=None, item=None
+        self,
+        expression: str,
+        accessory_type: AccessoryTypeEnum,
+        weapon=None,
+        secondary_weapon=None,
+        item=None,
     ):
         """
         Проходим постфиксную запись;
@@ -511,7 +523,9 @@ class PowerMixin:
                 stack.append(self.OPERATORS[token][0](left, right))  # type: ignore
             else:
                 stack.append(
-                    self.calculate_token(token, power, weapon, secondary_weapon, item)
+                    self.calculate_token(
+                        token, accessory_type, weapon, secondary_weapon, item
+                    )
                 )
         return stack.pop()
 
@@ -578,11 +592,16 @@ class PowerMixin:
         return ' '.join(result)
 
     def evaluate_power_expression(
-        self, string: str, power=None, weapon=None, secondary_weapon=None, item=None
+        self,
+        string: str,
+        accessory_type: AccessoryTypeEnum | None = None,
+        weapon=None,
+        secondary_weapon=None,
+        item=None,
     ):
         return self.calculate_reverse_polish_notation(
             self.expression_to_reverse_polish_notation(string),
-            power,
+            accessory_type,
             weapon,
             secondary_weapon,
             item,
@@ -604,7 +623,7 @@ class PowerMixin:
         return sorted(properties.values(), key=lambda x: x and x.order)
 
     @staticmethod
-    def power_inconsistent_message(power: Power):
+    def get_power_inconsistent_message(power: Power):
         message = 'POWER INCONSISTENT'
         return PowerDisplay(
             name=power.name,
@@ -614,4 +633,73 @@ class PowerMixin:
             frequency_order=0,
             frequency=message,
             properties=[],
+        ).asdict()
+
+    def parse_string(
+        self,
+        accessory_type: AccessoryTypeEnum,
+        string: str,
+        weapons: Sequence["Weapon"] | None = None,
+        item: ItemAbstract | None = None,
+    ):
+        try:
+            primaty_weapon = weapons[0] or weapons[2]
+        except (TypeError, IndexError):
+            primaty_weapon = None
+        try:
+            secondary_weapon = weapons[1]
+        except (TypeError, IndexError):
+            secondary_weapon = None
+        pattern = r'\$(\S+)\b'  # gets substring from '$' to next whitespace
+        # TODO fix parsing cases with ")" as a last character.
+        #  Now it's unmatched by regexp
+        expressions_to_calculate = re.findall(pattern, string)
+        template = re.sub(
+            pattern, '{}', string
+        )  # preparing template for format() method
+        calculated_expressions = []
+        for expression in expressions_to_calculate:
+            calculated_expressions.append(
+                self.evaluate_power_expression(
+                    string=expression,
+                    accessory_type=accessory_type,
+                    weapon=primaty_weapon,
+                    secondary_weapon=secondary_weapon,
+                    item=item,
+                )
+            )
+        return template.format(*calculated_expressions)
+
+    def get_power_display(
+        self,
+        *,
+        power: Power,
+        weapons: Sequence["Weapon"] = (),
+        item: ItemAbstract | None = None,
+    ) -> dict[str, str]:
+        return PowerDisplay(
+            name=power.name,
+            keywords=power.keywords(weapons),
+            category=power.category(weapons),
+            description=self.parse_string(
+                accessory_type=power.accessory_type,
+                string=power.description,
+                weapons=weapons,
+                item=item,
+            ),
+            frequency_order=power.frequency_order,
+            frequency=power.frequency.lower(),
+            properties=[
+                PowerPropertyDisplay(
+                    title=prop.get_displayed_title(),
+                    description=self.parse_string(
+                        power.accessory_type,
+                        string=prop.get_displayed_description(),
+                        weapons=weapons,
+                        item=item,
+                    ),
+                    debug=prop.get_displayed_description(),
+                )
+                for prop in self.valid_properties(power)
+            ],
         ).asdict()

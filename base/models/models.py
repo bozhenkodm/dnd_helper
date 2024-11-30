@@ -1,4 +1,3 @@
-import re
 from functools import cached_property
 from typing import Sequence
 
@@ -33,7 +32,6 @@ from base.models.powers import Power, PowerMixin
 from base.models.skills import NPCSkillMixin, Skill
 from base.objects import npc_klasses, race_classes, weapon_types_classes
 from base.objects.dice import DiceRoll
-from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
 from base.objects.weapon_types import WeaponType as WeaponTypeClass
 
 
@@ -681,41 +679,6 @@ class NPC(
     def inventory_text(self):
         return map(str, self.items)
 
-    def parse_string(
-        self,
-        power: Power,
-        string: str,
-        weapons: Sequence[Weapon] | None = None,
-        item: ItemAbstract | None = None,
-    ):
-        try:
-            primaty_weapon = weapons[0] or weapons[2]
-        except (TypeError, IndexError):
-            primaty_weapon = None
-        try:
-            secondary_weapon = weapons[1]
-        except (TypeError, IndexError):
-            secondary_weapon = None
-        pattern = r'\$(\S+)\b'  # gets substring from '$' to next whitespace
-        # TODO fix parsing cases with ")" as a last character.
-        #  Now it's unmatched by regexp
-        expressions_to_calculate = re.findall(pattern, string)
-        template = re.sub(
-            pattern, '{}', string
-        )  # preparing template for format() method
-        calculated_expressions = []
-        for expression in expressions_to_calculate:
-            calculated_expressions.append(
-                self.evaluate_power_expression(
-                    string=expression,
-                    power=power,
-                    weapon=primaty_weapon,
-                    secondary_weapon=secondary_weapon,
-                    item=item,
-                )
-            )
-        return template.format(*calculated_expressions)
-
     def powers_calculated(self) -> Sequence[dict]:
         """
         calculated powers for npc html page
@@ -734,29 +697,10 @@ class NPC(
         powers: list[dict] = []
         for power in powers_qs.ordered_by_frequency():
             try:
-                powers.append(
-                    PowerDisplay(
-                        name=power.name,
-                        keywords=power.keywords(),
-                        category=power.category(),
-                        description=self.parse_string(power, string=power.description),
-                        frequency_order=power.frequency_order,
-                        frequency=power.frequency.lower(),
-                        properties=[
-                            PowerPropertyDisplay(
-                                title=prop.get_displayed_title(),
-                                description=self.parse_string(
-                                    power, string=prop.get_displayed_description()
-                                ),
-                                debug=prop.get_displayed_description(),
-                            )
-                            for prop in self.valid_properties(power)
-                        ],
-                    ).asdict()
-                )
+                powers.append(self.get_power_display(power=power))
             except PowerInconsistent as e:
                 print(f"{power} display is not created with error: {e}")
-                powers.append(self.power_inconsistent_message(power))
+                powers.append(self.get_power_inconsistent_message(power))
                 continue
             except WrongWeapon as e:
                 print(f"{power} display is not created with error: {e}")
@@ -773,33 +717,10 @@ class NPC(
         for power in power_weapon_qs:
             for weapons in self.proper_weapons_for_power(power):
                 try:
-                    powers.append(
-                        PowerDisplay(
-                            name=power.name,
-                            keywords=power.keywords(weapons),
-                            category=power.category(weapons),
-                            description=self.parse_string(power, power.description),
-                            frequency_order=power.frequency_order,
-                            frequency=power.frequency.lower(),
-                            properties=[
-                                PowerPropertyDisplay(
-                                    **{
-                                        'title': prop.get_displayed_title(),
-                                        'description': self.parse_string(
-                                            power,
-                                            string=prop.get_displayed_description(),
-                                            weapons=weapons,
-                                        ),
-                                        'debug': prop.description,
-                                    }
-                                )
-                                for prop in self.valid_properties(power)
-                            ],
-                        ).asdict()
-                    )
+                    powers.append(self.get_power_display(power=power, weapons=weapons))
                 except PowerInconsistent as e:
                     print(f"{power} display is not created with error: {e}")
-                    powers.append(self.power_inconsistent_message(power))
+                    powers.append(self.get_power_inconsistent_message(power))
                     continue
                 except WrongWeapon as e:
                     print(f"{power} display is not created with error: {e}")
@@ -808,35 +729,10 @@ class NPC(
         for item in self.magic_items:
             for power in item.magic_item_type.powers.ordered_by_frequency():
                 try:
-                    powers.append(
-                        PowerDisplay(
-                            name=power.name,
-                            keywords=power.keywords(),
-                            category=power.category(),
-                            description=self.parse_string(
-                                power, power.description, item=item
-                            ),
-                            frequency_order=power.frequency_order,
-                            frequency=power.frequency.lower(),
-                            properties=[
-                                PowerPropertyDisplay(
-                                    **{
-                                        'title': prop.get_displayed_title(),
-                                        'description': self.parse_string(
-                                            power,
-                                            string=prop.get_displayed_description(),
-                                            item=item,
-                                        ),
-                                        'debug': prop.description,
-                                    }
-                                )
-                                for prop in self.valid_properties(power)
-                            ],
-                        ).asdict()
-                    )
+                    powers.append(self.get_power_display(power=power, item=item))
                 except PowerInconsistent as e:
                     print(f"{power} display is not created with error: {e}")
-                    powers.append(self.power_inconsistent_message(power))
+                    powers.append(self.get_power_inconsistent_message(power))
                 except WrongWeapon as e:
                     print(f"{power} display is not created with error: {e}")
                     continue
