@@ -24,6 +24,7 @@ from base.managers import PowerQueryset
 from base.models.bonuses import Bonus
 from base.objects.dice import DiceRoll
 from base.objects.npc_classes import NPCClass
+from base.objects.powers_output import PowerDisplay
 from base.objects.weapon_types import KiFocus
 
 if TYPE_CHECKING:
@@ -205,28 +206,34 @@ class Power(models.Model):
         # TODO localization
         if self.magic_item_type:
             return self.magic_item_type.name
-        if self.functional_template:
-            return self.functional_template.title
-        if self.paragon_path:
-            return self.paragon_path.title
-        if self.race:
-            return self.race.get_name_display()
-        if self.accessory_type in (
-            AccessoryTypeEnum.WEAPON,
-            AccessoryTypeEnum.IMPLEMENT,
-        ):
-            return str(weapons[0])
-        if self.accessory_type == AccessoryTypeEnum.TWO_WEAPONS:
-            return f'{weapons[0]}, {weapons[1]}'
-        if self.level % 2 == 0 and self.level > 0:
-            return 'Приём'
-        if self.frequency == PowerFrequencyEnum.PASSIVE:
-            return 'Пассивный'
-        if self.klass:
-            return self.klass.get_name_display()
-        raise ValueError('Power improperly configured')
+        result = []
+        try:
+            if self.functional_template:
+                result.append(self.functional_template.title)
+            if self.paragon_path:
+                result.append(self.paragon_path.title)
+            if self.race:
+                result.append(self.race.get_name_display())
+            if self.klass:
+                result.append(self.klass.get_name_display())
+            if self.accessory_type in (
+                AccessoryTypeEnum.WEAPON,
+                AccessoryTypeEnum.IMPLEMENT,
+            ):
+                result.append(str(weapons[0]))
+            if self.accessory_type == AccessoryTypeEnum.TWO_WEAPONS:
+                result.extend(map(str, weapons))
+            if self.level % 2 == 0 and self.level > 0:
+                result.append('Приём')
+            if self.frequency == PowerFrequencyEnum.PASSIVE:
+                result.append('Пассивный')
+        except (TypeError, IndexError, ValueError) as e:
+            raise PowerInconsistent(f'Power {self} is improperly configured: {e}')
+        if not result:
+            raise PowerInconsistent(f'Power {self} is improperly configured')
+        return '; '.join(result)
 
-    def attack_type(self, weapon=None):
+    def attack_type(self, weapon=None) -> str:
         if (
             self.range_type
             in (
@@ -283,27 +290,29 @@ class Power(models.Model):
             )
         raise PowerInconsistent(_('Wrong attack type'))
 
-    def keywords(self, weapons=()):
+    def keywords(self, weapons=()) -> str:
         if self.frequency == PowerFrequencyEnum.PASSIVE:
             return ''
-        return filter(
-            None,
-            (
-                self.get_action_type_display(),
-                self.get_accessory_type_display() if self.accessory_type else '',
-                self.get_frequency_display(),
+        return ', '.join(
+            filter(
+                None,
+                (
+                    self.get_action_type_display(),
+                    self.get_accessory_type_display() if self.accessory_type else '',
+                    self.get_frequency_display(),
+                )
+                + tuple(self.attack_type(weapon) for weapon in weapons if weapon)
+                + tuple(
+                    PowerDamageTypeEnum[type_].description  # type: ignore
+                    for type_ in self.damage_type
+                    if type_ != PowerDamageTypeEnum.NONE
+                )
+                + tuple(
+                    PowerEffectTypeEnum[type_].description  # type: ignore
+                    for type_ in self.effect_type
+                    if type_ != PowerEffectTypeEnum.NONE
+                ),
             )
-            + tuple(self.attack_type(weapon) for weapon in weapons if weapon)
-            + tuple(
-                PowerDamageTypeEnum[type_].description  # type: ignore
-                for type_ in self.damage_type
-                if type_ != PowerDamageTypeEnum.NONE
-            )
-            + tuple(
-                PowerEffectTypeEnum[type_].description  # type: ignore
-                for type_ in self.effect_type
-                if type_ != PowerEffectTypeEnum.NONE
-            ),
         )
 
     @property
@@ -593,3 +602,16 @@ class PowerMixin:
             if key not in properties or properties[key].level < prop.level:
                 properties[key] = prop
         return sorted(properties.values(), key=lambda x: x and x.order)
+
+    @staticmethod
+    def power_inconsistent_message(power: Power):
+        message = 'POWER INCONSISTENT'
+        return PowerDisplay(
+            name=power.name,
+            keywords=message,
+            category=message,
+            description=message,
+            frequency_order=0,
+            frequency=message,
+            properties=[],
+        ).asdict()

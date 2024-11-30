@@ -76,7 +76,7 @@
     </div>
     {% for power in object.powers_calculated %}
         <div class="npc-line {{ power.frequency }} tooltip">
-            <span><b>{{ power.name }} ({{ power.category }})</b> {{ power.keywords|join:", " }}</span>
+            <span><b>{{ power.name }} ({{ power.category }})</b> {{ power.keywords }}</span>
             {% if power.description %}
                 <span class="tooltip-text">{{power.description|linebreaksbr}}</span>
             {% endif %}

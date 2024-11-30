@@ -29,6 +29,7 @@ def test_npcs_are_valid(client):
             pytest.fail(f'npc: {npc}, error: {e}', pytrace=True)
         else:
             assert response.status_code == 200, npc
+            assert 'POWER INCONSISTENT' not in response.content.decode()
 
 
 @pytest.mark.django_db

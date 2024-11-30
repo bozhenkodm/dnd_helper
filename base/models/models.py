@@ -17,7 +17,7 @@ from base.constants.constants import (
     WeaponCategoryIntEnum,
     WeaponHandednessEnum,
 )
-from base.exceptions import PowerInconsistent
+from base.exceptions import PowerInconsistent, WrongWeapon
 from base.managers import WeaponTypeQuerySet
 from base.models.abilities import Ability, NPCAbilityAbstract
 from base.models.bonuses import Bonus
@@ -269,7 +269,9 @@ class Weapon(ItemAbstract):
             return melee_attack_type
         if is_ranged:
             return ranged_attack_type
-        raise PowerInconsistent(_('Wrong attack type'))
+        raise WrongWeapon(
+            f'Wrong attack type: {self}, melee: {is_melee}, ranged: {is_ranged}'
+        )
 
     @classmethod
     def create_on_base(
@@ -754,6 +756,10 @@ class NPC(
                 )
             except PowerInconsistent as e:
                 print(f"{power} display is not created with error: {e}")
+                powers.append(self.power_inconsistent_message(power))
+                continue
+            except WrongWeapon as e:
+                print(f"{power} display is not created with error: {e}")
                 continue
         power_weapon_qs = self.powers.ordered_by_frequency().filter(  # type: ignore
             accessory_type__isnull=False
@@ -793,6 +799,10 @@ class NPC(
                     )
                 except PowerInconsistent as e:
                     print(f"{power} display is not created with error: {e}")
+                    powers.append(self.power_inconsistent_message(power))
+                    continue
+                except WrongWeapon as e:
+                    print(f"{power} display is not created with error: {e}")
                     continue
 
         for item in self.magic_items:
@@ -826,4 +836,8 @@ class NPC(
                     )
                 except PowerInconsistent as e:
                     print(f"{power} display is not created with error: {e}")
+                    powers.append(self.power_inconsistent_message(power))
+                except WrongWeapon as e:
+                    print(f"{power} display is not created with error: {e}")
+                    continue
         return sorted(powers, key=lambda x: (x['frequency_order'], x['name']))

@@ -127,7 +127,7 @@ class NPCDefenceMixin:
             + self.race_data_instance.reflex
             + self.klass_data_instance.reflex
             + self._necklace_defence_bonus
-            + self.armor.armor_type.reflex
+            + self.armor.armor_type.reflex_bonus
             if self.armor
             else 0
         )
