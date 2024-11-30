@@ -1,10 +1,9 @@
 import operator
 import re
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING, Callable, Sequence
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from multiselectfield import MultiSelectField
 
 from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
@@ -28,6 +27,7 @@ from base.objects.dice import DiceRoll
 from base.objects.npc_classes import NPCClass
 from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
 from base.objects.weapon_types import KiFocus
+from multiselectfield import MultiSelectField
 
 if TYPE_CHECKING:
     from base.models.models import Weapon
@@ -41,7 +41,9 @@ class Power(models.Model):
     objects = PowerQueryset.as_manager()
 
     name = models.CharField(verbose_name=_('Title'), max_length=100)
-    description = models.TextField(verbose_name=_('Description'), null=True, blank=True)
+    description = models.TextField(
+        verbose_name=_('Description'), default='', blank=True
+    )
     frequency = models.CharField(
         verbose_name=_('Usage frequency'),
         choices=PowerFrequencyEnum.generate_choices(is_sorted=False),
@@ -203,7 +205,7 @@ class Power(models.Model):
 
     def category(
         self,
-        weapons: Sequence["Weapon"] = None,
+        weapons: Sequence["Weapon"] = (),
     ):
         # TODO localization
         if self.magic_item_type:
@@ -356,7 +358,7 @@ class PowerProperty(models.Model):
         choices=IntDescriptionSubclassEnum.generate_choices(),
         default=0,
     )
-    description = models.TextField(verbose_name=('Description'), blank=True, null=True)
+    description = models.TextField(verbose_name=('Description'), blank=True, default='')
     order = models.SmallIntegerField(verbose_name=_('Order'), default=0)
 
     def get_displayed_title(self):
@@ -386,6 +388,7 @@ class PowerMixin:
     klass_data_instance: NPCClass
     _magic_threshold: int
     no_hand: "Weapon"
+    is_implement_proficient: Callable[["Weapon"], bool]
 
     @property
     def _power_attrs(self):
@@ -406,7 +409,7 @@ class PowerMixin:
         return self.no_hand.weapon_type.slug == KiFocus.slug()
 
     def _can_get_bonus_from_implement_to_weapon(
-        self, accessory_type: AccessoryTypeEnum
+        self, accessory_type: AccessoryTypeEnum | None
     ):
         return (
             self._is_no_hand_implement_ki_focus
@@ -416,7 +419,7 @@ class PowerMixin:
         )
 
     def _calculate_weapon_damage(
-        self, weapon: "Weapon", accessory_type: AccessoryTypeEnum
+        self, weapon: "Weapon", accessory_type: AccessoryTypeEnum | None
     ):
         if not weapon:
             # TODO deal with error message
@@ -426,7 +429,9 @@ class PowerMixin:
             damage_roll.addendant = max(damage_roll.addendant, self.no_hand.enhancement)
         return damage_roll.threshold(self._magic_threshold)
 
-    def _calculate_attack(self, weapon: "Weapon", accessory_type: AccessoryTypeEnum):
+    def _calculate_attack(
+        self, weapon: "Weapon", accessory_type: AccessoryTypeEnum | None
+    ):
         if not weapon:
             # TODO deal with error message
             return self.klass_data_instance.attack_bonus()
@@ -444,7 +449,7 @@ class PowerMixin:
         )
 
     def _calculate_damage_bonus(
-        self, weapon: "Weapon", accessory_type: AccessoryTypeEnum
+        self, weapon: "Weapon", accessory_type: AccessoryTypeEnum | None
     ):
         enhancement = weapon and weapon.enhancement or 0
         if self._can_get_bonus_from_implement_to_weapon(accessory_type):
@@ -457,7 +462,7 @@ class PowerMixin:
     def calculate_token(
         self,
         token: str,
-        accessory_type: AccessoryTypeEnum,
+        accessory_type: AccessoryTypeEnum | None,
         weapon=None,
         secondary_weapon=None,
         item=None,
@@ -504,7 +509,7 @@ class PowerMixin:
     def calculate_reverse_polish_notation(
         self,
         expression: str,
-        accessory_type: AccessoryTypeEnum,
+        accessory_type: AccessoryTypeEnum | None,
         weapon=None,
         secondary_weapon=None,
         item=None,
@@ -637,9 +642,9 @@ class PowerMixin:
 
     def parse_string(
         self,
-        accessory_type: AccessoryTypeEnum,
+        accessory_type: AccessoryTypeEnum | None,
         string: str,
-        weapons: Sequence["Weapon"] | None = None,
+        weapons: Sequence["Weapon"] = (),
         item: ItemAbstract | None = None,
     ):
         try:
@@ -682,18 +687,26 @@ class PowerMixin:
             keywords=power.keywords(weapons),
             category=power.category(weapons),
             description=self.parse_string(
-                accessory_type=power.accessory_type,
+                accessory_type=(
+                    AccessoryTypeEnum[power.accessory_type]
+                    if power.accessory_type
+                    else None
+                ),
                 string=power.description,
                 weapons=weapons,
                 item=item,
             ),
-            frequency_order=power.frequency_order,
+            frequency_order=power.frequency_order,  # type: ignore
             frequency=power.frequency.lower(),
             properties=[
                 PowerPropertyDisplay(
                     title=prop.get_displayed_title(),
                     description=self.parse_string(
-                        power.accessory_type,
+                        (
+                            AccessoryTypeEnum[power.accessory_type]
+                            if power.accessory_type
+                            else None
+                        ),
                         string=prop.get_displayed_description(),
                         weapons=weapons,
                         item=item,

@@ -1,11 +1,11 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from multiselectfield import MultiSelectField
 
 from base.constants.constants import AbilityEnum
 from base.helpers import modifier
 from base.objects.abilities import Abilities
 from base.objects.races import Race
+from multiselectfield import MultiSelectField
 
 
 class Ability(models.Model):

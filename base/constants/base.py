@@ -5,6 +5,8 @@ from django.db import models
 
 
 class BaseNameValueDescriptionEnum(str, Enum):
+    description: str
+
     def __new__(cls, value, description):
         obj = str.__new__(cls, value)
         obj._value_ = value
@@ -79,6 +81,8 @@ class BaseNameValueDescriptionEnum(str, Enum):
 
 
 class IntDescriptionEnum(IntEnum):
+    description: str
+
     def __new__(cls, value, description=''):
         obj = int.__new__(cls, value)
         obj._value_ = value
@@ -88,7 +92,7 @@ class IntDescriptionEnum(IntEnum):
     @classmethod
     def generate_choices(
         cls,
-        condition: Callable[["BaseNameValueDescriptionEnum"], bool] = lambda x: True,
+        condition: Callable[["IntDescriptionEnum"], bool] = lambda x: True,
     ):
         return sorted(
             ((item.value, item.description) for item in cls if condition(item)),

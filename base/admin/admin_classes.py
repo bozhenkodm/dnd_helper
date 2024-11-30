@@ -1,6 +1,7 @@
 import io
 import subprocess
 import textwrap
+import typing
 import urllib.parse
 from functools import reduce
 
@@ -347,7 +348,8 @@ class NPCAdmin(admin.ModelAdmin):
         return False
 
     def get_object(self, request, object_id, from_field=None):
-        self.object: NPC = super().get_object(request, object_id, from_field)
+        self.object = super().get_object(request, object_id, from_field)
+        typing.cast(NPC, self.object)
         return self.object
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):

@@ -91,8 +91,7 @@ class Armor(ItemAbstract):
     armor_type = models.ForeignKey(
         ArmorType,
         verbose_name=_('Armor type'),
-        on_delete=models.SET_NULL,
-        null=True,
+        on_delete=models.CASCADE,
     )
 
     def __str__(self) -> str:
@@ -155,9 +154,7 @@ class WeaponType(models.Model):
 
     objects = WeaponTypeQuerySet.as_manager()
 
-    name = models.CharField(
-        verbose_name=_('Title'), max_length=30, null=True, blank=True
-    )
+    name = models.CharField(verbose_name=_('Title'), max_length=30, blank=True)
     slug = models.CharField(verbose_name='Slug', max_length=30, unique=True, blank=True)
     handedness = models.CharField(
         verbose_name=_('Handedness'),
@@ -502,7 +499,8 @@ class NPC(
     @property
     def all_trained_skills(self) -> list[SkillEnum]:
         return self.klass_data_instance.mandatory_skills.enum_objects + [
-            SkillEnum(skill.title) for skill in self.trained_skills.all()
+            SkillEnum(skill.title)  # type: ignore
+            for skill in self.trained_skills.all()
         ]
 
     @property
@@ -647,8 +645,8 @@ class NPC(
             return True
         return weapon.weapon_type in power.available_weapon_types.all()
 
-    def proper_weapons_for_power(self, power: Power) -> Sequence[tuple[Weapon]]:
-        result = []
+    def proper_weapons_for_power(self, power: Power) -> Sequence[tuple[Weapon, ...]]:
+        result: list[tuple[Weapon, ...]] = []
         match power.accessory_type:
             case AccessoryTypeEnum.WEAPON:
                 for weapon in (self.primary_hand, self.secondary_hand):
@@ -727,6 +725,8 @@ class NPC(
                     continue
 
         for item in self.magic_items:
+            if not item.magic_item_type:
+                continue
             for power in item.magic_item_type.powers.ordered_by_frequency():
                 try:
                     powers.append(self.get_power_display(power=power, item=item))

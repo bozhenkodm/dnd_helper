@@ -114,7 +114,7 @@ class NPCDefenceMixin:
             + self.klass_data_instance.fortitude
             + self._necklace_defence_bonus
             + self.armor.armor_type.fortitude_bonus
-            if self.armor
+            if self.armor is not None
             else 0
         )
 

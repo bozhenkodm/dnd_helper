@@ -42,7 +42,7 @@ class WeaponType:
     # property shows if weapon is a magic item itself
     is_magic_item: ClassVar[bool] = False
 
-    primary_end: ClassVar[Optional["WeaponType"]] = None
+    primary_end: ClassVar[Optional[type["WeaponType"]]] = None
 
     @classmethod
     def slug(cls):

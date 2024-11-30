@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, cast
 
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
@@ -255,7 +255,7 @@ class NPCModelForm(forms.ModelForm):
             self.add_error('is_bonus_applied', message)
 
     def clean(self) -> dict[str, Any] | None:
-        self.instance: NPC
+        cast(NPC, self.instance)
         if not self.instance.id:
             return super().clean()
         self.check_npc_without_paragon_path()
