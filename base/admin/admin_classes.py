@@ -108,7 +108,7 @@ class RaceAdmin(admin.ModelAdmin):
         if not obj.id:
             return '-'
         return ', '.join(
-            ability.description  # type: ignore[attr-defined]
+            ability.description
             for ability in race_classes[obj.name].const_ability_bonus.enum_objects
         )
 

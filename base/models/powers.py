@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Callable, Sequence
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from multiselectfield import MultiSelectField
 
 from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
@@ -27,7 +28,6 @@ from base.objects.dice import DiceRoll
 from base.objects.npc_classes import NPCClass
 from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
 from base.objects.weapon_types import KiFocus
-from multiselectfield import MultiSelectField
 
 if TYPE_CHECKING:
     from base.models.models import Weapon

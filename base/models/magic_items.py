@@ -2,6 +2,7 @@ from typing import ClassVar
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from multiselectfield import MultiSelectField
 
 from base.constants.constants import (
     ArmorTypeIntEnum,
@@ -12,7 +13,6 @@ from base.constants.constants import (
 )
 from base.managers import ItemAbstractQuerySet
 from base.objects import weapon_types_tuple
-from multiselectfield import MultiSelectField
 
 
 class MagicItemType(models.Model):
