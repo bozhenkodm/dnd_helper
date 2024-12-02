@@ -112,10 +112,10 @@ class ImplementType(WeaponType):
 
     @classmethod
     def slug(cls):
-        snake_case = ""
+        snake_case = ''
         for i, char in enumerate(cls.__name__):
             if i > 0 and char.isupper():
-                snake_case += "_" + char.lower()
+                snake_case += '_' + char.lower()
             else:
                 snake_case += char.lower()
         return snake_case

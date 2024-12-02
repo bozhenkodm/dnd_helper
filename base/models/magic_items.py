@@ -10,6 +10,8 @@ from base.constants.constants import (
     MagicItemCategory,
     MagicItemSlot,
     ShieldTypeIntEnum,
+    WeaponCategoryIntEnum,
+    WeaponGroupEnum,
 )
 from base.managers import ItemAbstractQuerySet
 from base.objects import weapon_types_tuple
@@ -95,6 +97,18 @@ class MagicWeaponType(MagicItemType):
         verbose_name = _('Magic weapon type')
         verbose_name_plural = _('Magic weapon types')
 
+    weapon_groups = MultiSelectField(
+        verbose_name=_('Weapon group'),
+        choices=WeaponGroupEnum.generate_choices(),
+        null=True,
+        blank=True,
+    )
+    weapon_categories = MultiSelectField(
+        verbose_name=_('Weapon category'),
+        choices=WeaponCategoryIntEnum.generate_choices(),
+        null=True,
+        blank=True,
+    )
     weapon_type_slots = MultiSelectField(
         verbose_name=_('Weapon type'),
         choices=sorted(
@@ -102,8 +116,7 @@ class MagicWeaponType(MagicItemType):
             for w in sorted(weapon_types_tuple, key=lambda x: x.name)
             if not w.is_magic_item and not w.primary_end
         ),
-        null=False,
-        min_choices=1,
+        null=True,
     )
     crit_dice = models.SmallIntegerField(
         verbose_name=_('Crit dice'),

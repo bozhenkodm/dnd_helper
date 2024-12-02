@@ -4,6 +4,7 @@ from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from base.constants.constants import (
     AbilityEnum,
@@ -304,7 +305,7 @@ class ItemAbstractForm(forms.ModelForm):
         if self.instance and self.instance.magic_item_type:
             self.fields['level'] = forms.ChoiceField(
                 choices=((i, i) for i in self.instance.magic_item_type.level_range()),
-                label='Уровень',
+                label=_('Level'),
             )
 
 

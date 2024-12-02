@@ -92,7 +92,7 @@ class IntDescriptionEnum(IntEnum):
     @classmethod
     def generate_choices(
         cls,
-        condition: Callable[["IntDescriptionEnum"], bool] = lambda x: True,
+        condition: Callable[['IntDescriptionEnum'], bool] = lambda x: True,
     ):
         return sorted(
             ((item.value, item.description) for item in cls if condition(item)),

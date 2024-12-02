@@ -12,6 +12,7 @@ from django.db import models
 from django.db.transaction import atomic
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext_lazy as _
 
 from base.admin.forms import (
     ArmsSlotItemForm,
@@ -36,6 +37,7 @@ from base.constants.constants import (
     PowerPropertyTitle,
     PowerRangeTypeEnum,
     ShieldTypeIntEnum,
+    WeaponGroupEnum,
 )
 from base.models import Class, Race
 from base.models.encounters import Combatants, CombatantsPC
@@ -588,7 +590,7 @@ class WeaponTypeAdmin(admin.ModelAdmin):
     ordering = ('name',)
     list_display = ('name', 'category', 'handedness')
     search_fields = ('name',)
-    readonly_fields = ('group', 'prof_bonus', 'damage', 'properties')
+    readonly_fields = ('prof_bonus', 'damage', 'properties')
     list_filter = ('handedness', 'category')
     save_as = True
     form = WeaponTypeForm
@@ -597,7 +599,7 @@ class WeaponTypeAdmin(admin.ModelAdmin):
         if obj and obj.id:
             return (
                 'category',
-                'group',
+                'group_display',
                 'prof_bonus',
                 'damage',
                 'handedness',
@@ -630,10 +632,10 @@ class WeaponTypeAdmin(admin.ModelAdmin):
         return obj.data_instance.properties_text()
 
     @admin.display(description='Группа оружия')
-    def group(self, obj):
+    def group_display(self, obj):
         if not obj.id:
             return '-'
-        return obj.data_instance.group_display()
+        return ', '.join(WeaponGroupEnum[g].description for g in obj.group)
 
     @admin.display(description='Бонус мастерства')
     def prof_bonus(self, obj):
@@ -652,8 +654,12 @@ class WeaponTypeAdmin(admin.ModelAdmin):
         if not obj.id:
             obj.name = weapon_types_classes[obj.slug].name
         super().save_model(request, obj, form, change)
+        queries = [
+            models.Q(weapon_type_slots__contains=obj.slug),
+            models.Q(weapon_categories__contains=obj.slug),
+        ] + [models.Q(weapon_groups__contains=g) for g in obj.group]
         for magic_weapon_type in MagicWeaponType.objects.filter(
-            weapon_type_slots__contains=obj.slug
+            reduce(lambda x, y: x | y, queries)
         ):
             for level in magic_weapon_type.level_range():
                 Weapon.create_on_base(obj, magic_weapon_type, level)
@@ -1032,19 +1038,43 @@ class MagicArmorTypeAdmin(MagicItemTypeAdminBase):
 
 
 class MagicWeaponTypeAdmin(MagicItemTypeAdminBase):
-    fields = (
-        'name',
-        'weapon_type_slots',
-        'min_level',
-        'step',
-        'max_level',
-        'category',
-        'crit_dice',
-        'crit_property',
-        'picture',
-        'upload_from_clipboard',
-        'image_tag',
-        'source',
+    fieldsets = (
+        (
+            None,
+            {
+                'fields': (
+                    'name',
+                    (
+                        'weapon_categories',
+                        'weapon_groups',
+                    ),
+                )
+            },
+        ),
+        (
+            _('Weapon types'),
+            {
+                "classes": ["collapse"],
+                'fields': ('weapon_type_slots',),
+            },
+        ),
+        (
+            None,
+            {
+                'fields': (
+                    'min_level',
+                    'step',
+                    'max_level',
+                    'category',
+                    'crit_dice',
+                    'crit_property',
+                    'picture',
+                    'upload_from_clipboard',
+                    'image_tag',
+                    'source',
+                )
+            },
+        ),
     )
     form = MagicWeaponTypeForm
 
@@ -1052,10 +1082,15 @@ class MagicWeaponTypeAdmin(MagicItemTypeAdminBase):
     def save_model(self, request, obj, form, change):
         obj.slot = MagicItemSlot.WEAPON.value
         super().save_model(request, obj, form, change)
-        weapon_types = WeaponType.objects.filter(slug__in=obj.weapon_type_slots)
+        queries = [
+            models.Q(slug__in=obj.weapon_type_slots),
+            models.Q(category__in=obj.weapon_categories),
+        ] + [models.Q(group__contains=g) for g in obj.weapon_groups]
+        weapon_types = WeaponType.objects.filter(reduce(lambda x, y: x | y, queries))
         for weapon_type in weapon_types:
             for level in obj.level_range():
                 Weapon.create_on_base(weapon_type, obj, level)
+        # deleting weapons that can no longer be of unchecked weapon types
         nwt = WeaponType.objects.exclude(slug__in=obj.weapon_type_slots)
         Weapon.objects.filter(weapon_type__in=nwt, magic_item_type=obj).delete()
 

@@ -106,9 +106,6 @@ class NPCRaceEnum(BaseNameValueDescriptionEnum):
 
 
 class NPCClassEnum(BaseNameValueDescriptionEnum):
-    def _generate_next_value_(name, start, count, last_values):
-        return str(name).lower()
-
     INVOKER = auto(), 'Апостол'
     ARTIFICER = auto(), 'Артефактор'
     BARD = auto(), 'Бард'
@@ -138,9 +135,6 @@ class NPCClassEnum(BaseNameValueDescriptionEnum):
 
 
 class SkillEnum(BaseNameValueDescriptionEnum):
-    def _generate_next_value_(name, start, count, last_values):
-        return str(name).lower()
-
     ACROBATICS = auto(), 'Акробатика'
     ATHLETICS = auto(), 'Атлетика'
     PERCEPTION = auto(), 'Внимательность'
@@ -213,9 +207,6 @@ class ShieldTypeIntEnum(IntDescriptionEnum):
 
 
 class WeaponGroupEnum(BaseNameValueDescriptionEnum):
-    def _generate_next_value_(name, start, count, last_values):
-        return str(name).lower()
-
     # Melee
     AXE = auto(), 'Топор'
     MACE = auto(), 'Булава'
@@ -262,9 +253,6 @@ class DiceIntEnum(IntDescriptionEnum):
 
 
 class WeaponHandednessEnum(BaseNameValueDescriptionEnum):
-    def _generate_next_value_(name, start, count, last_values):
-        return str(name).lower()
-
     ONE = auto(), 'Одноручное'
     TWO = auto(), 'Двуручное'
     VERSATILE = (
@@ -277,9 +265,6 @@ class WeaponHandednessEnum(BaseNameValueDescriptionEnum):
 
 
 class PowerSourceEnum(BaseNameValueDescriptionEnum):
-    def _generate_next_value_(name, start, count, last_values):
-        return str(name).lower()
-
     MARTIAL = auto(), 'Воинский'
     DIVINE = auto(), 'Духовный'
     ARCANE = auto(), 'Магический'
@@ -289,9 +274,6 @@ class PowerSourceEnum(BaseNameValueDescriptionEnum):
 
 
 class ClassRoleEnum(BaseNameValueDescriptionEnum):
-    def _generate_next_value_(name, start, count, last_values):
-        return str(name).lower()
-
     STRIKER = auto(), 'Атакующий'
     DEFENDER = auto(), 'Защитник'
     CONTROLLER = auto(), 'Контроллер'
@@ -415,9 +397,6 @@ class MagicItemCategory(BaseNameValueDescriptionEnum):
 
 
 class MagicItemSlot(BaseNameValueDescriptionEnum):
-    def _generate_next_value_(name, start, count, last_values):
-        return str(name).lower()
-
     WEAPON = auto(), 'Оружие'
     ARMOR = auto(), 'Броня'
     NECK = auto(), 'Шея'
@@ -439,9 +418,6 @@ class MagicItemSlot(BaseNameValueDescriptionEnum):
 
 
 class ThrownWeaponType(BaseNameValueDescriptionEnum):
-    def _generate_next_value_(name, start, count, last_values):
-        return str(name).lower()
-
     LIGHT = auto(), 'Лёгкое'
     HEAVY = auto(), 'Тяжёлое'
 

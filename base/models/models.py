@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from multiselectfield import MultiSelectField
 
 from base.constants.constants import (
     AccessoryTypeEnum,
@@ -14,6 +15,7 @@ from base.constants.constants import (
     SexEnum,
     SkillEnum,
     WeaponCategoryIntEnum,
+    WeaponGroupEnum,
     WeaponHandednessEnum,
 )
 from base.exceptions import PowerInconsistent, WrongWeapon
@@ -160,6 +162,12 @@ class WeaponType(models.Model):
         verbose_name=_('Handedness'),
         choices=WeaponHandednessEnum.generate_choices(is_sorted=False),
         max_length=WeaponHandednessEnum.max_length(),
+        null=True,
+    )
+    group = MultiSelectField(
+        verbose_name=_('Group'),
+        min_choices=1,
+        choices=WeaponGroupEnum.generate_choices(),
         null=True,
     )
     category = models.PositiveSmallIntegerField(
