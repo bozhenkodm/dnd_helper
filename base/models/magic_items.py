@@ -117,6 +117,7 @@ class MagicWeaponType(MagicItemType):
             if not w.is_magic_item and not w.primary_end
         ),
         null=True,
+        blank=True,
     )
     crit_dice = models.SmallIntegerField(
         verbose_name=_('Crit dice'),

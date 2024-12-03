@@ -4,6 +4,7 @@ from base.admin.admin_classes import (
     ArmorAdmin,
     ArmorTypeAdmin,
     ArmsItemSlotAdmin,
+    BonusAdmin,
     ClassAdmin,
     EncounterAdmin,
     FunctionalTemplateAdmin,
@@ -58,7 +59,7 @@ admin.site.register(MagicItemType, MagicItemTypeAdmin)
 admin.site.register(MagicArmorType, MagicArmorTypeAdmin)
 admin.site.register(MagicWeaponType, MagicWeaponTypeAdmin)
 admin.site.register(MagicArmItemType, MagicArmItemTypeAdmin)
-admin.site.register(Bonus)
+admin.site.register(Bonus, BonusAdmin)
 
 # hidden from sidebar
 admin.site.register(Armor, ArmorAdmin)

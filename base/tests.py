@@ -3,8 +3,9 @@ import os
 import pytest
 from django.conf import settings
 
+from base.constants.constants import WeaponGroupEnum
 from base.models import NPC
-from base.models.models import WeaponType
+from base.models.models import Weapon, WeaponType
 from base.objects import weapon_types_classes
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -41,3 +42,18 @@ def test_objects_db_consistency():
         assert (
             wt.category == weapon_types_classes[wt.slug].category
         ), f'{wt} has inconsistent category'
+        if obj_group := getattr(weapon_types_classes[wt.slug], 'group', None):
+            if isinstance(obj_group, WeaponGroupEnum):
+                assert wt.group == [obj_group]
+            else:
+                assert wt.group == list(obj_group)
+        else:
+            assert not wt.group
+
+
+@pytest.mark.django_db
+def test_exist_non_enhanced_weapon():
+    for wt in WeaponType.objects.all():
+        assert Weapon.objects.filter(
+            weapon_type=wt, level=0
+        ).count(), f'{wt} has no weapon instance'

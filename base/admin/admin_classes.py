@@ -1086,13 +1086,16 @@ class MagicWeaponTypeAdmin(MagicItemTypeAdminBase):
             models.Q(slug__in=obj.weapon_type_slots),
             models.Q(category__in=obj.weapon_categories),
         ] + [models.Q(group__contains=g) for g in obj.weapon_groups]
-        weapon_types = WeaponType.objects.filter(reduce(lambda x, y: x | y, queries))
+        weapon_types = WeaponType.objects.filter(
+            reduce(lambda x, y: x | y, queries)
+        ).filter(is_enhanceable=True)
         for weapon_type in weapon_types:
             for level in obj.level_range():
                 Weapon.create_on_base(weapon_type, obj, level)
         # deleting weapons that can no longer be of unchecked weapon types
-        nwt = WeaponType.objects.exclude(slug__in=obj.weapon_type_slots)
-        Weapon.objects.filter(weapon_type__in=nwt, magic_item_type=obj).delete()
+        Weapon.objects.filter(magic_item_type=obj).exclude(
+            weapon_type__in=weapon_types
+        ).delete()
 
 
 class MagicArmItemTypeAdmin(MagicItemTypeAdminBase):
@@ -1145,3 +1148,7 @@ class ArmsItemSlotAdmin(admin.ModelAdmin):
         Return empty perms dict thus hiding the model from admin index.
         """
         return {}
+
+
+class BonusAdmin(admin.ModelAdmin):
+    pass

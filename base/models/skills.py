@@ -37,7 +37,9 @@ class NPCSkillMixin:
         """
         return Skills(
             **{
-                skill.value: getattr(self, f'{skill.get_base_ability()[:3]}_mod')
+                skill.lvalue: getattr(
+                    self, f'{skill.get_base_ability().lower()[:3]}_mod'
+                )
                 for skill in SkillEnum
             }
         )
@@ -47,7 +49,7 @@ class NPCSkillMixin:
         half_level = Skills.init_with_const(SkillEnum.sequence(), self.half_level)
         trained_skills = Skills.init_with_const(
             [
-                SkillEnum[trained_skill.title.upper()]
+                SkillEnum[trained_skill.title]
                 for trained_skill in self.trained_skills.all()  # type: ignore
             ],
             5,
@@ -172,8 +174,6 @@ class NPCSkillMixin:
         )
         for skill, value in asdict(self.skills).items():
             if getattr(ordinary_skills, skill) != value:
-                description = SkillEnum[
-                    skill.upper()
-                ].description  # type: ignore[attr-defined]
+                description = SkillEnum[skill.upper()].description
                 result.append(f'{description}' f' +{value}')
         return sorted(result)

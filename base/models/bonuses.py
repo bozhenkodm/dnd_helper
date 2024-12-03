@@ -1,7 +1,15 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from base.constants.constants import BonusSource, BonusType
+from base.constants.base import generate_choices
+from base.constants.constants import (
+    AbilityEnum,
+    BonusSource,
+    BonusType,
+    DefenceTypeEnum,
+    SkillEnum,
+)
+from base.models.powers import Power
 
 
 class Bonus(models.Model):
@@ -11,6 +19,9 @@ class Bonus(models.Model):
 
     name = models.CharField(
         verbose_name=_('Title'), max_length=100, null=True, blank=True
+    )
+    power = models.ForeignKey(
+        Power, verbose_name=_('Power'), null=True, blank=True, on_delete=models.CASCADE
     )
     source = models.CharField(
         verbose_name=_('Bonus source'),
@@ -24,8 +35,13 @@ class Bonus(models.Model):
     )
     bonus_type = models.CharField(
         verbose_name=_('Bonus type'),
-        choices=BonusType.generate_choices(),
-        max_length=BonusType.max_length(),
+        choices=generate_choices(AbilityEnum, SkillEnum, DefenceTypeEnum, BonusType),
+        max_length=max(
+            map(
+                lambda x: x.max_length(),
+                (AbilityEnum, SkillEnum, DefenceTypeEnum, BonusType),
+            )
+        ),
         null=True,
         blank=True,
     )

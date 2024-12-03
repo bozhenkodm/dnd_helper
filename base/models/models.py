@@ -21,7 +21,6 @@ from base.constants.constants import (
 from base.exceptions import PowerInconsistent, WrongWeapon
 from base.managers import WeaponTypeQuerySet
 from base.models.abilities import Ability, NPCAbilityAbstract
-from base.models.bonuses import Bonus
 from base.models.defences import NPCDefenceMixin
 from base.models.experience import NPCExperienceAbstract
 from base.models.magic_items import (
@@ -182,6 +181,9 @@ class WeaponType(models.Model):
         blank=True,
         related_name='secondary_end',
     )
+    is_enhanceable = models.BooleanField(
+        verbose_name=_('Is weapon enhanceable?'), default=True
+    )
 
     def __str__(self) -> str:
         # return weapon_types_classes[self.slug].name
@@ -208,7 +210,11 @@ class Weapon(ItemAbstract):
         unique_together = ('magic_item_type', 'level', 'weapon_type')
 
     weapon_type = models.ForeignKey(
-        WeaponType, verbose_name=_('Weapon type'), on_delete=models.CASCADE, null=False
+        WeaponType,
+        verbose_name=_('Weapon type'),
+        on_delete=models.CASCADE,
+        null=False,
+        related_name='weapons',
     )
 
     def __str__(self):
@@ -311,7 +317,6 @@ class Race(models.Model):
         default=True,
         help_text=_('Social races are used for random npc generation'),
     )
-    bonus = models.ManyToManyField(Bonus, verbose_name=_('Bonus'), blank=True)
 
     def __str__(self):
         return NPCRaceEnum[self.name].description
@@ -408,7 +413,6 @@ class NPC(
 
     name = models.CharField(verbose_name=_('Name'), max_length=50)
     description = models.TextField(verbose_name=_('Description'), null=True, blank=True)
-    creation_step = models.PositiveSmallIntegerField(default=1)
     race = models.ForeignKey(Race, on_delete=models.CASCADE, verbose_name=_('Race'))
     klass = models.ForeignKey(
         Class,

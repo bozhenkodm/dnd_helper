@@ -22,7 +22,6 @@ from base.constants.constants import (
 )
 from base.exceptions import PowerInconsistent
 from base.managers import PowerQueryset
-from base.models.bonuses import Bonus
 from base.models.magic_items import ItemAbstract
 from base.objects.dice import DiceRoll
 from base.objects.npc_classes import NPCClass
@@ -164,10 +163,6 @@ class Power(models.Model):
     )
     range = models.SmallIntegerField(verbose_name=_('Distance'), default=0)
     burst = models.SmallIntegerField(verbose_name=_('Area'), default=0)
-
-    bonus = models.ForeignKey(
-        Bonus, verbose_name=_('Bonus'), null=True, on_delete=models.SET_NULL, blank=True
-    )
 
     def __str__(self):
         if self.race:

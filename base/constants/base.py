@@ -1,4 +1,5 @@
 from enum import Enum, IntEnum
+from functools import reduce
 from typing import Any, Callable, Self, Sequence
 
 from django.db import models
@@ -125,3 +126,7 @@ class IntDescriptionSubclassEnum(IntDescriptionEnum):
             [(item.value, item.description) for item in cls] + [(0, '---------')],
             key=lambda x: x[0],
         )
+
+
+def generate_choices(*enums: type[BaseNameValueDescriptionEnum]):
+    return tuple(reduce(lambda x, y: x + y, (e.generate_choices() for e in enums)))
