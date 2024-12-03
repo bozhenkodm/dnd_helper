@@ -34,10 +34,6 @@ class Race:
     initiative: ClassVar[int] = 0
 
     @property
-    def healing_surge_bonus(self):
-        return 0
-
-    @property
     def heavy_armor_speed_penalty(self):
         return 1
 
@@ -65,11 +61,6 @@ class DragonbornRace(Race):
     const_ability_bonus = Abilities(charisma=2)
     var_ability_bonus = Abilities(strength=2, constitution=2)
     skill_bonuses = Skills(intimidate=2, history=2)
-
-    @property
-    def healing_surge_bonus(self):
-        # У драконорождённых исцеление увеличено
-        return self.npc.con_mod
 
 
 class ShifterRace(Race):

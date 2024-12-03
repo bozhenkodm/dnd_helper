@@ -10,6 +10,7 @@ from multiselectfield import MultiSelectField
 from base.constants.constants import (
     AccessoryTypeEnum,
     ArmorTypeIntEnum,
+    BonusType,
     NPCClassEnum,
     NPCRaceEnum,
     SexEnum,
@@ -571,7 +572,7 @@ class NPC(
         """
         Healing surge value
         """
-        return self.bloodied // 2 + self.race_data_instance.healing_surge_bonus
+        return self.bloodied // 2 + self.calculate_bonus(BonusType.SURGE)
 
     @property
     def _tier(self):

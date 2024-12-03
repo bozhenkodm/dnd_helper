@@ -73,7 +73,9 @@ class Skills:
     @property
     def enum_objects(self) -> list[SkillEnum]:
         return [
-            SkillEnum[skill_name] for skill_name, value in asdict(self).items() if value
+            SkillEnum[skill_name.upper()]
+            for skill_name, value in asdict(self).items()
+            if value
         ]
 
     def display_non_zero(self) -> str:

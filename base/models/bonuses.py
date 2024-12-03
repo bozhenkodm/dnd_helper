@@ -7,9 +7,9 @@ from base.constants.constants import (
     BonusSource,
     BonusType,
     DefenceTypeEnum,
+    PowerFrequencyEnum,
     SkillEnum,
 )
-from base.models.powers import Power
 
 
 class Bonus(models.Model):
@@ -21,7 +21,14 @@ class Bonus(models.Model):
         verbose_name=_('Title'), max_length=100, null=True, blank=True
     )
     power = models.ForeignKey(
-        Power, verbose_name=_('Power'), null=True, blank=True, on_delete=models.CASCADE
+        "base.Power",
+        verbose_name=_('Power'),
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='bonuses',
+        related_query_name='bonus',
+        limit_choices_to={'level': 0, 'frequency': PowerFrequencyEnum.PASSIVE},
     )
     source = models.CharField(
         verbose_name=_('Bonus source'),
@@ -35,11 +42,21 @@ class Bonus(models.Model):
     )
     bonus_type = models.CharField(
         verbose_name=_('Bonus type'),
-        choices=generate_choices(AbilityEnum, SkillEnum, DefenceTypeEnum, BonusType),
+        choices=generate_choices(
+            AbilityEnum,
+            SkillEnum,
+            DefenceTypeEnum,
+            BonusType,
+        ),
         max_length=max(
             map(
                 lambda x: x.max_length(),
-                (AbilityEnum, SkillEnum, DefenceTypeEnum, BonusType),
+                (
+                    AbilityEnum,
+                    SkillEnum,
+                    DefenceTypeEnum,
+                    BonusType,
+                ),
             )
         ),
         null=True,

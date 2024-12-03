@@ -1,5 +1,6 @@
 import operator
 import re
+from collections import defaultdict
 from typing import TYPE_CHECKING, Callable, Sequence
 
 from django.db import models
@@ -10,6 +11,7 @@ from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
     AbilityEnum,
     AccessoryTypeEnum,
+    BonusType,
     DefenceTypeEnum,
     DiceIntEnum,
     PowerActionTypeEnum,
@@ -19,9 +21,11 @@ from base.constants.constants import (
     PowerPropertyTitle,
     PowerRangeTypeEnum,
     PowerVariables,
+    SkillEnum,
 )
 from base.exceptions import PowerInconsistent
 from base.managers import PowerQueryset
+from base.models.bonuses import Bonus
 from base.models.magic_items import ItemAbstract
 from base.objects.dice import DiceRoll
 from base.objects.npc_classes import NPCClass
@@ -55,6 +59,7 @@ class Power(models.Model):
         default=PowerActionTypeEnum.STANDARD,
         null=True,
         blank=False,
+        help_text=_('Choose, if power frequency is not passive'),
     )
     klass = models.ForeignKey(
         'base.Class',
@@ -654,9 +659,13 @@ class PowerMixin:
         # TODO fix parsing cases with ")" as a last character.
         #  Now it's unmatched by regexp
         expressions_to_calculate = re.findall(pattern, string)
+        print('2' * 88)
+        print(string)
+        print(expressions_to_calculate)
         template = re.sub(
             pattern, '{}', string
         )  # preparing template for format() method
+        print(template)
         calculated_expressions = []
         for expression in expressions_to_calculate:
             calculated_expressions.append(
@@ -711,3 +720,36 @@ class PowerMixin:
                 for prop in self.valid_properties(power)
             ],
         ).asdict()
+
+    def bonuses(self) -> models.QuerySet["Bonus"]:
+        powers = self.powers.filter(
+            frequency=PowerFrequencyEnum.PASSIVE, subclass__in=(self.subclass, 0)
+        ).union(self.race.powers.filter(frequency=PowerFrequencyEnum.PASSIVE))
+        if self.functional_template:
+            powers = powers.union(
+                self.functional_template.powers.filter(
+                    frequency=PowerFrequencyEnum.PASSIVE
+                )
+            )
+        if self.paragon_path:
+            powers = powers.union(
+                self.paragon_path.powers.filter(frequency=PowerFrequencyEnum.PASSIVE)
+            )
+        powers = powers.union(
+            Power.objects.filter(
+                frequency=PowerFrequencyEnum.PASSIVE,
+                magic_item_type__in=self.magic_items,
+            )
+        )
+        return Bonus.objects.filter(power__id__in=(p.id for p in powers))
+
+    def calculate_bonus(
+        self,
+        bonus_type: AbilityEnum | SkillEnum | DefenceTypeEnum | BonusType,
+    ):
+        result = defaultdict(list)
+        for bonus in self.bonuses().filter(bonus_type=bonus_type):
+            result[bonus.source].append(
+                int(self.parse_string(accessory_type=None, string=f'${bonus.value}'))
+            )
+        return sum(max(value) for value in result.values())

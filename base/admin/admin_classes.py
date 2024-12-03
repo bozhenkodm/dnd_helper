@@ -88,7 +88,6 @@ class RaceAdmin(admin.ModelAdmin):
         'const_ability_bonus',
         'var_ability_bonus',
         'is_sociable',
-        'bonus',
     )
     list_filter = ('is_sociable',)
     list_display = ('name', 'is_sociable')
@@ -791,6 +790,15 @@ class PowerAdmin(admin.ModelAdmin):
     readonly_fields = ('syntax',)
     ordering = ('klass', 'level', 'frequency')
     autocomplete_fields = ('available_weapon_types',)
+    search_fields = (
+        'name',
+        'klass__name_display',
+        'race__name_display',
+        'functional_template__title',
+        'paragon_path__title',
+        'magic_item_type__name',
+        'skill__title',
+    )
     save_as = True
 
     @admin.display(description='Синтаксис')
@@ -1151,4 +1159,4 @@ class ArmsItemSlotAdmin(admin.ModelAdmin):
 
 
 class BonusAdmin(admin.ModelAdmin):
-    pass
+    autocomplete_fields = ('power',)
