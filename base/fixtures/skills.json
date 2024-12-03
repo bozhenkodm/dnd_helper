@@ -1,137 +1,137 @@
 [
 {
     "model": "base.skill",
-    "pk": "acrobatics",
+    "pk": "ACROBATICS",
     "fields": {
-        "based_on": "dexterity",
+        "based_on": "DEXTERITY",
         "ordering": 3
     }
 },
 {
     "model": "base.skill",
-    "pk": "arcana",
+    "pk": "ARCANA",
     "fields": {
-        "based_on": "intelligence",
+        "based_on": "INTELLIGENCE",
         "ordering": 11
     }
 },
 {
     "model": "base.skill",
-    "pk": "athletics",
+    "pk": "ATHLETICS",
     "fields": {
-        "based_on": "strength",
+        "based_on": "STRENGTH",
         "ordering": 4
     }
 },
 {
     "model": "base.skill",
-    "pk": "bluff",
+    "pk": "BLUFF",
     "fields": {
-        "based_on": "charisma",
+        "based_on": "CHARISMA",
         "ordering": 12
     }
 },
 {
     "model": "base.skill",
-    "pk": "diplomacy",
+    "pk": "DIPLOMACY",
     "fields": {
-        "based_on": "charisma",
+        "based_on": "CHARISMA",
         "ordering": 13
     }
 },
 {
     "model": "base.skill",
-    "pk": "dungeoneering",
+    "pk": "DUNGEONEERING",
     "fields": {
-        "based_on": "wisdom",
+        "based_on": "WISDOM",
         "ordering": 14
     }
 },
 {
     "model": "base.skill",
-    "pk": "endurance",
+    "pk": "ENDURANCE",
     "fields": {
-        "based_on": "constitution",
+        "based_on": "CONSTITUTION",
         "ordering": 7
     }
 },
 {
     "model": "base.skill",
-    "pk": "heal",
+    "pk": "HEAL",
     "fields": {
-        "based_on": "wisdom",
+        "based_on": "WISDOM",
         "ordering": 19
     }
 },
 {
     "model": "base.skill",
-    "pk": "history",
+    "pk": "HISTORY",
     "fields": {
-        "based_on": "intelligence",
+        "based_on": "INTELLIGENCE",
         "ordering": 10
     }
 },
 {
     "model": "base.skill",
-    "pk": "insight",
+    "pk": "INSIGHT",
     "fields": {
-        "based_on": "wisdom",
+        "based_on": "WISDOM",
         "ordering": 16
     }
 },
 {
     "model": "base.skill",
-    "pk": "intimidate",
+    "pk": "INTIMIDATE",
     "fields": {
-        "based_on": "charisma",
+        "based_on": "CHARISMA",
         "ordering": 8
     }
 },
 {
     "model": "base.skill",
-    "pk": "nature",
+    "pk": "NATURE",
     "fields": {
-        "based_on": "wisdom",
+        "based_on": "WISDOM",
         "ordering": 15
     }
 },
 {
     "model": "base.skill",
-    "pk": "perception",
+    "pk": "PERCEPTION",
     "fields": {
-        "based_on": "wisdom",
+        "based_on": "WISDOM",
         "ordering": 5
     }
 },
 {
     "model": "base.skill",
-    "pk": "religion",
+    "pk": "RELIGION",
     "fields": {
-        "based_on": "intelligence",
+        "based_on": "INTELLIGENCE",
         "ordering": 17
     }
 },
 {
     "model": "base.skill",
-    "pk": "stealth",
+    "pk": "STEALTH",
     "fields": {
-        "based_on": "dexterity",
+        "based_on": "DEXTERITY",
         "ordering": 18
     }
 },
 {
     "model": "base.skill",
-    "pk": "streetwise",
+    "pk": "STREETWISE",
     "fields": {
-        "based_on": "charisma",
+        "based_on": "CHARISMA",
         "ordering": 9
     }
 },
 {
     "model": "base.skill",
-    "pk": "thievery",
+    "pk": "THIEVERY",
     "fields": {
-        "based_on": "dexterity",
+        "based_on": "DEXTERITY",
         "ordering": 6
     }
 }
