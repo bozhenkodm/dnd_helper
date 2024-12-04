@@ -79,4 +79,9 @@ def test_race_db_consistency():
         assert (
             race.speed == race_classes[race.name].speed
         ), f'{race} has inconsistent speed'
-
+        assert (
+            race.vision == race_classes[race.name].vision
+        ), f'{race} has inconsistent vision'
+        assert (
+            race.size == race_classes[race.name].size
+        ), f'{race} has inconsistent size'

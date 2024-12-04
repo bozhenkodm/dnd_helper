@@ -14,7 +14,9 @@ from base.constants.constants import (
     NPCClassEnum,
     NPCRaceEnum,
     SexEnum,
+    SizeEnum,
     SkillEnum,
+    VisionEnum,
     WeaponCategoryIntEnum,
     WeaponGroupEnum,
     WeaponHandednessEnum,
@@ -321,6 +323,18 @@ class Race(models.Model):
         verbose_name=_('Selective ability bonuses'),
     )
     speed = models.PositiveSmallIntegerField(verbose_name=_('Speed'), default=6)
+    vision = models.CharField(
+        verbose_name=_('Vision'),
+        choices=VisionEnum.generate_choices(is_sorted=False),
+        max_length=VisionEnum.max_length(),
+        default=VisionEnum.NORMAL,
+    )
+    size = models.CharField(
+        verbose_name=_('Size'),
+        choices=SizeEnum.generate_choices(is_sorted=False),
+        max_length=SizeEnum.max_length(),
+        default=SizeEnum.AVERAGE,
+    )
     is_sociable = models.BooleanField(
         verbose_name=_('Is race social?'),
         default=True,
