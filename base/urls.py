@@ -6,6 +6,7 @@ from base.views import (
     MainView,
     NPCDetailView,
     NPCFormView,
+    PCPartyView,
     SubclassOptionsView,
 )
 
@@ -26,5 +27,6 @@ urlpatterns = [
         EncounterChangeInitiativeView.as_view(),
         name='encounter-change',
     ),
+    path('pcparty/detail/<pk>', PCPartyView.as_view(), name='pcparty'),
     path('', MainView.as_view(), name='main_view'),
 ] + api_urlpatterns

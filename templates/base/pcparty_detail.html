@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<style>
+.border {
+    border: 2px solid black;
+    border-collapse: collapse
+}
+.center {
+    text-align: center
+}
+</style>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ object }}</title>
+</head>
+<body>
+<div class="pagenotbreak" style="width: 1000px; font-size: large">
+<table class="border" style="width: 1000px; font-size: large">
+    <colgroup>
+       <col span="1" style="width: 40%;">
+       <col span="1" style="width: 10%;">
+       <col span="1" style="width: 10%;">
+       <col span="1" style="width: 10%;">
+       <col span="1" style="width: 10%;">
+       <col span="1" style="width: 10%;">
+       <col span="1" style="width: 10%;">
+    </colgroup>
+    <tr class="border">
+      <th class="border">Имя</th>
+      <th class="border">КД</th>
+      <th class="border">Стойкость</th>
+      <th class="border">Реакция</th>
+      <th class="border">Воля</th>
+      <th class="border">Пассивная внимательность</th>
+      <th class="border">Пассивная проницательность</th>
+    </tr>
+{% for member in object.members.all %}
+    <tr class="border">
+      <td class="border center"><span><b>{{ member.name }}</b></span></td>
+      <td class="border center"><span><b>{{ member.armor_class }}</b></span></td>
+      <td class="border center"><span><b>{{ member.fortitude }}</b></span></td>
+      <td class="border center"><span><b>{{ member.reflex }}</b></span></td>
+      <td class="border center"><span><b>{{ member.will }}</b></span></td>
+      <td class="border center"><span><b>{{ member.passive_perception }}</b></span></td>
+      <td class="border center"><span><b>{{ member.passive_insight }}</b></span></td>
+    </tr>
+{% endfor %}
+</table>
+</div>
+</body>
+</html>

@@ -54,16 +54,17 @@
   </tr>
 {% for combatant in object.participants.ordered %}
     <tr class="border {% if object.turn_number_in_round == forloop.counter %}current_turn{% endif %}">
-    <td class="border"><span><b>{{ forloop.counter }}</b></span></td>
-    <td class="border"><span><b>{{ combatant.full_name }}</b></span><br>
-    {% if combatant.display_defences %}
-    <span style="font-size: small"><b>КД</b>: {{combatant.ac}}, <b>Ст</b>: {{combatant.fortitude}}, <b>Р</b>: {{combatant.reflex}}, <b>В</b>: {{combatant.will}} </span>
-    {% endif %}
-    </td>
-    <td>
-        <textarea name="status{{ forloop.counter }}" form="round_form" style="width: 98%">{{ combatant.status }}</textarea>
-    </td>
-    <td class="border"><span style="float: right">{{ combatant.initiative|floatformat:"0" }} </span></td>
+        <td class="border"><span><b>{{ forloop.counter }}</b></span></td>
+        <td class="border"><span><b>{{ combatant.full_name }}</b></span><br>
+        {% if combatant.display_defences %}
+        <span style="font-size: small"><b>КД</b>: {{combatant.ac}}, <b>Ст</b>: {{combatant.fortitude}}, <b>Р</b>: {{combatant.reflex}}, <b>В</b>: {{combatant.will}} </span>
+        {% endif %}
+        </td>
+        <td>
+            <textarea name="status{{ forloop.counter }}" form="round_form" style="width: 98%">{{ combatant.status }}</textarea>
+        </td>
+        <td class="border"><span style="float: right">{{ combatant.initiative|floatformat:"0" }} </span></td>
+    </tr>
 {% endfor %}
 </table>
 </div>

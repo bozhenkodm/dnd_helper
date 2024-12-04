@@ -45,6 +45,9 @@ class PCParty(models.Model):
         name = f'{self.name}: ' if self.name else ''
         return f'{name}{members}'
 
+    def get_absolute_url(self):
+        return reverse('pcparty', kwargs={'pk': self.pk})
+
 
 class Encounter(models.Model):
     class Meta:

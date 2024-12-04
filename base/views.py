@@ -10,7 +10,7 @@ from base.constants.constants import SkillEnum
 from base.forms.encounter import EncounterChangeInitiativeForm
 from base.forms.npc import NPCModelForm
 from base.models import NPC, Class, Encounter
-from base.models.encounters import EncounterParticipants
+from base.models.encounters import EncounterParticipants, PCParty
 from base.objects import npc_klasses
 
 
@@ -75,6 +75,10 @@ class EncounterChangeInitiativeView(View):
             participant.move_after(form.cleaned_data['move_after'])
 
         return redirect('encounter', pk=kwargs.get('pk'))
+
+
+class PCPartyView(DetailView):
+    model = PCParty
 
 
 class MainView(TemplateView):
