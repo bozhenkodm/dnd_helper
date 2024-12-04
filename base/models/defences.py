@@ -89,7 +89,6 @@ class NPCDefenceMixin:
     def armor_class(self: NPCProtocol) -> int:
         result = (
             self._defence_level_bonus
-            + self.race_data_instance.armor_class
             + (
                 self.functional_template.armor_class_bonus
                 if self.functional_template

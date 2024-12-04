@@ -50,7 +50,7 @@ from base.models.magic_items import (
 )
 from base.models.models import NPC, Armor, ArmorType, ParagonPath, Weapon, WeaponType
 from base.models.powers import Power, PowerProperty
-from base.objects import npc_klasses, race_classes, weapon_types_classes
+from base.objects import npc_klasses, weapon_types_classes
 from base.objects.weapon_types import HolySymbol, KiFocus
 
 
@@ -103,7 +103,6 @@ class RaceAdmin(admin.ModelAdmin):
         if obj and obj.id:
             return 'name', 'const_ability_bonus', 'var_ability_bonus'
         return ()
-
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False

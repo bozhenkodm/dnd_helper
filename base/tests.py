@@ -76,4 +76,7 @@ def test_race_db_consistency():
         assert (
             race.name_display == race_classes[race.name].slug.description
         ), f'{race} has inconsistent name display'
+        assert (
+            race.speed == race_classes[race.name].speed
+        ), f'{race} has inconsistent speed'
 

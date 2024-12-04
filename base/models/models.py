@@ -320,6 +320,7 @@ class Race(models.Model):
         related_name='races',
         verbose_name=_('Selective ability bonuses'),
     )
+    speed = models.PositiveSmallIntegerField(verbose_name=_('Speed'), default=6)
     is_sociable = models.BooleanField(
         verbose_name=_('Is race social?'),
         default=True,

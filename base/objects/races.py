@@ -1,7 +1,6 @@
 from typing import ClassVar, Sequence, Type
 
 from base.constants.constants import NPCRaceEnum, SizeEnum, VisionEnum
-from base.objects.abilities import Abilities
 from base.objects.skills import Skills
 from base.objects.weapon_types import (
     Longbow,
@@ -22,7 +21,6 @@ class Race:
     vision: ClassVar[VisionEnum] = VisionEnum.NORMAL
     size: ClassVar[SizeEnum] = SizeEnum.AVERAGE
 
-    armor_class: ClassVar[int] = 0
     fortitude: ClassVar[int] = 0
     reflex: ClassVar[int] = 0
     will: ClassVar[int] = 0
