@@ -54,7 +54,7 @@ class NPCModelForm(forms.ModelForm):
             self.fields['var_bonus_ability'] = forms.ModelChoiceField(
                 queryset=Ability.objects.filter(races=self.instance.race),
                 label='Выборочный бонус характеристики',
-                required=False,
+                required=bool(Ability.objects.filter(races=self.instance.race).count()),
             )
             self.fields['trained_skills'] = forms.ModelMultipleChoiceField(
                 queryset=Skill.objects.filter(classes=self.instance.klass),

@@ -141,7 +141,12 @@ class InvokerClass(NPCClass):
     _will = 1
     mandatory_skills = Skills(religion=5)
     trainable_skills = Skills(
-        endurance=5, history=5, intimidate=5, arcana=5, diplomacy=5, insight=5
+        endurance=5,
+        history=5,
+        intimidate=5,
+        arcana=5,
+        diplomacy=5,
+        insight=5,
     )
     _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
@@ -257,13 +262,6 @@ class VampireClass(NPCClass):
             # Рефлексы вампира
             result += 2
         return result
-
-    @property
-    def damage_bonus(self) -> int:
-        base_bonus = super().damage_bonus + self.npc.cha_mod
-        if self.npc.level < 5:
-            return base_bonus
-        return base_bonus + (self.npc.level - 5) // 10 * 2 + 2
 
 
 class BarbarianClass(NPCClass):
@@ -865,14 +863,6 @@ class SorcererClass(NPCClass):
     class SubclassEnum(IntDescriptionSubclassEnum):
         DRAGON_MAGIC = 1, 'Драконья магия'
         WILD_MAGIC = 2, 'Дикая магия'
-
-    @property
-    def damage_bonus(self) -> int:
-        if self.npc.subclass == self.SubclassEnum.DRAGON_MAGIC:
-            return self.npc._level_bonus + self.npc.str_mod + 2 * self.npc._tier
-        elif self.npc.subclass == self.SubclassEnum.WILD_MAGIC:
-            return self.npc._level_bonus + self.npc.dex_mod + 2 * self.npc._tier
-        return 0
 
     @property
     def _armor_class_ability_bonus(self) -> int:

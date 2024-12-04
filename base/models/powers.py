@@ -134,11 +134,15 @@ class Power(models.Model):
         verbose_name=_('Effect type'),
         choices=PowerEffectTypeEnum.generate_choices(),
         default=PowerEffectTypeEnum.NONE,
+        null=True,
+        blank=True,
     )
     damage_type = MultiSelectField(
         verbose_name=_('Damage type'),
         choices=PowerDamageTypeEnum.generate_choices(),
         default=PowerDamageTypeEnum.NONE,
+        null=True,
+        blank=True,
     )
     dice_number = models.SmallIntegerField(verbose_name=_('Dice number'), default=1)
     damage_dice = models.SmallIntegerField(
@@ -433,7 +437,6 @@ class PowerMixin:
         self, weapon: "Weapon", accessory_type: AccessoryTypeEnum | None
     ):
         if not weapon:
-            # TODO deal with error message
             return self.klass_data_instance.attack_bonus()
         enhancement = weapon.enhancement
         if self._can_get_bonus_from_implement_to_weapon(accessory_type):
@@ -456,6 +459,7 @@ class PowerMixin:
             enhancement = max(enhancement, self.no_hand.enhancement)
         return (
             self.klass_data_instance.damage_bonus
+            + self.calculate_bonus(BonusType.DAMAGE)
             + self.enhancement_with_magic_threshold(enhancement)
         )
 
@@ -659,13 +663,9 @@ class PowerMixin:
         # TODO fix parsing cases with ")" as a last character.
         #  Now it's unmatched by regexp
         expressions_to_calculate = re.findall(pattern, string)
-        print('2' * 88)
-        print(string)
-        print(expressions_to_calculate)
         template = re.sub(
             pattern, '{}', string
         )  # preparing template for format() method
-        print(template)
         calculated_expressions = []
         for expression in expressions_to_calculate:
             calculated_expressions.append(
@@ -738,10 +738,13 @@ class PowerMixin:
         powers = powers.union(
             Power.objects.filter(
                 frequency=PowerFrequencyEnum.PASSIVE,
-                magic_item_type__in=self.magic_items,
+                magic_item_type__in=(mi.magic_item_type for mi in self.magic_items),
             )
         )
-        return Bonus.objects.filter(power__id__in=(p.id for p in powers))
+        return Bonus.objects.filter(
+            power__id__in=(p.id for p in powers),
+            min_level__gte=self.level,
+        )
 
     def calculate_bonus(
         self,
@@ -749,7 +752,12 @@ class PowerMixin:
     ):
         result = defaultdict(list)
         for bonus in self.bonuses().filter(bonus_type=bonus_type):
-            result[bonus.source].append(
-                int(self.parse_string(accessory_type=None, string=f'${bonus.value}'))
-            )
+            try:
+                result[bonus.source].append(
+                    int(
+                        self.parse_string(accessory_type=None, string=f'${bonus.value}')
+                    )
+                )
+            except ValueError:
+                print(f'Bonus processing failed: {bonus}, {bonus.value}')
         return sum(max(value) for value in result.values())

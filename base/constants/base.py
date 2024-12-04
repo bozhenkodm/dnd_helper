@@ -23,13 +23,14 @@ class BaseNameValueDescriptionEnum(str, Enum):
         is_sorted: bool = True,
         start_with: Sequence[Self] = (),
         condition: Callable[[Any], bool] = lambda x: True,
+        description_prefix: str = '',
     ) -> list[tuple[str, str]]:
         result = [(item.value, item.description) for item in start_with]  # type: ignore
         if is_sorted:
             result.extend(
                 sorted(
                     (
-                        (item.value, item.description)
+                        (item.value, f'{description_prefix}{item.description}')
                         for item in cls
                         if item not in start_with and condition(item)
                     ),  # type: ignore
@@ -38,7 +39,7 @@ class BaseNameValueDescriptionEnum(str, Enum):
             )
         else:
             result.extend(
-                (item.value, item.description)
+                (item.value, f'{description_prefix}{item.description}')
                 for item in cls
                 if item not in start_with and condition(item)  # type: ignore
             )

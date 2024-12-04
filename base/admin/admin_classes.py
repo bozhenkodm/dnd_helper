@@ -123,7 +123,7 @@ class RaceAdmin(admin.ModelAdmin):
 class ClassAdmin(admin.ModelAdmin):
     search_fields = ('name_display',)
     ordering = ('name_display',)
-    readonly_fields = (
+    fields = (
         'available_armor_types',
         'available_shields',
         'available_weapons',
@@ -131,7 +131,6 @@ class ClassAdmin(admin.ModelAdmin):
         'mandatory_skills',
         'trainable_skills',
     )
-    fields = readonly_fields
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False

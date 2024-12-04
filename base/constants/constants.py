@@ -433,3 +433,4 @@ class BonusType(BaseNameValueDescriptionEnum):
     SURGE = auto(), 'Значение исцеления'
     SURGES = auto(), 'Количество исцелений'
     ATTACK = auto(), 'Атака'
+    DAMAGE = auto(), 'Урон'

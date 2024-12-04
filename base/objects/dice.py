@@ -12,15 +12,8 @@ class DiceRoll:
 
     def __str__(self) -> str:
         if not self.addendant:
-            return (
-                f'{self.rolls}'
-                f'{self.dice.description}'  # type: ignore[attr-defined]
-            )
-        return (
-            f'{self.rolls}'
-            f'{self.dice.description}'  # type: ignore[attr-defined]
-            f'+{self.addendant}'
-        )
+            return f'{self.rolls}' f'{self.dice.description}'
+        return f'{self.rolls}' f'{self.dice.description}' f'+{self.addendant}'
 
     def __add__(self, other) -> 'DiceRoll':
         if not isinstance(other, int):
@@ -36,10 +29,9 @@ class DiceRoll:
         if not isinstance(other, int):
             raise TypeError('should multiply only by int')
         # 1d6+4 * 2 = 2d6+4. Addendants don't multiply
-        result = DiceRoll(
+        return DiceRoll(
             rolls=self.rolls * other, dice=self.dice, addendant=self.addendant
         )
-        return result
 
     def __imul__(self, other) -> 'DiceRoll':
         return self.__mul__(other)
