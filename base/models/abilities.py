@@ -107,16 +107,20 @@ class NPCAbilityAbstract(models.Model):
     @property
     def _initial_abilities_bonuses(self) -> Abilities:
         # getting one of variable ability bonus for specific npc
-        if not self.var_bonus_ability:
-            return self.race_data_instance.const_ability_bonus
-        var_bonus_abilitiy_name = self.var_bonus_ability.title.lower()
-        return self.race_data_instance.const_ability_bonus + Abilities(
-            **{
-                var_bonus_abilitiy_name: getattr(
-                    self.race_data_instance.var_ability_bonus, var_bonus_abilitiy_name
-                )
-            }
+        const_ability_bonus = Abilities.init_with_const(
+            *[
+                AbilityEnum(a)
+                for a in self.race.const_ability_bonus.values_list('title', flat=True)
+            ],
+            value=2,
         )
+        if self.var_bonus_ability:
+            var_ability_bonus = Abilities.init_with_const(
+                AbilityEnum(self.var_bonus_ability.title), value=2
+            )
+        else:
+            var_ability_bonus = Abilities()
+        return const_ability_bonus + var_ability_bonus
 
     @property
     def _level_abilities_bonuses(self) -> Abilities:
@@ -129,17 +133,18 @@ class NPCAbilityAbstract(models.Model):
             24,
             28,
         ):  # level bonus abilities on 4, 8, 14, 18, 24, 28 levels
-            result += Abilities(
-                **{
-                    ability.lower(): 1
+            result += Abilities.init_with_const(
+                *(
+                    AbilityEnum(ability)
                     for ability in getattr(self, f'level{i}_bonus_abilities')
-                }
+                ),
+                value=1,
             )
         return result
 
     @property
     def _tier_attrs_bonus(self) -> Abilities:
-        return Abilities(**{ability.lvalue: self._tier for ability in AbilityEnum})
+        return Abilities.init_with_const(*AbilityEnum, value=self._tier)
 
     @property
     def _base_abilities(self) -> Abilities:
@@ -152,38 +157,38 @@ class NPCAbilityAbstract(models.Model):
             charisma=self.base_charisma,
         )
 
-    def _calculate_ability_bonus(self, ability: AbilityEnum) -> int:
-        abilities = (
+    @property
+    def _abilities(self) -> Abilities:
+        return (
             self._initial_abilities_bonuses
             + self._tier_attrs_bonus
             + self._level_abilities_bonuses
             + self._base_abilities
         )
-        return getattr(abilities, ability.lvalue)
 
     @property
     def strength(self) -> int:
-        return self._calculate_ability_bonus(AbilityEnum.STRENGTH)
+        return self._abilities.strength
 
     @property
     def constitution(self) -> int:
-        return self._calculate_ability_bonus(AbilityEnum.CONSTITUTION)
+        return self._abilities.constitution
 
     @property
     def dexterity(self) -> int:
-        return self._calculate_ability_bonus(AbilityEnum.DEXTERITY)
+        return self._abilities.dexterity
 
     @property
     def intelligence(self) -> int:
-        return self._calculate_ability_bonus(AbilityEnum.INTELLIGENCE)
+        return self._abilities.intelligence
 
     @property
     def wisdom(self) -> int:
-        return self._calculate_ability_bonus(AbilityEnum.WISDOM)
+        return self._abilities.wisdom
 
     @property
     def charisma(self) -> int:
-        return self._calculate_ability_bonus(AbilityEnum.CHARISMA)
+        return self._abilities.charisma
 
     @property
     def str_mod(self) -> int:

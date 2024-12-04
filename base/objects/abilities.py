@@ -29,3 +29,7 @@ class Abilities:
             for ability_name, value in asdict(self).items()
             if value
         ]
+
+    @classmethod
+    def init_with_const(cls, *abilities: AbilityEnum, value: int) -> "Abilities":
+        return Abilities(**{ability.lvalue: value for ability in abilities})

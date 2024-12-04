@@ -1,12 +1,13 @@
 import os
+from dataclasses import asdict
 
 import pytest
 from django.conf import settings
 
 from base.constants.constants import WeaponGroupEnum
-from base.models import NPC
-from base.models.models import Weapon, WeaponType
-from base.objects import weapon_types_classes
+from base.models import NPC, Class
+from base.models.models import Race, Weapon, WeaponType
+from base.objects import npc_klasses, race_classes, weapon_types_classes
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -34,7 +35,7 @@ def test_npcs_are_valid(client):
 
 
 @pytest.mark.django_db
-def test_objects_db_consistency():
+def test_weapon_type_db_consistency():
     for wt in WeaponType.objects.all():
         assert (
             wt.handedness == weapon_types_classes[wt.slug].handedness
@@ -57,3 +58,33 @@ def test_exist_non_enhanced_weapon():
         assert Weapon.objects.filter(
             weapon_type=wt, level=0
         ).count(), f'{wt} has no weapon instance'
+
+
+@pytest.mark.django_db
+def test_class_db_consistency():
+    for klass in Class.objects.all():
+        assert set(klass.trainable_skills.values_list('title', flat=True)) == set(
+            key.upper()
+            for key, value in asdict(npc_klasses[klass.name].trainable_skills).items()
+            if value
+        ), f'{klass} has inconsistent trainable skills'
+
+
+@pytest.mark.django_db
+def test_race_db_consistency():
+    for race in Race.objects.all():
+        assert (
+            race.name_display == race_classes[race.name].slug.description
+        ), f'{race} has inconsistent name display'
+        assert set(race.var_ability_bonus.values_list('title', flat=True)) == set(
+            key.upper()
+            for key, value in asdict(race_classes[race.name].var_ability_bonus).items()
+            if value
+        ), f'{race} has inconsistent selective ability bonuses'
+        assert set(race.const_ability_bonus.values_list('title', flat=True)) == set(
+            key.upper()
+            for key, value in asdict(
+                race_classes[race.name].const_ability_bonus
+            ).items()
+            if value
+        ), f'{race} has inconsistent constant ability bonuses'

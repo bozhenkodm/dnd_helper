@@ -310,8 +310,15 @@ class Race(models.Model):
     name_display = models.CharField(
         verbose_name=_('Title'), max_length=NPCRaceEnum.max_description_length()
     )
+    const_ability_bonus = models.ManyToManyField(
+        Ability,
+        related_name='races_with_const',
+        verbose_name=_('Constant ability bonuses'),
+    )
     var_ability_bonus = models.ManyToManyField(
-        Ability, related_name='races', verbose_name='Выборочные бонусы характеристик'
+        Ability,
+        related_name='races',
+        verbose_name=_('Selective ability bonuses'),
     )
     is_sociable = models.BooleanField(
         verbose_name=_('Is race social?'),

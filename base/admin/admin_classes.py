@@ -123,23 +123,23 @@ class RaceAdmin(admin.ModelAdmin):
 class ClassAdmin(admin.ModelAdmin):
     search_fields = ('name_display',)
     ordering = ('name_display',)
-    fields = (
+    readonly_fields = (
         'available_armor_types',
         'available_shields',
         'available_weapons',
         'available_implements',
         'mandatory_skills',
-        'trainable_skills',
     )
+    fields = readonly_fields + ('trainable_skills',)
 
-    def has_add_permission(self, request: HttpRequest) -> bool:
-        return False
-
-    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
-
-    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
+    # def has_add_permission(self, request: HttpRequest) -> bool:
+    #     return False
+    #
+    # def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
+    #     return False
+    #
+    # def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+    #     return False
 
     @admin.display(description='Обязательные навыки')
     def mandatory_skills(self, obj) -> str:
