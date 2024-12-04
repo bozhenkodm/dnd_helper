@@ -104,14 +104,6 @@ class RaceAdmin(admin.ModelAdmin):
             return 'name', 'const_ability_bonus', 'var_ability_bonus'
         return ()
 
-    @admin.display(description='Постоянныe бонусы характеристик')
-    def const_ability_bonus(self, obj) -> str:
-        if not obj.id:
-            return '-'
-        return ', '.join(
-            ability.description
-            for ability in race_classes[obj.name].const_ability_bonus.enum_objects
-        )
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False

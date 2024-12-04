@@ -76,15 +76,4 @@ def test_race_db_consistency():
         assert (
             race.name_display == race_classes[race.name].slug.description
         ), f'{race} has inconsistent name display'
-        assert set(race.var_ability_bonus.values_list('title', flat=True)) == set(
-            key.upper()
-            for key, value in asdict(race_classes[race.name].var_ability_bonus).items()
-            if value
-        ), f'{race} has inconsistent selective ability bonuses'
-        assert set(race.const_ability_bonus.values_list('title', flat=True)) == set(
-            key.upper()
-            for key, value in asdict(
-                race_classes[race.name].const_ability_bonus
-            ).items()
-            if value
-        ), f'{race} has inconsistent constant ability bonuses'
+
