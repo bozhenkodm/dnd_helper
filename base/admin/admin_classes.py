@@ -97,10 +97,11 @@ class RaceAdmin(admin.ModelAdmin):
         'speed',
         'vision',
         'size',
+        'available_weapon_types',
         'is_sociable',
     )
     list_filter = ('is_sociable',)
-    list_display = ('name', 'is_sociable')
+    list_display = ('name_display', 'speed', 'vision', 'size', 'is_sociable')
     search_fields = ('name_display',)
     actions = (make_sociable, make_unsociable)
     inlines = (
@@ -114,7 +115,14 @@ class RaceAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None) -> tuple:
         if obj and obj.id:
-            return 'name', 'const_ability_bonus', 'var_ability_bonus'
+            return (
+                'name',
+                'const_ability_bonus',
+                'var_ability_bonus',
+                'speed',
+                'vision',
+                'size',
+            )
         return ()
 
     def has_add_permission(self, request: HttpRequest) -> bool:

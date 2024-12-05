@@ -36,7 +36,7 @@ from base.models.magic_items import (
 )
 from base.models.powers import Power, PowerMixin
 from base.models.skills import NPCSkillMixin, Skill
-from base.objects import npc_klasses, race_classes, weapon_types_classes
+from base.objects import npc_klasses, weapon_types_classes
 from base.objects.dice import DiceRoll
 from base.objects.weapon_types import WeaponType as WeaponTypeClass
 
@@ -337,6 +337,10 @@ class Race(models.Model):
         max_length=SizeEnum.max_length(),
         default=SizeEnum.AVERAGE,
     )
+    available_weapon_types = models.ManyToManyField(
+        WeaponType,
+        verbose_name=_('Available weapon types'),
+    )
     is_sociable = models.BooleanField(
         verbose_name=_('Is race social?'),
         default=True,
@@ -543,10 +547,6 @@ class NPC(
         return self.klass
 
     @cached_property
-    def race_data_instance(self):
-        return race_classes.get(self.race.name)(npc=self)
-
-    @cached_property
     def klass_data_instance(self):
         return npc_klasses.get(self.klass.name)(npc=self)
 
@@ -641,11 +641,8 @@ class NPC(
 
     @property
     def speed(self):
-        if self.armor:
-            return self.race.speed - min(
-                self.armor.speed_penalty,
-                self.race_data_instance.heavy_armor_speed_penalty,
-            )
+        if self.armor and self.race.name != NPCRaceEnum.DWARF:
+            return (self.race.speed - self.armor.speed_penalty)
         return self.race.speed
 
     @property
@@ -678,10 +675,10 @@ class NPC(
         data_instance = weapon.data_instance
         return any(
             (
-                data_instance.category
+                weapon.weapon_type.category
                 in map(int, self.klass_data_instance.available_weapon_categories),
                 type(data_instance) in self.klass_data_instance.available_weapon_types,
-                type(data_instance) in self.race_data_instance.available_weapon_types,
+                weapon.weapon_type in self.race.available_weapon_types.all(),
                 weapon.weapon_type in self.trained_weapons.all(),
             )
         )

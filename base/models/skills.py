@@ -5,7 +5,6 @@ from django.db import models
 from base.constants.constants import SkillEnum
 from base.models.abilities import Ability
 from base.objects.npc_classes import NPCClass
-from base.objects.races import Race
 from base.objects.skills import Skills
 
 
@@ -26,7 +25,6 @@ class Skill(models.Model):
 
 
 class NPCSkillMixin:
-    race_data_instance: Race
     klass_data_instance: NPCClass
     half_level: int
 

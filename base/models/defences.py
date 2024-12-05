@@ -14,14 +14,12 @@ if TYPE_CHECKING:
 
 from base.constants.constants import DefenceTypeEnum, NPCClassEnum, ShieldTypeIntEnum
 from base.objects.npc_classes import NPCClass
-from base.objects.races import Race
 
 INITIAL_DEFENCE_VALUE = 10
 
 
 class NPCProtocol(Protocol):
     klass_data_instance: NPCClass
-    race_data_instance: Race
     half_level: int
     _level_bonus: int
     _tier: int
@@ -42,7 +40,6 @@ class NPCProtocol(Protocol):
     gloves_slot: "HandsSlotItem"
     functional_template: "FunctionalTemplate"
     klass: "Class"
-    race: "Race"
     armor: "Armor"
 
     @property

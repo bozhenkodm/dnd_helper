@@ -5,7 +5,6 @@ from multiselectfield import MultiSelectField
 from base.constants.constants import AbilityEnum
 from base.helpers import modifier
 from base.objects.abilities import Abilities
-from base.objects.races import Race
 
 
 class Ability(models.Model):
@@ -28,7 +27,6 @@ class NPCAbilityAbstract(models.Model):
         abstract = True
 
     half_level: int
-    race_data_instance: Race
     _tier: int
 
     base_strength = models.SmallIntegerField(verbose_name='Сила (базовая)', default=10)

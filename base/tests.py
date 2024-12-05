@@ -6,8 +6,8 @@ from django.urls import reverse
 
 from base.constants.constants import WeaponGroupEnum
 from base.models import NPC, Class
-from base.models.models import Race, Weapon, WeaponType
-from base.objects import npc_klasses, race_classes, weapon_types_classes
+from base.models.models import Weapon, WeaponType
+from base.objects import npc_klasses, weapon_types_classes
 
 
 @pytest.fixture(scope='session')
@@ -74,11 +74,3 @@ def test_class_db_consistency():
             for key, value in asdict(npc_klasses[klass.name].trainable_skills).items()
             if value
         ), f'{klass} has inconsistent trainable skills'
-
-
-@pytest.mark.django_db
-def test_race_db_consistency():
-    for race in Race.objects.all():
-        assert (
-            race.name_display == race_classes[race.name].slug.description
-        ), f'{race} has inconsistent name display'
