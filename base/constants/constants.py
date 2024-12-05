@@ -150,10 +150,6 @@ class SkillEnum(BaseNameValueDescriptionEnum):
     STEALTH = auto(), 'Скрытность'
     HEAL = auto(), 'Целительство'
 
-    @classmethod
-    def sequence(cls):
-        yield from cls
-
     def get_base_ability(self):
         if self in (self.ACROBATICS, self.STEALTH, self.THIEVERY):
             return AbilityEnum.DEXTERITY

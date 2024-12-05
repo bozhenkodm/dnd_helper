@@ -31,7 +31,7 @@ from base.models.magic_items import (
     SimpleMagicItem,
     WaistSlotItem,
 )
-from base.models.models import Weapon, WeaponType
+from base.models.models import ParagonPath, Weapon, WeaponType
 from base.models.powers import Power
 from base.models.skills import Skill
 from base.objects import weapon_types_tuple
@@ -60,6 +60,14 @@ class NPCModelForm(forms.ModelForm):
                 queryset=Skill.objects.filter(classes=self.instance.klass),
                 widget=forms.CheckboxSelectMultiple,
                 label='Тренированный навыки',
+                required=False,
+            )
+            self.fields['paragon_path'] = forms.ModelChoiceField(
+                queryset=ParagonPath.objects.filter(
+                    models.Q(klass=self.instance.klass)
+                    | models.Q(race=self.instance.race)
+                ),
+                label='Путь совершенства',
                 required=False,
             )
             self.fields['powers'] = forms.ModelMultipleChoiceField(
@@ -118,7 +126,8 @@ class NPCModelForm(forms.ModelForm):
             )
             self.fields['arms_slot'] = forms.ModelChoiceField(
                 queryset=ArmsSlotItem.objects.select_related('magic_item_type').filter(
-                    magic_item_type__slot=ArmsSlotItem.SLOT.value
+                    magic_item_type__slot=ArmsSlotItem.SLOT.value,
+                    shield__in=self.instance.klass_data_instance.available_shield_types,
                 ),
                 label='Предмет на предплечья',
                 required=False,

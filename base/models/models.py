@@ -11,8 +11,10 @@ from base.constants.constants import (
     AccessoryTypeEnum,
     ArmorTypeIntEnum,
     BonusType,
+    ClassRoleEnum,
     NPCClassEnum,
     NPCRaceEnum,
+    PowerSourceEnum,
     SexEnum,
     SizeEnum,
     SkillEnum,
@@ -359,6 +361,23 @@ class Class(models.Model):
         verbose_name=_('Title'),
         max_length=NPCClassEnum.max_description_length(),
     )
+    surges = models.PositiveSmallIntegerField(verbose_name=_('Surges'), default=6)
+    hit_points_per_level = models.PositiveSmallIntegerField(
+        verbose_name=_('Hit points per level'), default=5
+    )
+    hit_points_per_level_npc = models.PositiveSmallIntegerField(
+        verbose_name=_('Hit points per level'), default=8
+    )
+    power_source = models.CharField(
+        verbose_name=_('Power source'),
+        choices=PowerSourceEnum.generate_choices(),
+        max_length=PowerSourceEnum.max_length(),
+    )
+    role = models.CharField(
+        verbose_name=_('Role'),
+        choices=ClassRoleEnum.generate_choices(),
+        max_length=ClassRoleEnum.max_length(),
+    )
     trainable_skills = models.ManyToManyField(
         Skill, verbose_name='Выборочно тренируемые навыки', related_name='classes'
     )
@@ -570,9 +589,9 @@ class NPC(
     @property
     def max_hit_points(self) -> int:
         if self.is_bonus_applied:
-            hit_points_per_level = self.klass_data_instance.hit_points_per_level_npc
+            hit_points_per_level = self.klass.hit_points_per_level_npc
         else:
-            hit_points_per_level = self.klass_data_instance.hit_points_per_level_pc
+            hit_points_per_level = self.klass.hit_points_per_level
         result = (
             hit_points_per_level * self.level
             + self.constitution
@@ -607,25 +626,27 @@ class NPC(
     @property
     def surges(self) -> int:
         """Surges number"""
-        result = self.race_data_instance.surges_number_bonus
+        result = self.calculate_bonus(BonusType.SURGES)
         if self.is_bonus_applied:
             result += self._tier + 1
         else:
-            result += self.klass_data_instance.base_surges_per_day + self.con_mod
+            result += self.klass.surges + self.con_mod
         return result
 
     @property
     def initiative(self) -> int:
-        return self.dex_mod + self.half_level + self.race_data_instance.initiative
+        return (
+            self.dex_mod + self.half_level + self.calculate_bonus(BonusType.INITIATIVE)
+        )
 
     @property
     def speed(self):
         if self.armor:
-            return self.race_data_instance.speed - min(
+            return self.race.speed - min(
                 self.armor.speed_penalty,
                 self.race_data_instance.heavy_armor_speed_penalty,
             )
-        return self.race_data_instance.speed
+        return self.race.speed
 
     @property
     def items(self):

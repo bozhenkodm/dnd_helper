@@ -30,6 +30,14 @@ class Bonus(models.Model):
         related_query_name='bonus',
         limit_choices_to={'level': 0, 'frequency': PowerFrequencyEnum.PASSIVE},
     )
+    race = models.ForeignKey(
+        'base.Race',
+        verbose_name=_('Race'),
+        null=True,
+        on_delete=models.CASCADE,
+        blank=True,
+        related_name='bonuses',
+    )
     source = models.CharField(
         verbose_name=_('Bonus source'),
         choices=BonusSource.generate_choices(),
@@ -43,10 +51,7 @@ class Bonus(models.Model):
     bonus_type = models.CharField(
         verbose_name=_('Bonus type'),
         choices=generate_choices(
-            AbilityEnum,
-            SkillEnum,
-            DefenceTypeEnum,
-            BonusType,
+            AbilityEnum, SkillEnum, DefenceTypeEnum, BonusType, is_sorted=False
         ),
         max_length=max(
             map(
@@ -67,4 +72,4 @@ class Bonus(models.Model):
     )
 
     def __str__(self):
-        return self.name
+        return self.name or ''

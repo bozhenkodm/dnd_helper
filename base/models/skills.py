@@ -46,15 +46,17 @@ class NPCSkillMixin:
 
     @property
     def skills(self) -> Skills:
-        half_level = Skills.init_with_const(SkillEnum.sequence(), self.half_level)
+        half_level = Skills.init_with_const(*SkillEnum, value=self.half_level)
         trained_skills = Skills.init_with_const(
-            [
+            *[
                 SkillEnum[trained_skill.title]
                 for trained_skill in self.trained_skills.all()  # type: ignore
             ],
-            5,
+            value=5,
         )
-        race_bonus = self.race_data_instance.skill_bonuses
+        bonus_skills = Skills(
+            **{k.lower(): v for k, v in self.calculate_bonuses(*SkillEnum).items()}
+        )
         mandatory_skills = self.klass_data_instance.mandatory_skills
         armor_skill_penalty = (
             self.armor.skill_penalty if self.armor else 0  # type: ignore
@@ -63,7 +65,7 @@ class NPCSkillMixin:
             self.shield.skill_penalty if self.shield else 0  # type: ignore
         )
         penalty = Skills.init_with_const(
-            (
+            *(
                 SkillEnum.ACROBATICS,
                 SkillEnum.ATHLETICS,
                 SkillEnum.THIEVERY,
@@ -76,7 +78,7 @@ class NPCSkillMixin:
             half_level
             + trained_skills
             + mandatory_skills
-            + race_bonus
+            + bonus_skills
             - penalty
             + self.skill_mod_bonus
         )
@@ -170,7 +172,7 @@ class NPCSkillMixin:
     def skills_text(self) -> list[str]:
         result = []
         ordinary_skills = self.skill_mod_bonus + Skills.init_with_const(
-            SkillEnum.sequence(), self.half_level
+            *SkillEnum, value=self.half_level
         )
         for skill, value in asdict(self.skills).items():
             if getattr(ordinary_skills, skill) != value:

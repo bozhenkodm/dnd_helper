@@ -721,7 +721,7 @@ class PowerMixin:
             ],
         ).asdict()
 
-    def bonuses(self) -> models.QuerySet["Bonus"]:
+    def get_bonuses(self) -> models.QuerySet["Bonus"]:
         powers = self.powers.filter(
             frequency=PowerFrequencyEnum.PASSIVE, subclass__in=(self.subclass, 0)
         ).union(self.race.powers.filter(frequency=PowerFrequencyEnum.PASSIVE))
@@ -746,18 +746,34 @@ class PowerMixin:
             min_level__gte=self.level,
         )
 
-    def calculate_bonus(
+    def calculate_bonuses(
         self,
-        bonus_type: AbilityEnum | SkillEnum | DefenceTypeEnum | BonusType,
-    ):
-        result = defaultdict(list)
-        for bonus in self.bonuses().filter(bonus_type=bonus_type):
-            try:
-                result[bonus.source].append(
-                    int(
-                        self.parse_string(accessory_type=None, string=f'${bonus.value}')
+        *bonus_types: AbilityEnum | SkillEnum | DefenceTypeEnum | BonusType,
+    ) -> dict[AbilityEnum | SkillEnum | DefenceTypeEnum | BonusType, int]:
+        # TODO refactor query here and in self.bonuses
+        result = {}
+        for bonus_type in bonus_types:
+            bonuses = defaultdict(list)
+            for bonus in (
+                self.get_bonuses()
+                .filter(bonus_type=bonus_type)
+                .union(self.race.bonuses.filter(bonus_type=bonus_type))
+            ):
+                try:
+                    bonuses[bonus.source].append(
+                        int(
+                            self.parse_string(
+                                accessory_type=None, string=f'${bonus.value}'
+                            )
+                        )
                     )
-                )
-            except ValueError:
-                print(f'Bonus processing failed: {bonus}, {bonus.value}')
-        return sum(max(value) for value in result.values())
+                except ValueError:
+                    print(f'Bonus processing failed: {bonus}, {bonus.value}')
+
+            result[bonus_type] = sum(max(value) for value in bonuses.values())
+        return result
+
+    def calculate_bonus(
+        self, bonus_type: AbilityEnum | SkillEnum | DefenceTypeEnum | BonusType
+    ) -> int:
+        return self.calculate_bonuses(bonus_type)[bonus_type]

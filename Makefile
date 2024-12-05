@@ -42,5 +42,5 @@ messages:
 	poetry run python manage.py compilemessages
 
 test:
-	cp db.sqlite3 db_test.sqlite3
+	cp db.sqlite3 /tmp/db_test.sqlite3
 	poetry run pytest

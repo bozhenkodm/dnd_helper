@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     )
     from base.models.models import FunctionalTemplate, Class, Armor
 
-from base.constants.constants import NPCClassEnum, ShieldTypeIntEnum
+from base.constants.constants import DefenceTypeEnum, NPCClassEnum, ShieldTypeIntEnum
 from base.objects.npc_classes import NPCClass
 from base.objects.races import Race
 
@@ -109,7 +109,7 @@ class NPCDefenceMixin:
                 if self.functional_template
                 else 0
             )
-            + self.race_data_instance.fortitude
+            + self.calculate_bonus(DefenceTypeEnum.FORTITUDE)
             + self.klass_data_instance.fortitude
             + self._necklace_defence_bonus
             + self.armor.armor_type.fortitude_bonus
@@ -123,7 +123,7 @@ class NPCDefenceMixin:
             self._defence_level_bonus
             + max(self.dex_mod, self.int_mod)
             + (self.functional_template.reflex_bonus if self.functional_template else 0)
-            + self.race_data_instance.reflex
+            + self.calculate_bonus(DefenceTypeEnum.REFLEX)
             + self.klass_data_instance.reflex
             + self._necklace_defence_bonus
             + self.armor.armor_type.reflex_bonus
@@ -142,7 +142,7 @@ class NPCDefenceMixin:
             self._defence_level_bonus
             + max(self.wis_mod, self.cha_mod)
             + (self.functional_template.will_bonus if self.functional_template else 0)
-            + self.race_data_instance.will
+            + self.calculate_bonus(DefenceTypeEnum.WILL)
             + self.klass_data_instance.will
             + self._necklace_defence_bonus
             + self.armor.armor_type.will_bonus

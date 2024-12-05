@@ -30,6 +30,7 @@ from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
     AccessoryTypeEnum,
     ArmorTypeIntEnum,
+    BonusSource,
     MagicItemSlot,
     NPCClassEnum,
     NPCRaceEnum,
@@ -40,6 +41,7 @@ from base.constants.constants import (
     WeaponGroupEnum,
 )
 from base.models import Class, Race
+from base.models.bonuses import Bonus
 from base.models.encounters import Combatants, CombatantsPC
 from base.models.magic_items import (
     ArmsSlotItem,
@@ -82,18 +84,29 @@ def make_unsociable(modeladmin, request, queryset) -> None:
     queryset.update(is_sociable=False)
 
 
+class RaceBonusInline(admin.TabularInline):
+    model = Bonus
+    fields = ('bonus_type', 'value')
+
+
 class RaceAdmin(admin.ModelAdmin):
     fields = (
         'name',
         'const_ability_bonus',
         'var_ability_bonus',
+        'speed',
+        'vision',
+        'size',
         'is_sociable',
     )
     list_filter = ('is_sociable',)
     list_display = ('name', 'is_sociable')
     search_fields = ('name_display',)
     actions = (make_sociable, make_unsociable)
-    inlines = (PowerInline,)
+    inlines = (
+        RaceBonusInline,
+        PowerInline,
+    )
 
     def get_queryset(self, request):
         qs = super().get_queryset(request).annotate(title=NPCRaceEnum.generate_case())
@@ -110,6 +123,18 @@ class RaceAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
 
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        for formset in formsets:
+            if formset.model == Bonus:
+                instances = formset.save(commit=False)
+                for instance in instances:
+                    instance.source = BonusSource.RACE
+                    instance.name = (
+                        f'{form.instance}: {instance.get_bonus_type_display()}'
+                    )
+                    instance.save()
+
 
 class ClassAdmin(admin.ModelAdmin):
     search_fields = ('name_display',)
@@ -119,18 +144,20 @@ class ClassAdmin(admin.ModelAdmin):
         'available_shields',
         'available_weapons',
         'available_implements',
+        'power_source',
+        'role',
         'mandatory_skills',
     )
     fields = readonly_fields + ('trainable_skills',)
 
-    # def has_add_permission(self, request: HttpRequest) -> bool:
-    #     return False
-    #
-    # def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
-    #     return False
-    #
-    # def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
-    #     return False
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
+    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
 
     @admin.display(description='Обязательные навыки')
     def mandatory_skills(self, obj) -> str:
@@ -298,9 +325,6 @@ class NPCAdmin(admin.ModelAdmin):
         ),
         'powers',
     ]
-    readonly_fields = [
-        'mandatory_skills',
-    ]
     autocomplete_fields = (
         'race',
         'klass',
@@ -404,6 +428,12 @@ class NPCAdmin(admin.ModelAdmin):
             )
         result.insert(9, self._get_level_abilities_bonus_fields(obj))
         return result
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = ['mandatory_skills']
+        if obj and obj.level < 11:
+            readonly_fields.append('paragon_path')
+        return readonly_fields
 
     @admin.display(description='Тренированные навыки')
     def mandatory_skills(self, obj):
@@ -884,7 +914,7 @@ class PowerAdmin(admin.ModelAdmin):
         obj = form.instance
         if not obj.attack_ability:
             return
-        ability_mod = obj.attack_ability[:3]
+        ability_mod = obj.attack_ability[:3].lower()
         for property in obj.properties.filter(title=PowerPropertyTitle.ATTACK):
             if not property.description:
                 property.description = (

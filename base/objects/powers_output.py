@@ -5,7 +5,7 @@ from dataclasses import asdict, dataclass
 class PowerPropertyDisplay:
     title: str
     description: str
-    debug: str
+    debug: str | None = None
 
 
 @dataclass

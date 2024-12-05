@@ -4,9 +4,7 @@ from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
     AbilityEnum,
     ArmorTypeIntEnum,
-    ClassRoleEnum,
     NPCClassEnum,
-    PowerSourceEnum,
     ShieldTypeIntEnum,
     SkillEnum,
     WeaponCategoryIntEnum,
@@ -51,12 +49,9 @@ from base.objects.weapon_types import (
 
 class NPCClass:
     slug: ClassVar[NPCClassEnum]
-    power_source: ClassVar[PowerSourceEnum]
-    role: ClassVar[ClassRoleEnum]
     _fortitude: ClassVar[int] = 0
     _reflex: ClassVar[int] = 0
     _will: ClassVar[int] = 0
-    base_surges_per_day: ClassVar[int] = 6  # if level bonus is not applied
     base_attack_abilities: ClassVar[Sequence[AbilityEnum]] = ()
     mandatory_skills: ClassVar[Skills] = Skills()
     trainable_skills: ClassVar[Skills] = Skills()
@@ -64,15 +59,15 @@ class NPCClass:
     _available_armor_types: ClassVar[Sequence[ArmorTypeIntEnum]] = (
         ArmorTypeIntEnum.CLOTH,
     )
-    available_shield_types: ClassVar[Sequence[ShieldTypeIntEnum]] = ()
+    available_shield_types: ClassVar[Sequence[ShieldTypeIntEnum]] = (
+        ShieldTypeIntEnum.NONE,
+    )
     available_weapon_categories: ClassVar[Sequence[WeaponCategoryIntEnum]] = (
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.SIMPLE_RANGED,
     )
     available_weapon_types: ClassVar[Sequence[Type[WeaponType]]] = ()
     available_implement_types: ClassVar[Sequence[Type[WeaponType]]] = ()
-    hit_points_per_level_npc: ClassVar[int] = 8
-    hit_points_per_level_pc: ClassVar[int] = 5
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         pass
@@ -134,8 +129,6 @@ class NPCClass:
 
 class InvokerClass(NPCClass):
     slug = NPCClassEnum.INVOKER
-    power_source = PowerSourceEnum.DIVINE
-    role = ClassRoleEnum.CONTROLLER
     _fortitude = 1
     _reflex = 1
     _will = 1
@@ -158,15 +151,11 @@ class InvokerClass(NPCClass):
         Rod,
         Quaterstaff,
     )
-    hit_points_per_level_npc = 6
-    hit_points_per_level_pc = 4
     base_attack_abilities = (AbilityEnum.WISDOM,)
 
 
 class ArtificerClass(NPCClass):
     slug = NPCClassEnum.ARTIFICER
-    power_source = PowerSourceEnum.ARCANE
-    role = ClassRoleEnum.LEADER
     _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -183,8 +172,6 @@ class ArtificerClass(NPCClass):
 
 class BardClass(NPCClass):
     slug = NPCClassEnum.BARD
-    power_source = PowerSourceEnum.ARCANE
-    role = ClassRoleEnum.LEADER
     _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -219,10 +206,9 @@ class BardClass(NPCClass):
         religion=5,
         heal=5,
     )
-    skill_bonuses = Skills.init_with_const(SkillEnum.sequence(), 1)
+    skill_bonuses = Skills.init_with_const(*SkillEnum, value=1)
     _reflex = 1
     _will = 1
-    base_surges_per_day = 7
     base_attack_abilities = (AbilityEnum.CHARISMA,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -233,8 +219,6 @@ class BardClass(NPCClass):
 
 class VampireClass(NPCClass):
     slug = NPCClassEnum.VAMPIRE
-    power_source = PowerSourceEnum.SHADOW
-    role = ClassRoleEnum.STRIKER
     available_implement_types = (KiFocus, HolySymbol)
     trainable_skills = Skills(
         acrobatics=5,
@@ -249,7 +233,6 @@ class VampireClass(NPCClass):
         stealth=5,
         thievery=5,
     )
-    base_surges_per_day = 2
     base_attack_abilities = (AbilityEnum.DEXTERITY, AbilityEnum.CHARISMA)
 
     @property
@@ -266,8 +249,6 @@ class VampireClass(NPCClass):
 
 class BarbarianClass(NPCClass):
     slug = NPCClassEnum.BARBARIAN
-    power_source = PowerSourceEnum.PRIMAL
-    role = ClassRoleEnum.STRIKER
     _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -287,9 +268,6 @@ class BarbarianClass(NPCClass):
         heal=5,
     )
     _fortitude = 2
-    base_surges_per_day = 8
-    hit_points_per_level_npc = 10
-    hit_points_per_level_pc = 6
     base_attack_abilities = (AbilityEnum.STRENGTH,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -318,8 +296,6 @@ class BarbarianClass(NPCClass):
 
 class WarlordClass(NPCClass):
     slug = NPCClassEnum.WARLORD
-    power_source = PowerSourceEnum.MARTIAL
-    role = ClassRoleEnum.LEADER
     _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -334,7 +310,6 @@ class WarlordClass(NPCClass):
     )
     _fortitude = 1
     _will = 1
-    base_surges_per_day = 7
     trainable_skills = Skills(
         athletics=5, endurance=5, intimidate=5, history=5, diplomacy=5, heal=5
     )
@@ -347,9 +322,6 @@ class WarlordClass(NPCClass):
 
 class FighterClass(NPCClass):
     slug = NPCClassEnum.FIGHTER
-    power_source = PowerSourceEnum.MARTIAL
-    role = ClassRoleEnum.DEFENDER
-    base_surges_per_day = 9
     _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -367,7 +339,6 @@ class FighterClass(NPCClass):
     trainable_skills = Skills(
         athletics=5, endurance=5, intimidate=5, streetwise=5, heal=5
     )
-    hit_points_per_level_pc = 6
     base_attack_abilities = (AbilityEnum.STRENGTH,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -433,13 +404,9 @@ class FighterClass(NPCClass):
 
 class WizardClass(NPCClass):
     slug = NPCClassEnum.WIZARD
-    power_source = PowerSourceEnum.ARCANE
-    role = ClassRoleEnum.CONTROLLER
     available_weapon_categories = []
     available_weapon_types = (Dagger, Quaterstaff)
     available_implement_types = (Wand, Sphere, Quaterstaff)
-    hit_points_per_level_npc = 6
-    hit_points_per_level_pc = 4
     mandatory_skills = Skills(arcana=5)
     trainable_skills = Skills(
         history=5, diplomacy=5, dungeoneering=5, nature=5, insight=5, religion=5
@@ -458,8 +425,6 @@ class WizardClass(NPCClass):
 
 class DruidClass(NPCClass):
     slug = NPCClassEnum.DRUID
-    power_source = PowerSourceEnum.PRIMAL
-    role = ClassRoleEnum.CONTROLLER
     _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -479,14 +444,11 @@ class DruidClass(NPCClass):
     )
     _reflex = 1
     _will = 1
-    base_surges_per_day = 7
     base_attack_abilities = (AbilityEnum.WISDOM,)
 
 
 class PriestClass(NPCClass):
     slug = NPCClassEnum.PRIEST
-    power_source = PowerSourceEnum.DIVINE
-    role = ClassRoleEnum.LEADER
     _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -497,14 +459,11 @@ class PriestClass(NPCClass):
     mandatory_skills = Skills(religion=5)
     trainable_skills = Skills(history=5, arcana=5, diplomacy=5, insight=5, heal=5)
     _will = 2
-    base_surges_per_day = 7
     base_attack_abilities = (AbilityEnum.WISDOM,)
 
 
 class SeekerClass(NPCClass):
     slug = NPCClassEnum.SEEKER
-    power_source = PowerSourceEnum.PRIMAL
-    role = ClassRoleEnum.CONTROLLER
     _available_armor_types = (ArmorTypeIntEnum.CLOTH, ArmorTypeIntEnum.LEATHER)
     available_weapon_categories = (
         WeaponCategoryIntEnum.SIMPLE,
@@ -525,7 +484,6 @@ class SeekerClass(NPCClass):
     )
     _reflex = 1
     _will = 1
-    base_surges_per_day = 7
     base_attack_abilities = (AbilityEnum.WISDOM,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -550,8 +508,6 @@ class SeekerClass(NPCClass):
 
 class AvengerClass(NPCClass):
     slug = NPCClassEnum.AVENGER
-    power_source = PowerSourceEnum.DIVINE
-    role = ClassRoleEnum.STRIKER
     available_weapon_categories = (
         WeaponCategoryIntEnum.SIMPLE,
         WeaponCategoryIntEnum.MILITARY,
@@ -572,7 +528,6 @@ class AvengerClass(NPCClass):
     _fortitude = 1
     _reflex = 1
     _will = 1
-    base_surges_per_day = 7
     base_attack_abilities = (AbilityEnum.WISDOM,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -593,8 +548,6 @@ class AvengerClass(NPCClass):
 
 class WarlockClass(NPCClass):
     slug = NPCClassEnum.WARLOCK
-    power_source = PowerSourceEnum.ARCANE
-    role = ClassRoleEnum.STRIKER
     available_implement_types = (Wand, Rod, RitualDagger, RitualSickle)
     _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
@@ -624,8 +577,6 @@ class WarlockClass(NPCClass):
 
 class SwordmageClass(NPCClass):
     slug = NPCClassEnum.SWORDMAGE
-    power_source = PowerSourceEnum.ARCANE
-    role = ClassRoleEnum.DEFENDER
     _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -650,8 +601,6 @@ class SwordmageClass(NPCClass):
         athletics=5, endurance=5, intimidate=5, history=5, diplomacy=5, insight=5
     )
     _will = 2
-    hit_points_per_level_pc = 6
-    base_surges_per_day = 8
     base_attack_abilities = (AbilityEnum.INTELLIGENCE,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -671,8 +620,6 @@ class SwordmageClass(NPCClass):
 
 class PaladinClass(NPCClass):
     slug = NPCClassEnum.PALADIN
-    power_source = PowerSourceEnum.DIVINE
-    role = ClassRoleEnum.DEFENDER
     _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -695,15 +642,11 @@ class PaladinClass(NPCClass):
     _fortitude = 1
     _reflex = 1
     _will = 1
-    hit_points_per_level_pc = 6
-    base_surges_per_day = 10
     base_attack_abilities = (AbilityEnum.CHARISMA, AbilityEnum.STRENGTH)
 
 
 class RogueClass(NPCClass):
     slug = NPCClassEnum.ROGUE
-    power_source = PowerSourceEnum.MARTIAL
-    role = ClassRoleEnum.STRIKER
     _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -746,8 +689,6 @@ class RogueClass(NPCClass):
 
 class RunepriestClass(NPCClass):
     slug = NPCClassEnum.RUNEPRIEST
-    power_source = PowerSourceEnum.DIVINE
-    role = ClassRoleEnum.LEADER
     _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -767,7 +708,6 @@ class RunepriestClass(NPCClass):
         heal=5,
     )
     _will = 2
-    base_surges_per_day = 7
     base_attack_abilities = (AbilityEnum.STRENGTH,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -777,8 +717,6 @@ class RunepriestClass(NPCClass):
 
 class RangerClass(NPCClass):
     slug = NPCClassEnum.RANGER
-    power_source = PowerSourceEnum.MARTIAL
-    role = ClassRoleEnum.STRIKER
     _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -811,8 +749,6 @@ class RangerClass(NPCClass):
 
 class WardenClass(NPCClass):
     slug = NPCClassEnum.WARDEN
-    power_source = PowerSourceEnum.PRIMAL
-    role = ClassRoleEnum.DEFENDER
     _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -828,11 +764,8 @@ class WardenClass(NPCClass):
     trainable_skills = Skills(
         athletics=5, perception=5, endurance=5, intimidate=5, dungeoneering=5, heal=5
     )
-    hit_points_per_level_npc = 10
-    hit_points_per_level_pc = 7
     _fortitude = 1
     _will = 1
-    base_surges_per_day = 9
     base_attack_abilities = (AbilityEnum.STRENGTH,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -842,8 +775,6 @@ class WardenClass(NPCClass):
 
 class SorcererClass(NPCClass):
     slug = NPCClassEnum.SORCERER
-    power_source = PowerSourceEnum.ARCANE
-    role = ClassRoleEnum.STRIKER
     available_implement_types = (Dagger, Quaterstaff)
     mandatory_skills = Skills(arcana=5)
     trainable_skills = Skills(
@@ -874,8 +805,6 @@ class SorcererClass(NPCClass):
 
 class ShamanClass(NPCClass):
     slug = NPCClassEnum.SHAMAN
-    power_source = PowerSourceEnum.PRIMAL
-    role = ClassRoleEnum.LEADER
     _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -896,7 +825,6 @@ class ShamanClass(NPCClass):
     )
     _fortitude = 1
     _will = 1
-    base_surges_per_day = 7
     base_attack_abilities = (AbilityEnum.WISDOM,)
 
 
@@ -977,10 +905,7 @@ class HexbladeClass(WarlockClass):
 
 class MonkClass(NPCClass):
     slug = NPCClassEnum.MONK
-    power_source = PowerSourceEnum.PSIONIC
-    role = ClassRoleEnum.STRIKER
     _reflex = 1
-    base_surges_per_day = 7
     trainable_skills = Skills(
         acrobatics=5,
         athletics=5,
@@ -1021,8 +946,6 @@ class MonkClass(NPCClass):
 
 class BladeSingerClass(WizardClass):
     slug = NPCClassEnum.BLADESINGER
-    power_source = PowerSourceEnum.ARCANE
-    role = ClassRoleEnum.CONTROLLER
     _available_armor_types = (ArmorTypeIntEnum.CLOTH, ArmorTypeIntEnum.LEATHER)
     available_weapon_categories = [
         WeaponCategoryIntEnum.SIMPLE,
@@ -1032,7 +955,6 @@ class BladeSingerClass(WizardClass):
     ]
     available_implement_types = (Wand, Sphere, Quaterstaff)
 
-    hit_points_per_level_npc = 6
     mandatory_skills = Skills(arcana=5)
     trainable_skills = Skills(
         acrobatics=5,

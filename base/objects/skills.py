@@ -1,5 +1,4 @@
 from dataclasses import asdict, dataclass
-from typing import Sequence
 
 from base.constants.constants import SkillEnum
 
@@ -67,7 +66,7 @@ class Skills:
         )
 
     @classmethod
-    def init_with_const(cls, skills: Sequence[SkillEnum], value: int) -> "Skills":
+    def init_with_const(cls, *skills: SkillEnum, value: int) -> "Skills":
         return Skills(**{skill.lvalue: value for skill in skills})
 
     @property

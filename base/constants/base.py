@@ -129,5 +129,11 @@ class IntDescriptionSubclassEnum(IntDescriptionEnum):
         )
 
 
-def generate_choices(*enums: type[BaseNameValueDescriptionEnum]):
-    return tuple(reduce(lambda x, y: x + y, (e.generate_choices() for e in enums)))
+def generate_choices(
+    *enums: type[BaseNameValueDescriptionEnum], is_sorted: bool = True
+):
+    return tuple(
+        reduce(
+            lambda x, y: x + y, (e.generate_choices(is_sorted=is_sorted) for e in enums)
+        )
+    )

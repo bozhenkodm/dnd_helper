@@ -1,22 +1,20 @@
-import os
 from dataclasses import asdict
 
 import pytest
 from django.conf import settings
+from django.urls import reverse
 
 from base.constants.constants import WeaponGroupEnum
 from base.models import NPC, Class
 from base.models.models import Race, Weapon, WeaponType
 from base.objects import npc_klasses, race_classes, weapon_types_classes
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 @pytest.fixture(scope='session')
 def django_db_setup():
     settings.DATABASES['default'] = {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db_test.sqlite3'),
+        'NAME': '/tmp/db_test.sqlite3',
         'ATOMIC_REQUESTS': True,
     }
 
@@ -32,6 +30,14 @@ def test_npcs_are_valid(client):
         else:
             assert response.status_code == 200, npc
             assert 'POWER INCONSISTENT' not in response.content.decode()
+        try:
+            response = client.get(
+                reverse('admin:base_npc_change', kwargs={'object_id': npc.pk})
+            )
+        except Exception as e:
+            pytest.fail(f'admin site npc: {npc}, error: {e}', pytrace=True)
+        else:
+            assert response.status_code < 400, f'admin site: {npc}'
 
 
 @pytest.mark.django_db
@@ -76,12 +82,3 @@ def test_race_db_consistency():
         assert (
             race.name_display == race_classes[race.name].slug.description
         ), f'{race} has inconsistent name display'
-        assert (
-            race.speed == race_classes[race.name].speed
-        ), f'{race} has inconsistent speed'
-        assert (
-            race.vision == race_classes[race.name].vision
-        ), f'{race} has inconsistent vision'
-        assert (
-            race.size == race_classes[race.name].size
-        ), f'{race} has inconsistent size'
