@@ -1,5 +1,3 @@
-from dataclasses import asdict
-
 import pytest
 from django.conf import settings
 from django.urls import reverse
@@ -69,8 +67,4 @@ def test_exist_non_enhanced_weapon():
 @pytest.mark.django_db
 def test_class_db_consistency():
     for klass in Class.objects.all():
-        assert set(klass.trainable_skills.values_list('title', flat=True)) == set(
-            key.upper()
-            for key, value in asdict(npc_klasses[klass.name].trainable_skills).items()
-            if value
-        ), f'{klass} has inconsistent trainable skills'
+        assert klass.name_display == npc_klasses[klass.name].slug.description

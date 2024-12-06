@@ -38,6 +38,7 @@ from base.constants.constants import (
     PowerPropertyTitle,
     PowerRangeTypeEnum,
     ShieldTypeIntEnum,
+    WeaponCategoryIntEnum,
     WeaponGroupEnum,
 )
 from base.models import Class, Race
@@ -144,37 +145,35 @@ class RaceAdmin(admin.ModelAdmin):
                     instance.save()
 
 
+class ClassBonusInline(admin.TabularInline):
+    model = Bonus
+    fields = ('bonus_type', 'value')
+
+
 class ClassAdmin(admin.ModelAdmin):
     search_fields = ('name_display',)
     ordering = ('name_display',)
     readonly_fields = (
         'available_armor_types',
-        'available_shields',
+        'available_shield_types',
         'available_weapons',
         'available_implements',
         'power_source',
         'role',
         'mandatory_skills',
+        'trainable_skills',
     )
-    fields = readonly_fields + ('trainable_skills',)
+    fields = readonly_fields
+    inlines = (ClassBonusInline,)
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
+    # def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
+    #     return False
 
     def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
-
-    @admin.display(description='Обязательные навыки')
-    def mandatory_skills(self, obj) -> str:
-        if not obj.id:
-            return '-'
-        return ', '.join(
-            skill.description  # type: ignore[attr-defined]
-            for skill in npc_klasses[obj.name].mandatory_skills.enum_objects
-        )
 
     @admin.display(description='Ношение брони')
     def available_armor_types(self, obj):
@@ -189,13 +188,8 @@ class ClassAdmin(admin.ModelAdmin):
             return '-'  # fixme dynamic armor list
 
     @admin.display(description='Ношение щитов')
-    def available_shields(self, obj):
-        if not obj.id or not npc_klasses[obj.name].available_shield_types:
-            return '-'
-        return ', '.join(
-            shield.description
-            for shield in npc_klasses[obj.name].available_shield_types
-        )
+    def available_shield_types(self, obj):
+        return obj.available_shields
 
     @admin.display(description='Владение оружием')
     def available_weapons(self, obj):
@@ -204,10 +198,8 @@ class ClassAdmin(admin.ModelAdmin):
         try:
             return ', '.join(
                 [
-                    weapon_category.description
-                    for weapon_category in npc_klasses[
-                        obj.name
-                    ].available_weapon_categories
+                    WeaponCategoryIntEnum(int(wc)).description
+                    for wc in obj.available_weapon_categories
                 ]
                 + [
                     weapon_type.name
@@ -225,6 +217,18 @@ class ClassAdmin(admin.ModelAdmin):
             implement_type.name
             for implement_type in npc_klasses[obj.name].available_implement_types
         )
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        for formset in formsets:
+            if formset.model == Bonus:
+                instances = formset.save(commit=False)
+                for instance in instances:
+                    instance.source = BonusSource.CLASS
+                    instance.name = (
+                        f'{form.instance}: {instance.get_bonus_type_display()}'
+                    )
+                    instance.save()
 
 
 class RaceListFilter(admin.SimpleListFilter):
@@ -445,7 +449,9 @@ class NPCAdmin(admin.ModelAdmin):
 
     @admin.display(description='Тренированные навыки')
     def mandatory_skills(self, obj):
-        return obj.klass_data_instance.mandatory_skills.display_non_zero()
+        return ', '.join(
+            s.get_title_display() for s in obj.klass.mandatory_skills.all()
+        )
 
     @atomic
     def save_model(self, request, obj, form, change):
@@ -812,6 +818,7 @@ class PowerAdmin(admin.ModelAdmin):
         RaceListFilter,
         'functional_template',
         'paragon_path',
+        'magic_item_type',
         'skill',
     )
     inlines = (PowerPropertyInline,)

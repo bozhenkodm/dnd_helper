@@ -66,6 +66,28 @@ class Skills:
         )
 
     @classmethod
+    def max(cls, *skills: 'Skills'):
+        return Skills(
+            acrobatics=max(s.acrobatics for s in skills),
+            arcana=max(s.arcana for s in skills),
+            athletics=max(s.athletics for s in skills),
+            bluff=max(s.bluff for s in skills),
+            diplomacy=max(s.diplomacy for s in skills),
+            dungeoneering=max(s.dungeoneering for s in skills),
+            endurance=max(s.endurance for s in skills),
+            heal=max(s.heal for s in skills),
+            history=max(s.history for s in skills),
+            insight=max(s.insight for s in skills),
+            intimidate=max(s.intimidate for s in skills),
+            nature=max(s.nature for s in skills),
+            perception=max(s.perception for s in skills),
+            religion=max(s.religion for s in skills),
+            stealth=max(s.stealth for s in skills),
+            streetwise=max(s.streetwise for s in skills),
+            thievery=max(s.thievery for s in skills),
+        )
+
+    @classmethod
     def init_with_const(cls, *skills: SkillEnum, value: int) -> "Skills":
         return Skills(**{skill.lvalue: value for skill in skills})
 

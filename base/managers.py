@@ -3,6 +3,7 @@ from django.db.models.functions import Floor
 
 from base.constants.constants import PowerFrequencyEnum
 from base.objects import weapon_types_tuple
+from base.objects.skills import Skills
 
 
 class ItemAbstractQuerySet(models.QuerySet):
@@ -47,3 +48,8 @@ class PowerQueryset(models.QuerySet):
 class EncounterParticipantsQuerySet(models.QuerySet):
     def ordered(self):
         return self.order_by('-initiative', 'name')
+
+
+class SkillQuerySet(models.QuerySet):
+    def obj(self, value: int) -> Skills:
+        return Skills(**{s.title.lower(): value for s in self})

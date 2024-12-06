@@ -16,6 +16,7 @@ from base.constants.constants import (
     NPCRaceEnum,
     PowerSourceEnum,
     SexEnum,
+    ShieldTypeIntEnum,
     SizeEnum,
     SkillEnum,
     VisionEnum,
@@ -26,6 +27,7 @@ from base.constants.constants import (
 from base.exceptions import PowerInconsistent, WrongWeapon
 from base.managers import WeaponTypeQuerySet
 from base.models.abilities import Ability, NPCAbilityAbstract
+from base.models.bonuses import BonusMixin
 from base.models.defences import NPCDefenceMixin
 from base.models.experience import NPCExperienceAbstract
 from base.models.magic_items import (
@@ -372,6 +374,20 @@ class Class(models.Model):
     hit_points_per_level_npc = models.PositiveSmallIntegerField(
         verbose_name=_('Hit points per level'), default=8
     )
+    available_weapon_categories = MultiSelectField(
+        verbose_name=_('Available weapon categories'),
+        choices=WeaponCategoryIntEnum.generate_choices(),
+        null=True,
+        blank=True,
+    )
+    available_shields = MultiSelectField(
+        verbose_name=_('Available shields'),
+        choices=ShieldTypeIntEnum.generate_choices(
+            lambda x: x != ShieldTypeIntEnum.NONE
+        ),
+        null=True,
+        blank=True,
+    )
     power_source = models.CharField(
         verbose_name=_('Power source'),
         choices=PowerSourceEnum.generate_choices(),
@@ -382,12 +398,31 @@ class Class(models.Model):
         choices=ClassRoleEnum.generate_choices(),
         max_length=ClassRoleEnum.max_length(),
     )
+    mandatory_skills = models.ManyToManyField(Skill, verbose_name=_('Mandatory skills'))
     trainable_skills = models.ManyToManyField(
         Skill, verbose_name='Выборочно тренируемые навыки', related_name='classes'
     )
 
     def __str__(self):
         return self.name_display
+
+
+class Subclass(models.Model):
+    class Meta:
+        verbose_name = _('Subclass')
+        verbose_name_plural = _('Subclasses')
+        unique_together = ('klass', 'subclass_id')
+
+    klass = models.ForeignKey(
+        Class,
+        verbose_name=_('Class'),
+        on_delete=models.CASCADE,
+    )
+    name = models.CharField(_('Name'), max_length=40)
+    slug = models.CharField(_('Slug'), max_length=40)
+    subclass_id = models.PositiveSmallIntegerField(
+        verbose_name=('Subclass id'), default=0
+    )
 
 
 class FunctionalTemplate(models.Model):
@@ -450,6 +485,7 @@ class NPC(
     NPCSkillMixin,
     PowerMixin,
     NPCMagicItemAbstract,
+    BonusMixin,
 ):
     class Meta:
         verbose_name = 'NPC'
@@ -552,7 +588,10 @@ class NPC(
 
     @property
     def all_trained_skills(self) -> list[SkillEnum]:
-        return self.klass_data_instance.mandatory_skills.enum_objects + [
+        return [
+            SkillEnum(skill.title)  # type: ignore
+            for skill in self.klass.mandatory_skills.all()
+        ] + [
             SkillEnum(skill.title)  # type: ignore
             for skill in self.trained_skills.all()
         ]
@@ -642,7 +681,7 @@ class NPC(
     @property
     def speed(self):
         if self.armor and self.race.name != NPCRaceEnum.DWARF:
-            return (self.race.speed - self.armor.speed_penalty)
+            return self.race.speed - self.armor.speed_penalty
         return self.race.speed
 
     @property
@@ -676,7 +715,7 @@ class NPC(
         return any(
             (
                 weapon.weapon_type.category
-                in map(int, self.klass_data_instance.available_weapon_categories),
+                in map(int, self.klass.available_weapon_categories),
                 type(data_instance) in self.klass_data_instance.available_weapon_types,
                 weapon.weapon_type in self.race.available_weapon_types.all(),
                 weapon.weapon_type in self.trained_weapons.all(),
@@ -702,7 +741,7 @@ class NPC(
         result: list[tuple[Weapon, ...]] = []
         match power.accessory_type:
             case AccessoryTypeEnum.WEAPON:
-                for weapon in (self.primary_hand, self.secondary_hand):
+                for weapon in filter(None, (self.primary_hand, self.secondary_hand)):
                     if (
                         weapon
                         and self.is_weapon_proficient(weapon)

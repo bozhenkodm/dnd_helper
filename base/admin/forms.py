@@ -126,8 +126,9 @@ class NPCModelForm(forms.ModelForm):
             )
             self.fields['arms_slot'] = forms.ModelChoiceField(
                 queryset=ArmsSlotItem.objects.select_related('magic_item_type').filter(
-                    magic_item_type__slot=ArmsSlotItem.SLOT.value,
-                    shield__in=self.instance.klass_data_instance.available_shield_types,
+                    models.Q(magic_item_type__slot=ArmsSlotItem.SLOT.value)
+                    & models.Q(shield__in=self.instance.klass.available_shields)
+                    | models.Q(shield=ShieldTypeIntEnum.NONE),
                 ),
                 label='Предмет на предплечья',
                 required=False,

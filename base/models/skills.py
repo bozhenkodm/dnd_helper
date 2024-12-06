@@ -2,7 +2,8 @@ from dataclasses import asdict
 
 from django.db import models
 
-from base.constants.constants import SkillEnum
+from base.constants.constants import NPCClassEnum, SkillEnum
+from base.managers import SkillQuerySet
 from base.models.abilities import Ability
 from base.objects.npc_classes import NPCClass
 from base.objects.skills import Skills
@@ -11,6 +12,8 @@ from base.objects.skills import Skills
 class Skill(models.Model):
     class Meta:
         ordering = ('ordering',)
+
+    objects = SkillQuerySet.as_manager()
 
     title = models.CharField(
         choices=SkillEnum.generate_choices(),
@@ -52,10 +55,17 @@ class NPCSkillMixin:
             ],
             value=5,
         )
+        if self.klass.name == NPCClassEnum.BARD:
+            # TODO figure out how to move this logic to common bonus logic
+            trained_skills += Skills.max(
+                trained_skills,
+                Skills.init_with_const(*SkillEnum, value=1),
+            )
+
         bonus_skills = Skills(
             **{k.lower(): v for k, v in self.calculate_bonuses(*SkillEnum).items()}
         )
-        mandatory_skills = self.klass_data_instance.mandatory_skills
+        mandatory_skills = self.klass.mandatory_skills.obj(value=5)
         armor_skill_penalty = (
             self.armor.skill_penalty if self.armor else 0  # type: ignore
         )

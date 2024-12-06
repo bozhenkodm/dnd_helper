@@ -29,7 +29,6 @@ class NPCProtocol(Protocol):
     int_mod: int
     wis_mod: int
     cha_mod: int
-    # armor:
     arms_slot: "ArmsSlotItem"
     neck_slot: "NeckSlotItem"
     head_slot: "HeadSlotItem"
@@ -64,11 +63,11 @@ class NPCDefenceMixin:
     def shield(self: NPCProtocol) -> ShieldTypeIntEnum:
         if not self.arms_slot:
             return ShieldTypeIntEnum.NONE
-        return ShieldTypeIntEnum.get_by_value(self.arms_slot.shield)
+        return ShieldTypeIntEnum(self.arms_slot.shield)
 
     @property
     def _shield_bonus(self: NPCProtocol) -> int:
-        if self.shield not in self.klass_data_instance.available_shield_types:
+        if self.shield not in self.klass.available_shields:
             return 0
         return self.shield.value
 

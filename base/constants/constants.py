@@ -281,17 +281,50 @@ class PowerFrequencyEnum(BaseNameValueDescriptionEnum):
 
 
 class PowerDamageTypeEnum(BaseNameValueDescriptionEnum):
-    NONE = auto(), ''
-    ACID = auto(), 'Кислота'
-    COLD = auto(), 'Холод'
-    FIRE = auto(), 'Огонь'
-    LIGHTNING = auto(), 'Электричество'
-    NECROTIC = auto(), 'Некротическая энергия'
-    POISON = auto(), 'Яд'
-    PSYCHIC = auto(), 'Психическая энергия'
-    RADIANT = auto(), 'Излучение'
-    THUNDER = auto(), 'Звук'
-    FORCE = auto(), 'Силовое поле'
+    UNTYPED = (
+        auto(),
+        'Без типа',
+    )
+    THUNDER = (
+        auto(),
+        'Звук',
+    )
+    RADIANT = (
+        auto(),
+        'Излучение',
+    )
+    ACID = (
+        auto(),
+        'Кислота',
+    )
+    NECROTIC = (
+        auto(),
+        'Некротическая энергия',
+    )
+    FIRE = (
+        auto(),
+        'Огонь',
+    )
+    PSYCHIC = (
+        auto(),
+        'Психическая энергия',
+    )
+    FORCE = (
+        auto(),
+        'Силовое поле',
+    )
+    COLD = (
+        auto(),
+        'Холод',
+    )
+    LIGHTNING = (
+        auto(),
+        'Электричество',
+    )
+    POISON = (
+        auto(),
+        'Яд',
+    )
 
 
 class PowerEffectTypeEnum(BaseNameValueDescriptionEnum):

@@ -30,6 +30,42 @@ class Bonus(models.Model):
         related_query_name='bonus',
         limit_choices_to={'level': 0, 'frequency': PowerFrequencyEnum.PASSIVE},
     )
+    klass = models.ForeignKey(
+        'base.Class',
+        related_name='bonuses',
+        verbose_name=_('Class'),
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    subclass = models.SmallIntegerField(
+        verbose_name=_('Subclass'),
+        default=0,
+    )
+    functional_template = models.ForeignKey(
+        'base.FunctionalTemplate',
+        verbose_name=_('Functional template'),
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name='bonuses',
+    )
+    paragon_path = models.ForeignKey(
+        'base.ParagonPath',
+        verbose_name=_('Paragon path'),
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='bonuses',
+    )
+    magic_item_type = models.ForeignKey(
+        'MagicItemType',
+        verbose_name=_('Magic item type'),
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='bonuses',
+    )
     race = models.ForeignKey(
         'base.Race',
         verbose_name=_('Race'),
@@ -73,3 +109,7 @@ class Bonus(models.Model):
 
     def __str__(self):
         return self.name or ''
+
+
+class BonusMixin:
+    pass

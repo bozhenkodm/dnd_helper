@@ -140,7 +140,7 @@ class Power(models.Model):
     damage_type = MultiSelectField(
         verbose_name=_('Damage type'),
         choices=PowerDamageTypeEnum.generate_choices(),
-        default=PowerDamageTypeEnum.NONE,
+        default=PowerDamageTypeEnum.UNTYPED,
         null=True,
         blank=True,
     )
@@ -313,7 +313,7 @@ class Power(models.Model):
                 + tuple(
                     PowerDamageTypeEnum[type_].description  # type: ignore
                     for type_ in self.damage_type
-                    if type_ != PowerDamageTypeEnum.NONE
+                    if type_ != PowerDamageTypeEnum.UNTYPED
                 )
                 + tuple(
                     PowerEffectTypeEnum[type_].description  # type: ignore
@@ -721,7 +721,7 @@ class PowerMixin:
             ],
         ).asdict()
 
-    def get_bonuses(self) -> models.QuerySet["Bonus"]:
+    def get_power_bonuses(self) -> models.QuerySet["Bonus"]:
         powers = self.powers.filter(
             frequency=PowerFrequencyEnum.PASSIVE, subclass__in=(self.subclass, 0)
         ).union(self.race.powers.filter(frequency=PowerFrequencyEnum.PASSIVE))
@@ -755,7 +755,7 @@ class PowerMixin:
         for bonus_type in bonus_types:
             bonuses = defaultdict(list)
             for bonus in (
-                self.get_bonuses()
+                self.get_power_bonuses()
                 .filter(bonus_type=bonus_type)
                 .union(self.race.bonuses.filter(bonus_type=bonus_type))
             ):

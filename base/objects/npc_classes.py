@@ -5,12 +5,8 @@ from base.constants.constants import (
     AbilityEnum,
     ArmorTypeIntEnum,
     NPCClassEnum,
-    ShieldTypeIntEnum,
-    SkillEnum,
-    WeaponCategoryIntEnum,
     WeaponHandednessEnum,
 )
-from base.objects.skills import Skills
 from base.objects.weapon_types import (
     AnnihilationBlade,
     Broadsword,
@@ -53,18 +49,8 @@ class NPCClass:
     _reflex: ClassVar[int] = 0
     _will: ClassVar[int] = 0
     base_attack_abilities: ClassVar[Sequence[AbilityEnum]] = ()
-    mandatory_skills: ClassVar[Skills] = Skills()
-    trainable_skills: ClassVar[Skills] = Skills()
-    skill_bonuses: ClassVar[Skills] = Skills()
     _available_armor_types: ClassVar[Sequence[ArmorTypeIntEnum]] = (
         ArmorTypeIntEnum.CLOTH,
-    )
-    available_shield_types: ClassVar[Sequence[ShieldTypeIntEnum]] = (
-        ShieldTypeIntEnum.NONE,
-    )
-    available_weapon_categories: ClassVar[Sequence[WeaponCategoryIntEnum]] = (
-        WeaponCategoryIntEnum.SIMPLE,
-        WeaponCategoryIntEnum.SIMPLE_RANGED,
     )
     available_weapon_types: ClassVar[Sequence[Type[WeaponType]]] = ()
     available_implement_types: ClassVar[Sequence[Type[WeaponType]]] = ()
@@ -132,15 +118,6 @@ class InvokerClass(NPCClass):
     _fortitude = 1
     _reflex = 1
     _will = 1
-    mandatory_skills = Skills(religion=5)
-    trainable_skills = Skills(
-        endurance=5,
-        history=5,
-        intimidate=5,
-        arcana=5,
-        diplomacy=5,
-        insight=5,
-    )
     _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
@@ -161,10 +138,6 @@ class ArtificerClass(NPCClass):
         ArmorTypeIntEnum.LEATHER,
     )
     available_implement_types = (Wand, Rod, Quaterstaff)
-    mandatory_skills = Skills(arcana=5)
-    trainable_skills = Skills(
-        perception=5, thievery=5, history=5, diplomacy=5, dungeoneering=5, heal=5
-    )
     _fortitude = 1
     _will = 1
     base_attack_abilities = (AbilityEnum.INTELLIGENCE,)
@@ -178,35 +151,12 @@ class BardClass(NPCClass):
         ArmorTypeIntEnum.HIDE,
         ArmorTypeIntEnum.CHAINMAIL,
     )
-    available_shield_types = (ShieldTypeIntEnum.LIGHT,)
-    available_weapon_categories = (
-        WeaponCategoryIntEnum.SIMPLE,
-        WeaponCategoryIntEnum.SIMPLE_RANGED,
-        WeaponCategoryIntEnum.MILITARY_RANGED,
-    )
     available_weapon_types = (
         LongSword,
         ShortSword,
         Scimitar,
     )
-    available_implement_types = (Wand, LongSword)
-    mandatory_skills = Skills(arcana=5)
-    trainable_skills = Skills(
-        acrobatics=5,
-        athletics=5,
-        perception=5,
-        intimidate=5,
-        streetwise=5,
-        history=5,
-        bluff=5,
-        diplomacy=5,
-        nature=5,
-        dungeoneering=5,
-        insight=5,
-        religion=5,
-        heal=5,
-    )
-    skill_bonuses = Skills.init_with_const(*SkillEnum, value=1)
+    available_implement_types = (Wand,)
     _reflex = 1
     _will = 1
     base_attack_abilities = (AbilityEnum.CHARISMA,)
@@ -220,19 +170,6 @@ class BardClass(NPCClass):
 class VampireClass(NPCClass):
     slug = NPCClassEnum.VAMPIRE
     available_implement_types = (KiFocus, HolySymbol)
-    trainable_skills = Skills(
-        acrobatics=5,
-        arcana=5,
-        athletics=5,
-        bluff=5,
-        diplomacy=5,
-        history=5,
-        intimidate=5,
-        perception=5,
-        religion=5,
-        stealth=5,
-        thievery=5,
-    )
     base_attack_abilities = (AbilityEnum.DEXTERITY, AbilityEnum.CHARISMA)
 
     @property
@@ -253,19 +190,6 @@ class BarbarianClass(NPCClass):
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
         ArmorTypeIntEnum.HIDE,
-    )
-    available_weapon_categories = (
-        WeaponCategoryIntEnum.SIMPLE,
-        WeaponCategoryIntEnum.MILITARY,
-    )
-    trainable_skills = Skills(
-        acrobatics=5,
-        athletics=5,
-        endurance=5,
-        perception=5,
-        intimidate=5,
-        nature=5,
-        heal=5,
     )
     _fortitude = 2
     base_attack_abilities = (AbilityEnum.STRENGTH,)
@@ -302,17 +226,8 @@ class WarlordClass(NPCClass):
         ArmorTypeIntEnum.HIDE,
         ArmorTypeIntEnum.CHAINMAIL,
     )
-    available_shield_types = (ShieldTypeIntEnum.LIGHT,)
-    available_weapon_categories = (
-        WeaponCategoryIntEnum.SIMPLE,
-        WeaponCategoryIntEnum.MILITARY,
-        WeaponCategoryIntEnum.SIMPLE_RANGED,
-    )
     _fortitude = 1
     _will = 1
-    trainable_skills = Skills(
-        athletics=5, endurance=5, intimidate=5, history=5, diplomacy=5, heal=5
-    )
     base_attack_abilities = (AbilityEnum.STRENGTH,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -328,16 +243,6 @@ class FighterClass(NPCClass):
         ArmorTypeIntEnum.HIDE,
         ArmorTypeIntEnum.CHAINMAIL,
         ArmorTypeIntEnum.SCALE,
-    )
-    available_shield_types = (ShieldTypeIntEnum.LIGHT, ShieldTypeIntEnum.HEAVY)
-    available_weapon_categories = (
-        WeaponCategoryIntEnum.SIMPLE,
-        WeaponCategoryIntEnum.MILITARY,
-        WeaponCategoryIntEnum.SIMPLE_RANGED,
-        WeaponCategoryIntEnum.MILITARY_RANGED,
-    )
-    trainable_skills = Skills(
-        athletics=5, endurance=5, intimidate=5, streetwise=5, heal=5
     )
     base_attack_abilities = (AbilityEnum.STRENGTH,)
 
@@ -404,13 +309,8 @@ class FighterClass(NPCClass):
 
 class WizardClass(NPCClass):
     slug = NPCClassEnum.WIZARD
-    available_weapon_categories = []
     available_weapon_types = (Dagger, Quaterstaff)
     available_implement_types = (Wand, Sphere, Quaterstaff)
-    mandatory_skills = Skills(arcana=5)
-    trainable_skills = Skills(
-        history=5, diplomacy=5, dungeoneering=5, nature=5, insight=5, religion=5
-    )
     _will = 2
     base_attack_abilities = (AbilityEnum.INTELLIGENCE,)
 
@@ -431,17 +331,6 @@ class DruidClass(NPCClass):
         ArmorTypeIntEnum.HIDE,
     )
     available_implement_types = (Totem,)
-    mandatory_skills = Skills(nature=5)
-    trainable_skills = Skills(
-        athletics=5,
-        perception=5,
-        endurance=5,
-        history=5,
-        arcana=5,
-        diplomacy=5,
-        insight=5,
-        heal=5,
-    )
     _reflex = 1
     _will = 1
     base_attack_abilities = (AbilityEnum.WISDOM,)
@@ -456,8 +345,6 @@ class PriestClass(NPCClass):
         ArmorTypeIntEnum.CHAINMAIL,
     )
     available_implement_types = (HolySymbol,)
-    mandatory_skills = Skills(religion=5)
-    trainable_skills = Skills(history=5, arcana=5, diplomacy=5, insight=5, heal=5)
     _will = 2
     base_attack_abilities = (AbilityEnum.WISDOM,)
 
@@ -465,23 +352,6 @@ class PriestClass(NPCClass):
 class SeekerClass(NPCClass):
     slug = NPCClassEnum.SEEKER
     _available_armor_types = (ArmorTypeIntEnum.CLOTH, ArmorTypeIntEnum.LEATHER)
-    available_weapon_categories = (
-        WeaponCategoryIntEnum.SIMPLE,
-        WeaponCategoryIntEnum.SIMPLE_RANGED,
-        WeaponCategoryIntEnum.MILITARY_RANGED,
-    )
-    mandatory_skills = Skills(nature=5)
-    trainable_skills = Skills(
-        acrobatics=5,
-        athletics=5,
-        endurance=5,
-        heal=5,
-        insight=5,
-        intimidate=5,
-        nature=5,
-        perception=5,
-        stealth=5,
-    )
     _reflex = 1
     _will = 1
     base_attack_abilities = (AbilityEnum.WISDOM,)
@@ -508,23 +378,7 @@ class SeekerClass(NPCClass):
 
 class AvengerClass(NPCClass):
     slug = NPCClassEnum.AVENGER
-    available_weapon_categories = (
-        WeaponCategoryIntEnum.SIMPLE,
-        WeaponCategoryIntEnum.MILITARY,
-        WeaponCategoryIntEnum.SIMPLE_RANGED,
-    )
     available_implement_types = (HolySymbol,)
-    mandatory_skills = Skills(religion=5)
-    trainable_skills = Skills(
-        acrobatics=5,
-        athletics=5,
-        perception=5,
-        endurance=5,
-        intimidate=5,
-        streetwise=5,
-        stealth=5,
-        heal=5,
-    )
     _fortitude = 1
     _reflex = 1
     _will = 1
@@ -552,16 +406,6 @@ class WarlockClass(NPCClass):
     _available_armor_types = (
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
-    )
-    trainable_skills = Skills(
-        thievery=5,
-        intimidate=5,
-        streetwise=5,
-        history=5,
-        arcana=5,
-        bluff=5,
-        insight=5,
-        religion=5,
     )
     _reflex = 1
     _will = 1
@@ -596,10 +440,6 @@ class SwordmageClass(NPCClass):
         Greatsword,
     )
     available_implement_types = available_weapon_types
-    mandatory_skills = Skills(arcana=5)
-    trainable_skills = Skills(
-        athletics=5, endurance=5, intimidate=5, history=5, diplomacy=5, insight=5
-    )
     _will = 2
     base_attack_abilities = (AbilityEnum.INTELLIGENCE,)
 
@@ -628,17 +468,7 @@ class PaladinClass(NPCClass):
         ArmorTypeIntEnum.SCALE,
         ArmorTypeIntEnum.PLATE,
     )
-    available_shield_types = (ShieldTypeIntEnum.LIGHT, ShieldTypeIntEnum.HEAVY)
-    available_weapon_categories = (
-        WeaponCategoryIntEnum.SIMPLE,
-        WeaponCategoryIntEnum.MILITARY,
-        WeaponCategoryIntEnum.SIMPLE_RANGED,
-    )
     available_implement_types = (HolySymbol,)
-    mandatory_skills = Skills(religion=5)
-    trainable_skills = Skills(
-        endurance=5, intimidate=5, history=5, diplomacy=5, insight=5, heal=5
-    )
     _fortitude = 1
     _reflex = 1
     _will = 1
@@ -651,20 +481,7 @@ class RogueClass(NPCClass):
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
     )
-    available_weapon_categories = ()
     available_weapon_types = (Dagger, ShortSword, Sling, HandCrossbow, Shuriken)
-
-    mandatory_skills = Skills(thievery=5, stealth=5)
-    trainable_skills = Skills(
-        acrobatics=5,
-        athletics=5,
-        perception=5,
-        intimidate=5,
-        streetwise=5,
-        bluff=5,
-        dungeoneering=5,
-        insight=5,
-    )
     _reflex = 2
     base_attack_abilities = (AbilityEnum.DEXTERITY,)
 
@@ -696,17 +513,6 @@ class RunepriestClass(NPCClass):
         ArmorTypeIntEnum.CHAINMAIL,
         ArmorTypeIntEnum.SCALE,
     )
-    available_shield_types = (ShieldTypeIntEnum.LIGHT,)
-    mandatory_skills = Skills(religion=5)
-    trainable_skills = Skills(
-        athletics=5,
-        thievery=5,
-        endurance=5,
-        history=5,
-        arcana=5,
-        insight=5,
-        heal=5,
-    )
     _will = 2
     base_attack_abilities = (AbilityEnum.STRENGTH,)
 
@@ -721,16 +527,6 @@ class RangerClass(NPCClass):
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
         ArmorTypeIntEnum.HIDE,
-    )
-    available_weapon_categories = (
-        WeaponCategoryIntEnum.SIMPLE,
-        WeaponCategoryIntEnum.MILITARY,
-        WeaponCategoryIntEnum.SIMPLE_RANGED,
-        WeaponCategoryIntEnum.MILITARY_RANGED,
-    )
-    mandatory_skills = Skills(nature=5, dungeoneering=5)
-    trainable_skills = Skills(
-        acrobatics=5, athletics=5, perception=5, endurance=5, stealth=5, heal=5
     )
     _fortitude = 1
     _reflex = 1
@@ -754,16 +550,6 @@ class WardenClass(NPCClass):
         ArmorTypeIntEnum.LEATHER,
         ArmorTypeIntEnum.HIDE,
     )
-    available_shield_types = (ShieldTypeIntEnum.LIGHT, ShieldTypeIntEnum.HEAVY)
-    available_weapon_categories = (
-        WeaponCategoryIntEnum.SIMPLE,
-        WeaponCategoryIntEnum.MILITARY,
-        WeaponCategoryIntEnum.SIMPLE_RANGED,
-    )
-    mandatory_skills = Skills(nature=5)
-    trainable_skills = Skills(
-        athletics=5, perception=5, endurance=5, intimidate=5, dungeoneering=5, heal=5
-    )
     _fortitude = 1
     _will = 1
     base_attack_abilities = (AbilityEnum.STRENGTH,)
@@ -776,18 +562,6 @@ class WardenClass(NPCClass):
 class SorcererClass(NPCClass):
     slug = NPCClassEnum.SORCERER
     available_implement_types = (Dagger, Quaterstaff)
-    mandatory_skills = Skills(arcana=5)
-    trainable_skills = Skills(
-        athletics=5,
-        endurance=5,
-        intimidate=5,
-        history=5,
-        bluff=5,
-        diplomacy=5,
-        dungeoneering=5,
-        nature=5,
-        insight=5,
-    )
     _will = 2
     base_attack_abilities = (AbilityEnum.CHARISMA,)
 
@@ -809,20 +583,8 @@ class ShamanClass(NPCClass):
         ArmorTypeIntEnum.CLOTH,
         ArmorTypeIntEnum.LEATHER,
     )
-    available_weapon_categories = (WeaponCategoryIntEnum.SIMPLE,)
     available_weapon_types = (Longspear,)
     available_implement_types = (Totem,)
-    mandatory_skills = Skills(nature=5)
-    trainable_skills = Skills(
-        athletics=5,
-        perception=5,
-        endurance=5,
-        history=5,
-        arcana=5,
-        insight=5,
-        religion=5,
-        heal=5,
-    )
     _fortitude = 1
     _will = 1
     base_attack_abilities = (AbilityEnum.WISDOM,)
@@ -830,22 +592,6 @@ class ShamanClass(NPCClass):
 
 class HexbladeClass(WarlockClass):
     slug = NPCClassEnum.HEXBLADE
-    available_weapon_categories = (
-        WeaponCategoryIntEnum.SIMPLE,
-        WeaponCategoryIntEnum.MILITARY,
-        WeaponCategoryIntEnum.SIMPLE_RANGED,
-    )
-    trainable_skills = Skills(
-        thievery=5,
-        intimidate=5,
-        streetwise=5,
-        stealth=5,
-        history=5,
-        arcana=5,
-        bluff=5,
-        insight=5,
-        religion=5,
-    )
     _fortitude = 1
     _reflex = 0
     _will = 1
@@ -906,19 +652,6 @@ class HexbladeClass(WarlockClass):
 class MonkClass(NPCClass):
     slug = NPCClassEnum.MONK
     _reflex = 1
-    trainable_skills = Skills(
-        acrobatics=5,
-        athletics=5,
-        perception=5,
-        thievery=5,
-        endurance=5,
-        diplomacy=5,
-        insight=5,
-        religion=5,
-        stealth=5,
-        heal=5,
-    )
-    available_weapon_categories = ()
     available_accesories = (Quaterstaff, Club, Dagger, Spear, Sling, Shuriken)
     available_weapon_types = available_accesories + (UnarmedMonkStrike,)
     available_implement_types = available_accesories + (KiFocus,)
@@ -947,23 +680,6 @@ class MonkClass(NPCClass):
 class BladeSingerClass(WizardClass):
     slug = NPCClassEnum.BLADESINGER
     _available_armor_types = (ArmorTypeIntEnum.CLOTH, ArmorTypeIntEnum.LEATHER)
-    available_weapon_categories = [
-        WeaponCategoryIntEnum.SIMPLE,
-        WeaponCategoryIntEnum.SIMPLE_RANGED,
-        WeaponCategoryIntEnum.MILITARY,
-        WeaponCategoryIntEnum.MILITARY_RANGED,
-    ]
     available_implement_types = (Wand, Sphere, Quaterstaff)
-
-    mandatory_skills = Skills(arcana=5)
-    trainable_skills = Skills(
-        acrobatics=5,
-        athletics=5,
-        intimidate=5,
-        history=5,
-        diplomacy=5,
-        nature=5,
-        perception=5,
-    )
     _will = 2
     base_attack_abilities = (AbilityEnum.INTELLIGENCE,)
