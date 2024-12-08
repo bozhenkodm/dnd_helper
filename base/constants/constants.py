@@ -444,8 +444,8 @@ class MagicItemSlot(BaseNameValueDescriptionEnum):
 
 
 class ThrownWeaponType(BaseNameValueDescriptionEnum):
-    LIGHT = auto(), 'Лёгкое'
-    HEAVY = auto(), 'Тяжёлое'
+    LIGHT = auto(), 'Лёгкое метательное'
+    HEAVY = auto(), 'Тяжёлое метательное'
 
 
 class BonusSource(BaseNameValueDescriptionEnum):

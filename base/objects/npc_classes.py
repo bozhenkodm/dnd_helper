@@ -261,7 +261,7 @@ class FighterClass(NPCClass):
                 self.npc.shield,
                 self.npc.secondary_hand,
                 self.npc.primary_hand
-                and not self.npc.primary_hand.data_instance.is_melee,
+                and not self.npc.primary_hand.weapon_type.is_melee,
                 self.npc.primary_hand
                 and self.npc.primary_hand.handedness == WeaponHandednessEnum.TWO,
             )
@@ -301,7 +301,7 @@ class FighterClass(NPCClass):
             if (
                 self.npc.primary_hand
                 and self.npc.secondary_hand
-                and weapon.weapon_type.data_instance.is_off_hand
+                and weapon.weapon_type.is_off_hand
             ):
                 return result + 1
         return result
@@ -363,7 +363,7 @@ class SeekerClass(NPCClass):
     def attack_bonus(self, weapon=None, is_implement: bool = False) -> int:
         result = super().attack_bonus(weapon, is_implement)
         if self.npc.subclass == self.SubclassEnum.SPIRITBOND and (
-            weapon.data_instance.thrown
+            weapon.weapon_type.thrown
         ):
             return result + 1
         return result

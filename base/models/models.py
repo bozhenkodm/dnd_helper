@@ -12,20 +12,22 @@ from base.constants.constants import (
     ArmorTypeIntEnum,
     BonusType,
     ClassRoleEnum,
+    DiceIntEnum,
     NPCClassEnum,
     NPCRaceEnum,
+    PowerActionTypeEnum,
     PowerSourceEnum,
     SexEnum,
     ShieldTypeIntEnum,
     SizeEnum,
     SkillEnum,
+    ThrownWeaponType,
     VisionEnum,
     WeaponCategoryIntEnum,
     WeaponGroupEnum,
     WeaponHandednessEnum,
 )
 from base.exceptions import PowerInconsistent, WrongWeapon
-from base.managers import WeaponTypeQuerySet
 from base.models.abilities import Ability, NPCAbilityAbstract
 from base.models.bonuses import BonusMixin
 from base.models.defences import NPCDefenceMixin
@@ -160,8 +162,6 @@ class WeaponType(models.Model):
         verbose_name = _('Weapon type')
         verbose_name_plural = _('Weapon types')
 
-    objects = WeaponTypeQuerySet.as_manager()
-
     name = models.CharField(verbose_name=_('Title'), max_length=30, blank=True)
     slug = models.CharField(verbose_name='Slug', max_length=30, unique=True, blank=True)
     handedness = models.CharField(
@@ -180,6 +180,41 @@ class WeaponType(models.Model):
         verbose_name=_('Category'),
         choices=WeaponCategoryIntEnum.generate_choices(),
     )
+    range = models.PositiveSmallIntegerField(default=0)
+    prof_bonus = models.PositiveSmallIntegerField(
+        verbose_name=_('Prof bonus'), default=2
+    )
+    dice = models.PositiveSmallIntegerField(
+        choices=DiceIntEnum.generate_choices(lambda x: x <= DiceIntEnum.D12), null=True
+    )
+    dice_number = models.PositiveSmallIntegerField(default=1)
+
+    brutal = models.PositiveSmallIntegerField(default=0)
+    thrown = models.CharField(
+        choices=ThrownWeaponType.generate_choices(),
+        max_length=ThrownWeaponType.max_length(),
+        null=True,
+    )
+    is_off_hand = models.BooleanField(default=False)
+    is_high_crit = models.BooleanField(default=False)
+    is_reach = models.BooleanField(default=False)
+    load = models.CharField(
+        choices=(
+            (
+                PowerActionTypeEnum.FREE.value,
+                f'Зарядка: {PowerActionTypeEnum.FREE.description}',
+            ),
+            (
+                PowerActionTypeEnum.MINOR.value,
+                f'Зарядка: {PowerActionTypeEnum.MINOR.description}',
+            ),
+        ),
+        max_length=5,
+        null=True,
+    )
+    is_small = models.BooleanField(default=False)
+    is_defensive = models.BooleanField(default=False)
+    is_big = models.BooleanField(default=False)
     primary_end = models.OneToOneField(
         "self",
         verbose_name=_('Primary end'),
@@ -193,8 +228,15 @@ class WeaponType(models.Model):
     )
 
     def __str__(self) -> str:
-        # return weapon_types_classes[self.slug].name
         return self.name
+
+    @property
+    def max_range(self):
+        return self.range * 2
+
+    @property
+    def is_ranged(self) -> bool:
+        return bool(self.range)
 
     @cached_property
     def data_instance(self):
@@ -204,10 +246,33 @@ class WeaponType(models.Model):
             return weapon_types_classes.get(self.slug.capitalize())()
 
     def damage(self, weapon_number=1) -> str:
-        return (
-            f'{self.data_instance.dice_number * weapon_number}'
-            f'{self.data_instance.damage_dice.description}'
-        )
+        return f'{self.dice_number * weapon_number}' f'{self.get_dice_display()}'
+
+    @property
+    def is_melee(self) -> bool:
+        return WeaponCategoryIntEnum(self.category).is_melee
+
+    @property
+    def properties_text(self) -> str:
+        # TODO localization
+        result = []
+        if self.brutal:
+            result.append(f'Жестокое {self.brutal}')
+        if self.thrown:
+            result.append(self.get_thrown_display())
+        if self.is_off_hand:
+            result.append('Дополнительное')
+        if self.is_high_crit:
+            result.append('Высококритичное')
+        if self.is_reach:
+            result.append('Досягаемость')
+        if self.load:
+            result.append(self.get_load_display())
+        if self.is_small:
+            result.append('Маленькое')
+        if self.is_defensive:
+            result.append('Защитное')
+        return ', '.join(result)
 
 
 class Weapon(ItemAbstract):
@@ -237,20 +302,20 @@ class Weapon(ItemAbstract):
     def damage(self):
         if not self.enhancement:
             return (
-                f'{self.data_instance.dice_number}'
-                f'{self.data_instance.damage_dice.description}'
+                f'{self.weapon_type.dice_number}'
+                f'{self.weapon_type.get_dice_display()}'
             )
         return (
-            f'{self.data_instance.dice_number}'
-            f'{self.data_instance.damage_dice.description} + '
+            f'{self.weapon_type.dice_number}'
+            f'{self.weapon_type.get_dice_display()}'
             f'{self.enhancement}'
         )
 
     @property
     def damage_roll(self) -> DiceRoll:
         return DiceRoll(
-            rolls=self.weapon_type.data_instance.dice_number,
-            dice=self.weapon_type.data_instance.damage_dice,
+            rolls=self.weapon_type.dice_number,
+            dice=DiceIntEnum(self.weapon_type.dice),
             addendant=self.enhancement,
         )
 
@@ -260,7 +325,7 @@ class Weapon(ItemAbstract):
 
     @property
     def prof_bonus(self):
-        return self.data_instance.prof_bonus
+        return self.weapon_type.prof_bonus
 
     @cached_property
     def handedness(self):
@@ -269,15 +334,15 @@ class Weapon(ItemAbstract):
     def get_attack_type(self, is_melee: bool, is_ranged: bool) -> str:
         # TODO localization
         melee_attack_type, ranged_attack_type = '', ''
-        is_melee = is_melee and self.data_instance.is_melee
-        is_ranged = is_ranged and self.data_instance.is_ranged
+        is_melee = is_melee and self.weapon_type.is_melee
+        is_ranged = is_ranged and self.weapon_type.is_ranged
         if is_melee:
-            distance = 2 if self.data_instance.is_reach else 1
+            distance = 2 if self.weapon_type.is_reach else 1
             melee_attack_type = f'Рукопашный {distance}'
         if is_ranged:
             ranged_attack_type = (
                 f'Дальнобойный '
-                f'{self.data_instance.range}/{self.data_instance.max_range}'
+                f'{self.weapon_type.range}/{self.weapon_type.max_range}'
             )
         if is_melee and is_ranged:
             return f'{melee_attack_type} или {ranged_attack_type}'
@@ -746,7 +811,8 @@ class NPC(
                         weapon
                         and self.is_weapon_proficient(weapon)
                         and self._is_weapon_available_for_power(power, weapon)
-                        and not weapon.data_instance.is_pure_implement
+                        and weapon.weapon_type.category
+                        != WeaponCategoryIntEnum.IMPLEMENT
                     ):
                         result.append((weapon,))
             case AccessoryTypeEnum.IMPLEMENT:

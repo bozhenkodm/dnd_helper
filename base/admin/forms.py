@@ -42,10 +42,6 @@ class NPCModelForm(forms.ModelForm):
         model = NPC
         fields = '__all__'
 
-    sex = forms.ChoiceField(
-        choices=SexEnum.generate_choices(is_sorted=False), label='Пол'
-    )
-
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if self.instance.id:
@@ -187,7 +183,7 @@ class NPCModelForm(forms.ModelForm):
         ):
             klass_data_instance = self.instance.klass_data_instance
             if (
-                klass_data_instance.slug == NPCClassEnum.RANGER
+                self.instance.klass.name == NPCClassEnum.RANGER
                 and self.cleaned_data['subclass']
                 == klass_data_instance.SubclassEnum.TWO_HANDED.value
                 or klass_data_instance.slug == NPCClassEnum.BARBARIAN
@@ -208,7 +204,7 @@ class NPCModelForm(forms.ModelForm):
                 or klass_data_instance.slug == NPCClassEnum.BARBARIAN
                 and self.cleaned_data['subclass']
                 == klass_data_instance.SubclassEnum.WHIRLING.value
-            ) and not (secondary_hand and secondary_hand.data_instance.is_off_hand):
+            ) and not (secondary_hand and secondary_hand.weapon_type.is_off_hand):
                 self.add_error(
                     'secondary_hand',
                     ValidationError(

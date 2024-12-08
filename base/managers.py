@@ -2,7 +2,6 @@ from django.db import models
 from django.db.models.functions import Floor
 
 from base.constants.constants import PowerFrequencyEnum
-from base.objects import weapon_types_tuple
 from base.objects.skills import Skills
 
 
@@ -16,22 +15,6 @@ class ItemAbstractQuerySet(models.QuerySet):
                 ),
                 default=0,
             ),
-        )
-
-
-class WeaponTypeQuerySet(models.QuerySet):
-    def with_damage_dice(self):
-        kwargs = (
-            {
-                'slug': item.slug,
-                'then': models.Value(
-                    item.damage_dice.description if item.damage_dice else None
-                ),
-            }
-            for item in weapon_types_tuple
-        )
-        return self.annotate(
-            damage_dice=models.Case(*(models.When(**kws) for kws in kwargs))
         )
 
 

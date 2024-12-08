@@ -40,6 +40,7 @@ from base.constants.constants import (
     ShieldTypeIntEnum,
     WeaponCategoryIntEnum,
     WeaponGroupEnum,
+    WeaponHandednessEnum,
 )
 from base.models import Class, Race
 from base.models.bonuses import Bonus
@@ -54,7 +55,6 @@ from base.models.magic_items import (
 from base.models.models import NPC, Armor, ArmorType, ParagonPath, Weapon, WeaponType
 from base.models.powers import Power, PowerProperty
 from base.objects import npc_klasses, weapon_types_classes
-from base.objects.weapon_types import HolySymbol, KiFocus
 
 
 class PowerInline(admin.TabularInline):
@@ -354,7 +354,8 @@ class NPCAdmin(admin.ModelAdmin):
         'functional_template',
         'paragon_path',
     )
-    list_per_page = 15
+    radio_fields = {"sex": admin.VERTICAL}
+    list_per_page = 20
     form = NPCModelForm
 
     def get_queryset(self, request: HttpRequest) -> models.QuerySet:
@@ -662,7 +663,7 @@ class WeaponTypeAdmin(admin.ModelAdmin):
     def properties(self, obj):
         if not obj.id:
             return '-'
-        return obj.data_instance.properties_text()
+        return obj.properties_text
 
     @admin.display(description='Группа оружия')
     def group_display(self, obj):
@@ -670,17 +671,11 @@ class WeaponTypeAdmin(admin.ModelAdmin):
             return '-'
         return ', '.join(WeaponGroupEnum[g].description for g in obj.group)
 
-    @admin.display(description='Бонус мастерства')
-    def prof_bonus(self, obj):
-        if not obj.id or not obj.data_instance.prof_bonus:
-            return '-'
-        return obj.data_instance.prof_bonus
-
     @admin.display(description='Урон')
     def damage(self, obj):
         if not obj.id:
             return '-'
-        return obj.data_instance.damage()
+        return obj.damage()
 
     @atomic
     def save_model(self, request, obj, form, change):
@@ -739,7 +734,7 @@ class WeaponAdmin(admin.ModelAdmin):
             return queryset, may_have_duplicates
         if field_name == 'no_hand':
             queryset = queryset.filter(
-                weapon_type__slug__in=(KiFocus.slug(), HolySymbol.slug())
+                weapon_type__handedness=WeaponHandednessEnum.FREE
             )
         return queryset, may_have_duplicates
 
@@ -757,15 +752,24 @@ class WeaponAdmin(admin.ModelAdmin):
 
     @admin.display(description='Категория оружия')
     def category(self, obj):
-        return obj.weapon_type.data_instance.category.description
+        return obj.weapon_type.category
 
     @admin.display(description='Группа оружия')
     def group(self, obj):
-        return obj.weapon_type.data_instance.group_display()
+        return obj.weapon_type.group
 
     @admin.display(description='Урон')
     def damage(self, obj):
-        return f'{obj.weapon_type.data_instance.damage()} + {obj.enhancement}'
+        return f'{obj.weapon_type.damage()} + {obj.enhancement}'
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=...):
+        return False
+
+    def has_delete_permission(self, request, obj=...):
+        return False
 
 
 class PowerPropertyInline(admin.TabularInline):
