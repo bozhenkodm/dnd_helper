@@ -2,7 +2,8 @@ from random import choice
 
 from django.core.management import BaseCommand
 
-from base.models import Class, Race
+from base.models import Race
+from base.models.klass import Class
 
 
 class Command(BaseCommand):

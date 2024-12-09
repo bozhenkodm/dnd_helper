@@ -10,7 +10,8 @@ if TYPE_CHECKING:
         WaistSlotItem,
         HandsSlotItem,
     )
-    from base.models.models import FunctionalTemplate, Class, Armor
+    from base.models.models import FunctionalTemplate, Armor
+    from base.models.klass import Class
 
 from base.constants.constants import DefenceTypeEnum, NPCClassEnum, ShieldTypeIntEnum
 from base.objects.npc_classes import NPCClass
@@ -67,7 +68,7 @@ class NPCDefenceMixin:
 
     @property
     def _shield_bonus(self: NPCProtocol) -> int:
-        if self.shield not in self.klass.available_shields:
+        if self.shield not in self.klass.shields:
             return 0
         return self.shield.value
 

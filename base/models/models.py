@@ -11,14 +11,10 @@ from base.constants.constants import (
     AccessoryTypeEnum,
     ArmorTypeIntEnum,
     BonusType,
-    ClassRoleEnum,
     DiceIntEnum,
-    NPCClassEnum,
     NPCRaceEnum,
     PowerActionTypeEnum,
-    PowerSourceEnum,
     SexEnum,
-    ShieldTypeIntEnum,
     SizeEnum,
     SkillEnum,
     ThrownWeaponType,
@@ -28,10 +24,12 @@ from base.constants.constants import (
     WeaponHandednessEnum,
 )
 from base.exceptions import PowerInconsistent, WrongWeapon
+from base.managers import WeaponTypeQuerySet
 from base.models.abilities import Ability, NPCAbilityAbstract
 from base.models.bonuses import BonusMixin
 from base.models.defences import NPCDefenceMixin
 from base.models.experience import NPCExperienceAbstract
+from base.models.klass import Class, Subclass
 from base.models.magic_items import (
     ItemAbstract,
     MagicArmorType,
@@ -161,6 +159,8 @@ class WeaponType(models.Model):
     class Meta:
         verbose_name = _('Weapon type')
         verbose_name_plural = _('Weapon types')
+
+    objects = WeaponTypeQuerySet.as_manager()
 
     name = models.CharField(verbose_name=_('Title'), max_length=30, blank=True)
     slug = models.CharField(verbose_name='Slug', max_length=30, unique=True, blank=True)
@@ -418,78 +418,6 @@ class Race(models.Model):
         return NPCRaceEnum[self.name].description
 
 
-class Class(models.Model):
-    class Meta:
-        verbose_name = _('Class')
-        verbose_name_plural = _('Classes')
-        ordering = ('name_display',)
-
-    name = models.SlugField(
-        choices=NPCClassEnum.generate_choices(is_sorted=False),
-        max_length=NPCClassEnum.max_length(),
-    )
-    name_display = models.CharField(
-        verbose_name=_('Title'),
-        max_length=NPCClassEnum.max_description_length(),
-    )
-    surges = models.PositiveSmallIntegerField(verbose_name=_('Surges'), default=6)
-    hit_points_per_level = models.PositiveSmallIntegerField(
-        verbose_name=_('Hit points per level'), default=5
-    )
-    hit_points_per_level_npc = models.PositiveSmallIntegerField(
-        verbose_name=_('Hit points per level'), default=8
-    )
-    available_weapon_categories = MultiSelectField(
-        verbose_name=_('Available weapon categories'),
-        choices=WeaponCategoryIntEnum.generate_choices(),
-        null=True,
-        blank=True,
-    )
-    available_shields = MultiSelectField(
-        verbose_name=_('Available shields'),
-        choices=ShieldTypeIntEnum.generate_choices(
-            lambda x: x != ShieldTypeIntEnum.NONE
-        ),
-        null=True,
-        blank=True,
-    )
-    power_source = models.CharField(
-        verbose_name=_('Power source'),
-        choices=PowerSourceEnum.generate_choices(),
-        max_length=PowerSourceEnum.max_length(),
-    )
-    role = models.CharField(
-        verbose_name=_('Role'),
-        choices=ClassRoleEnum.generate_choices(),
-        max_length=ClassRoleEnum.max_length(),
-    )
-    mandatory_skills = models.ManyToManyField(Skill, verbose_name=_('Mandatory skills'))
-    trainable_skills = models.ManyToManyField(
-        Skill, verbose_name='Выборочно тренируемые навыки', related_name='classes'
-    )
-
-    def __str__(self):
-        return self.name_display
-
-
-class Subclass(models.Model):
-    class Meta:
-        verbose_name = _('Subclass')
-        verbose_name_plural = _('Subclasses')
-        unique_together = ('klass', 'subclass_id')
-
-    klass = models.ForeignKey(
-        Class,
-        verbose_name=_('Class'),
-        on_delete=models.CASCADE,
-    )
-    name = models.CharField(_('Name'), max_length=40)
-    slug = models.CharField(_('Slug'), max_length=40)
-    subclass_id = models.PositiveSmallIntegerField(
-        verbose_name=('Subclass id'), default=0
-    )
-
-
 class FunctionalTemplate(models.Model):
     class Meta:
         verbose_name = _('Functional template')
@@ -652,6 +580,13 @@ class NPC(
         return npc_klasses.get(self.klass.name)(npc=self)
 
     @property
+    def subclass_instance(self) -> Subclass | None:
+        try:
+            return self.klass.subclasses.get(subclass_id=self.subclass)
+        except Subclass.DoesNotExist:
+            return None
+
+    @property
     def all_trained_skills(self) -> list[SkillEnum]:
         return [
             SkillEnum(skill.title)  # type: ignore
@@ -779,8 +714,7 @@ class NPC(
         data_instance = weapon.data_instance
         return any(
             (
-                weapon.weapon_type.category
-                in map(int, self.klass.available_weapon_categories),
+                weapon.weapon_type.category in map(int, self.klass.weapon_categories),
                 type(data_instance) in self.klass_data_instance.available_weapon_types,
                 weapon.weapon_type in self.race.available_weapon_types.all(),
                 weapon.weapon_type in self.trained_weapons.all(),

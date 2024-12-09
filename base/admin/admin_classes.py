@@ -12,7 +12,6 @@ from django.db import models
 from django.db.transaction import atomic
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _
 
 from base.admin.forms import (
     ArmsSlotItemForm,
@@ -42,9 +41,10 @@ from base.constants.constants import (
     WeaponGroupEnum,
     WeaponHandednessEnum,
 )
-from base.models import Class, Race
+from base.models import Race
 from base.models.bonuses import Bonus
 from base.models.encounters import Combatants, CombatantsPC
+from base.models.klass import Class
 from base.models.magic_items import (
     ArmsSlotItem,
     MagicArmorType,
@@ -158,12 +158,12 @@ class ClassAdmin(admin.ModelAdmin):
         'available_shield_types',
         'available_weapons',
         'available_implements',
-        'power_source',
-        'role',
         'mandatory_skills',
         'trainable_skills',
+        'power_source',
+        'role',
     )
-    fields = readonly_fields
+    fields = readonly_fields #+ ('shields',)
     inlines = (ClassBonusInline,)
 
     def has_add_permission(self, request: HttpRequest) -> bool:
@@ -177,19 +177,11 @@ class ClassAdmin(admin.ModelAdmin):
 
     @admin.display(description='Ношение брони')
     def available_armor_types(self, obj):
-        if not obj.id:
-            return '-'
-        try:
-            return ', '.join(
-                armor_type.description
-                for armor_type in npc_klasses[obj.name]._available_armor_types
-            )
-        except TypeError:
-            return '-'  # fixme dynamic armor list
+        return obj.armor_types
 
     @admin.display(description='Ношение щитов')
     def available_shield_types(self, obj):
-        return obj.available_shields
+        return obj.shields
 
     @admin.display(description='Владение оружием')
     def available_weapons(self, obj):
@@ -199,7 +191,7 @@ class ClassAdmin(admin.ModelAdmin):
             return ', '.join(
                 [
                     WeaponCategoryIntEnum(int(wc)).description
-                    for wc in obj.available_weapon_categories
+                    for wc in obj.weapon_categories
                 ]
                 + [
                     weapon_type.name
@@ -229,6 +221,11 @@ class ClassAdmin(admin.ModelAdmin):
                         f'{form.instance}: {instance.get_bonus_type_display()}'
                     )
                     instance.save()
+
+
+class SubclassAdmin(admin.ModelAdmin):
+    ordering = ('klass__name_display', 'subclass_id', 'name')
+    list_filter = ('klass',)
 
 
 class RaceListFilter(admin.SimpleListFilter):
@@ -1085,43 +1082,24 @@ class MagicArmorTypeAdmin(MagicItemTypeAdminBase):
 
 
 class MagicWeaponTypeAdmin(MagicItemTypeAdminBase):
-    fieldsets = (
+    fields = (
+        'name',
         (
-            None,
-            {
-                'fields': (
-                    'name',
-                    (
-                        'weapon_categories',
-                        'weapon_groups',
-                    ),
-                )
-            },
+            'weapon_categories',
+            'weapon_groups',
         ),
-        (
-            _('Weapon types'),
-            {
-                "classes": ["collapse"],
-                'fields': ('weapon_type_slots',),
-            },
-        ),
-        (
-            None,
-            {
-                'fields': (
-                    'min_level',
-                    'step',
-                    'max_level',
-                    'category',
-                    'crit_dice',
-                    'crit_property',
-                    'picture',
-                    'upload_from_clipboard',
-                    'image_tag',
-                    'source',
-                )
-            },
-        ),
+        'weapon_types',
+        'implement_type',
+        'min_level',
+        'step',
+        'max_level',
+        'category',
+        'crit_dice',
+        'crit_property',
+        'picture',
+        'upload_from_clipboard',
+        'image_tag',
+        'source',
     )
     form = MagicWeaponTypeForm
 

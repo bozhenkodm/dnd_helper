@@ -49,9 +49,6 @@ class NPCClass:
     _reflex: ClassVar[int] = 0
     _will: ClassVar[int] = 0
     base_attack_abilities: ClassVar[Sequence[AbilityEnum]] = ()
-    _available_armor_types: ClassVar[Sequence[ArmorTypeIntEnum]] = (
-        ArmorTypeIntEnum.CLOTH,
-    )
     available_weapon_types: ClassVar[Sequence[Type[WeaponType]]] = ()
     available_implement_types: ClassVar[Sequence[Type[WeaponType]]] = ()
 
@@ -64,14 +61,6 @@ class NPCClass:
     @property
     def hit_points_bonus(self) -> int:
         return 0
-
-    @property
-    def available_armor_types(self) -> Sequence[ArmorTypeIntEnum]:
-        return self._available_armor_types
-
-    @available_armor_types.setter
-    def available_armor_types(self, value):
-        pass
 
     def attack_bonus(self, weapon=None, is_implement: bool = False) -> int:
         level_bonus = self.npc._level_bonus + self.npc.half_level
@@ -91,7 +80,10 @@ class NPCClass:
     def armor_class_bonus(self) -> int:
         result = 0
         if self.npc.armor:
-            if self.npc.armor.armor_type.base_armor_type in self.available_armor_types:
+            available_armor_types = self.npc.klass.armor_types
+            if self.npc.subclass_instance:
+                available_armor_types += self.npc.subclass_instance.armor_types
+            if self.npc.armor.armor_type.base_armor_type in available_armor_types:
                 result += self.npc.armor.armor_class
             # result += self.npc.enhancement_with_magic_threshold(
             #     self.npc.armor.enhancement
@@ -118,12 +110,6 @@ class InvokerClass(NPCClass):
     _fortitude = 1
     _reflex = 1
     _will = 1
-    _available_armor_types = (
-        ArmorTypeIntEnum.CLOTH,
-        ArmorTypeIntEnum.LEATHER,
-        ArmorTypeIntEnum.HIDE,
-        ArmorTypeIntEnum.CHAINMAIL,
-    )
     available_implement_types = (
         Rod,
         Quaterstaff,
@@ -133,10 +119,6 @@ class InvokerClass(NPCClass):
 
 class ArtificerClass(NPCClass):
     slug = NPCClassEnum.ARTIFICER
-    _available_armor_types = (
-        ArmorTypeIntEnum.CLOTH,
-        ArmorTypeIntEnum.LEATHER,
-    )
     available_implement_types = (Wand, Rod, Quaterstaff)
     _fortitude = 1
     _will = 1
@@ -145,12 +127,6 @@ class ArtificerClass(NPCClass):
 
 class BardClass(NPCClass):
     slug = NPCClassEnum.BARD
-    _available_armor_types = (
-        ArmorTypeIntEnum.CLOTH,
-        ArmorTypeIntEnum.LEATHER,
-        ArmorTypeIntEnum.HIDE,
-        ArmorTypeIntEnum.CHAINMAIL,
-    )
     available_weapon_types = (
         LongSword,
         ShortSword,
@@ -186,11 +162,6 @@ class VampireClass(NPCClass):
 
 class BarbarianClass(NPCClass):
     slug = NPCClassEnum.BARBARIAN
-    _available_armor_types = (
-        ArmorTypeIntEnum.CLOTH,
-        ArmorTypeIntEnum.LEATHER,
-        ArmorTypeIntEnum.HIDE,
-    )
     _fortitude = 2
     base_attack_abilities = (AbilityEnum.STRENGTH,)
 
@@ -220,12 +191,6 @@ class BarbarianClass(NPCClass):
 
 class WarlordClass(NPCClass):
     slug = NPCClassEnum.WARLORD
-    _available_armor_types = (
-        ArmorTypeIntEnum.CLOTH,
-        ArmorTypeIntEnum.LEATHER,
-        ArmorTypeIntEnum.HIDE,
-        ArmorTypeIntEnum.CHAINMAIL,
-    )
     _fortitude = 1
     _will = 1
     base_attack_abilities = (AbilityEnum.STRENGTH,)
@@ -237,13 +202,6 @@ class WarlordClass(NPCClass):
 
 class FighterClass(NPCClass):
     slug = NPCClassEnum.FIGHTER
-    _available_armor_types = (
-        ArmorTypeIntEnum.CLOTH,
-        ArmorTypeIntEnum.LEATHER,
-        ArmorTypeIntEnum.HIDE,
-        ArmorTypeIntEnum.CHAINMAIL,
-        ArmorTypeIntEnum.SCALE,
-    )
     base_attack_abilities = (AbilityEnum.STRENGTH,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -325,11 +283,6 @@ class WizardClass(NPCClass):
 
 class DruidClass(NPCClass):
     slug = NPCClassEnum.DRUID
-    _available_armor_types = (
-        ArmorTypeIntEnum.CLOTH,
-        ArmorTypeIntEnum.LEATHER,
-        ArmorTypeIntEnum.HIDE,
-    )
     available_implement_types = (Totem,)
     _reflex = 1
     _will = 1
@@ -338,12 +291,6 @@ class DruidClass(NPCClass):
 
 class PriestClass(NPCClass):
     slug = NPCClassEnum.PRIEST
-    _available_armor_types = (
-        ArmorTypeIntEnum.CLOTH,
-        ArmorTypeIntEnum.LEATHER,
-        ArmorTypeIntEnum.HIDE,
-        ArmorTypeIntEnum.CHAINMAIL,
-    )
     available_implement_types = (HolySymbol,)
     _will = 2
     base_attack_abilities = (AbilityEnum.WISDOM,)
@@ -351,7 +298,6 @@ class PriestClass(NPCClass):
 
 class SeekerClass(NPCClass):
     slug = NPCClassEnum.SEEKER
-    _available_armor_types = (ArmorTypeIntEnum.CLOTH, ArmorTypeIntEnum.LEATHER)
     _reflex = 1
     _will = 1
     base_attack_abilities = (AbilityEnum.WISDOM,)
@@ -403,10 +349,6 @@ class AvengerClass(NPCClass):
 class WarlockClass(NPCClass):
     slug = NPCClassEnum.WARLOCK
     available_implement_types = (Wand, Rod, RitualDagger, RitualSickle)
-    _available_armor_types = (
-        ArmorTypeIntEnum.CLOTH,
-        ArmorTypeIntEnum.LEATHER,
-    )
     _reflex = 1
     _will = 1
     base_attack_abilities = (AbilityEnum.CHARISMA, AbilityEnum.CONSTITUTION)
@@ -421,10 +363,6 @@ class WarlockClass(NPCClass):
 
 class SwordmageClass(NPCClass):
     slug = NPCClassEnum.SWORDMAGE
-    _available_armor_types = (
-        ArmorTypeIntEnum.CLOTH,
-        ArmorTypeIntEnum.LEATHER,
-    )
     available_weapon_types = (
         Dagger,
         Sickle,
@@ -460,14 +398,6 @@ class SwordmageClass(NPCClass):
 
 class PaladinClass(NPCClass):
     slug = NPCClassEnum.PALADIN
-    _available_armor_types = (
-        ArmorTypeIntEnum.CLOTH,
-        ArmorTypeIntEnum.LEATHER,
-        ArmorTypeIntEnum.HIDE,
-        ArmorTypeIntEnum.CHAINMAIL,
-        ArmorTypeIntEnum.SCALE,
-        ArmorTypeIntEnum.PLATE,
-    )
     available_implement_types = (HolySymbol,)
     _fortitude = 1
     _reflex = 1
@@ -477,10 +407,6 @@ class PaladinClass(NPCClass):
 
 class RogueClass(NPCClass):
     slug = NPCClassEnum.ROGUE
-    _available_armor_types = (
-        ArmorTypeIntEnum.CLOTH,
-        ArmorTypeIntEnum.LEATHER,
-    )
     available_weapon_types = (Dagger, ShortSword, Sling, HandCrossbow, Shuriken)
     _reflex = 2
     base_attack_abilities = (AbilityEnum.DEXTERITY,)
@@ -506,13 +432,6 @@ class RogueClass(NPCClass):
 
 class RunepriestClass(NPCClass):
     slug = NPCClassEnum.RUNEPRIEST
-    _available_armor_types = (
-        ArmorTypeIntEnum.CLOTH,
-        ArmorTypeIntEnum.LEATHER,
-        ArmorTypeIntEnum.HIDE,
-        ArmorTypeIntEnum.CHAINMAIL,
-        ArmorTypeIntEnum.SCALE,
-    )
     _will = 2
     base_attack_abilities = (AbilityEnum.STRENGTH,)
 
@@ -523,11 +442,6 @@ class RunepriestClass(NPCClass):
 
 class RangerClass(NPCClass):
     slug = NPCClassEnum.RANGER
-    _available_armor_types = (
-        ArmorTypeIntEnum.CLOTH,
-        ArmorTypeIntEnum.LEATHER,
-        ArmorTypeIntEnum.HIDE,
-    )
     _fortitude = 1
     _reflex = 1
     base_attack_abilities = (AbilityEnum.DEXTERITY, AbilityEnum.STRENGTH)
@@ -545,11 +459,6 @@ class RangerClass(NPCClass):
 
 class WardenClass(NPCClass):
     slug = NPCClassEnum.WARDEN
-    _available_armor_types = (
-        ArmorTypeIntEnum.CLOTH,
-        ArmorTypeIntEnum.LEATHER,
-        ArmorTypeIntEnum.HIDE,
-    )
     _fortitude = 1
     _will = 1
     base_attack_abilities = (AbilityEnum.STRENGTH,)
@@ -579,10 +488,6 @@ class SorcererClass(NPCClass):
 
 class ShamanClass(NPCClass):
     slug = NPCClassEnum.SHAMAN
-    _available_armor_types = (
-        ArmorTypeIntEnum.CLOTH,
-        ArmorTypeIntEnum.LEATHER,
-    )
     available_weapon_types = (Longspear,)
     available_implement_types = (Totem,)
     _fortitude = 1
@@ -596,25 +501,6 @@ class HexbladeClass(WarlockClass):
     _reflex = 0
     _will = 1
     base_attack_abilities = (AbilityEnum.CHARISMA,)  # type: ignore
-
-    @property
-    def available_armor_types(self) -> Sequence[ArmorTypeIntEnum]:
-        result = [
-            ArmorTypeIntEnum.CLOTH,
-            ArmorTypeIntEnum.LEATHER,
-            ArmorTypeIntEnum.HIDE,
-            ArmorTypeIntEnum.CHAINMAIL,
-        ]
-        if self.npc.subclass in (
-            self.SubclassEnum.INFERNAL_PACT,
-            self.SubclassEnum.ELEMENTAL_PACT,
-        ):
-            result.append(ArmorTypeIntEnum.SCALE)
-        return result
-
-    @available_armor_types.setter
-    def available_armor_types(self, value):
-        pass
 
     @property
     def available_weapon_types(self) -> Sequence[Type[WeaponType]]:
@@ -679,7 +565,6 @@ class MonkClass(NPCClass):
 
 class BladeSingerClass(WizardClass):
     slug = NPCClassEnum.BLADESINGER
-    _available_armor_types = (ArmorTypeIntEnum.CLOTH, ArmorTypeIntEnum.LEATHER)
     available_implement_types = (Wand, Sphere, Quaterstaff)
     _will = 2
     base_attack_abilities = (AbilityEnum.INTELLIGENCE,)

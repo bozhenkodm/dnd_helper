@@ -46,9 +46,9 @@ class NPCModelForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.instance.id:
             self.instance: NPC
-            klass_data_instance = self.instance.klass_data_instance
             self.fields['var_bonus_ability'] = forms.ModelChoiceField(
                 queryset=Ability.objects.filter(races=self.instance.race),
+                widget=forms.RadioSelect(),
                 label='Выборочный бонус характеристики',
                 required=bool(Ability.objects.filter(races=self.instance.race).count()),
             )
@@ -79,12 +79,10 @@ class NPCModelForm(forms.ModelForm):
                 widget=FilteredSelectMultiple('Таланты', False),
                 required=False,
             )
-            if subclass_enum := getattr(klass_data_instance, 'SubclassEnum'):
-                self.fields['subclass'] = forms.TypedChoiceField(
-                    coerce=int,
-                    choices=subclass_enum.generate_choices(),
-                    label='Подкласс',
-                )
+            self.fields['subclass'] = forms.ChoiceField(
+                choices=self.instance.klass.subclasses.generate_choices(with_zero=True),
+                label='Подкласс',
+            )
             self.fields['base_attack_ability'] = forms.ChoiceField(
                 choices=AbilityEnum.generate_choices(
                     is_sorted=False,
@@ -123,7 +121,7 @@ class NPCModelForm(forms.ModelForm):
             self.fields['arms_slot'] = forms.ModelChoiceField(
                 queryset=ArmsSlotItem.objects.select_related('magic_item_type').filter(
                     models.Q(magic_item_type__slot=ArmsSlotItem.SLOT.value)
-                    & models.Q(shield__in=self.instance.klass.available_shields)
+                    & models.Q(shield__in=self.instance.klass.shields)
                     | models.Q(shield=ShieldTypeIntEnum.NONE),
                 ),
                 label='Предмет на предплечья',
@@ -153,6 +151,10 @@ class NPCModelForm(forms.ModelForm):
                 required=False,
             )
 
+    def add_errors(self, *fields, error=''):
+        for field in fields:
+            self.add_error(field, ValidationError(error))
+
     def check_shield_and_weapon_in_one_hand(
         self, secondary_hand, shield_is_in_hand: bool
     ) -> None:
@@ -175,12 +177,34 @@ class NPCModelForm(forms.ModelForm):
                 self.add_error('arms_slot', error)
 
     def check_two_weapons_in_two_hands(self, primary_hand, secondary_hand) -> None:
-        if (
-            primary_hand
-            and primary_hand.handedness
-            != WeaponHandednessEnum.TWO  # one-handed or versatile
-            and secondary_hand
+        if not secondary_hand:
+            return
+        if not primary_hand:
+            self.add_errors(
+                'primary_hand', 'secondary_hand', error='Сначала занимаем основную руку'
+            )
+        if primary_hand.handedness in (WeaponHandednessEnum.DOUBLE,):
+            self.add_errors(
+                'primary_hand',
+                'secondary_hand',
+                error='Двойное оружие занимает две руки',
+            )
+        if primary_hand.handedness in (
+            WeaponHandednessEnum.ONE,
+            WeaponHandednessEnum.VERSATILE,
         ):
+            if secondary_hand.is_off_hand:
+                return
+            if secondary_hand.handedness in (
+                WeaponHandednessEnum.TWO,
+                WeaponHandednessEnum.DOUBLE,
+            ):
+                self.add_errors(
+                    'primary_hand',
+                    'secondary_hand',
+                    error='Двойное и двуручное оружие занимает две руки',
+                )
+                return
             klass_data_instance = self.instance.klass_data_instance
             if (
                 self.instance.klass.name == NPCClassEnum.RANGER

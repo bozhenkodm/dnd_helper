@@ -5,7 +5,6 @@ import multiselectfield.db.fields
 from django.conf import settings
 from django.db import migrations, models
 
-import base.constants.constants
 import base.models.bonuses
 import base.models.defences
 import base.models.powers
@@ -1902,9 +1901,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         blank=True,
                         limit_choices_to={
-                            'frequency': base.constants.constants.PowerFrequencyEnum[
-                                'PASSIVE'
-                            ],
+                            'frequency': 'PASSIVE',
                             'level': 0,
                         },
                         null=True,

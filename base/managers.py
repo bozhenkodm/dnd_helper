@@ -36,3 +36,20 @@ class EncounterParticipantsQuerySet(models.QuerySet):
 class SkillQuerySet(models.QuerySet):
     def obj(self, value: int) -> Skills:
         return Skills(**{s.title.lower(): value for s in self})
+
+
+class WeaponTypeQuerySet(models.QuerySet):
+    def of_category(self, category: int):
+        return self.filter(category=category)
+
+    def of_group(self, group: str):
+        return self.filter(group=group)
+
+
+class SubclassQuerySet(models.QuerySet):
+    def generate_choices(self, with_zero=False):
+        if with_zero:
+            yield 0, '---------'
+        yield from (
+            (i.subclass_id, i.name) for i in self.order_by('subclass_id', 'name')
+        )

@@ -2,7 +2,8 @@ import pytest
 from django.conf import settings
 from django.urls import reverse
 
-from base.models import NPC, Class
+from base.models import NPC
+from base.models.klass import Class
 from base.models.models import Weapon, WeaponType
 from base.objects import npc_klasses
 
@@ -55,4 +56,4 @@ def test_exist_non_enhanced_weapon():
 @pytest.mark.django_db
 def test_class_db_consistency():
     for klass in Class.objects.all():
-        assert klass.name_display == npc_klasses[klass.name].slug.description
+        assert klass.get_name_display() == npc_klasses[klass.name].slug.description

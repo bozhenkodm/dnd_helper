@@ -124,7 +124,6 @@ class NPCClassEnum(BaseNameValueDescriptionEnum):
     ROGUE = auto(), 'Плут'
     RUNEPRIEST = auto(), 'Рунный жрец'
     RANGER = auto(), 'Следопыт'
-    RANGER_MELEE = auto(), 'Следопыт (Рукопашник)'
     HEXBLADE = auto(), 'Хексблэйд (колдун)'
     WARDEN = auto(), 'Хранитель'
     SORCERER = auto(), 'Чародей'

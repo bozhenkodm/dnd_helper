@@ -119,6 +119,17 @@ class MagicWeaponType(MagicItemType):
         null=True,
         blank=True,
     )
+    weapon_types = models.ManyToManyField(
+        "base.WeaponType", verbose_name=_('Weapon type'), related_name='magic_weapons'
+    )
+    implement_type = models.ForeignKey(
+        "base.WeaponType",
+        verbose_name=_('Implement type'),
+        help_text=_('Does item has additional implement property?'),
+        null=True,
+        limit_choices_to={'category': WeaponCategoryIntEnum.IMPLEMENT},
+        on_delete=models.SET_NULL,
+    )
     crit_dice = models.SmallIntegerField(
         verbose_name=_('Crit dice'),
         choices=DiceIntEnum.generate_choices(condition=lambda x: x < DiceIntEnum.D20),
