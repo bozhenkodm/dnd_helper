@@ -458,7 +458,7 @@ class PowerMixin:
         if self._can_get_bonus_from_implement_to_weapon(accessory_type):
             enhancement = max(enhancement, self.no_hand.enhancement)
         return (
-            self.klass_data_instance.damage_bonus
+            self.damage_bonus
             + self.calculate_bonus(BonusType.DAMAGE)
             + self.enhancement_with_magic_threshold(enhancement)
         )

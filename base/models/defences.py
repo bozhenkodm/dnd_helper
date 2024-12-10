@@ -13,7 +13,13 @@ if TYPE_CHECKING:
     from base.models.models import FunctionalTemplate, Armor
     from base.models.klass import Class
 
-from base.constants.constants import DefenceTypeEnum, NPCClassEnum, ShieldTypeIntEnum
+from base.constants.constants import (
+    ArmorTypeIntEnum,
+    DefenceTypeEnum,
+    NPCClassEnum,
+    ShieldTypeIntEnum,
+    WeaponHandednessEnum,
+)
 from base.objects.npc_classes import NPCClass
 
 INITIAL_DEFENCE_VALUE = 10
@@ -83,6 +89,100 @@ class NPCDefenceMixin:
         return self.neck_slot.defence_bonus
 
     @property
+    def _armor_class_ability_bonus(self) -> int:
+        result = max(self.int_mod, self.dex_mod)
+        if not self.subclass_instance:
+            return result
+        if (
+            self.klass.name == NPCClassEnum.SEEKER
+            and self.subclass_instance.slug == 'SPIRITBOND'
+            or self.klass.name == NPCClassEnum.SORCERER
+            and self.subclass_instance.slug == 'DRAGON_MAGIC'
+        ):
+            result = max(self.str_mod, result)
+        return result
+
+    def _is_vampire_and_armored_properly(self) -> bool:
+        return (
+            self.klass.name == NPCClassEnum.VAMPIRE
+            and not self.shield
+            and (
+                not self.armor
+                or self.armor.armor_type.base_armor_type == ArmorTypeIntEnum.CLOTH
+            )
+        )
+
+    def _is_barbarian_and_armored_properly(self) -> bool:
+        return (
+            self.klass.name == NPCClassEnum.BARBARIAN
+            and not self.shield
+            and (not self.armor or self.armor.is_light)
+        )
+
+    def _is_brawler_fighter_and_properly_armed(self) -> bool:
+        # brawler fighter should have melee weapon in just one hand
+        if any(
+            (
+                self.klass.name != NPCClassEnum.FIGHTER,
+                self.subclass_instance and self.subclass_instance.slug != 'BRAWLER',
+                self.shield,
+                self.secondary_hand,
+                self.primary_hand and not self.primary_hand.weapon_type.is_melee,
+                self.primary_hand
+                and self.primary_hand.handedness
+                in (WeaponHandednessEnum.TWO, WeaponHandednessEnum.DOUBLE),
+            )
+        ):
+            return False
+        return True
+
+    def _is_avenger_and_armored_properly(self) -> bool:
+        return (
+            self.klass.name == NPCClassEnum.AVENGER
+            and not self.shield
+            and (
+                not self.armor
+                or self.armor.armor_type.base_armor_type == ArmorTypeIntEnum.CLOTH
+            )
+        )
+
+    @property
+    def armor_class_bonus(self) -> int:
+        result = 0
+        if self.armor:
+            available_armor_types = self.klass.armor_types
+            if self.subclass_instance:
+                available_armor_types += self.subclass_instance.armor_types
+            if self.armor.armor_type.base_armor_type in available_armor_types:
+                result += self.armor.armor_class
+            # result += self.npc.enhancement_with_magic_threshold(
+            #     self.npc.armor.enhancement
+            # )
+        if not self.armor or self.armor.is_light:
+            result += self._armor_class_ability_bonus
+
+        if self._is_vampire_and_armored_properly():
+            # Рефлексы вампира
+            result += 2
+        if self._is_barbarian_and_armored_properly():
+            result += self._tier + 1
+        if self._is_brawler_fighter_and_properly_armed():
+            result += 1
+        if self._is_avenger_and_armored_properly():
+            result += 3
+        if self.klass.name == NPCClassEnum.SWORDMAGE:
+            if (
+                not self.shield
+                and not self.secondary_hand
+                and self.primary_hand
+                and self.primary_hand.handedness != WeaponHandednessEnum.DOUBLE
+            ):
+                result += 3
+            else:
+                result += 1
+        return result
+
+    @property
     def armor_class(self: NPCProtocol) -> int:
         result = (
             self._defence_level_bonus
@@ -91,7 +191,7 @@ class NPCDefenceMixin:
                 if self.functional_template
                 else 0
             )
-            + self.klass_data_instance.armor_class_bonus
+            + self.armor_class_bonus
             + self._shield_bonus
         )
         return result

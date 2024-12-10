@@ -24,6 +24,10 @@ class ClassAbstract(models.Model):
         null=True,
         blank=True,
     )
+    weapon_types = models.ManyToManyField(
+        'base.WeaponType', verbose_name=_('Available weapon types'),
+        limit_choices_to={'primary_end__isnull': True}
+    )
     armor_types = MultiSelectField(
         verbose_name=_('Available armor types'),
         choices=ArmorTypeIntEnum.generate_choices(),

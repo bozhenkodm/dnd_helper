@@ -163,7 +163,7 @@ class ClassAdmin(admin.ModelAdmin):
         'power_source',
         'role',
     )
-    fields = readonly_fields #+ ('shields',)
+    fields = readonly_fields
     inlines = (ClassBonusInline,)
 
     def has_add_permission(self, request: HttpRequest) -> bool:

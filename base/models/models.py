@@ -12,6 +12,7 @@ from base.constants.constants import (
     ArmorTypeIntEnum,
     BonusType,
     DiceIntEnum,
+    NPCClassEnum,
     NPCRaceEnum,
     PowerActionTypeEnum,
     SexEnum,
@@ -626,6 +627,16 @@ class NPC(
         return 0
 
     @property
+    def class_hit_points_bonus(self) -> int:
+        if (
+            self.klass.name == NPCClassEnum.RANGER
+            and self.subclass_instance
+            and self.subclass_instance.slug == 'TWO_HANDED'
+        ):
+            return (self._tier + 1) * 5
+        return 0
+
+    @property
     def max_hit_points(self) -> int:
         if self.is_bonus_applied:
             hit_points_per_level = self.klass.hit_points_per_level_npc
@@ -634,7 +645,7 @@ class NPC(
         result = (
             hit_points_per_level * self.level
             + self.constitution
-            + self.klass_data_instance.hit_points_bonus
+            + self.class_hit_points_bonus
         )
         if self.functional_template:
             result += (
@@ -671,6 +682,26 @@ class NPC(
         else:
             result += self.klass.surges + self.con_mod
         return result
+
+    @property
+    def damage_bonus(self) -> int:
+        base_bonus = self._level_bonus
+        if self.klass.name != NPCClassEnum.HEXBLADE or not self.subclass_instance:
+            return base_bonus
+        damage_modifier = 0
+        if self.subclass_instance.slug in (
+            'FEY_PACT',
+            'GLOOM_PACT',
+        ):
+            damage_modifier = self.dex_mod
+        if self.subclass_instance.slug in (
+            'INFERNAL_PACT',
+            'ELEMENTAL_PACT',
+        ):
+            damage_modifier = self.con_mod
+        if self.subclass_instance.slug == 'STAR_PACT':
+            damage_modifier = self.int_mod
+        return base_bonus + (+((self.level - 5) // 10) * 2 + 2 + damage_modifier)
 
     @property
     def initiative(self) -> int:

@@ -58,39 +58,11 @@ class NPCClass:
     def __init__(self, npc):
         self.npc = npc
 
-    @property
-    def hit_points_bonus(self) -> int:
-        return 0
-
     def attack_bonus(self, weapon=None, is_implement: bool = False) -> int:
         level_bonus = self.npc._level_bonus + self.npc.half_level
         if weapon and not is_implement and self.npc.is_weapon_proficient(weapon=weapon):
             return level_bonus + weapon.prof_bonus
         return level_bonus
-
-    @property
-    def damage_bonus(self) -> int:
-        return self.npc._level_bonus
-
-    @property
-    def _armor_class_ability_bonus(self) -> int:
-        return max(self.npc.int_mod, self.npc.dex_mod)
-
-    @property
-    def armor_class_bonus(self) -> int:
-        result = 0
-        if self.npc.armor:
-            available_armor_types = self.npc.klass.armor_types
-            if self.npc.subclass_instance:
-                available_armor_types += self.npc.subclass_instance.armor_types
-            if self.npc.armor.armor_type.base_armor_type in available_armor_types:
-                result += self.npc.armor.armor_class
-            # result += self.npc.enhancement_with_magic_threshold(
-            #     self.npc.armor.enhancement
-            # )
-        if not self.npc.armor or self.npc.armor.is_light:
-            result += self._armor_class_ability_bonus
-        return result
 
     @property
     def fortitude(self) -> int:
@@ -148,17 +120,6 @@ class VampireClass(NPCClass):
     available_implement_types = (KiFocus, HolySymbol)
     base_attack_abilities = (AbilityEnum.DEXTERITY, AbilityEnum.CHARISMA)
 
-    @property
-    def armor_class_bonus(self) -> int:
-        result = super().armor_class_bonus
-        if not self.npc.shield and (
-            not self.npc.armor
-            or self.npc.armor.armor_type.base_armor_type == ArmorTypeIntEnum.CLOTH
-        ):
-            # Рефлексы вампира
-            result += 2
-        return result
-
 
 class BarbarianClass(NPCClass):
     slug = NPCClassEnum.BARBARIAN
@@ -174,13 +135,6 @@ class BarbarianClass(NPCClass):
     @property
     def _is_armored_properly(self) -> bool:
         return not self.npc.shield and (not self.npc.armor or self.npc.armor.is_light)
-
-    @property
-    def armor_class_bonus(self) -> int:
-        result = super().armor_class_bonus
-        if self._is_armored_properly:
-            result += self.npc._tier + 1
-        return result
 
     @property
     def reflex(self) -> int:
@@ -215,7 +169,8 @@ class FighterClass(NPCClass):
         # brawler fighter should have melee weapon in just one hand
         if any(
             (
-                self.npc.subclass != self.SubclassEnum.BRAWLER,
+                self.npc.subclass_instance
+                and self.npc.subclass_instance.slug != 'BRAWLER',
                 self.npc.shield,
                 self.npc.secondary_hand,
                 self.npc.primary_hand
@@ -226,13 +181,6 @@ class FighterClass(NPCClass):
         ):
             return False
         return True
-
-    @property
-    def armor_class_bonus(self) -> int:
-        result = super().armor_class_bonus
-        if self._is_brawler_and_properly_armed():
-            result += 1
-        return result
 
     @property
     def fortitude(self) -> int:
@@ -314,13 +262,6 @@ class SeekerClass(NPCClass):
             return result + 1
         return result
 
-    @property
-    def _armor_class_ability_bonus(self) -> int:
-        result = super()._armor_class_ability_bonus
-        if self.npc.subclass == self.SubclassEnum.SPIRITBOND:
-            result = max(self.npc.str_mod, result)
-        return result
-
 
 class AvengerClass(NPCClass):
     slug = NPCClassEnum.AVENGER
@@ -334,16 +275,6 @@ class AvengerClass(NPCClass):
         PURSUIT = 1, 'Осуждение преследования'
         RETRIBUTION = 2, 'Осуждение расплаты'
         UNITY = 3, 'Осуждение единства'
-
-    @property
-    def armor_class_bonus(self) -> int:
-        result = super().armor_class_bonus
-        if not self.npc.shield and (
-            not self.npc.armor
-            or self.npc.armor.armor_type.base_armor_type == ArmorTypeIntEnum.CLOTH
-        ):
-            result += 3
-        return result
 
 
 class WarlockClass(NPCClass):
@@ -385,15 +316,6 @@ class SwordmageClass(NPCClass):
         ASSAULT_AEGIS = 1, 'Эгида атаки'
         SHIELDING_AEGIS = 2, 'Эгида защиты'
         ENSNAREMENT_AEGIS = 3, 'Эгида западни'
-
-    @property
-    def armor_class_bonus(self) -> int:
-        result = super().armor_class_bonus
-        if not self.npc.shield and not self.npc.secondary_hand:
-            result += 3
-        else:
-            result += 1
-        return result
 
 
 class PaladinClass(NPCClass):
@@ -450,12 +372,6 @@ class RangerClass(NPCClass):
         MARKSMAN = 1, 'Стрелок'
         TWO_HANDED = 2, 'Обоерукий'
 
-    @property
-    def hit_points_bonus(self) -> int:
-        if self.npc.subclass == self.SubclassEnum.TWO_HANDED:
-            return (self.npc._tier + 1) * 5
-        return 0
-
 
 class WardenClass(NPCClass):
     slug = NPCClassEnum.WARDEN
@@ -477,13 +393,6 @@ class SorcererClass(NPCClass):
     class SubclassEnum(IntDescriptionSubclassEnum):
         DRAGON_MAGIC = 1, 'Драконья магия'
         WILD_MAGIC = 2, 'Дикая магия'
-
-    @property
-    def _armor_class_ability_bonus(self) -> int:
-        result = super()._armor_class_ability_bonus
-        if self.npc.subclass == self.SubclassEnum.DRAGON_MAGIC:
-            result = max(self.npc.str_mod, result)
-        return result
 
 
 class ShamanClass(NPCClass):
@@ -515,24 +424,6 @@ class HexbladeClass(WarlockClass):
     @available_weapon_types.setter
     def available_weapon_types(self, value):
         pass
-
-    @property
-    def damage_bonus(self) -> int:
-        base_bonus = super().damage_bonus
-        damage_modifier = 0
-        if self.npc.subclass in (
-            self.SubclassEnum.FEY_PACT,
-            self.SubclassEnum.GLOOM_PACT,
-        ):
-            damage_modifier = self.npc.dex_mod
-        if self.npc.subclass in (
-            self.SubclassEnum.INFERNAL_PACT,
-            self.SubclassEnum.ELEMENTAL_PACT,
-        ):
-            damage_modifier = self.npc.con_mod
-        if self.npc.subclass == self.SubclassEnum.STAR_PACT:
-            damage_modifier = self.npc.int_mod
-        return base_bonus + (+((self.npc.level - 5) // 10) * 2 + 2 + damage_modifier)
 
 
 class MonkClass(NPCClass):
