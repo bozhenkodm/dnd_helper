@@ -98,7 +98,7 @@ class RaceAdmin(admin.ModelAdmin):
         'speed',
         'vision',
         'size',
-        'available_weapon_types',
+        'weapon_types',
         'is_sociable',
     )
     list_filter = ('is_sociable',)
@@ -193,10 +193,7 @@ class ClassAdmin(admin.ModelAdmin):
                     WeaponCategoryIntEnum(int(wc)).description
                     for wc in obj.weapon_categories
                 ]
-                + [
-                    weapon_type.name
-                    for weapon_type in npc_klasses[obj.name].available_weapon_types
-                ]
+                + [weapon_type.name for weapon_type in obj.weapon_types.all()]
             )
         except TypeError:
             return '-'
@@ -206,8 +203,7 @@ class ClassAdmin(admin.ModelAdmin):
         if not obj.id:
             return '-'
         return ', '.join(
-            implement_type.name
-            for implement_type in npc_klasses[obj.name].available_implement_types
+            [implement_type.name for implement_type in obj.implement_types.all()]
         )
 
     def save_related(self, request, form, formsets, change):
@@ -809,7 +805,7 @@ class PowerAdmin(admin.ModelAdmin):
         ('attack_ability', 'defence', 'attack_bonus'),
         ('effect_type', 'damage_type'),
         ('dice_number', 'damage_dice'),
-        ('accessory_type', 'available_weapon_types'),
+        ('accessory_type', 'weapon_types'),
         ('range_type', 'range', 'burst'),
         'syntax',
     ]
@@ -825,7 +821,7 @@ class PowerAdmin(admin.ModelAdmin):
     inlines = (PowerPropertyInline,)
     readonly_fields = ('syntax',)
     ordering = ('klass', 'level', 'frequency')
-    autocomplete_fields = ('available_weapon_types',)
+    autocomplete_fields = ('weapon_types',)
     search_fields = (
         'name',
         'klass__name_display',

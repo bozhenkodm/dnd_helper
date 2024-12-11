@@ -1,46 +1,7 @@
-from typing import ClassVar, Sequence, Type
+from typing import ClassVar, Sequence
 
 from base.constants.base import IntDescriptionSubclassEnum
-from base.constants.constants import (
-    AbilityEnum,
-    ArmorTypeIntEnum,
-    NPCClassEnum,
-    WeaponHandednessEnum,
-)
-from base.objects.weapon_types import (
-    AnnihilationBlade,
-    Broadsword,
-    Club,
-    Dagger,
-    ExquisiteAgonyScourge,
-    Falchion,
-    Glaive,
-    Greatsword,
-    HandCrossbow,
-    HolySymbol,
-    Khopesh,
-    KiFocus,
-    Longspear,
-    LongSword,
-    Quaterstaff,
-    Rapier,
-    RitualDagger,
-    RitualSickle,
-    Rod,
-    Scimitar,
-    Scythe,
-    ShortSword,
-    Shuriken,
-    Sickle,
-    Sling,
-    Spear,
-    Sphere,
-    Totem,
-    UnarmedMonkStrike,
-    Wand,
-    WeaponType,
-    WinterMourningBlade,
-)
+from base.constants.constants import AbilityEnum, NPCClassEnum, WeaponHandednessEnum
 
 
 class NPCClass:
@@ -49,8 +10,6 @@ class NPCClass:
     _reflex: ClassVar[int] = 0
     _will: ClassVar[int] = 0
     base_attack_abilities: ClassVar[Sequence[AbilityEnum]] = ()
-    available_weapon_types: ClassVar[Sequence[Type[WeaponType]]] = ()
-    available_implement_types: ClassVar[Sequence[Type[WeaponType]]] = ()
 
     class SubclassEnum(IntDescriptionSubclassEnum):
         pass
@@ -82,16 +41,11 @@ class InvokerClass(NPCClass):
     _fortitude = 1
     _reflex = 1
     _will = 1
-    available_implement_types = (
-        Rod,
-        Quaterstaff,
-    )
     base_attack_abilities = (AbilityEnum.WISDOM,)
 
 
 class ArtificerClass(NPCClass):
     slug = NPCClassEnum.ARTIFICER
-    available_implement_types = (Wand, Rod, Quaterstaff)
     _fortitude = 1
     _will = 1
     base_attack_abilities = (AbilityEnum.INTELLIGENCE,)
@@ -99,12 +53,6 @@ class ArtificerClass(NPCClass):
 
 class BardClass(NPCClass):
     slug = NPCClassEnum.BARD
-    available_weapon_types = (
-        LongSword,
-        ShortSword,
-        Scimitar,
-    )
-    available_implement_types = (Wand,)
     _reflex = 1
     _will = 1
     base_attack_abilities = (AbilityEnum.CHARISMA,)
@@ -117,7 +65,6 @@ class BardClass(NPCClass):
 
 class VampireClass(NPCClass):
     slug = NPCClassEnum.VAMPIRE
-    available_implement_types = (KiFocus, HolySymbol)
     base_attack_abilities = (AbilityEnum.DEXTERITY, AbilityEnum.CHARISMA)
 
 
@@ -215,8 +162,6 @@ class FighterClass(NPCClass):
 
 class WizardClass(NPCClass):
     slug = NPCClassEnum.WIZARD
-    available_weapon_types = (Dagger, Quaterstaff)
-    available_implement_types = (Wand, Sphere, Quaterstaff)
     _will = 2
     base_attack_abilities = (AbilityEnum.INTELLIGENCE,)
 
@@ -231,7 +176,6 @@ class WizardClass(NPCClass):
 
 class DruidClass(NPCClass):
     slug = NPCClassEnum.DRUID
-    available_implement_types = (Totem,)
     _reflex = 1
     _will = 1
     base_attack_abilities = (AbilityEnum.WISDOM,)
@@ -239,7 +183,6 @@ class DruidClass(NPCClass):
 
 class PriestClass(NPCClass):
     slug = NPCClassEnum.PRIEST
-    available_implement_types = (HolySymbol,)
     _will = 2
     base_attack_abilities = (AbilityEnum.WISDOM,)
 
@@ -265,7 +208,6 @@ class SeekerClass(NPCClass):
 
 class AvengerClass(NPCClass):
     slug = NPCClassEnum.AVENGER
-    available_implement_types = (HolySymbol,)
     _fortitude = 1
     _reflex = 1
     _will = 1
@@ -279,7 +221,6 @@ class AvengerClass(NPCClass):
 
 class WarlockClass(NPCClass):
     slug = NPCClassEnum.WARLOCK
-    available_implement_types = (Wand, Rod, RitualDagger, RitualSickle)
     _reflex = 1
     _will = 1
     base_attack_abilities = (AbilityEnum.CHARISMA, AbilityEnum.CONSTITUTION)
@@ -294,21 +235,6 @@ class WarlockClass(NPCClass):
 
 class SwordmageClass(NPCClass):
     slug = NPCClassEnum.SWORDMAGE
-    available_weapon_types = (
-        Dagger,
-        Sickle,
-        Scythe,
-        LongSword,
-        ShortSword,
-        Broadsword,
-        Khopesh,
-        Rapier,
-        Scimitar,
-        Falchion,
-        Glaive,
-        Greatsword,
-    )
-    available_implement_types = available_weapon_types
     _will = 2
     base_attack_abilities = (AbilityEnum.INTELLIGENCE,)
 
@@ -320,7 +246,6 @@ class SwordmageClass(NPCClass):
 
 class PaladinClass(NPCClass):
     slug = NPCClassEnum.PALADIN
-    available_implement_types = (HolySymbol,)
     _fortitude = 1
     _reflex = 1
     _will = 1
@@ -329,7 +254,6 @@ class PaladinClass(NPCClass):
 
 class RogueClass(NPCClass):
     slug = NPCClassEnum.ROGUE
-    available_weapon_types = (Dagger, ShortSword, Sling, HandCrossbow, Shuriken)
     _reflex = 2
     base_attack_abilities = (AbilityEnum.DEXTERITY,)
 
@@ -343,11 +267,12 @@ class RogueClass(NPCClass):
         if not weapon:
             return super().attack_bonus()
         base_bonus = super().attack_bonus(weapon=weapon)
-        wt_data_instance = weapon.data_instance
-        if type(wt_data_instance) in self.available_weapon_types and isinstance(
-            wt_data_instance,
-            (Dagger, Sling, HandCrossbow),  # should choose either dagger or ranged
-        ):
+        if (
+            weapon.weapon_type in self.npc.klass.weapon_types.all()
+            or self.npc.subclass_instance
+            and weapon.weapon_type in self.npc.subclass_instance.weapon_types.all()
+            and weapon.weapon_type.slug in ('Dagger', 'Sling', 'HandCrossbow')
+        ):  # should choose either dagger or ranged
             return base_bonus + 1
         return base_bonus
 
@@ -386,7 +311,6 @@ class WardenClass(NPCClass):
 
 class SorcererClass(NPCClass):
     slug = NPCClassEnum.SORCERER
-    available_implement_types = (Dagger, Quaterstaff)
     _will = 2
     base_attack_abilities = (AbilityEnum.CHARISMA,)
 
@@ -397,8 +321,6 @@ class SorcererClass(NPCClass):
 
 class ShamanClass(NPCClass):
     slug = NPCClassEnum.SHAMAN
-    available_weapon_types = (Longspear,)
-    available_implement_types = (Totem,)
     _fortitude = 1
     _will = 1
     base_attack_abilities = (AbilityEnum.WISDOM,)
@@ -411,27 +333,10 @@ class HexbladeClass(WarlockClass):
     _will = 1
     base_attack_abilities = (AbilityEnum.CHARISMA,)  # type: ignore
 
-    @property
-    def available_weapon_types(self) -> Sequence[Type[WeaponType]]:
-        if self.npc.subclass == self.SubclassEnum.FEY_PACT:
-            return (WinterMourningBlade,)
-        if self.npc.subclass == self.SubclassEnum.INFERNAL_PACT:
-            return (AnnihilationBlade,)
-        if self.npc.subclass == self.SubclassEnum.GLOOM_PACT:
-            return (ExquisiteAgonyScourge,)
-        return ()
-
-    @available_weapon_types.setter
-    def available_weapon_types(self, value):
-        pass
-
 
 class MonkClass(NPCClass):
     slug = NPCClassEnum.MONK
     _reflex = 1
-    available_accesories = (Quaterstaff, Club, Dagger, Spear, Sling, Shuriken)
-    available_weapon_types = available_accesories + (UnarmedMonkStrike,)
-    available_implement_types = available_accesories + (KiFocus,)
     base_attack_abilities = (AbilityEnum.DEXTERITY,)
 
     class SubclassEnum(IntDescriptionSubclassEnum):
@@ -456,6 +361,5 @@ class MonkClass(NPCClass):
 
 class BladeSingerClass(WizardClass):
     slug = NPCClassEnum.BLADESINGER
-    available_implement_types = (Wand, Sphere, Quaterstaff)
     _will = 2
     base_attack_abilities = (AbilityEnum.INTELLIGENCE,)

@@ -405,7 +405,7 @@ class Race(models.Model):
         max_length=SizeEnum.max_length(),
         default=SizeEnum.AVERAGE,
     )
-    available_weapon_types = models.ManyToManyField(
+    weapon_types = models.ManyToManyField(
         WeaponType,
         verbose_name=_('Available weapon types'),
     )
@@ -534,7 +534,12 @@ class NPC(
     )
 
     armor = models.ForeignKey(
-        Armor, verbose_name=_('Armor'), null=True, on_delete=models.SET_NULL
+        Armor,
+        verbose_name=_('Armor'),
+        null=True,
+        on_delete=models.SET_NULL,
+        # limit_choices_to=models.Q(armor_type__base_armor_type__in=models.F('npc__klass__armor_types'))
+        # | models.Q(armor_type_base_armor_type__in=models.F('subclass__armor_types')),
     )
     primary_hand = models.ForeignKey(
         Weapon,
@@ -543,6 +548,7 @@ class NPC(
         null=True,
         on_delete=models.SET_NULL,
         related_name='in_primary_hands',
+        limit_choices_to=~models.Q(weapon_type__handedness=WeaponHandednessEnum.FREE),
     )
     secondary_hand = models.ForeignKey(
         Weapon,
@@ -551,6 +557,7 @@ class NPC(
         null=True,
         on_delete=models.SET_NULL,
         related_name='in_secondary_hands',
+        limit_choices_to=~models.Q(weapon_type__handedness=WeaponHandednessEnum.FREE),
     )
     no_hand = models.ForeignKey(
         Weapon,
@@ -560,6 +567,7 @@ class NPC(
         null=True,
         on_delete=models.SET_NULL,
         related_name='in_no_hands',
+        limit_choices_to={'weapon_type__handedness': WeaponHandednessEnum.FREE},
     )
 
     powers = models.ManyToManyField(Power, blank=True, verbose_name=_('Powers'))
@@ -742,12 +750,13 @@ class NPC(
         return tuple(filter(lambda x: getattr(x, 'magic_item_type'), self.items))
 
     def is_weapon_proficient(self, weapon: Weapon) -> bool:
-        data_instance = weapon.data_instance
         return any(
             (
                 weapon.weapon_type.category in map(int, self.klass.weapon_categories),
-                type(data_instance) in self.klass_data_instance.available_weapon_types,
-                weapon.weapon_type in self.race.available_weapon_types.all(),
+                weapon.weapon_type in self.klass.weapon_types.all(),
+                self.subclass_instance
+                and weapon.weapon_type in self.subclass_instance.weapon_types.all(),
+                weapon.weapon_type in self.race.weapon_types.all(),
                 weapon.weapon_type in self.trained_weapons.all(),
             )
         )
@@ -755,17 +764,16 @@ class NPC(
     def is_implement_proficient(self, weapon: Weapon) -> bool:
         return any(
             (
-                type(weapon.data_instance)
-                in self.klass_data_instance.available_implement_types,
+                weapon.weapon_type in self.klass.implement_types.all(),
                 weapon.weapon_type in self.trained_weapons.all(),
             )
         )
 
     @staticmethod
     def _is_weapon_available_for_power(power: Power, weapon: Weapon) -> bool:
-        if not power.available_weapon_types.count():
+        if not power.weapon_types.count():
             return True
-        return weapon.weapon_type in power.available_weapon_types.all()
+        return weapon.weapon_type in power.weapon_types.all()
 
     def proper_weapons_for_power(self, power: Power) -> Sequence[tuple[Weapon, ...]]:
         result: list[tuple[Weapon, ...]] = []
