@@ -7,7 +7,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from base.constants.constants import (
-    AbilityEnum,
     MagicItemSlot,
     NPCClassEnum,
     NPCRaceEnum,
@@ -199,11 +198,9 @@ class NPCModelForm(forms.ModelForm):
                 return
             if (
                 self.instance.klass.name == NPCClassEnum.RANGER
-                and self.cleaned_data['subclass_id']
-                == 'TWO_HANDED'
+                and self.cleaned_data['subclass_id'] == 'TWO_HANDED'
                 or self.instance.klass.name == NPCClassEnum.BARBARIAN
-                and self.cleaned_data['subclass_id']
-                == 'WHIRLING'
+                and self.cleaned_data['subclass_id'] == 'WHIRLING'
             ) and secondary_hand.handedness == WeaponHandednessEnum.TWO:
                 self.add_error(
                     'secondary_hand',
@@ -214,11 +211,9 @@ class NPCModelForm(forms.ModelForm):
                 )
             elif not (
                 self.instance.klass.name == NPCClassEnum.RANGER
-                and self.cleaned_data['subclass_id']
-                == 'TWO_HANDED'
+                and self.cleaned_data['subclass_id'] == 'TWO_HANDED'
                 or self.instance.klass.name == NPCClassEnum.BARBARIAN
-                and self.cleaned_data['subclass_id']
-                == 'WHIRLING'
+                and self.cleaned_data['subclass_id'] == 'WHIRLING'
             ) and not (secondary_hand and secondary_hand.weapon_type.is_off_hand):
                 self.add_error(
                     'secondary_hand',

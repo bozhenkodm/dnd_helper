@@ -802,6 +802,7 @@ class PowerMixin:
                 self.get_power_bonuses()
                 .filter(bonus_type=bonus_type)
                 .union(self.race.bonuses.filter(bonus_type=bonus_type))
+                .union(self.subclass_instance.bonuses.filter(bonus_type=bonus_type))
             ):
                 try:
                     bonuses[bonus.source].append(

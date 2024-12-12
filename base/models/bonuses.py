@@ -38,9 +38,10 @@ class Bonus(models.Model):
         null=True,
         blank=True,
     )
-    subclass_fk = models.ForeignKey(
+    subclass = models.ForeignKey(
         'base.Subclass',
         verbose_name=_('Subclass'),
+        related_name='bonuses',
         on_delete=models.CASCADE,
         null=True,
         blank=True,

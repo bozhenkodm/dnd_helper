@@ -28,14 +28,14 @@ class ClassAbstract(models.Model):
         'base.WeaponType',
         verbose_name=_('Available weapon types'),
         limit_choices_to={'primary_end__isnull': True},
-        blank=True
+        blank=True,
     )
     implement_types = models.ManyToManyField(
         'base.WeaponType',
         verbose_name=_('Available implement types'),
         limit_choices_to={'primary_end__isnull': True},
         related_name='implement_%(app_label)s_%(class)s_wielders',
-        blank=True
+        blank=True,
     )
     armor_types = MultiSelectField(
         verbose_name=_('Available armor types'),

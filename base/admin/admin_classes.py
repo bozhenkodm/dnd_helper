@@ -24,7 +24,6 @@ from base.admin.forms import (
     ParagonPathForm,
     WeaponForm,
 )
-from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
     AccessoryTypeEnum,
     ArmorTypeIntEnum,
@@ -810,10 +809,7 @@ class PowerPropertyInline(admin.TabularInline):
                 instance = self.parent_model.objects.get(id=object_id)
             except self.parent_model.DoesNotExist:
                 instance = None
-            if (
-                instance
-                and instance.klass
-            ):
+            if instance and instance.klass:
                 db_field.choices = instance.klass.subclasses.generate_choices()
 
         return super().formfield_for_dbfield(db_field, request, **kwargs)
