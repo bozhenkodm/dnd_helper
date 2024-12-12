@@ -28,12 +28,14 @@ class ClassAbstract(models.Model):
         'base.WeaponType',
         verbose_name=_('Available weapon types'),
         limit_choices_to={'primary_end__isnull': True},
+        blank=True
     )
     implement_types = models.ManyToManyField(
         'base.WeaponType',
-        verbose_name=_('Available weapon types'),
+        verbose_name=_('Available implement types'),
         limit_choices_to={'primary_end__isnull': True},
         related_name='implement_%(app_label)s_%(class)s_wielders',
+        blank=True
     )
     armor_types = MultiSelectField(
         verbose_name=_('Available armor types'),
@@ -65,6 +67,9 @@ class Class(ClassAbstract):
         verbose_name=_('Title'),
         max_length=NPCClassEnum.max_description_length(),
     )
+    fortitude = models.PositiveSmallIntegerField(verbose_name=_('Fortitude'), default=0)
+    reflex = models.PositiveSmallIntegerField(verbose_name=_('Reflex'), default=0)
+    will = models.PositiveSmallIntegerField(verbose_name=_('Will'), default=0)
     surges = models.PositiveSmallIntegerField(verbose_name=_('Surges'), default=6)
     hit_points_per_level = models.PositiveSmallIntegerField(
         verbose_name=_('Hit points per level'), default=5

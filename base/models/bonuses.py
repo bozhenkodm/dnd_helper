@@ -28,7 +28,7 @@ class Bonus(models.Model):
         on_delete=models.CASCADE,
         related_name='bonuses',
         related_query_name='bonus',
-        limit_choices_to={'level': 0, 'frequency': PowerFrequencyEnum.PASSIVE},
+        limit_choices_to={'level': 0, 'frequency': PowerFrequencyEnum.PASSIVE.value},
     )
     klass = models.ForeignKey(
         'base.Class',
@@ -38,9 +38,12 @@ class Bonus(models.Model):
         null=True,
         blank=True,
     )
-    subclass = models.SmallIntegerField(
+    subclass_fk = models.ForeignKey(
+        'base.Subclass',
         verbose_name=_('Subclass'),
-        default=0,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     functional_template = models.ForeignKey(
         'base.FunctionalTemplate',

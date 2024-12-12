@@ -47,9 +47,7 @@ class WeaponTypeQuerySet(models.QuerySet):
 
 
 class SubclassQuerySet(models.QuerySet):
-    def generate_choices(self, with_zero=False):
-        if with_zero:
-            yield 0, '---------'
+    def generate_choices(self):
         yield from (
             (i.subclass_id, i.name) for i in self.order_by('subclass_id', 'name')
         )

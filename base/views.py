@@ -12,7 +12,6 @@ from base.forms.npc import NPCModelForm
 from base.models import NPC, Encounter
 from base.models.encounters import EncounterParticipants, PCParty
 from base.models.klass import Class
-from base.objects import npc_klasses
 
 
 class SubclassOptionsView(View):
@@ -22,11 +21,7 @@ class SubclassOptionsView(View):
             klass = Class.objects.get(id=klass_id)
         except (Class.DoesNotExist, ValueError):
             return JsonResponse({})
-        klass_instance = npc_klasses.get(klass.name)
-        if not klass_instance:
-            return JsonResponse({})
-        subclass_enum = klass_instance.SubclassEnum
-        return JsonResponse(dict(subclass_enum.generate_choices()))
+        return JsonResponse(dict(klass.subclasses.generate_choices()))
 
 
 class NPCFormView(FormView):

@@ -23,7 +23,6 @@ from base.admin.forms import (
     NPCModelForm,
     ParagonPathForm,
     WeaponForm,
-    WeaponTypeForm,
 )
 from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
@@ -54,7 +53,6 @@ from base.models.magic_items import (
 )
 from base.models.models import NPC, Armor, ArmorType, ParagonPath, Weapon, WeaponType
 from base.models.powers import Power, PowerProperty
-from base.objects import npc_klasses, weapon_types_classes
 
 
 class PowerInline(admin.TabularInline):
@@ -101,7 +99,12 @@ class RaceAdmin(admin.ModelAdmin):
         'weapon_types',
         'is_sociable',
     )
-    list_filter = ('is_sociable',)
+    list_filter = (
+        'speed',
+        'vision',
+        'size',
+        'is_sociable',
+    )
     list_display = ('name_display', 'speed', 'vision', 'size', 'is_sociable')
     search_fields = ('name_display',)
     actions = (make_sociable, make_unsociable)
@@ -160,10 +163,16 @@ class ClassAdmin(admin.ModelAdmin):
         'available_implements',
         'mandatory_skills',
         'trainable_skills',
-        'power_source',
-        'role',
+        # 'power_source',
+        # 'role',
     )
-    fields = readonly_fields
+    fields = readonly_fields + (
+        'fortitude',
+        'reflex',
+        'will',
+    )
+    list_filter = ('power_source', 'role')
+    list_display = ('name_display',)
     inlines = (ClassBonusInline,)
 
     def has_add_permission(self, request: HttpRequest) -> bool:
@@ -222,6 +231,23 @@ class ClassAdmin(admin.ModelAdmin):
 class SubclassAdmin(admin.ModelAdmin):
     ordering = ('klass__name_display', 'subclass_id', 'name')
     list_filter = ('klass',)
+    list_display = ('__str__', 'klass')
+    inlines = (ClassBonusInline,)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).exclude(subclass_id=0)
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        for formset in formsets:
+            if formset.model == Bonus:
+                instances = formset.save(commit=False)
+                for instance in instances:
+                    instance.source = BonusSource.CLASS
+                    instance.name = (
+                        f'{form.instance}: {instance.get_bonus_type_display()}'
+                    )
+                    instance.save()
 
 
 class RaceListFilter(admin.SimpleListFilter):
@@ -283,7 +309,7 @@ class NPCAdmin(admin.ModelAdmin):
         ),
         (
             'klass',
-            'subclass',
+            'subclass_id',
         ),
         ('level', 'experience'),
         'description',
@@ -346,6 +372,14 @@ class NPCAdmin(admin.ModelAdmin):
         KlassListFilter,
         'functional_template',
         'paragon_path',
+    )
+    list_display = (
+        'name',
+        'level',
+        'race',
+        'klass',
+        'paragon_path',
+        'functional_template',
     )
     radio_fields = {"sex": admin.VERTICAL}
     list_per_page = 20
@@ -463,7 +497,7 @@ class NPCAdmin(admin.ModelAdmin):
         super().save_related(request, form, formsets, change)
         obj = form.instance
         default_powers = Power.objects.filter(
-            models.Q(klass=obj.klass) & models.Q(subclass__in=(obj.subclass, 0))
+            models.Q(klass=obj.klass) & models.Q(subclass__in=(obj.subclass_id, 0))
         ).filter(level=0)
         for power in default_powers:
             obj.powers.add(power)
@@ -548,6 +582,7 @@ class ArmorTypeAdmin(admin.ModelAdmin):
         'will_bonus',
     )
     readonly_fields = ('armor_class',)
+    list_display = ('__str__', 'base_armor_type')
     ordering = ('base_armor_type', 'minimal_enhancement')
 
     @admin.display(description='Класс доспеха')
@@ -620,7 +655,6 @@ class WeaponTypeAdmin(admin.ModelAdmin):
     readonly_fields = ('prof_bonus', 'damage', 'properties')
     list_filter = ('handedness', 'category')
     save_as = True
-    form = WeaponTypeForm
 
     def get_fields(self, request, obj=None):
         if obj and obj.id:
@@ -672,8 +706,6 @@ class WeaponTypeAdmin(admin.ModelAdmin):
 
     @atomic
     def save_model(self, request, obj, form, change):
-        if not obj.id:
-            obj.name = weapon_types_classes[obj.slug].name
         super().save_model(request, obj, form, change)
         queries = [
             models.Q(weapon_type_slots__contains=obj.slug),
@@ -781,17 +813,8 @@ class PowerPropertyInline(admin.TabularInline):
             if (
                 instance
                 and instance.klass
-                and instance.subclass == 0
-                and (
-                    subclass_enum := getattr(
-                        npc_klasses[instance.klass.name], 'SubclassEnum', None
-                    )
-                )
             ):
-                choices = subclass_enum.generate_choices()
-                db_field.choices = choices
-            else:
-                db_field.choices = IntDescriptionSubclassEnum.generate_choices()
+                db_field.choices = instance.klass.subclasses.generate_choices()
 
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
@@ -877,7 +900,7 @@ class PowerAdmin(admin.ModelAdmin):
                 'description',
                 'level',
                 'race',
-                ('klass', 'subclass'),
+                ('klass', 'subclass_id'),
                 'functional_template',
                 'paragon_path',
                 'magic_item_type',
@@ -886,7 +909,7 @@ class PowerAdmin(admin.ModelAdmin):
             )
         result = super().get_fields(request, obj)[:]
         if obj.klass:
-            result.insert(3, ('klass', 'subclass'))
+            result.insert(3, ('klass', 'subclass_id'))
         if obj.race:
             result.insert(3, 'race')
         if obj.functional_template:
@@ -894,27 +917,6 @@ class PowerAdmin(admin.ModelAdmin):
         if obj.magic_item_type:
             result.insert(3, 'magic_item_type')
         return result
-
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name == 'subclass':
-            object_id = request.resolver_match.kwargs.get('object_id', 0)
-            try:
-                instance = self.model.objects.get(id=object_id)
-            except self.model.DoesNotExist:
-                instance = None
-            if (
-                instance
-                and instance.klass
-                and (
-                    subclass_enum := getattr(
-                        npc_klasses[instance.klass.name], 'SubclassEnum', None
-                    )
-                )
-            ):
-                choices = subclass_enum.generate_choices()
-                db_field.choices = choices
-
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     def get_inlines(self, request, obj):
         if obj:
@@ -992,6 +994,17 @@ class PlayerCharactersAdmin(admin.ModelAdmin):
         ('passive_perception', 'passive_insight'),
         'initiative',
     )
+    list_display = (
+        'name',
+        'armor_class',
+        'fortitude',
+        'reflex',
+        'will',
+        'passive_perception',
+        'passive_insight',
+        'initiative',
+    )
+    ordering = ('name',)
 
 
 class MagicItemTypeAdminBase(admin.ModelAdmin):
@@ -1029,6 +1042,7 @@ class MagicItemTypeAdmin(MagicItemTypeAdminBase):
     )
 
     form = MagicItemTypeForm
+    list_display = ('name', 'slot')
 
     @atomic
     def save_model(self, request, obj, form, change):
@@ -1104,7 +1118,7 @@ class MagicWeaponTypeAdmin(MagicItemTypeAdminBase):
         obj.slot = MagicItemSlot.WEAPON.value
         super().save_model(request, obj, form, change)
         queries = [
-            models.Q(slug__in=obj.weapon_type_slots),
+            models.Q(id__in=obj.weapon_types.values_list('id', flat=True)),
             models.Q(category__in=obj.weapon_categories),
         ] + [models.Q(group__contains=g) for g in obj.weapon_groups]
         weapon_types = WeaponType.objects.filter(

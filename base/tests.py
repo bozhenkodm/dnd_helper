@@ -3,9 +3,7 @@ from django.conf import settings
 from django.urls import reverse
 
 from base.models import NPC
-from base.models.klass import Class
 from base.models.models import Weapon, WeaponType
-from base.objects import npc_klasses
 
 
 @pytest.fixture(scope='session')
@@ -38,13 +36,6 @@ def test_npcs_are_valid(client):
             assert response.status_code < 400, f'admin site: {npc}'
 
 
-@pytest.mark.skip
-@pytest.mark.django_db
-def test_weapon_type_db_consistency():
-    for wt in WeaponType.objects.all():
-        pass
-
-
 @pytest.mark.django_db
 def test_exist_non_enhanced_weapon():
     for wt in WeaponType.objects.all():
@@ -52,8 +43,3 @@ def test_exist_non_enhanced_weapon():
             weapon_type=wt, level=0
         ).count(), f'{wt} has no weapon instance'
 
-
-@pytest.mark.django_db
-def test_class_db_consistency():
-    for klass in Class.objects.all():
-        assert klass.get_name_display() == npc_klasses[klass.name].slug.description

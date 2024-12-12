@@ -31,10 +31,9 @@ from base.models.magic_items import (
     SimpleMagicItem,
     WaistSlotItem,
 )
-from base.models.models import ParagonPath, Weapon, WeaponType
+from base.models.models import ParagonPath, Weapon
 from base.models.powers import Power
 from base.models.skills import Skill
-from base.objects import weapon_types_tuple
 
 
 class NPCModelForm(forms.ModelForm):
@@ -79,16 +78,9 @@ class NPCModelForm(forms.ModelForm):
                 widget=FilteredSelectMultiple('Таланты', False),
                 required=False,
             )
-            self.fields['subclass'] = forms.ChoiceField(
-                choices=self.instance.klass.subclasses.generate_choices(with_zero=True),
+            self.fields['subclass_id'] = forms.ChoiceField(
+                choices=self.instance.klass.subclasses.generate_choices(),
                 label='Подкласс',
-            )
-            self.fields['base_attack_ability'] = forms.ChoiceField(
-                choices=AbilityEnum.generate_choices(
-                    is_sorted=False,
-                    start_with=self.instance.klass_data_instance.base_attack_abilities,
-                ),
-                initial=self.instance.klass_data_instance.base_attack_abilities[0],
             )
             self.fields['neck_slot'] = forms.ModelChoiceField(
                 queryset=NeckSlotItem.objects.select_related('magic_item_type').filter(
@@ -205,14 +197,13 @@ class NPCModelForm(forms.ModelForm):
                     error='Двойное и двуручное оружие занимает две руки',
                 )
                 return
-            klass_data_instance = self.instance.klass_data_instance
             if (
                 self.instance.klass.name == NPCClassEnum.RANGER
-                and self.cleaned_data['subclass']
-                == klass_data_instance.SubclassEnum.TWO_HANDED.value
-                or klass_data_instance.slug == NPCClassEnum.BARBARIAN
-                and self.cleaned_data['subclass']
-                == klass_data_instance.SubclassEnum.WHIRLING.value
+                and self.cleaned_data['subclass_id']
+                == 'TWO_HANDED'
+                or self.instance.klass.name == NPCClassEnum.BARBARIAN
+                and self.cleaned_data['subclass_id']
+                == 'WHIRLING'
             ) and secondary_hand.handedness == WeaponHandednessEnum.TWO:
                 self.add_error(
                     'secondary_hand',
@@ -222,12 +213,12 @@ class NPCModelForm(forms.ModelForm):
                     ),
                 )
             elif not (
-                klass_data_instance.slug == NPCClassEnum.RANGER
-                and self.cleaned_data['subclass']
-                == klass_data_instance.SubclassEnum.TWO_HANDED.value
-                or klass_data_instance.slug == NPCClassEnum.BARBARIAN
-                and self.cleaned_data['subclass']
-                == klass_data_instance.SubclassEnum.WHIRLING.value
+                self.instance.klass.name == NPCClassEnum.RANGER
+                and self.cleaned_data['subclass_id']
+                == 'TWO_HANDED'
+                or self.instance.klass.name == NPCClassEnum.BARBARIAN
+                and self.cleaned_data['subclass_id']
+                == 'WHIRLING'
             ) and not (secondary_hand and secondary_hand.weapon_type.is_off_hand):
                 self.add_error(
                     'secondary_hand',
@@ -312,21 +303,6 @@ class ParagonPathForm(forms.ModelForm):
             self.add_error('klass', message)
             self.add_error('race', message)
         return super().clean()
-
-
-class WeaponTypeForm(forms.ModelForm):
-    class Meta:
-        model = WeaponType
-        fields = '__all__'
-
-    slug = forms.ChoiceField(
-        choices=[
-            (cls.slug(), f'{cls.name}')
-            for cls in weapon_types_tuple
-            if cls.slug() not in set(WeaponType.objects.values_list('slug', flat=True))
-        ],
-        label='Название',
-    )
 
 
 class ItemAbstractForm(forms.ModelForm):

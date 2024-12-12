@@ -26,7 +26,7 @@ class NPCModelForm(forms.ModelForm):
         widget=forms.RadioSelect,
     )
 
-    subclass = forms.TypedChoiceField(
+    subclass_id = forms.TypedChoiceField(
         coerce=int,
         choices=IntDescriptionSubclassEnum.generate_choices(),
         label='Подкласс',

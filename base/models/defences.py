@@ -20,13 +20,11 @@ from base.constants.constants import (
     ShieldTypeIntEnum,
     WeaponHandednessEnum,
 )
-from base.objects.npc_classes import NPCClass
 
 INITIAL_DEFENCE_VALUE = 10
 
 
 class NPCProtocol(Protocol):
-    klass_data_instance: NPCClass
     half_level: int
     _level_bonus: int
     _tier: int
@@ -64,6 +62,9 @@ class NPCProtocol(Protocol):
     def _necklace_defence_bonus(self) -> int:
         pass
 
+    def _is_brawler_fighter_and_properly_armed(self) -> bool:
+        pass
+
 
 class NPCDefenceMixin:
     @property
@@ -91,8 +92,6 @@ class NPCDefenceMixin:
     @property
     def _armor_class_ability_bonus(self) -> int:
         result = max(self.int_mod, self.dex_mod)
-        if not self.subclass_instance:
-            return result
         if (
             self.klass.name == NPCClassEnum.SEEKER
             and self.subclass_instance.slug == 'SPIRITBOND'
@@ -124,7 +123,7 @@ class NPCDefenceMixin:
         if any(
             (
                 self.klass.name != NPCClassEnum.FIGHTER,
-                self.subclass_instance and self.subclass_instance.slug != 'BRAWLER',
+                self.subclass_instance.slug != 'BRAWLER',
                 self.shield,
                 self.secondary_hand,
                 self.primary_hand and not self.primary_hand.weapon_type.is_melee,
@@ -150,9 +149,9 @@ class NPCDefenceMixin:
     def armor_class_bonus(self) -> int:
         result = 0
         if self.armor:
-            available_armor_types = self.klass.armor_types
-            if self.subclass_instance:
-                available_armor_types += self.subclass_instance.armor_types
+            available_armor_types = (
+                self.klass.armor_types + self.subclass_instance.armor_types
+            )
             if self.armor.armor_type.base_armor_type in available_armor_types:
                 result += self.armor.armor_class
             # result += self.npc.enhancement_with_magic_threshold(
@@ -198,7 +197,7 @@ class NPCDefenceMixin:
 
     @property
     def fortitude(self: NPCProtocol) -> int:
-        return (
+        result = (
             self._defence_level_bonus
             + max(self.str_mod, self.con_mod)
             + (
@@ -207,12 +206,15 @@ class NPCDefenceMixin:
                 else 0
             )
             + self.calculate_bonus(DefenceTypeEnum.FORTITUDE)
-            + self.klass_data_instance.fortitude
+            + self.klass.fortitude
             + self._necklace_defence_bonus
             + self.armor.armor_type.fortitude_bonus
             if self.armor is not None
             else 0
         )
+        if self._is_brawler_fighter_and_properly_armed():
+            result += 2
+        return result
 
     @property
     def reflex(self: NPCProtocol) -> int:
@@ -221,16 +223,15 @@ class NPCDefenceMixin:
             + max(self.dex_mod, self.int_mod)
             + (self.functional_template.reflex_bonus if self.functional_template else 0)
             + self.calculate_bonus(DefenceTypeEnum.REFLEX)
-            + self.klass_data_instance.reflex
+            + self.klass.reflex
             + self._necklace_defence_bonus
             + self.armor.armor_type.reflex_bonus
             if self.armor
             else 0
         )
         result += self._shield_bonus
-        if self.klass.name == NPCClassEnum.BARBARIAN:
-            if not self.shield and self.armor and self.armor.is_light:
-                result += self._tier + 1
+        if self._is_barbarian_and_armored_properly():
+            result += self._tier + 1
         return result
 
     @property
@@ -240,7 +241,7 @@ class NPCDefenceMixin:
             + max(self.wis_mod, self.cha_mod)
             + (self.functional_template.will_bonus if self.functional_template else 0)
             + self.calculate_bonus(DefenceTypeEnum.WILL)
-            + self.klass_data_instance.will
+            + self.klass.will
             + self._necklace_defence_bonus
             + self.armor.armor_type.will_bonus
             if self.armor

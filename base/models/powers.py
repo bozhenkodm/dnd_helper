@@ -14,6 +14,7 @@ from base.constants.constants import (
     BonusType,
     DefenceTypeEnum,
     DiceIntEnum,
+    NPCClassEnum,
     PowerActionTypeEnum,
     PowerDamageTypeEnum,
     PowerEffectTypeEnum,
@@ -22,15 +23,14 @@ from base.constants.constants import (
     PowerRangeTypeEnum,
     PowerVariables,
     SkillEnum,
+    WeaponHandednessEnum,
 )
 from base.exceptions import PowerInconsistent
 from base.managers import PowerQueryset
 from base.models.bonuses import Bonus
 from base.models.magic_items import ItemAbstract
 from base.objects.dice import DiceRoll
-from base.objects.npc_classes import NPCClass
 from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
-from base.objects.weapon_types import KiFocus
 
 if TYPE_CHECKING:
     from base.models.models import Weapon
@@ -56,7 +56,7 @@ class Power(models.Model):
         verbose_name=_('Action type'),
         choices=PowerActionTypeEnum.generate_choices(is_sorted=False),
         max_length=PowerActionTypeEnum.max_length(),
-        default=PowerActionTypeEnum.STANDARD,
+        default=PowerActionTypeEnum.STANDARD.value,
         null=True,
         blank=False,
         help_text=_('Choose, if power frequency is not passive'),
@@ -133,14 +133,14 @@ class Power(models.Model):
     effect_type = MultiSelectField(
         verbose_name=_('Effect type'),
         choices=PowerEffectTypeEnum.generate_choices(),
-        default=PowerEffectTypeEnum.NONE,
+        default=PowerEffectTypeEnum.NONE.value,
         null=True,
         blank=True,
     )
     damage_type = MultiSelectField(
         verbose_name=_('Damage type'),
         choices=PowerDamageTypeEnum.generate_choices(),
-        default=PowerDamageTypeEnum.UNTYPED,
+        default=PowerDamageTypeEnum.UNTYPED.value,
         null=True,
         blank=True,
     )
@@ -168,7 +168,7 @@ class Power(models.Model):
         verbose_name=_('Range type'),
         choices=PowerRangeTypeEnum.generate_choices(is_sorted=False),
         max_length=PowerRangeTypeEnum.max_length(),
-        default=PowerRangeTypeEnum.PERSONAL,
+        default=PowerRangeTypeEnum.PERSONAL.value,
     )
     range = models.SmallIntegerField(verbose_name=_('Distance'), default=0)
     burst = models.SmallIntegerField(verbose_name=_('Area'), default=0)
@@ -389,7 +389,6 @@ class PowerMixin:
         '_': (min, 2),
     }
 
-    klass_data_instance: NPCClass
     _magic_threshold: int
     no_hand: "Weapon"
     is_implement_proficient: Callable[["Weapon"], bool]
@@ -410,7 +409,7 @@ class PowerMixin:
     def _is_no_hand_implement_ki_focus(self) -> bool:
         if not self.no_hand:
             return False
-        return self.no_hand.weapon_type.slug == KiFocus.slug()
+        return self.no_hand.weapon_type.slug == 'KiFocus'
 
     def _can_get_bonus_from_implement_to_weapon(
         self, accessory_type: AccessoryTypeEnum | None
@@ -433,16 +432,61 @@ class PowerMixin:
             damage_roll.addendant = max(damage_roll.addendant, self.no_hand.enhancement)
         return damage_roll.threshold(self._magic_threshold)
 
+    def attack_bonus(self, weapon=None, is_implement: bool = False) -> int:
+        result = self._level_bonus + self.half_level
+        if weapon and not is_implement and self.is_weapon_proficient(weapon=weapon):
+            result += weapon.prof_bonus
+        if self.klass.name == NPCClassEnum.FIGHTER and weapon:
+            if self.subclass_instance.slug == 'GREAT_WEAPON':
+                if (
+                    not self.shield
+                    and weapon.weapon_type.handedness == WeaponHandednessEnum.TWO
+                    and bool(self.primary_hand) != bool(self.secondary_hand)  # xor
+                ):
+                    result += 1
+            if self.subclass_instance.slug == 'GUARDIAN':
+                if weapon.weapon_type.handedness in (
+                    WeaponHandednessEnum.ONE,
+                    WeaponHandednessEnum.VERSATILE,
+                ):
+                    return result + 1
+            if self.subclass_instance.slug == 'TEMPPEST':
+                if (
+                    self.primary_hand
+                    and self.secondary_hand
+                    and weapon.weapon_type.is_off_hand
+                ):
+                    return result + 1
+
+        if (
+            self.klass.name == NPCClassEnum.SEEKER
+            and self.subclass_instance == self.SubclassEnum.SPIRITBOND
+            and weapon.weapon_type.thrown
+        ):
+            result += 1
+
+        if (
+            self.klass.name == NPCClassEnum.ROGUE
+            and weapon
+            and (
+                weapon.weapon_type in self.klass.weapon_types.all()
+                or weapon.weapon_type in self.subclass_instance.weapon_types.all()
+                and weapon.weapon_type.slug in ('Dagger', 'Sling', 'HandCrossbow')
+            )
+        ):  # should choose either dagger or ranged
+            result += 1
+        return result
+
     def _calculate_attack(
         self, weapon: "Weapon", accessory_type: AccessoryTypeEnum | None
     ):
         if not weapon:
-            return self.klass_data_instance.attack_bonus()
+            return self.attack_bonus()
         enhancement = weapon.enhancement
         if self._can_get_bonus_from_implement_to_weapon(accessory_type):
             enhancement = max(enhancement, self.no_hand.enhancement)
         return (
-            self.klass_data_instance.attack_bonus(
+            self.attack_bonus(
                 weapon, is_implement=accessory_type == AccessoryTypeEnum.IMPLEMENT
             )
             # armament enchantment
@@ -624,7 +668,7 @@ class PowerMixin:
         """
         properties: dict[str, PowerProperty] = {}
         for prop in power.properties.filter(
-            level__lte=self.level, subclass__in=(self.subclass, 0)  # type: ignore
+            level__lte=self.level, subclass__in=(self.subclass_id, 0)  # type: ignore
         ).order_by('-subclass'):
             key = f'{prop.get_displayed_title()},{prop.order}'
             if key not in properties or properties[key].level < prop.level:
@@ -723,7 +767,7 @@ class PowerMixin:
 
     def get_power_bonuses(self) -> models.QuerySet["Bonus"]:
         powers = self.powers.filter(
-            frequency=PowerFrequencyEnum.PASSIVE, subclass__in=(self.subclass, 0)
+            frequency=PowerFrequencyEnum.PASSIVE, subclass__in=(self.subclass_id, 0)
         ).union(self.race.powers.filter(frequency=PowerFrequencyEnum.PASSIVE))
         if self.functional_template:
             powers = powers.union(

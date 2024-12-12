@@ -14,7 +14,6 @@ from base.constants.constants import (
     WeaponGroupEnum,
 )
 from base.managers import ItemAbstractQuerySet
-from base.objects import weapon_types_tuple
 
 
 class MagicItemType(models.Model):
@@ -33,7 +32,7 @@ class MagicItemType(models.Model):
     category = models.CharField(
         verbose_name=_('Category'),
         choices=MagicItemCategory.generate_choices(is_sorted=False),
-        default=MagicItemCategory.UNCOMMON,
+        default=MagicItemCategory.UNCOMMON.value,
         max_length=MagicItemCategory.max_length(),
     )
     picture = models.ImageField(
@@ -109,25 +108,20 @@ class MagicWeaponType(MagicItemType):
         null=True,
         blank=True,
     )
-    weapon_type_slots = MultiSelectField(
-        verbose_name=_('Weapon type'),
-        choices=sorted(
-            (w.slug(), w.name)
-            for w in sorted(weapon_types_tuple, key=lambda x: x.name)
-            if not w.is_magic_item and not w.primary_end
-        ),
-        null=True,
-        blank=True,
-    )
     weapon_types = models.ManyToManyField(
-        "base.WeaponType", verbose_name=_('Weapon type'), related_name='magic_weapons'
+        "base.WeaponType",
+        verbose_name=_('Weapon type'),
+        related_name='magic_weapons',
+        blank=True,
+        limit_choices_to={'is_enhanceable': True},
     )
     implement_type = models.ForeignKey(
         "base.WeaponType",
         verbose_name=_('Implement type'),
         help_text=_('Does item has additional implement property?'),
         null=True,
-        limit_choices_to={'category': WeaponCategoryIntEnum.IMPLEMENT},
+        blank=True,
+        limit_choices_to={'category': WeaponCategoryIntEnum.IMPLEMENT.value},
         on_delete=models.SET_NULL,
     )
     crit_dice = models.SmallIntegerField(
@@ -135,7 +129,7 @@ class MagicWeaponType(MagicItemType):
         choices=DiceIntEnum.generate_choices(condition=lambda x: x < DiceIntEnum.D20),
         null=True,
         blank=True,
-        default=DiceIntEnum.D6,
+        default=DiceIntEnum.D6.value,
     )
     crit_property = models.CharField(
         verbose_name=_('Crit property'),
@@ -228,7 +222,7 @@ class ArmsSlotItem(ItemAbstract):
     shield = models.SmallIntegerField(
         verbose_name=_('Shield'),
         choices=ShieldTypeIntEnum.generate_choices(),
-        default=ShieldTypeIntEnum.NONE,
+        default=ShieldTypeIntEnum.NONE.value,
     )
 
     def __str__(self):

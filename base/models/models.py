@@ -39,9 +39,7 @@ from base.models.magic_items import (
 )
 from base.models.powers import Power, PowerMixin
 from base.models.skills import NPCSkillMixin, Skill
-from base.objects import npc_klasses, weapon_types_classes
 from base.objects.dice import DiceRoll
-from base.objects.weapon_types import WeaponType as WeaponTypeClass
 
 
 class ArmorType(models.Model):
@@ -239,13 +237,6 @@ class WeaponType(models.Model):
     def is_ranged(self) -> bool:
         return bool(self.range)
 
-    @cached_property
-    def data_instance(self):
-        try:
-            return weapon_types_classes.get(self.slug)()
-        except TypeError:
-            return weapon_types_classes.get(self.slug.capitalize())()
-
     def damage(self, weapon_number=1) -> str:
         return f'{self.dice_number * weapon_number}' f'{self.get_dice_display()}'
 
@@ -321,10 +312,6 @@ class Weapon(ItemAbstract):
         )
 
     @property
-    def data_instance(self) -> WeaponTypeClass:
-        return self.weapon_type.data_instance
-
-    @property
     def prof_bonus(self):
         return self.weapon_type.prof_bonus
 
@@ -397,13 +384,13 @@ class Race(models.Model):
         verbose_name=_('Vision'),
         choices=VisionEnum.generate_choices(is_sorted=False),
         max_length=VisionEnum.max_length(),
-        default=VisionEnum.NORMAL,
+        default=VisionEnum.NORMAL.value,
     )
     size = models.CharField(
         verbose_name=_('Size'),
         choices=SizeEnum.generate_choices(is_sorted=False),
         max_length=SizeEnum.max_length(),
-        default=SizeEnum.AVERAGE,
+        default=SizeEnum.AVERAGE.value,
     )
     weapon_types = models.ManyToManyField(
         WeaponType,
@@ -495,7 +482,7 @@ class NPC(
         on_delete=models.CASCADE,
         verbose_name=_('Class'),
     )
-    subclass = models.SmallIntegerField(
+    subclass_id = models.SmallIntegerField(
         verbose_name=_('Subclass'),
         default=0,
     )
@@ -548,7 +535,9 @@ class NPC(
         null=True,
         on_delete=models.SET_NULL,
         related_name='in_primary_hands',
-        limit_choices_to=~models.Q(weapon_type__handedness=WeaponHandednessEnum.FREE),
+        limit_choices_to=~models.Q(
+            weapon_type__handedness=WeaponHandednessEnum.FREE.value
+        ),
     )
     secondary_hand = models.ForeignKey(
         Weapon,
@@ -557,7 +546,9 @@ class NPC(
         null=True,
         on_delete=models.SET_NULL,
         related_name='in_secondary_hands',
-        limit_choices_to=~models.Q(weapon_type__handedness=WeaponHandednessEnum.FREE),
+        limit_choices_to=~models.Q(
+            weapon_type__handedness=WeaponHandednessEnum.FREE.value
+        ),
     )
     no_hand = models.ForeignKey(
         Weapon,
@@ -567,7 +558,7 @@ class NPC(
         null=True,
         on_delete=models.SET_NULL,
         related_name='in_no_hands',
-        limit_choices_to={'weapon_type__handedness': WeaponHandednessEnum.FREE},
+        limit_choices_to={'weapon_type__handedness': WeaponHandednessEnum.FREE.value},
     )
 
     powers = models.ManyToManyField(Power, blank=True, verbose_name=_('Powers'))
@@ -584,16 +575,9 @@ class NPC(
             return f'{self.klass} ({self.functional_template})'
         return self.klass
 
-    @cached_property
-    def klass_data_instance(self):
-        return npc_klasses.get(self.klass.name)(npc=self)
-
     @property
-    def subclass_instance(self) -> Subclass | None:
-        try:
-            return self.klass.subclasses.get(subclass_id=self.subclass)
-        except Subclass.DoesNotExist:
-            return None
+    def subclass_instance(self) -> Subclass:
+        return self.klass.subclasses.get(subclass_id=self.subclass_id)
 
     @property
     def all_trained_skills(self) -> list[SkillEnum]:
@@ -638,7 +622,6 @@ class NPC(
     def class_hit_points_bonus(self) -> int:
         if (
             self.klass.name == NPCClassEnum.RANGER
-            and self.subclass_instance
             and self.subclass_instance.slug == 'TWO_HANDED'
         ):
             return (self._tier + 1) * 5
@@ -694,7 +677,7 @@ class NPC(
     @property
     def damage_bonus(self) -> int:
         base_bonus = self._level_bonus
-        if self.klass.name != NPCClassEnum.HEXBLADE or not self.subclass_instance:
+        if self.klass.name != NPCClassEnum.HEXBLADE:
             return base_bonus
         damage_modifier = 0
         if self.subclass_instance.slug in (
@@ -754,8 +737,7 @@ class NPC(
             (
                 weapon.weapon_type.category in map(int, self.klass.weapon_categories),
                 weapon.weapon_type in self.klass.weapon_types.all(),
-                self.subclass_instance
-                and weapon.weapon_type in self.subclass_instance.weapon_types.all(),
+                weapon.weapon_type in self.subclass_instance.weapon_types.all(),
                 weapon.weapon_type in self.race.weapon_types.all(),
                 weapon.weapon_type in self.trained_weapons.all(),
             )
