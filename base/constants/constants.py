@@ -280,50 +280,17 @@ class PowerFrequencyEnum(BaseNameValueDescriptionEnum):
 
 
 class PowerDamageTypeEnum(BaseNameValueDescriptionEnum):
-    UNTYPED = (
-        auto(),
-        'Без типа',
-    )
-    THUNDER = (
-        auto(),
-        'Звук',
-    )
-    RADIANT = (
-        auto(),
-        'Излучение',
-    )
-    ACID = (
-        auto(),
-        'Кислота',
-    )
-    NECROTIC = (
-        auto(),
-        'Некротическая энергия',
-    )
-    FIRE = (
-        auto(),
-        'Огонь',
-    )
-    PSYCHIC = (
-        auto(),
-        'Психическая энергия',
-    )
-    FORCE = (
-        auto(),
-        'Силовое поле',
-    )
-    COLD = (
-        auto(),
-        'Холод',
-    )
-    LIGHTNING = (
-        auto(),
-        'Электричество',
-    )
-    POISON = (
-        auto(),
-        'Яд',
-    )
+    UNTYPED = auto(), 'Без типа'
+    THUNDER = auto(), 'Звук'
+    RADIANT = auto(), 'Излучение'
+    ACID = auto(), 'Кислота'
+    NECROTIC = auto(), 'Некротическая энергия'
+    FIRE = auto(), 'Огонь'
+    PSYCHIC = auto(), 'Психическая энергия'
+    FORCE = auto(), 'Силовое поле'
+    COLD = auto(), 'Холод'
+    LIGHTNING = auto(), 'Электричество'
+    POISON = auto(), 'Яд'
 
 
 class PowerEffectTypeEnum(BaseNameValueDescriptionEnum):
@@ -455,10 +422,23 @@ class BonusSource(BaseNameValueDescriptionEnum):
     ITEM = auto(), 'Бонус предмета'
 
 
-class BonusType(BaseNameValueDescriptionEnum):
+class NPCOtherProperties(BaseNameValueDescriptionEnum):
     SPEED = auto(), 'Скорость'
     INITIATIVE = auto(), 'Инициатива'
     SURGE = auto(), 'Значение исцеления'
     SURGES = auto(), 'Количество исцелений'
     ATTACK = auto(), 'Атака'
     DAMAGE = auto(), 'Урон'
+
+
+class ArmamentSlot(BaseNameValueDescriptionEnum):
+    PRIMARY = 'primary_hand', 'Основная рука'
+    SECONDARY = 'secondary_hand', 'Дополнительная рука'
+    NO = 'no_hand', 'Не занимает руки'
+
+
+CONDITION_FIELD = {
+    'class': 'klass',
+    'functionaltemplate': 'functional_template',
+    'paragonpath': 'paragon_path',
+}

@@ -6,6 +6,7 @@ from base.admin.admin_classes import (
     ArmsItemSlotAdmin,
     BonusAdmin,
     ClassAdmin,
+    ConstraintAdmin,
     EncounterAdmin,
     FunctionalTemplateAdmin,
     MagicArmItemTypeAdmin,
@@ -23,7 +24,9 @@ from base.admin.admin_classes import (
     WeaponTypeAdmin,
 )
 from base.models.bonuses import Bonus
+from base.models.condition import Constraint
 from base.models.encounters import Encounter, PCParty, PlayerCharacters
+from base.models.feats import Feat
 from base.models.klass import Class, Subclass
 from base.models.magic_items import (
     ArmsSlotItem,
@@ -62,6 +65,9 @@ admin.site.register(MagicArmorType, MagicArmorTypeAdmin)
 admin.site.register(MagicWeaponType, MagicWeaponTypeAdmin)
 admin.site.register(MagicArmItemType, MagicArmItemTypeAdmin)
 admin.site.register(Bonus, BonusAdmin)
+admin.site.register(Feat)
+admin.site.register(Constraint, ConstraintAdmin)
+
 
 # hidden from sidebar
 admin.site.register(Armor, ArmorAdmin)

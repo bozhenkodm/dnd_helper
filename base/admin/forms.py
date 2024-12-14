@@ -1,7 +1,6 @@
 from typing import Any, cast
 
 from django import forms
-from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -16,6 +15,8 @@ from base.constants.constants import (
 )
 from base.models import NPC
 from base.models.abilities import Ability
+from base.models.condition import Condition, Constraint
+from base.models.feats import Feat
 from base.models.magic_items import (
     ArmsSlotItem,
     FeetSlotItem,
@@ -58,25 +59,28 @@ class NPCModelForm(forms.ModelForm):
             )
             self.fields['paragon_path'] = forms.ModelChoiceField(
                 queryset=ParagonPath.objects.filter(
+                    id__in=ParagonPath.get_ids_for_npc(self.instance),
+                ).filter(
                     models.Q(klass=self.instance.klass)
                     | models.Q(race=self.instance.race)
                 ),
                 label='Путь совершенства',
                 required=False,
             )
-            self.fields['powers'] = forms.ModelMultipleChoiceField(
-                queryset=Power.objects.with_frequency_order()  # type: ignore
+            self.fields['powers'].queryset = (
+                Power.objects.with_frequency_order()
                 .filter(
                     models.Q(klass=self.instance.klass, level__gt=0)
                     | models.Q(race=self.instance.race, level__gt=0)
                     | models.Q(skill__title__in=self.instance.all_trained_skills),
                     level__lte=self.instance.level,
                 )
-                .order_by('level', 'frequency_order'),
-                label='Таланты',
-                widget=FilteredSelectMultiple('Таланты', False),
-                required=False,
+                .order_by('level', 'frequency_order')
             )
+            self.fields['feats'].queryset = Feat.objects.filter(
+                id__in=Feat.get_ids_for_npc(self.instance),
+                min_level__lte=self.instance.level,
+            ).order_by('min_level', 'name')
             self.fields['subclass_id'] = forms.ChoiceField(
                 choices=self.instance.klass.subclasses.generate_choices(),
                 label='Подкласс',
@@ -372,3 +376,37 @@ class MagicWeaponTypeForm(MagicItemTypeFormBase):
     class Meta:
         model = MagicWeaponType
         fields = '__all__'
+
+
+class ConstraintForm(forms.ModelForm):
+    class Meta:
+        model = Constraint
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.id and self.instance.content_type:
+            self.fields['object_id'] = forms.ChoiceField(
+                choices=(
+                    (item.id, str(item))
+                    for item in self.instance.content_type.model_class().objects.all()
+                ),
+                label=str(self.instance.content_type).split('|')[1].strip(),
+            )
+
+
+class ConditionForm(forms.ModelForm):
+    class Meta:
+        model = Condition
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.id and self.instance.content_type:
+            self.fields['object_id'] = forms.ChoiceField(
+                choices=(
+                    (item.id, str(item))
+                    for item in self.instance.content_type.model_class().objects.all()
+                ),
+                label=str(self.instance.content_type).split('|')[1].strip(),
+            )

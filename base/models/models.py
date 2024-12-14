@@ -5,14 +5,15 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from jedi.debug import speed
 from multiselectfield import MultiSelectField
 
 from base.constants.constants import (
     AccessoryTypeEnum,
     ArmorTypeIntEnum,
-    BonusType,
     DiceIntEnum,
     NPCClassEnum,
+    NPCOtherProperties,
     NPCRaceEnum,
     PowerActionTypeEnum,
     SexEnum,
@@ -27,9 +28,11 @@ from base.constants.constants import (
 from base.exceptions import PowerInconsistent, WrongWeapon
 from base.managers import WeaponTypeQuerySet
 from base.models.abilities import Ability, NPCAbilityAbstract
+from base.models.abstract import ConstraintAbstract
 from base.models.bonuses import BonusMixin
 from base.models.defences import NPCDefenceMixin
 from base.models.experience import NPCExperienceAbstract
+from base.models.feats import Feat
 from base.models.klass import Class, Subclass
 from base.models.magic_items import (
     ItemAbstract,
@@ -436,7 +439,7 @@ class FunctionalTemplate(models.Model):
         return self.title
 
 
-class ParagonPath(models.Model):
+class ParagonPath(ConstraintAbstract):
     class Meta:
         verbose_name = _('Paragon path')
         verbose_name_plural = _('Paragon paths')
@@ -455,8 +458,9 @@ class ParagonPath(models.Model):
     def __str__(self):
         if self.klass:
             return f'{self.title} ({self.klass})'
-        else:
+        elif self.race:
             return f'{self.title} ({self.race})'
+        return self.title
 
 
 class NPC(
@@ -562,6 +566,7 @@ class NPC(
     )
 
     powers = models.ManyToManyField(Power, blank=True, verbose_name=_('Powers'))
+    feats = models.ManyToManyField(Feat, blank=True, verbose_name=_('Feats'))
 
     def __str__(self):
         # TODO localization
@@ -576,7 +581,7 @@ class NPC(
         return self.klass
 
     @property
-    def subclass_instance(self) -> Subclass:
+    def subclass(self) -> Subclass:
         return self.klass.subclasses.get(subclass_id=self.subclass_id)
 
     @property
@@ -622,7 +627,7 @@ class NPC(
     def class_hit_points_bonus(self) -> int:
         if (
             self.klass.name == NPCClassEnum.RANGER
-            and self.subclass_instance.slug == 'TWO_HANDED'
+            and self.subclass.slug == 'TWO_HANDED'
         ):
             return (self._tier + 1) * 5
         return 0
@@ -654,7 +659,7 @@ class NPC(
         """
         Healing surge value
         """
-        return self.bloodied // 2 + self.calculate_bonus(BonusType.SURGE)
+        return self.bloodied // 2 + self.calculate_bonus(NPCOtherProperties.SURGE)
 
     @property
     def _tier(self):
@@ -667,7 +672,7 @@ class NPC(
     @property
     def surges(self) -> int:
         """Surges number"""
-        result = self.calculate_bonus(BonusType.SURGES)
+        result = self.calculate_bonus(NPCOtherProperties.SURGES)
         if self.is_bonus_applied:
             result += self._tier + 1
         else:
@@ -680,31 +685,34 @@ class NPC(
         if self.klass.name != NPCClassEnum.HEXBLADE:
             return base_bonus
         damage_modifier = 0
-        if self.subclass_instance.slug in (
+        if self.subclass.slug in (
             'FEY_PACT',
             'GLOOM_PACT',
         ):
             damage_modifier = self.dex_mod
-        if self.subclass_instance.slug in (
+        if self.subclass.slug in (
             'INFERNAL_PACT',
             'ELEMENTAL_PACT',
         ):
             damage_modifier = self.con_mod
-        if self.subclass_instance.slug == 'STAR_PACT':
+        if self.subclass.slug == 'STAR_PACT':
             damage_modifier = self.int_mod
         return base_bonus + (+((self.level - 5) // 10) * 2 + 2 + damage_modifier)
 
     @property
     def initiative(self) -> int:
         return (
-            self.dex_mod + self.half_level + self.calculate_bonus(BonusType.INITIATIVE)
+            self.dex_mod
+            + self.half_level
+            + self.calculate_bonus(NPCOtherProperties.INITIATIVE)
         )
 
     @property
     def speed(self):
+        bonus_speed = self.calculate_bonus(NPCOtherProperties.SPEED)
         if self.armor and self.race.name != NPCRaceEnum.DWARF:
-            return self.race.speed - self.armor.speed_penalty
-        return self.race.speed
+            return self.race.speed - self.armor.speed_penalty + bonus_speed
+        return self.race.speed + bonus_speed
 
     @property
     def items(self):
@@ -737,7 +745,7 @@ class NPC(
             (
                 weapon.weapon_type.category in map(int, self.klass.weapon_categories),
                 weapon.weapon_type in self.klass.weapon_types.all(),
-                weapon.weapon_type in self.subclass_instance.weapon_types.all(),
+                weapon.weapon_type in self.subclass.weapon_types.all(),
                 weapon.weapon_type in self.race.weapon_types.all(),
                 weapon.weapon_type in self.trained_weapons.all(),
             )
@@ -789,6 +797,10 @@ class NPC(
     @property
     def inventory_text(self):
         return map(str, self.items)
+
+    @property
+    def feats_count(self):
+        return self.feats.count() + self.trained_weapons.count()
 
     def powers_calculated(self) -> Sequence[dict]:
         """

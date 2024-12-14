@@ -94,9 +94,9 @@ class NPCDefenceMixin:
         result = max(self.int_mod, self.dex_mod)
         if (
             self.klass.name == NPCClassEnum.SEEKER
-            and self.subclass_instance.slug == 'SPIRITBOND'
+            and self.subclass.slug == 'SPIRITBOND'
             or self.klass.name == NPCClassEnum.SORCERER
-            and self.subclass_instance.slug == 'DRAGON_MAGIC'
+            and self.subclass.slug == 'DRAGON_MAGIC'
         ):
             result = max(self.str_mod, result)
         return result
@@ -123,7 +123,7 @@ class NPCDefenceMixin:
         if any(
             (
                 self.klass.name != NPCClassEnum.FIGHTER,
-                self.subclass_instance.slug != 'BRAWLER',
+                self.subclass.slug != 'BRAWLER',
                 self.shield,
                 self.secondary_hand,
                 self.primary_hand and not self.primary_hand.weapon_type.is_melee,
@@ -149,9 +149,7 @@ class NPCDefenceMixin:
     def armor_class_bonus(self) -> int:
         result = 0
         if self.armor:
-            available_armor_types = (
-                self.klass.armor_types + self.subclass_instance.armor_types
-            )
+            available_armor_types = self.klass.armor_types + self.subclass.armor_types
             if self.armor.armor_type.base_armor_type in available_armor_types:
                 result += self.armor.armor_class
             # result += self.npc.enhancement_with_magic_threshold(

@@ -5,8 +5,8 @@ from base.constants.base import generate_choices
 from base.constants.constants import (
     AbilityEnum,
     BonusSource,
-    BonusType,
     DefenceTypeEnum,
+    NPCOtherProperties,
     PowerFrequencyEnum,
     SkillEnum,
 )
@@ -29,6 +29,15 @@ class Bonus(models.Model):
         related_name='bonuses',
         related_query_name='bonus',
         limit_choices_to={'level': 0, 'frequency': PowerFrequencyEnum.PASSIVE.value},
+    )
+    feat = models.ForeignKey(
+        "base.Feat",
+        verbose_name=_('Feat'),
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='bonuses',
+        related_query_name='bonus',
     )
     klass = models.ForeignKey(
         'base.Class',
@@ -91,7 +100,7 @@ class Bonus(models.Model):
     bonus_type = models.CharField(
         verbose_name=_('Bonus type'),
         choices=generate_choices(
-            AbilityEnum, SkillEnum, DefenceTypeEnum, BonusType, is_sorted=False
+            AbilityEnum, SkillEnum, DefenceTypeEnum, NPCOtherProperties, is_sorted=False
         ),
         max_length=max(
             map(
@@ -100,7 +109,7 @@ class Bonus(models.Model):
                     AbilityEnum,
                     SkillEnum,
                     DefenceTypeEnum,
-                    BonusType,
+                    NPCOtherProperties,
                 ),
             )
         ),

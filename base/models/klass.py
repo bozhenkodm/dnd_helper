@@ -1,56 +1,10 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from multiselectfield import MultiSelectField
 
-from base.constants.constants import (
-    ArmorTypeIntEnum,
-    ClassRoleEnum,
-    NPCClassEnum,
-    PowerSourceEnum,
-    ShieldTypeIntEnum,
-    WeaponCategoryIntEnum,
-)
+from base.constants.constants import ClassRoleEnum, NPCClassEnum, PowerSourceEnum
 from base.managers import SubclassQuerySet
+from base.models.abstract import ClassAbstract
 from base.models.skills import Skill
-
-
-class ClassAbstract(models.Model):
-    class Meta:
-        abstract = True
-
-    weapon_categories = MultiSelectField(
-        verbose_name=_('Available weapon categories'),
-        choices=WeaponCategoryIntEnum.generate_choices(),
-        null=True,
-        blank=True,
-    )
-    weapon_types = models.ManyToManyField(
-        'base.WeaponType',
-        verbose_name=_('Available weapon types'),
-        limit_choices_to={'primary_end__isnull': True},
-        blank=True,
-    )
-    implement_types = models.ManyToManyField(
-        'base.WeaponType',
-        verbose_name=_('Available implement types'),
-        limit_choices_to={'primary_end__isnull': True},
-        related_name='implement_%(app_label)s_%(class)s_wielders',
-        blank=True,
-    )
-    armor_types = MultiSelectField(
-        verbose_name=_('Available armor types'),
-        choices=ArmorTypeIntEnum.generate_choices(),
-        null=True,
-        blank=True,
-    )
-    shields = MultiSelectField(
-        verbose_name=_('Available shields'),
-        choices=ShieldTypeIntEnum.generate_choices(
-            lambda x: x != ShieldTypeIntEnum.NONE
-        ),
-        null=True,
-        blank=True,
-    )
 
 
 class Class(ClassAbstract):

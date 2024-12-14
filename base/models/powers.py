@@ -11,10 +11,10 @@ from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
     AbilityEnum,
     AccessoryTypeEnum,
-    BonusType,
     DefenceTypeEnum,
     DiceIntEnum,
     NPCClassEnum,
+    NPCOtherProperties,
     PowerActionTypeEnum,
     PowerDamageTypeEnum,
     PowerEffectTypeEnum,
@@ -437,20 +437,20 @@ class PowerMixin:
         if weapon and not is_implement and self.is_weapon_proficient(weapon=weapon):
             result += weapon.prof_bonus
         if self.klass.name == NPCClassEnum.FIGHTER and weapon:
-            if self.subclass_instance.slug == 'GREAT_WEAPON':
+            if self.subclass.slug == 'GREAT_WEAPON':
                 if (
                     not self.shield
                     and weapon.weapon_type.handedness == WeaponHandednessEnum.TWO
                     and bool(self.primary_hand) != bool(self.secondary_hand)  # xor
                 ):
                     result += 1
-            if self.subclass_instance.slug == 'GUARDIAN':
+            if self.subclass.slug == 'GUARDIAN':
                 if weapon.weapon_type.handedness in (
                     WeaponHandednessEnum.ONE,
                     WeaponHandednessEnum.VERSATILE,
                 ):
                     return result + 1
-            if self.subclass_instance.slug == 'TEMPPEST':
+            if self.subclass.slug == 'TEMPPEST':
                 if (
                     self.primary_hand
                     and self.secondary_hand
@@ -460,7 +460,7 @@ class PowerMixin:
 
         if (
             self.klass.name == NPCClassEnum.SEEKER
-            and self.subclass_instance == self.SubclassEnum.SPIRITBOND
+            and self.subclass == 'SPIRITBOND'
             and weapon.weapon_type.thrown
         ):
             result += 1
@@ -470,7 +470,7 @@ class PowerMixin:
             and weapon
             and (
                 weapon.weapon_type in self.klass.weapon_types.all()
-                or weapon.weapon_type in self.subclass_instance.weapon_types.all()
+                or weapon.weapon_type in self.subclass.weapon_types.all()
                 and weapon.weapon_type.slug in ('Dagger', 'Sling', 'HandCrossbow')
             )
         ):  # should choose either dagger or ranged
@@ -503,7 +503,7 @@ class PowerMixin:
             enhancement = max(enhancement, self.no_hand.enhancement)
         return (
             self.damage_bonus
-            + self.calculate_bonus(BonusType.DAMAGE)
+            + self.calculate_bonus(NPCOtherProperties.DAMAGE)
             + self.enhancement_with_magic_threshold(enhancement)
         )
 
@@ -786,14 +786,17 @@ class PowerMixin:
             )
         )
         return Bonus.objects.filter(
-            power__id__in=(p.id for p in powers),
-            min_level__gte=self.level,
+            (
+                models.Q(power__id__in=(p.id for p in powers))
+                | models.Q(feat__id__in=self.feats.all())
+            )
+            & models.Q(min_level__lte=self.level)
         )
 
     def calculate_bonuses(
         self,
-        *bonus_types: AbilityEnum | SkillEnum | DefenceTypeEnum | BonusType,
-    ) -> dict[AbilityEnum | SkillEnum | DefenceTypeEnum | BonusType, int]:
+        *bonus_types: AbilityEnum | SkillEnum | DefenceTypeEnum | NPCOtherProperties,
+    ) -> dict[AbilityEnum | SkillEnum | DefenceTypeEnum | NPCOtherProperties, int]:
         # TODO refactor query here and in self.bonuses
         result = {}
         for bonus_type in bonus_types:
@@ -802,7 +805,7 @@ class PowerMixin:
                 self.get_power_bonuses()
                 .filter(bonus_type=bonus_type)
                 .union(self.race.bonuses.filter(bonus_type=bonus_type))
-                .union(self.subclass_instance.bonuses.filter(bonus_type=bonus_type))
+                .union(self.subclass.bonuses.filter(bonus_type=bonus_type))
             ):
                 try:
                     bonuses[bonus.source].append(
@@ -819,6 +822,6 @@ class PowerMixin:
         return result
 
     def calculate_bonus(
-        self, bonus_type: AbilityEnum | SkillEnum | DefenceTypeEnum | BonusType
+        self, bonus_type: AbilityEnum | SkillEnum | DefenceTypeEnum | NPCOtherProperties
     ) -> int:
         return self.calculate_bonuses(bonus_type)[bonus_type]

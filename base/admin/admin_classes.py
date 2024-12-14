@@ -7,6 +7,7 @@ from functools import reduce
 
 from django import forms
 from django.contrib import admin
+from django.contrib.contenttypes.admin import GenericTabularInline
 from django.core.files.images import ImageFile
 from django.db import models
 from django.db.transaction import atomic
@@ -15,6 +16,8 @@ from django.utils.safestring import mark_safe
 
 from base.admin.forms import (
     ArmsSlotItemForm,
+    ConditionForm,
+    ConstraintForm,
     MagicArmItemTypeForm,
     MagicArmorTypeForm,
     MagicItemForm,
@@ -41,6 +44,7 @@ from base.constants.constants import (
 )
 from base.models import Race
 from base.models.bonuses import Bonus
+from base.models.condition import Condition, Constraint, PropertiesCondition
 from base.models.encounters import Combatants, CombatantsPC
 from base.models.klass import Class
 from base.models.magic_items import (
@@ -50,11 +54,11 @@ from base.models.magic_items import (
     MagicWeaponType,
     SimpleMagicItem,
 )
-from base.models.models import NPC, Armor, ArmorType, ParagonPath, Weapon, WeaponType
+from base.models.models import NPC, Armor, ArmorType, Weapon, WeaponType
 from base.models.powers import Power, PowerProperty
 
 
-class PowerInline(admin.TabularInline):
+class PowerReadonlyInline(admin.TabularInline):
     model = Power
     fields = ('name', 'power_text')
     readonly_fields = fields
@@ -70,6 +74,10 @@ class PowerInline(admin.TabularInline):
 
     def has_add_permission(self, request, obj=None):
         return False
+
+
+class ConstraintInline(GenericTabularInline):
+    model = Constraint
 
 
 @admin.action(description='Социализировать расы')
@@ -109,7 +117,7 @@ class RaceAdmin(admin.ModelAdmin):
     actions = (make_sociable, make_unsociable)
     inlines = (
         RaceBonusInline,
-        PowerInline,
+        PowerReadonlyInline,
     )
 
     def get_queryset(self, request):
@@ -287,7 +295,10 @@ class KlassListFilter(admin.SimpleListFilter):
 
 
 class ParagonPathAdmin(admin.ModelAdmin):
-    inlines = (PowerInline,)
+    inlines = (
+        ConstraintInline,
+        PowerReadonlyInline,
+    )
     form = ParagonPathForm
 
 
@@ -354,6 +365,7 @@ class NPCAdmin(admin.ModelAdmin):
             'right_ring_slot',
         ),
         'powers',
+        'feats',
     ]
     autocomplete_fields = (
         'race',
@@ -364,7 +376,7 @@ class NPCAdmin(admin.ModelAdmin):
         'no_hand',
         'armor',
     )
-    filter_horizontal = ('powers',)
+    filter_horizontal = ('powers', 'feats')
     search_fields = ('name',)
     list_filter = (
         RaceListFilter,
@@ -405,19 +417,6 @@ class NPCAdmin(admin.ModelAdmin):
         self.object = super().get_object(request, object_id, from_field)
         typing.cast(NPC, self.object)
         return self.object
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == 'race':
-            kwargs['queryset'] = Race.objects.annotate(
-                title=NPCRaceEnum.generate_case()
-            ).order_by('title')
-        if db_field.name == 'klass':
-            kwargs['queryset'] = Class.objects.order_by('name')
-        if db_field.name == 'paragon_path':
-            kwargs['queryset'] = ParagonPath.objects.filter(
-                models.Q(klass=self.object.klass) | models.Q(race=self.object.race)
-            )
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def _get_level_abilities_bonus_fields(self, obj) -> list[str]:
         result = []
@@ -896,7 +895,7 @@ class PowerAdmin(admin.ModelAdmin):
                 'description',
                 'level',
                 'race',
-                ('klass', 'subclass_id'),
+                ('klass', 'subclass'),
                 'functional_template',
                 'paragon_path',
                 'magic_item_type',
@@ -980,7 +979,7 @@ class FunctionalTemplateAdmin(admin.ModelAdmin):
         ('armor_class_bonus', 'fortitude_bonus', 'reflex_bonus', 'will_bonus'),
         ('save_bonus', 'action_points_bonus', 'hit_points_per_level'),
     )
-    inlines = (PowerInline,)
+    inlines = (PowerReadonlyInline,)
 
 
 class PlayerCharactersAdmin(admin.ModelAdmin):
@@ -1006,7 +1005,7 @@ class PlayerCharactersAdmin(admin.ModelAdmin):
 class MagicItemTypeAdminBase(admin.ModelAdmin):
     ordering = ('name',)
     readonly_fields = ('image_tag',)
-    inlines = (PowerInline,)
+    inlines = (PowerReadonlyInline,)
 
     @admin.display(description='Картинка')
     def image_tag(self, obj):
@@ -1183,3 +1182,26 @@ class ArmsItemSlotAdmin(admin.ModelAdmin):
 
 class BonusAdmin(admin.ModelAdmin):
     autocomplete_fields = ('power',)
+
+
+class ConditionInline(admin.TabularInline):
+    model = Condition
+    fields = ('content_type', 'object_id')
+    extra = 0
+    form = ConditionForm
+
+
+class PropertiesConditionInline(admin.TabularInline):
+    model = PropertiesCondition
+
+
+class ConstraintAdmin(admin.ModelAdmin):
+    form = ConstraintForm
+    inlines = (ConditionInline, PropertiesConditionInline)
+
+    @atomic
+    def save_model(self, request, obj, form, change):
+        if not obj.name:
+            ct = str(obj.content_type).split('|')[1].strip()
+            obj.name = f'{ct}, {obj.belongs_to}, constraint'
+        super().save_model(request, obj, form, change)
