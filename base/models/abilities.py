@@ -48,7 +48,7 @@ class NPCAbilityAbstract(models.Model):
     var_bonus_ability = models.ForeignKey(
         Ability,
         on_delete=models.SET_NULL,
-        verbose_name='Выборочный бонус характеристики',
+        verbose_name=_('Selective ability bonus'),
         null=True,
     )
     base_attack_ability = models.CharField(

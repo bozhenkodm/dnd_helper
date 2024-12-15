@@ -5,7 +5,6 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from jedi.debug import speed
 from multiselectfield import MultiSelectField
 
 from base.constants.constants import (
@@ -516,7 +515,9 @@ class NPC(
         default=True,
     )
 
-    trained_skills = models.ManyToManyField(Skill, verbose_name=_('Trained skills'))
+    trained_skills = models.ManyToManyField(
+        Skill, verbose_name=_('Trained skills'), blank=True
+    )
     trained_weapons = models.ManyToManyField(
         WeaponType,
         blank=True,

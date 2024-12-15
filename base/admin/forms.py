@@ -45,27 +45,24 @@ class NPCModelForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.instance.id:
             self.instance: NPC
-            self.fields['var_bonus_ability'] = forms.ModelChoiceField(
-                queryset=Ability.objects.filter(races=self.instance.race),
-                widget=forms.RadioSelect(),
-                label='Выборочный бонус характеристики',
-                required=bool(Ability.objects.filter(races=self.instance.race).count()),
+            self.fields['var_bonus_ability'].queryset = Ability.objects.filter(
+                races=self.instance.race
+            )
+            self.fields['var_bonus_ability'].required = bool(
+                Ability.objects.filter(races=self.instance.race).count()
             )
             self.fields['trained_skills'] = forms.ModelMultipleChoiceField(
                 queryset=Skill.objects.filter(classes=self.instance.klass),
                 widget=forms.CheckboxSelectMultiple,
-                label='Тренированный навыки',
+                label=_('Trained skills'),
                 required=False,
             )
-            self.fields['paragon_path'] = forms.ModelChoiceField(
-                queryset=ParagonPath.objects.filter(
-                    id__in=ParagonPath.get_ids_for_npc(self.instance),
-                ).filter(
-                    models.Q(klass=self.instance.klass)
-                    | models.Q(race=self.instance.race)
+            self.fields['paragon_path'].queryset = ParagonPath.objects.filter(
+                id__in=ParagonPath.get_ids_for_npc(
+                    self.instance,
+                    initial_query=models.Q(klass=self.instance.klass)
+                    | models.Q(race=self.instance.race),
                 ),
-                label='Путь совершенства',
-                required=False,
             )
             self.fields['powers'].queryset = (
                 Power.objects.with_frequency_order()
@@ -85,66 +82,40 @@ class NPCModelForm(forms.ModelForm):
                 choices=self.instance.klass.subclasses.generate_choices(),
                 label='Подкласс',
             )
-            self.fields['neck_slot'] = forms.ModelChoiceField(
-                queryset=NeckSlotItem.objects.select_related('magic_item_type').filter(
-                    magic_item_type__slot=NeckSlotItem.SLOT.value
-                ),
-                label='Предмет на шею',
-                required=False,
-            )
-            self.fields['head_slot'] = forms.ModelChoiceField(
-                queryset=HeadSlotItem.objects.select_related('magic_item_type').filter(
-                    magic_item_type__slot=HeadSlotItem.SLOT.value
-                ),
-                label='Предмет на голову',
-                required=False,
-            )
-            self.fields['waist_slot'] = forms.ModelChoiceField(
-                queryset=WaistSlotItem.objects.select_related('magic_item_type').filter(
-                    magic_item_type__slot=WaistSlotItem.SLOT.value
-                ),
-                label='Предмет на пояс',
-                required=False,
-            )
-            self.fields['feet_slot'] = forms.ModelChoiceField(
-                queryset=FeetSlotItem.objects.select_related('magic_item_type').filter(
-                    magic_item_type__slot=FeetSlotItem.SLOT.value
-                ),
-                label='Предмет на ноги',
-                required=False,
-            )
-            self.fields['arms_slot'] = forms.ModelChoiceField(
-                queryset=ArmsSlotItem.objects.select_related('magic_item_type').filter(
-                    models.Q(magic_item_type__slot=ArmsSlotItem.SLOT.value)
-                    & models.Q(shield__in=self.instance.klass.shields)
-                    | models.Q(shield=ShieldTypeIntEnum.NONE),
-                ),
-                label='Предмет на предплечья',
-                required=False,
+            self.fields['neck_slot'].queryset = NeckSlotItem.objects.select_related(
+                'magic_item_type'
+            ).filter(magic_item_type__slot=NeckSlotItem.SLOT.value)
+            self.fields['head_slot'].queryset = HeadSlotItem.objects.select_related(
+                'magic_item_type'
+            ).filter(magic_item_type__slot=HeadSlotItem.SLOT.value)
+            self.fields['waist_slot'].queryset = WaistSlotItem.objects.select_related(
+                'magic_item_type'
+            ).filter(magic_item_type__slot=WaistSlotItem.SLOT.value)
+            self.fields['feet_slot'].queryset = FeetSlotItem.objects.select_related(
+                'magic_item_type'
+            ).filter(magic_item_type__slot=FeetSlotItem.SLOT.value)
+            self.fields['arms_slot'].queryset = ArmsSlotItem.objects.select_related(
+                'magic_item_type'
+            ).filter(
+                models.Q(magic_item_type__slot=ArmsSlotItem.SLOT.value)
+                & models.Q(shield__in=self.instance.klass.shields)
+                | models.Q(shield=ShieldTypeIntEnum.NONE),
             )
 
-            self.fields['left_ring_slot'] = forms.ModelChoiceField(
-                queryset=RingsSlotItem.objects.select_related('magic_item_type').filter(
+            self.fields['left_ring_slot'].queryset = (
+                RingsSlotItem.objects.select_related('magic_item_type').filter(
                     magic_item_type__slot=RingsSlotItem.SLOT.value
-                ),
-                label='Кольцо на левую руку',
-                required=False,
+                )
             )
 
-            self.fields['right_ring_slot'] = forms.ModelChoiceField(
-                queryset=RingsSlotItem.objects.select_related('magic_item_type').filter(
+            self.fields['right_ring_slot'].queryset = (
+                RingsSlotItem.objects.select_related('magic_item_type').filter(
                     magic_item_type__slot=RingsSlotItem.SLOT.value
-                ),
-                label='Кольцо на правую руку',
-                required=False,
+                )
             )
-            self.fields['gloves_slot'] = forms.ModelChoiceField(
-                queryset=HandsSlotItem.objects.select_related('magic_item_type').filter(
-                    magic_item_type__slot=HandsSlotItem.SLOT.value
-                ),
-                label='Предмет на кисти',
-                required=False,
-            )
+            self.fields['gloves_slot'].queryset = HandsSlotItem.objects.select_related(
+                'magic_item_type'
+            ).filter(magic_item_type__slot=HandsSlotItem.SLOT.value)
 
     def add_errors(self, *fields, error=''):
         for field in fields:

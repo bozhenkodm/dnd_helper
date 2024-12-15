@@ -437,7 +437,7 @@ class ArmamentSlot(BaseNameValueDescriptionEnum):
     NO = 'no_hand', 'Не занимает руки'
 
 
-CONDITION_FIELD = {
+MODEL_NAME_TO_NPC_FIELD = {
     'class': 'klass',
     'functionaltemplate': 'functional_template',
     'paragonpath': 'paragon_path',

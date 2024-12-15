@@ -392,7 +392,7 @@ class NPCAdmin(admin.ModelAdmin):
         'paragon_path',
         'functional_template',
     )
-    radio_fields = {"sex": admin.VERTICAL}
+    radio_fields = {'sex': admin.VERTICAL, 'var_bonus_ability': admin.VERTICAL}
     list_per_page = 20
     form = NPCModelForm
 
