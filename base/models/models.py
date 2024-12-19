@@ -169,19 +169,24 @@ class WeaponType(models.Model):
         verbose_name=_('Handedness'),
         choices=WeaponHandednessEnum.generate_choices(is_sorted=False),
         max_length=WeaponHandednessEnum.max_length(),
-        null=True,
     )
     group = MultiSelectField(
         verbose_name=_('Group'),
         min_choices=1,
         choices=WeaponGroupEnum.generate_choices(),
-        null=True,
     )
     category = models.PositiveSmallIntegerField(
         verbose_name=_('Category'),
         choices=WeaponCategoryIntEnum.generate_choices(),
     )
-    range = models.PositiveSmallIntegerField(default=0)
+    range = models.PositiveSmallIntegerField(
+        verbose_name=_('Range'), default=0, help_text=_('For ranged weapon')
+    )
+    distance = models.PositiveSmallIntegerField(
+        verbose_name=_('Distance'),
+        default=0,
+        help_text=_('Additional distance for melee weapons, "reach".'),
+    )
     prof_bonus = models.PositiveSmallIntegerField(
         verbose_name=_('Prof bonus'), default=2
     )
@@ -196,9 +201,7 @@ class WeaponType(models.Model):
         max_length=ThrownWeaponType.max_length(),
         null=True,
     )
-    is_off_hand = models.BooleanField(default=False)
     is_high_crit = models.BooleanField(default=False)
-    is_reach = models.BooleanField(default=False)
     load = models.CharField(
         choices=(
             (
@@ -215,7 +218,6 @@ class WeaponType(models.Model):
     )
     is_small = models.BooleanField(default=False)
     is_defensive = models.BooleanField(default=False)
-    is_big = models.BooleanField(default=False)
     primary_end = models.OneToOneField(
         "self",
         verbose_name=_('Primary end'),
@@ -247,6 +249,13 @@ class WeaponType(models.Model):
         return WeaponCategoryIntEnum(self.category).is_melee
 
     @property
+    def is_double(self) -> bool:
+        try:
+            return self.primary_end or self.secondary_end
+        except WeaponType.DoesNotExist:
+            return False
+
+    @property
     def properties_text(self) -> str:
         # TODO localization
         result = []
@@ -254,11 +263,9 @@ class WeaponType(models.Model):
             result.append(f'Жестокое {self.brutal}')
         if self.thrown:
             result.append(self.get_thrown_display())
-        if self.is_off_hand:
-            result.append('Дополнительное')
         if self.is_high_crit:
             result.append('Высококритичное')
-        if self.is_reach:
+        if self.distance:
             result.append('Досягаемость')
         if self.load:
             result.append(self.get_load_display())
@@ -321,13 +328,25 @@ class Weapon(ItemAbstract):
     def handedness(self):
         return self.weapon_type.handedness
 
+    @cached_property
+    def group(self):
+        return self.weapon_type.group
+
+    @cached_property
+    def category(self):
+        return self.weapon_type.category
+
+    @property
+    def is_double(self) -> bool:
+        return self.weapon_type.is_double
+
     def get_attack_type(self, is_melee: bool, is_ranged: bool) -> str:
         # TODO localization
         melee_attack_type, ranged_attack_type = '', ''
         is_melee = is_melee and self.weapon_type.is_melee
         is_ranged = is_ranged and self.weapon_type.is_ranged
         if is_melee:
-            distance = 2 if self.weapon_type.is_reach else 1
+            distance = self.weapon_type.distance + 1
             melee_attack_type = f'Рукопашный {distance}'
         if is_ranged:
             ranged_attack_type = (
@@ -626,6 +645,8 @@ class NPC(
 
     @property
     def class_hit_points_bonus(self) -> int:
+        # TODO add default feats to class and subclass
+        #  and remove this method
         if (
             self.klass.name == NPCClassEnum.RANGER
             and self.subclass.slug == 'TWO_HANDED'
@@ -642,7 +663,7 @@ class NPC(
         result = (
             hit_points_per_level * self.level
             + self.constitution
-            + self.class_hit_points_bonus
+            + self.calculate_bonus(NPCOtherProperties.HIT_POINTS)
         )
         if self.functional_template:
             result += (
@@ -800,8 +821,15 @@ class NPC(
         return map(str, self.items)
 
     @property
-    def feats_count(self):
+    def feats_count(self) -> int:
         return self.feats.count() + self.trained_weapons.count()
+
+    @property
+    def max_feats_number(self) -> int:
+        result = self.half_level + self._tier + 1
+        if self.race.name == NPCRaceEnum.HUMAN:
+            result += 1
+        return result
 
     def powers_calculated(self) -> Sequence[dict]:
         """

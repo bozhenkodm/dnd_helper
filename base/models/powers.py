@@ -454,7 +454,7 @@ class PowerMixin:
                 if (
                     self.primary_hand
                     and self.secondary_hand
-                    and weapon.weapon_type.is_off_hand
+                    and weapon.weapon_type.handedness == WeaponHandednessEnum.OFF_HAND
                 ):
                     return result + 1
 

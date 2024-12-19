@@ -1,3 +1,4 @@
+from itertools import chain
 from typing import Any, cast
 
 from django import forms
@@ -57,13 +58,21 @@ class NPCModelForm(forms.ModelForm):
                 label=_('Trained skills'),
                 required=False,
             )
-            self.fields['paragon_path'].queryset = ParagonPath.objects.filter(
-                id__in=ParagonPath.get_ids_for_npc(
-                    self.instance,
-                    initial_query=models.Q(klass=self.instance.klass)
-                    | models.Q(race=self.instance.race),
-                ),
-            )
+            if not self.instance.is_bonus_applied:
+                if self.instance.level >= 11:
+                    self.fields['paragon_path'].queryset = ParagonPath.objects.filter(
+                        id__in=ParagonPath.get_ids_for_npc(
+                            self.instance,
+                            initial_query=models.Q(klass=self.instance.klass)
+                            | models.Q(race=self.instance.race),
+                        ),
+                    )
+                self.fields['feats'].queryset = Feat.objects.filter(
+                    id__in=Feat.get_ids_for_npc(
+                        self.instance,
+                        initial_query=models.Q(min_level__lte=self.instance.level),
+                    ),
+                ).order_by('min_level', 'name')
             self.fields['powers'].queryset = (
                 Power.objects.with_frequency_order()
                 .filter(
@@ -74,10 +83,6 @@ class NPCModelForm(forms.ModelForm):
                 )
                 .order_by('level', 'frequency_order')
             )
-            self.fields['feats'].queryset = Feat.objects.filter(
-                id__in=Feat.get_ids_for_npc(self.instance),
-                min_level__lte=self.instance.level,
-            ).order_by('min_level', 'name')
             self.fields['subclass_id'] = forms.ChoiceField(
                 choices=self.instance.klass.subclasses.generate_choices(),
                 label='Подкласс',
@@ -149,7 +154,7 @@ class NPCModelForm(forms.ModelForm):
             self.add_errors(
                 'primary_hand', 'secondary_hand', error='Сначала занимаем основную руку'
             )
-        if primary_hand.handedness in (WeaponHandednessEnum.DOUBLE,):
+        if primary_hand.is_double:
             self.add_errors(
                 'primary_hand',
                 'secondary_hand',
@@ -159,12 +164,9 @@ class NPCModelForm(forms.ModelForm):
             WeaponHandednessEnum.ONE,
             WeaponHandednessEnum.VERSATILE,
         ):
-            if secondary_hand.is_off_hand:
+            if secondary_hand.handedness == WeaponHandednessEnum.OFF_HAND:
                 return
-            if secondary_hand.handedness in (
-                WeaponHandednessEnum.TWO,
-                WeaponHandednessEnum.DOUBLE,
-            ):
+            if secondary_hand.handedness == WeaponHandednessEnum.TWO or secondary_hand.is_double:
                 self.add_errors(
                     'primary_hand',
                     'secondary_hand',
@@ -189,7 +191,7 @@ class NPCModelForm(forms.ModelForm):
                 and self.cleaned_data['subclass_id'] == 'TWO_HANDED'
                 or self.instance.klass.name == NPCClassEnum.BARBARIAN
                 and self.cleaned_data['subclass_id'] == 'WHIRLING'
-            ) and not (secondary_hand and secondary_hand.weapon_type.is_off_hand):
+            ) and not (secondary_hand and secondary_hand.handedness == WeaponHandednessEnum.OFF_HAND):
                 self.add_error(
                     'secondary_hand',
                     ValidationError(
@@ -262,6 +264,9 @@ class NPCModelForm(forms.ModelForm):
         )
         self.check_two_weapons_in_two_hands(primary_hand, secondary_hand)
         self.check_double_weapon(primary_hand, secondary_hand, shield_is_in_hand)
+
+        # if self.instance.feats_count > self.instance.max_feats_number:
+        #     self.add_error('feats', 'Слишком много черт')
 
         return super().clean()
 
@@ -374,10 +379,11 @@ class ConditionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance.id and self.instance.content_type:
+            model_class = self.instance.content_type.model_class()
             self.fields['object_id'] = forms.ChoiceField(
-                choices=(
-                    (item.id, str(item))
-                    for item in self.instance.content_type.model_class().objects.all()
+                choices=chain(
+                    ((0, '---------'),),
+                    ((item.id, str(item)) for item in model_class.objects.all()),
                 ),
                 label=str(self.instance.content_type).split('|')[1].strip(),
             )

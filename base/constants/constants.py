@@ -245,15 +245,18 @@ class DiceIntEnum(IntDescriptionEnum):
 
 
 class WeaponHandednessEnum(BaseNameValueDescriptionEnum):
+    OFF_HAND = auto(), 'Дополнительное'
     ONE = auto(), 'Одноручное'
-    TWO = auto(), 'Двуручное'
     VERSATILE = (
         auto(),
         'Универсальное',
     )  # one-handed, but can be used with two hands
     # (with +1 to damage, unless user is small)
+    TWO = auto(), 'Двуручное'
     FREE = auto(), 'Не занимает руки'  # ki and symbols of faith
-    DOUBLE = auto(), 'Двойное'
+
+    def can_be_hold_in_one_hand(self) -> bool:
+        return self in (self.OFF_HAND, self.ONE, self.VERSATILE)
 
 
 class PowerSourceEnum(BaseNameValueDescriptionEnum):
@@ -427,6 +430,7 @@ class NPCOtherProperties(BaseNameValueDescriptionEnum):
     INITIATIVE = auto(), 'Инициатива'
     SURGE = auto(), 'Значение исцеления'
     SURGES = auto(), 'Количество исцелений'
+    HIT_POINTS = auto(), 'Количество хитов'
     ATTACK = auto(), 'Атака'
     DAMAGE = auto(), 'Урон'
 
@@ -441,4 +445,6 @@ MODEL_NAME_TO_NPC_FIELD = {
     'class': 'klass',
     'functionaltemplate': 'functional_template',
     'paragonpath': 'paragon_path',
+    'power': 'powers',
+    'feat': 'feats',
 }

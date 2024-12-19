@@ -78,6 +78,13 @@ class PowerReadonlyInline(admin.TabularInline):
 
 class ConstraintInline(GenericTabularInline):
     model = Constraint
+    show_change_link = True
+
+
+class BonusInline(admin.TabularInline):
+    model = Bonus
+    fields = ('bonus_type', 'value', 'source')
+    show_change_link = True
 
 
 @admin.action(description='Социализировать расы')
@@ -88,11 +95,6 @@ def make_sociable(modeladmin, request, queryset) -> None:
 @admin.action(description='Десоциализировать расы')
 def make_unsociable(modeladmin, request, queryset) -> None:
     queryset.update(is_sociable=False)
-
-
-class RaceBonusInline(admin.TabularInline):
-    model = Bonus
-    fields = ('bonus_type', 'value')
 
 
 class RaceAdmin(admin.ModelAdmin):
@@ -116,7 +118,7 @@ class RaceAdmin(admin.ModelAdmin):
     search_fields = ('name_display',)
     actions = (make_sociable, make_unsociable)
     inlines = (
-        RaceBonusInline,
+        BonusInline,
         PowerReadonlyInline,
     )
 
@@ -155,11 +157,6 @@ class RaceAdmin(admin.ModelAdmin):
                     instance.save()
 
 
-class ClassBonusInline(admin.TabularInline):
-    model = Bonus
-    fields = ('bonus_type', 'value')
-
-
 class ClassAdmin(admin.ModelAdmin):
     search_fields = ('name_display',)
     ordering = ('name_display',)
@@ -180,7 +177,7 @@ class ClassAdmin(admin.ModelAdmin):
     )
     list_filter = ('power_source', 'role')
     list_display = ('name_display',)
-    inlines = (ClassBonusInline,)
+    inlines = (BonusInline,)
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
@@ -239,7 +236,7 @@ class SubclassAdmin(admin.ModelAdmin):
     ordering = ('klass__name_display', 'subclass_id', 'name')
     list_filter = ('klass',)
     list_display = ('__str__', 'klass')
-    inlines = (ClassBonusInline,)
+    inlines = (BonusInline,)
 
     def get_queryset(self, request):
         return super().get_queryset(request).exclude(subclass_id=0)
@@ -343,7 +340,6 @@ class NPCAdmin(admin.ModelAdmin):
         # 'level28_bonus_abilities',
         'mandatory_skills',
         'trained_skills',
-        'trained_weapons',
         (
             'armor',
             'arms_slot',
@@ -365,7 +361,6 @@ class NPCAdmin(admin.ModelAdmin):
             'right_ring_slot',
         ),
         'powers',
-        'feats',
     ]
     autocomplete_fields = (
         'race',
@@ -465,6 +460,13 @@ class NPCAdmin(admin.ModelAdmin):
                 'paragon_path',
             )
         result.insert(9, self._get_level_abilities_bonus_fields(obj))
+        if not obj.is_bonus_applied:
+            result.extend(
+                [
+                    'trained_weapons',
+                    'feats',
+                ]
+            )
         return result
 
     def get_readonly_fields(self, request, obj=None):
@@ -979,6 +981,8 @@ class FunctionalTemplateAdmin(admin.ModelAdmin):
         ('armor_class_bonus', 'fortitude_bonus', 'reflex_bonus', 'will_bonus'),
         ('save_bonus', 'action_points_bonus', 'hit_points_per_level'),
     )
+    list_display = ('title', 'min_level')
+    list_editable = ('min_level',)
     inlines = (PowerReadonlyInline,)
 
 
@@ -999,6 +1003,7 @@ class PlayerCharactersAdmin(admin.ModelAdmin):
         'passive_insight',
         'initiative',
     )
+    list_editable = list_display[1:]
     ordering = ('name',)
 
 
@@ -1189,6 +1194,7 @@ class ConditionInline(admin.TabularInline):
     fields = ('content_type', 'object_id')
     extra = 0
     form = ConditionForm
+    show_change_link = True
 
 
 class PropertiesConditionInline(admin.TabularInline):
@@ -1198,6 +1204,7 @@ class PropertiesConditionInline(admin.TabularInline):
 class ConstraintAdmin(admin.ModelAdmin):
     form = ConstraintForm
     inlines = (ConditionInline, PropertiesConditionInline)
+    list_filter = ('content_type',)
 
     @atomic
     def save_model(self, request, obj, form, change):
@@ -1205,3 +1212,11 @@ class ConstraintAdmin(admin.ModelAdmin):
             ct = str(obj.content_type).split('|')[1].strip()
             obj.name = f'{ct}, {obj.belongs_to}, constraint'
         super().save_model(request, obj, form, change)
+
+
+class FeatAdmin(admin.ModelAdmin):
+    inlines = (ConstraintInline, BonusInline)
+    list_display = ('name', 'min_level', 'text')
+    list_editable = ('min_level',)
+    search_fields = ('name', 'min_level', 'text')
+    ordering = ('min_level', 'name')

@@ -8,6 +8,7 @@ from base.admin.admin_classes import (
     ClassAdmin,
     ConstraintAdmin,
     EncounterAdmin,
+    FeatAdmin,
     FunctionalTemplateAdmin,
     MagicArmItemTypeAdmin,
     MagicArmorTypeAdmin,
@@ -65,7 +66,7 @@ admin.site.register(MagicArmorType, MagicArmorTypeAdmin)
 admin.site.register(MagicWeaponType, MagicWeaponTypeAdmin)
 admin.site.register(MagicArmItemType, MagicArmItemTypeAdmin)
 admin.site.register(Bonus, BonusAdmin)
-admin.site.register(Feat)
+admin.site.register(Feat, FeatAdmin)
 admin.site.register(Constraint, ConstraintAdmin)
 
 

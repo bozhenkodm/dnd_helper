@@ -16,4 +16,27 @@ class Feat(ConstraintAbstract):
     text = models.TextField(verbose_name=_('Text'), null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        conditions = []
+        name = (
+            self.name
+            if self.min_level == 1
+            else f'{self.name}, {self.min_level} уровень'
+        )
+        for constraint in self.constraints.all():
+            if constraint.conditions.count():
+                conditions.append(
+                    ', '.join(
+                        f'{condition.content_type}: {condition.condition}'
+                        for condition in constraint.conditions.all()
+                    )
+                )
+            if constraint.scalar_conditions.count():
+                conditions.append(
+                    ', '.join(
+                        f'{condition.get_type_display()}: {condition.value}'
+                        for condition in constraint.scalar_conditions.all()
+                    )
+                )
+        if not conditions:
+            return name
+        return f'{name}. {_("or ").join(conditions)}'
