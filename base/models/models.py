@@ -184,8 +184,8 @@ class WeaponType(models.Model):
     )
     distance = models.PositiveSmallIntegerField(
         verbose_name=_('Distance'),
-        default=0,
-        help_text=_('Additional distance for melee weapons, "reach".'),
+        default=1,
+        help_text=_('Melee distance'),
     )
     prof_bonus = models.PositiveSmallIntegerField(
         verbose_name=_('Prof bonus'), default=2
@@ -239,14 +239,18 @@ class WeaponType(models.Model):
 
     @property
     def is_ranged(self) -> bool:
-        return bool(self.range)
+        return self.range > 0
+
+    @property
+    def is_reach(self) -> bool:
+        return self.distance == 2
 
     def damage(self, weapon_number=1) -> str:
         return f'{self.dice_number * weapon_number}' f'{self.get_dice_display()}'
 
     @property
     def is_melee(self) -> bool:
-        return WeaponCategoryIntEnum(self.category).is_melee
+        return bool(self.distance)
 
     @property
     def is_double(self) -> bool:
@@ -265,7 +269,7 @@ class WeaponType(models.Model):
             result.append(self.get_thrown_display())
         if self.is_high_crit:
             result.append('Высококритичное')
-        if self.distance:
+        if self.is_reach:
             result.append('Досягаемость')
         if self.load:
             result.append(self.get_load_display())
@@ -346,8 +350,7 @@ class Weapon(ItemAbstract):
         is_melee = is_melee and self.weapon_type.is_melee
         is_ranged = is_ranged and self.weapon_type.is_ranged
         if is_melee:
-            distance = self.weapon_type.distance + 1
-            melee_attack_type = f'Рукопашный {distance}'
+            melee_attack_type = f'Рукопашный {self.weapon_type.range}'
         if is_ranged:
             ranged_attack_type = (
                 f'Дальнобойный '
@@ -398,7 +401,7 @@ class Race(models.Model):
     var_ability_bonus = models.ManyToManyField(
         Ability,
         related_name='races',
-        verbose_name=_('Selective ability bonuses'),
+        verbose_name=_('Selective ability bonus'),
     )
     speed = models.PositiveSmallIntegerField(verbose_name=_('Speed'), default=6)
     vision = models.CharField(

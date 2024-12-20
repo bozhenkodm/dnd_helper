@@ -26,10 +26,10 @@ class Class(ClassAbstract):
     will = models.PositiveSmallIntegerField(verbose_name=_('Will'), default=0)
     surges = models.PositiveSmallIntegerField(verbose_name=_('Surges'), default=6)
     hit_points_per_level = models.PositiveSmallIntegerField(
-        verbose_name=_('Hit points per level'), default=5
+        verbose_name=_('Hits per level'), default=5
     )
     hit_points_per_level_npc = models.PositiveSmallIntegerField(
-        verbose_name=_('Hit points per level'), default=8
+        verbose_name=_('Hits per level'), default=8
     )
     power_source = models.CharField(
         verbose_name=_('Power source'),

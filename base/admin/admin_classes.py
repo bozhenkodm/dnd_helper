@@ -18,6 +18,7 @@ from base.admin.forms import (
     ArmsSlotItemForm,
     ConditionForm,
     ConstraintForm,
+    FeatForm,
     MagicArmItemTypeForm,
     MagicArmorTypeForm,
     MagicItemForm,
@@ -906,7 +907,7 @@ class PowerAdmin(admin.ModelAdmin):
             )
         result = super().get_fields(request, obj)[:]
         if obj.klass:
-            result.insert(3, ('klass', 'subclass_id'))
+            result.insert(3, ('klass', 'subclass'))
         if obj.race:
             result.insert(3, 'race')
         if obj.functional_template:
@@ -1220,3 +1221,30 @@ class FeatAdmin(admin.ModelAdmin):
     list_editable = ('min_level',)
     search_fields = ('name', 'min_level', 'text')
     ordering = ('min_level', 'name')
+    save_on_top = True
+    form = FeatForm
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if not obj.constraints.count():
+            constraint = Constraint(belongs_to=obj, name=f'Черта: {obj.name}')
+            constraint.save()
+            for field in ('klass', 'subclass', 'race'):
+                if condition_value := form.cleaned_data.get(field):
+                    condition = Condition(
+                        constraint=constraint, condition=condition_value
+                    )
+                    condition.save()
+            for field in (
+                'strength',
+                'constitution',
+                'dexterity',
+                'intelligence',
+                'wisdom',
+                'charisma',
+            ):
+                if condition_value := form.cleaned_data.get(field):
+                    condition = PropertiesCondition(
+                        constraint=constraint, type=field.upper(), value=condition_value
+                    )
+                    condition.save()

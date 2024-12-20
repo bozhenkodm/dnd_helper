@@ -127,8 +127,9 @@ class NPCDefenceMixin:
                 self.shield,
                 self.secondary_hand,
                 self.primary_hand and not self.primary_hand.weapon_type.is_melee,
-                self.primary_hand and self.primary_hand.handedness == WeaponHandednessEnum.TWO,
-                self.primary_hand and self.primary_hand.is_double
+                self.primary_hand
+                and self.primary_hand.handedness == WeaponHandednessEnum.TWO,
+                self.primary_hand and self.primary_hand.is_double,
             )
         ):
             return False

@@ -16,6 +16,7 @@ class Feat(ConstraintAbstract):
     text = models.TextField(verbose_name=_('Text'), null=True, blank=True)
 
     def __str__(self):
+        constraints = []
         conditions = []
         name = (
             self.name
@@ -37,6 +38,7 @@ class Feat(ConstraintAbstract):
                         for condition in constraint.scalar_conditions.all()
                     )
                 )
-        if not conditions:
-            return name
-        return f'{name}. {_("or ").join(conditions)}'
+            constraints.append(', '.join(conditions))
+        if not constraints:
+            return f'{name}. {self.text}'
+        return f'{name}. {_(" or ").join(constraints)}. {self.text}'

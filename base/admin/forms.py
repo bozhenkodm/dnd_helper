@@ -18,6 +18,7 @@ from base.models import NPC
 from base.models.abilities import Ability
 from base.models.condition import Condition, Constraint
 from base.models.feats import Feat
+from base.models.klass import Class, Subclass
 from base.models.magic_items import (
     ArmsSlotItem,
     FeetSlotItem,
@@ -32,7 +33,7 @@ from base.models.magic_items import (
     SimpleMagicItem,
     WaistSlotItem,
 )
-from base.models.models import ParagonPath, Weapon
+from base.models.models import ParagonPath, Race, Weapon
 from base.models.powers import Power
 from base.models.skills import Skill
 
@@ -166,7 +167,10 @@ class NPCModelForm(forms.ModelForm):
         ):
             if secondary_hand.handedness == WeaponHandednessEnum.OFF_HAND:
                 return
-            if secondary_hand.handedness == WeaponHandednessEnum.TWO or secondary_hand.is_double:
+            if (
+                secondary_hand.handedness == WeaponHandednessEnum.TWO
+                or secondary_hand.is_double
+            ):
                 self.add_errors(
                     'primary_hand',
                     'secondary_hand',
@@ -191,7 +195,10 @@ class NPCModelForm(forms.ModelForm):
                 and self.cleaned_data['subclass_id'] == 'TWO_HANDED'
                 or self.instance.klass.name == NPCClassEnum.BARBARIAN
                 and self.cleaned_data['subclass_id'] == 'WHIRLING'
-            ) and not (secondary_hand and secondary_hand.handedness == WeaponHandednessEnum.OFF_HAND):
+            ) and not (
+                secondary_hand
+                and secondary_hand.handedness == WeaponHandednessEnum.OFF_HAND
+            ):
                 self.add_error(
                     'secondary_hand',
                     ValidationError(
@@ -387,3 +394,32 @@ class ConditionForm(forms.ModelForm):
                 ),
                 label=str(self.instance.content_type).split('|')[1].strip(),
             )
+
+
+class FeatForm(forms.ModelForm):
+    class Meta:
+        model = Feat
+        fields = '__all__'
+
+    race = forms.ModelChoiceField(
+        queryset=Race.objects.order_by('-is_sociable', 'name_display'),
+        required=False,
+        label=_('Race'),
+    )
+    klass = forms.ModelChoiceField(
+        queryset=Class.objects.all(), required=False, label=_('Class')
+    )
+    subclass = forms.ModelChoiceField(
+        queryset=Subclass.objects.all(), required=False, label=_('Subclass')
+    )
+    power = forms.ModelChoiceField(
+        queryset=Race.objects.order_by('-is_sociable', 'name_display'),
+        required=False,
+        label=_('Race'),
+    )
+    strength = forms.IntegerField(required=False, label=_('Strength'))
+    constitution = forms.IntegerField(required=False, label=_('Constitution'))
+    dexterity = forms.IntegerField(required=False, label=_('Dexterity'))
+    intelligence = forms.IntegerField(required=False, label=_('Intelligence'))
+    wisdom = forms.IntegerField(required=False, label=_('Wisdom'))
+    charisma = forms.IntegerField(required=False, label=_('Charisma'))
