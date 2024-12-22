@@ -80,6 +80,7 @@ class PowerReadonlyInline(admin.TabularInline):
 class ConstraintInline(GenericTabularInline):
     model = Constraint
     show_change_link = True
+    extra = 1
 
 
 class BonusInline(admin.TabularInline):
@@ -90,12 +91,12 @@ class BonusInline(admin.TabularInline):
 
 @admin.action(description='Социализировать расы')
 def make_sociable(modeladmin, request, queryset) -> None:
-    queryset.update(is_sociable=True)
+    queryset.update(is_social=True)
 
 
 @admin.action(description='Десоциализировать расы')
 def make_unsociable(modeladmin, request, queryset) -> None:
-    queryset.update(is_sociable=False)
+    queryset.update(is_social=False)
 
 
 class RaceAdmin(admin.ModelAdmin):
@@ -107,15 +108,15 @@ class RaceAdmin(admin.ModelAdmin):
         'vision',
         'size',
         'weapon_types',
-        'is_sociable',
+        'is_social',
     )
     list_filter = (
         'speed',
         'vision',
         'size',
-        'is_sociable',
+        'is_social',
     )
-    list_display = ('name_display', 'speed', 'vision', 'size', 'is_sociable')
+    list_display = ('name_display', 'speed', 'vision', 'size', 'is_social')
     search_fields = ('name_display',)
     actions = (make_sociable, make_unsociable)
     inlines = (
@@ -1220,13 +1221,34 @@ class FeatAdmin(admin.ModelAdmin):
     list_display = ('name', 'min_level', 'text')
     list_editable = ('min_level',)
     search_fields = ('name', 'min_level', 'text')
-    ordering = ('min_level', 'name')
+    # ordering = ('min_level', 'name')
     save_on_top = True
     form = FeatForm
+    fields = (
+        ('name', 'min_level'),
+        'text',
+        'race',
+        ('klass', 'subclass', 'power_source'),
+        ('strength', 'constitution', 'dexterity'),
+        ('intelligence', 'wisdom', 'charisma'),
+    )
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
-        if not obj.constraints.count():
+        if any(
+            (
+                form.cleaned_data.get('klass'),
+                form.cleaned_data.get('subclass'),
+                form.cleaned_data.get('power_source'),
+                form.cleaned_data.get('race'),
+                form.cleaned_data.get('strength'),
+                form.cleaned_data.get('constitution'),
+                form.cleaned_data.get('dexterity'),
+                form.cleaned_data.get('intelligence'),
+                form.cleaned_data.get('wisdom'),
+                form.cleaned_data.get('charisma'),
+            )
+        ):
             constraint = Constraint(belongs_to=obj, name=f'Черта: {obj.name}')
             constraint.save()
             for field in ('klass', 'subclass', 'race'):
@@ -1242,6 +1264,7 @@ class FeatAdmin(admin.ModelAdmin):
                 'intelligence',
                 'wisdom',
                 'charisma',
+                'power_source'
             ):
                 if condition_value := form.cleaned_data.get(field):
                     condition = PropertiesCondition(

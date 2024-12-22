@@ -34,7 +34,7 @@ class Feat(ConstraintAbstract):
             if constraint.scalar_conditions.count():
                 conditions.append(
                     ', '.join(
-                        f'{condition.get_type_display()}: {condition.value}'
+                        f'{condition.get_type_display()}: {condition.value_display}'
                         for condition in constraint.scalar_conditions.all()
                     )
                 )

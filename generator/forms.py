@@ -19,7 +19,7 @@ class NPCNameForm(forms.ModelForm):
         choices=SexEnum.generate_choices(is_sorted=False),
     )
     race = forms.ModelMultipleChoiceField(
-        queryset=Race.objects.filter(is_sociable=True)
+        queryset=Race.objects.filter(is_social=True)
         .annotate(title=NPCRaceEnum.generate_case())
         .order_by('title'),
         widget=forms.CheckboxSelectMultiple,

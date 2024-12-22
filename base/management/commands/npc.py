@@ -16,7 +16,7 @@ class Command(BaseCommand):
         if options.get('all'):
             race = choice(Race.objects.all())
         else:
-            race = choice(Race.objects.filter(is_sociable=True))
+            race = choice(Race.objects.filter(is_social=True))
         klass = choice(Class.objects.all())
         self.stdout.write(
             self.style.SUCCESS(

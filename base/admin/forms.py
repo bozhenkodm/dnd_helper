@@ -10,6 +10,7 @@ from base.constants.constants import (
     MagicItemSlot,
     NPCClassEnum,
     NPCRaceEnum,
+    PowerSourceIntEnum,
     SexEnum,
     ShieldTypeIntEnum,
     WeaponHandednessEnum,
@@ -402,7 +403,7 @@ class FeatForm(forms.ModelForm):
         fields = '__all__'
 
     race = forms.ModelChoiceField(
-        queryset=Race.objects.order_by('-is_sociable', 'name_display'),
+        queryset=Race.objects.order_by('-is_social', 'name_display'),
         required=False,
         label=_('Race'),
     )
@@ -412,14 +413,15 @@ class FeatForm(forms.ModelForm):
     subclass = forms.ModelChoiceField(
         queryset=Subclass.objects.all(), required=False, label=_('Subclass')
     )
-    power = forms.ModelChoiceField(
-        queryset=Race.objects.order_by('-is_sociable', 'name_display'),
-        required=False,
-        label=_('Race'),
-    )
     strength = forms.IntegerField(required=False, label=_('Strength'))
     constitution = forms.IntegerField(required=False, label=_('Constitution'))
     dexterity = forms.IntegerField(required=False, label=_('Dexterity'))
     intelligence = forms.IntegerField(required=False, label=_('Intelligence'))
     wisdom = forms.IntegerField(required=False, label=_('Wisdom'))
     charisma = forms.IntegerField(required=False, label=_('Charisma'))
+    power_source = forms.TypedChoiceField(
+        choices=PowerSourceIntEnum.generate_choices(zero_item=(0, '-------')),
+        coerce=int,
+        label=_('Power source'),
+        required=False,
+    )

@@ -1,7 +1,12 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from base.constants.constants import ClassRoleEnum, NPCClassEnum, PowerSourceEnum
+from base.constants.constants import (
+    ClassRoleEnum,
+    NPCClassEnum,
+    PowerSourceEnum,
+    PowerSourceIntEnum,
+)
 from base.managers import SubclassQuerySet
 from base.models.abstract import ClassAbstract
 from base.models.skills import Skill
@@ -72,3 +77,30 @@ class Subclass(ClassAbstract):
 
     def __str__(self):
         return f'{self.klass}, {self.name}'
+
+
+class NPCClassAbstract(models.Model):
+    class Meta:
+        abstract = True
+
+    klass = models.ForeignKey(
+        Class,
+        on_delete=models.CASCADE,
+        verbose_name=_('Class'),
+    )
+    subclass_id = models.SmallIntegerField(
+        verbose_name=_('Subclass'),
+        default=0,
+    )
+
+    @property
+    def subclass(self) -> Subclass:
+        return self.klass.subclasses.get(subclass_id=self.subclass_id)
+
+    @property
+    def power_source(self) -> PowerSourceIntEnum:
+        return PowerSourceIntEnum(self.klass.power_source)
+
+    @property
+    def role(self) -> str:
+        return self.klass.role

@@ -268,11 +268,31 @@ class PowerSourceEnum(BaseNameValueDescriptionEnum):
     PSIONIC = auto(), 'Псионический'
 
 
+class PowerSourceIntEnum(IntDescriptionEnum):
+    # workaround to not make another
+    # PropertiesCondition model for strings
+    # maybe change power source and role to int
+    MARTIAL = 1, 'Воинский'
+    DIVINE = 2, 'Духовный'
+    ARCANE = 3, 'Магический'
+    PRIMAL = 4, 'Первородный'
+    SHADOW = 5, 'Теневой'
+    PSIONIC = 6, 'Псионический'
+
+
 class ClassRoleEnum(BaseNameValueDescriptionEnum):
     STRIKER = auto(), 'Атакующий'
     DEFENDER = auto(), 'Защитник'
     CONTROLLER = auto(), 'Контроллер'
     LEADER = auto(), 'Лидер'
+
+
+class ClassRoleIntEnum(IntDescriptionEnum):
+    # see comment to PowerSourceIntEnum
+    STRIKER = 1, 'Атакующий'
+    DEFENDER = 2, 'Защитник'
+    CONTROLLER = 3, 'Контроллер'
+    LEADER = 4, 'Лидер'
 
 
 class PowerFrequencyEnum(BaseNameValueDescriptionEnum):
@@ -433,6 +453,10 @@ class NPCOtherProperties(BaseNameValueDescriptionEnum):
     HIT_POINTS = auto(), 'Количество хитов'
     ATTACK = auto(), 'Атака'
     DAMAGE = auto(), 'Урон'
+
+
+class NPCClassProperties(BaseNameValueDescriptionEnum):
+    POWER_SOURCE = auto(), 'Источник силы'
 
 
 class ArmamentSlot(BaseNameValueDescriptionEnum):

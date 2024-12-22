@@ -32,7 +32,7 @@ from base.models.bonuses import BonusMixin
 from base.models.defences import NPCDefenceMixin
 from base.models.experience import NPCExperienceAbstract
 from base.models.feats import Feat
-from base.models.klass import Class, Subclass
+from base.models.klass import Class, NPCClassAbstract
 from base.models.magic_items import (
     ItemAbstract,
     MagicArmorType,
@@ -420,7 +420,7 @@ class Race(models.Model):
         WeaponType,
         verbose_name=_('Available weapon types'),
     )
-    is_sociable = models.BooleanField(
+    is_social = models.BooleanField(
         verbose_name=_('Is race social?'),
         default=True,
         help_text=_('Social races are used for random npc generation'),
@@ -485,6 +485,7 @@ class ParagonPath(ConstraintAbstract):
 
 
 class NPC(
+    NPCClassAbstract,
     NPCDefenceMixin,
     NPCExperienceAbstract,
     NPCAbilityAbstract,
@@ -502,15 +503,6 @@ class NPC(
     name = models.CharField(verbose_name=_('Name'), max_length=50)
     description = models.TextField(verbose_name=_('Description'), null=True, blank=True)
     race = models.ForeignKey(Race, on_delete=models.CASCADE, verbose_name=_('Race'))
-    klass = models.ForeignKey(
-        Class,
-        on_delete=models.CASCADE,
-        verbose_name=_('Class'),
-    )
-    subclass_id = models.SmallIntegerField(
-        verbose_name=_('Subclass'),
-        default=0,
-    )
     functional_template = models.ForeignKey(
         FunctionalTemplate,
         on_delete=models.CASCADE,
@@ -602,10 +594,6 @@ class NPC(
         if self.functional_template:
             return f'{self.klass} ({self.functional_template})'
         return self.klass
-
-    @property
-    def subclass(self) -> Subclass:
-        return self.klass.subclasses.get(subclass_id=self.subclass_id)
 
     @property
     def all_trained_skills(self) -> list[SkillEnum]:

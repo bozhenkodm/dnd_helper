@@ -43,7 +43,7 @@ class NPCName(models.Model):
     @classmethod
     def generate_npc(cls, race=None, sex=None) -> dict:
         if not race:
-            race = random.choice(Race.objects.filter(is_sociable=True))  # type: ignore
+            race = random.choice(Race.objects.filter(is_social=True))  # type: ignore
         else:
             race = Race.objects.get(name=race)
         try:
@@ -67,7 +67,7 @@ class NPCName(models.Model):
 
     @staticmethod
     def generate_links():
-        races = Race.objects.filter(is_sociable=True)
+        races = Race.objects.filter(is_social=True)
         return sorted(
             (
                 (

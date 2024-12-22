@@ -1,4 +1,5 @@
 from itertools import chain
+from multiprocessing.managers import Value
 
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -13,7 +14,7 @@ from base.constants.constants import (
     NPCOtherProperties,
     ShieldTypeIntEnum,
     WeaponCategoryIntEnum,
-    WeaponGroupEnum,
+    WeaponGroupEnum, NPCClassProperties, PowerSourceIntEnum,
 )
 from base.models.abstract import ClassAbstract
 from base.models.models import WeaponType
@@ -68,7 +69,7 @@ class Condition(models.Model):
         },
     )
     object_id = models.PositiveIntegerField(default=0)
-    condition = GenericForeignKey("content_type", "object_id")
+    condition = GenericForeignKey()
     negated = models.BooleanField(default=False)
 
 
@@ -169,6 +170,7 @@ class PropertiesCondition(models.Model):
                 condition=lambda x: x
                 not in (NPCOtherProperties.ATTACK, NPCOtherProperties.DAMAGE)
             ),
+            NPCClassProperties.generate_choices()
         ),
         max_length=max(
             map(
@@ -176,6 +178,7 @@ class PropertiesCondition(models.Model):
                 (
                     AbilityEnum,
                     NPCOtherProperties,
+                    NPCClassProperties,
                 ),
             )
         ),
@@ -183,3 +186,9 @@ class PropertiesCondition(models.Model):
     value = models.PositiveSmallIntegerField(
         verbose_name=_('Property value'), null=False
     )
+
+    @property
+    def value_display(self) -> str:
+        if self.type == NPCClassProperties.POWER_SOURCE:
+            return PowerSourceIntEnum(self.value).description
+        return str(self.value)

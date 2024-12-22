@@ -1,5 +1,6 @@
 from enum import Enum, IntEnum
 from functools import reduce
+from itertools import chain
 from typing import Any, Callable, Self, Sequence
 
 from django.db import models
@@ -20,12 +21,15 @@ class BaseNameValueDescriptionEnum(str, Enum):
     @classmethod
     def generate_choices(
         cls,
+        *,
         is_sorted: bool = True,
         start_with: Sequence[Self] = (),
         condition: Callable[[Any], bool] = lambda x: True,
         description_prefix: str = '',
+        zero_item: tuple[str, str] | None = None,
     ) -> list[tuple[str, str]]:
-        result = [(item.value, item.description) for item in start_with]  # type: ignore
+        result = [zero_item] if zero_item else []
+        result.extend((item.value, item.description) for item in start_with)
         if is_sorted:
             result.extend(
                 sorted(
@@ -95,15 +99,12 @@ class IntDescriptionEnum(IntEnum):
     def generate_choices(
         cls,
         condition: Callable[['IntDescriptionEnum'], bool] = lambda x: True,
+        zero_item: tuple[int, str] | None = None,
     ):
-        return sorted(
-            ((item.value, item.description) for item in cls if condition(item)),
-            key=lambda x: x[0],
-        )
-
-    @property
-    def lname(self) -> str:
-        return self.name.lower()
+        result = ((item.value, item.description) for item in cls if condition(item))
+        if zero_item is not None:
+            result = chain((zero_item,), result)
+        return sorted(result, key=lambda x: x[0])
 
     @classmethod
     def generate_case(cls, field='name') -> models.Case:
