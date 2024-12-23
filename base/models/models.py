@@ -17,7 +17,6 @@ from base.constants.constants import (
     PowerActionTypeEnum,
     SexEnum,
     SizeEnum,
-    SkillEnum,
     ThrownWeaponType,
     VisionEnum,
     WeaponCategoryIntEnum,
