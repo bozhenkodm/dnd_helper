@@ -1221,7 +1221,7 @@ class FeatAdmin(admin.ModelAdmin):
     list_display = ('name', 'min_level', 'text')
     list_editable = ('min_level',)
     search_fields = ('name', 'min_level', 'text')
-    # ordering = ('min_level', 'name')
+    ordering = ('min_level', 'name')
     save_on_top = True
     form = FeatForm
     fields = (
@@ -1229,6 +1229,7 @@ class FeatAdmin(admin.ModelAdmin):
         'text',
         'race',
         ('klass', 'subclass', 'power_source'),
+        # 'trained_skills',
         ('strength', 'constitution', 'dexterity'),
         ('intelligence', 'wisdom', 'charisma'),
     )
@@ -1241,6 +1242,7 @@ class FeatAdmin(admin.ModelAdmin):
                 form.cleaned_data.get('subclass'),
                 form.cleaned_data.get('power_source'),
                 form.cleaned_data.get('race'),
+                # form.cleaned_data.get('trained_skills'),
                 form.cleaned_data.get('strength'),
                 form.cleaned_data.get('constitution'),
                 form.cleaned_data.get('dexterity'),
@@ -1257,6 +1259,12 @@ class FeatAdmin(admin.ModelAdmin):
                         constraint=constraint, condition=condition_value
                     )
                     condition.save()
+            # if skills := form.cleaned_data.get('trained_skills'):
+            #     for skill in skills:
+            #         condition = Condition(
+            #             constraint=constraint, condition=skill
+            #         )
+            #         condition.save()
             for field in (
                 'strength',
                 'constitution',
@@ -1264,7 +1272,7 @@ class FeatAdmin(admin.ModelAdmin):
                 'intelligence',
                 'wisdom',
                 'charisma',
-                'power_source'
+                'power_source',
             ):
                 if condition_value := form.cleaned_data.get(field):
                     condition = PropertiesCondition(

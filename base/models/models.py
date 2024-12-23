@@ -395,7 +395,7 @@ class Race(models.Model):
     )
     const_ability_bonus = models.ManyToManyField(
         Ability,
-        related_name='races_with_const',
+        related_name='races_with_const_ability',
         verbose_name=_('Constant ability bonuses'),
     )
     var_ability_bonus = models.ManyToManyField(

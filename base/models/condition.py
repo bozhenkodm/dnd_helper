@@ -1,5 +1,4 @@
 from itertools import chain
-from multiprocessing.managers import Value
 
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -11,10 +10,12 @@ from base.constants.constants import (
     AbilityEnum,
     ArmamentSlot,
     ArmorTypeIntEnum,
+    NPCClassProperties,
     NPCOtherProperties,
+    PowerSourceIntEnum,
     ShieldTypeIntEnum,
     WeaponCategoryIntEnum,
-    WeaponGroupEnum, NPCClassProperties, PowerSourceIntEnum,
+    WeaponGroupEnum,
 )
 from base.models.abstract import ClassAbstract
 from base.models.models import WeaponType
@@ -65,6 +66,7 @@ class Condition(models.Model):
                 'paragonpath',
                 'feat',
                 'power',
+                'skill',
             ),
         },
     )
@@ -170,7 +172,7 @@ class PropertiesCondition(models.Model):
                 condition=lambda x: x
                 not in (NPCOtherProperties.ATTACK, NPCOtherProperties.DAMAGE)
             ),
-            NPCClassProperties.generate_choices()
+            NPCClassProperties.generate_choices(),
         ),
         max_length=max(
             map(

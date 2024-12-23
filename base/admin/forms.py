@@ -413,6 +413,12 @@ class FeatForm(forms.ModelForm):
     subclass = forms.ModelChoiceField(
         queryset=Subclass.objects.all(), required=False, label=_('Subclass')
     )
+    # trained_skills = forms.ModelMultipleChoiceField(
+    #     queryset=Skill.objects.order_by('ordering'),
+    #     required=False, label=_('Trained skills'),
+    #     # widget=forms.CheckboxSelectMultiple
+    # )
+
     strength = forms.IntegerField(required=False, label=_('Strength'))
     constitution = forms.IntegerField(required=False, label=_('Constitution'))
     dexterity = forms.IntegerField(required=False, label=_('Dexterity'))

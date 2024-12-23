@@ -19,7 +19,7 @@ class Skill(models.Model):
         max_length=SkillEnum.max_length(),
         primary_key=True,
     )
-    based_on = models.ForeignKey(Ability, on_delete=models.CASCADE, null=False)
+    based_on = models.ForeignKey(Ability, on_delete=models.CASCADE, null=True)
     ordering = models.PositiveSmallIntegerField(default=1)
 
     def __str__(self):

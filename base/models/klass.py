@@ -99,7 +99,7 @@ class NPCClassAbstract(models.Model):
 
     @property
     def power_source(self) -> PowerSourceIntEnum:
-        return PowerSourceIntEnum(self.klass.power_source)
+        return PowerSourceIntEnum[self.klass.power_source]  # type: ignore
 
     @property
     def role(self) -> str:

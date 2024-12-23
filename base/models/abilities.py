@@ -8,15 +8,11 @@ from base.objects.abilities import Abilities
 
 
 class Ability(models.Model):
-    class Meta:
-        ordering = ('ordering',)
-
     title = models.CharField(
         choices=AbilityEnum.generate_choices(),
         max_length=AbilityEnum.max_length(),
-        primary_key=True,
+        unique=True,
     )
-    ordering = models.PositiveSmallIntegerField(default=1)
 
     def __str__(self) -> str:
         return self.get_title_display()
