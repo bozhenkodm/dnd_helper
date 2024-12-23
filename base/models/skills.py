@@ -1,6 +1,7 @@
 from dataclasses import asdict
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from base.constants.constants import NPCClassEnum, SkillEnum
 from base.managers import SkillQuerySet
@@ -9,25 +10,38 @@ from base.objects.skills import Skills
 
 
 class Skill(models.Model):
-    class Meta:
-        ordering = ('ordering',)
-
     objects = SkillQuerySet.as_manager()
 
     title = models.CharField(
         choices=SkillEnum.generate_choices(),
         max_length=SkillEnum.max_length(),
-        primary_key=True,
+        unique=True,
     )
-    based_on = models.ForeignKey(Ability, on_delete=models.CASCADE, null=True)
-    ordering = models.PositiveSmallIntegerField(default=1)
+    based_on = models.ForeignKey(Ability, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.get_title_display()
 
 
-class NPCSkillMixin:
+class NPCSkillAbstract(models.Model):
+    class Meta:
+        abstract = True
+
     half_level: int
+
+    trained_skills = models.ManyToManyField(
+        Skill, verbose_name=_('Trained skills'), blank=True
+    )
+
+    @property
+    def all_trained_skills(self) -> list[SkillEnum]:
+        return [
+            SkillEnum(skill.title)  # type: ignore
+            for skill in self.klass.mandatory_skills.all()
+        ] + [
+            SkillEnum(skill.title)  # type: ignore
+            for skill in self.trained_skills.all()
+        ]
 
     @property
     def skill_mod_bonus(self) -> Skills:

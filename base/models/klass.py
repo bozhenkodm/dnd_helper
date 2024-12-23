@@ -48,7 +48,7 @@ class Class(ClassAbstract):
     )
     mandatory_skills = models.ManyToManyField(Skill, verbose_name=_('Mandatory skills'))
     trainable_skills = models.ManyToManyField(
-        Skill, verbose_name='Выборочно тренируемые навыки', related_name='classes'
+        Skill, verbose_name=_('Selective trainable skills'), related_name='classes'
     )
 
     def __str__(self):

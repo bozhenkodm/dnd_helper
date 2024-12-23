@@ -40,7 +40,7 @@ from base.models.magic_items import (
     NPCMagicItemAbstract,
 )
 from base.models.powers import Power, PowerMixin
-from base.models.skills import NPCSkillMixin, Skill
+from base.models.skills import NPCSkillAbstract
 from base.objects.dice import DiceRoll
 
 
@@ -489,7 +489,7 @@ class NPC(
     NPCDefenceMixin,
     NPCExperienceAbstract,
     NPCAbilityAbstract,
-    NPCSkillMixin,
+    NPCSkillAbstract,
     PowerMixin,
     NPCMagicItemAbstract,
     BonusMixin,
@@ -527,10 +527,6 @@ class NPC(
         verbose_name='Применять бонус за уровень?',
         help_text='Бонус за уровень уменьшает количество исцелений',
         default=True,
-    )
-
-    trained_skills = models.ManyToManyField(
-        Skill, verbose_name=_('Trained skills'), blank=True
     )
     trained_weapons = models.ManyToManyField(
         WeaponType,
@@ -594,16 +590,6 @@ class NPC(
         if self.functional_template:
             return f'{self.klass} ({self.functional_template})'
         return self.klass
-
-    @property
-    def all_trained_skills(self) -> list[SkillEnum]:
-        return [
-            SkillEnum(skill.title)  # type: ignore
-            for skill in self.klass.mandatory_skills.all()
-        ] + [
-            SkillEnum(skill.title)  # type: ignore
-            for skill in self.trained_skills.all()
-        ]
 
     @property
     def url(self):

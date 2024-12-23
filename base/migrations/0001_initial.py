@@ -1213,7 +1213,7 @@ class Migration(migrations.Migration):
             },
             bases=(
                 base.models.defences.NPCDefenceMixin,
-                base.models.skills.NPCSkillMixin,
+                base.models.skills.NPCSkillAbstract,
                 base.models.powers.PowerMixin,
                 models.Model,
                 base.models.bonuses.BonusMixin,

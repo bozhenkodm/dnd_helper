@@ -1,44 +1,44 @@
 [
 {
     "model": "base.ability",
-    "pk": "CHARISMA",
+    "pk": 1,
     "fields": {
-        "ordering": 6
+        "title": "STRENGTH"
     }
 },
 {
     "model": "base.ability",
-    "pk": "CONSTITUTION",
+    "pk": 2,
     "fields": {
-        "ordering": 2
+        "title": "CONSTITUTION"
     }
 },
 {
     "model": "base.ability",
-    "pk": "DEXTERITY",
+    "pk": 3,
     "fields": {
-        "ordering": 3
+        "title": "DEXTERITY"
     }
 },
 {
     "model": "base.ability",
-    "pk": "INTELLIGENCE",
+    "pk": 4,
     "fields": {
-        "ordering": 4
+        "title": "INTELLIGENCE"
     }
 },
 {
     "model": "base.ability",
-    "pk": "STRENGTH",
+    "pk": 5,
     "fields": {
-        "ordering": 1
+        "title": "WISDOM"
     }
 },
 {
     "model": "base.ability",
-    "pk": "WISDOM",
+    "pk": 6,
     "fields": {
-        "ordering": 5
+        "title": "CHARISMA"
     }
 }
 ]

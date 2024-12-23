@@ -1,138 +1,138 @@
 [
 {
     "model": "base.skill",
-    "pk": "ACROBATICS",
+    "pk": 1,
     "fields": {
-        "based_on": "DEXTERITY",
-        "ordering": 3
+        "title": "ACROBATICS",
+        "based_on": 3
     }
 },
 {
     "model": "base.skill",
-    "pk": "ARCANA",
+    "pk": 2,
     "fields": {
-        "based_on": "INTELLIGENCE",
-        "ordering": 11
+        "title": "ATHLETICS",
+        "based_on": 1
     }
 },
 {
     "model": "base.skill",
-    "pk": "ATHLETICS",
+    "pk": 3,
     "fields": {
-        "based_on": "STRENGTH",
-        "ordering": 4
+        "title": "PERCEPTION",
+        "based_on": 5
     }
 },
 {
     "model": "base.skill",
-    "pk": "BLUFF",
+    "pk": 4,
     "fields": {
-        "based_on": "CHARISMA",
-        "ordering": 12
+        "title": "THIEVERY",
+        "based_on": 3
     }
 },
 {
     "model": "base.skill",
-    "pk": "DIPLOMACY",
+    "pk": 5,
     "fields": {
-        "based_on": "CHARISMA",
-        "ordering": 13
+        "title": "ENDURANCE",
+        "based_on": 2
     }
 },
 {
     "model": "base.skill",
-    "pk": "DUNGEONEERING",
+    "pk": 6,
     "fields": {
-        "based_on": "WISDOM",
-        "ordering": 14
+        "title": "INTIMIDATE",
+        "based_on": 6
     }
 },
 {
     "model": "base.skill",
-    "pk": "ENDURANCE",
+    "pk": 7,
     "fields": {
-        "based_on": "CONSTITUTION",
-        "ordering": 7
+        "title": "STREETWISE",
+        "based_on": 6
     }
 },
 {
     "model": "base.skill",
-    "pk": "HEAL",
+    "pk": 8,
     "fields": {
-        "based_on": "WISDOM",
-        "ordering": 19
+        "title": "HISTORY",
+        "based_on": 4
     }
 },
 {
     "model": "base.skill",
-    "pk": "HISTORY",
+    "pk": 9,
     "fields": {
-        "based_on": "INTELLIGENCE",
-        "ordering": 10
+        "title": "ARCANA",
+        "based_on": 4
     }
 },
 {
     "model": "base.skill",
-    "pk": "INSIGHT",
+    "pk": 10,
     "fields": {
-        "based_on": "WISDOM",
-        "ordering": 16
+        "title": "BLUFF",
+        "based_on": 6
     }
 },
 {
     "model": "base.skill",
-    "pk": "INTIMIDATE",
+    "pk": 11,
     "fields": {
-        "based_on": "CHARISMA",
-        "ordering": 8
+        "title": "DIPLOMACY",
+        "based_on": 6
     }
 },
 {
     "model": "base.skill",
-    "pk": "NATURE",
+    "pk": 12,
     "fields": {
-        "based_on": "WISDOM",
-        "ordering": 15
+        "title": "DUNGEONEERING",
+        "based_on": 5
     }
 },
 {
     "model": "base.skill",
-    "pk": "PERCEPTION",
+    "pk": 13,
     "fields": {
-        "based_on": "WISDOM",
-        "ordering": 5
+        "title": "NATURE",
+        "based_on": 5
     }
 },
 {
     "model": "base.skill",
-    "pk": "RELIGION",
+    "pk": 14,
     "fields": {
-        "based_on": "INTELLIGENCE",
-        "ordering": 17
+        "title": "INSIGHT",
+        "based_on": 5
     }
 },
 {
     "model": "base.skill",
-    "pk": "STEALTH",
+    "pk": 15,
     "fields": {
-        "based_on": "DEXTERITY",
-        "ordering": 18
+        "title": "RELIGION",
+        "based_on": 4
     }
 },
 {
     "model": "base.skill",
-    "pk": "STREETWISE",
+    "pk": 16,
     "fields": {
-        "based_on": "CHARISMA",
-        "ordering": 9
+        "title": "STEALTH",
+        "based_on": 3
     }
 },
 {
     "model": "base.skill",
-    "pk": "THIEVERY",
+    "pk": 17,
     "fields": {
-        "based_on": "DEXTERITY",
-        "ordering": 6
+        "title": "HEAL",
+        "based_on": 5
     }
 }
 ]
