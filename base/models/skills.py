@@ -18,6 +18,7 @@ class Skill(models.Model):
         unique=True,
     )
     based_on = models.ForeignKey(Ability, on_delete=models.CASCADE)
+    is_penalty_applied = models.BooleanField(default=False)
 
     def __str__(self):
         return self.get_title_display()

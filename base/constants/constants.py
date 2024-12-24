@@ -471,4 +471,5 @@ MODEL_NAME_TO_NPC_FIELD = {
     'paragonpath': 'paragon_path',
     'power': 'powers',
     'feat': 'feats',
+    'skill': 'trained_skills',
 }

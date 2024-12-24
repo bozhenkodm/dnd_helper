@@ -26,6 +26,7 @@ from base.admin.forms import (
     MagicWeaponTypeForm,
     NPCModelForm,
     ParagonPathForm,
+    PropertiesConditionForm,
     WeaponForm,
 )
 from base.constants.constants import (
@@ -45,7 +46,12 @@ from base.constants.constants import (
 )
 from base.models import Race
 from base.models.bonuses import Bonus
-from base.models.condition import Condition, Constraint, PropertiesCondition
+from base.models.condition import (
+    AvailabilityCondition,
+    Condition,
+    Constraint,
+    PropertiesCondition,
+)
 from base.models.encounters import Combatants, CombatantsPC
 from base.models.klass import Class
 from base.models.magic_items import (
@@ -173,10 +179,12 @@ class ClassAdmin(admin.ModelAdmin):
         # 'role',
     )
     fields = readonly_fields + (
+        'default_feats',
         'fortitude',
         'reflex',
         'will',
     )
+    autocomplete_fields = ('default_feats',)
     list_filter = ('power_source', 'role')
     list_display = ('name_display',)
     inlines = (BonusInline,)
@@ -238,6 +246,7 @@ class SubclassAdmin(admin.ModelAdmin):
     ordering = ('klass__name_display', 'subclass_id', 'name')
     list_filter = ('klass',)
     list_display = ('__str__', 'klass')
+    autocomplete_fields = ('default_feats',)
     inlines = (BonusInline,)
 
     def get_queryset(self, request):
@@ -1201,11 +1210,16 @@ class ConditionInline(admin.TabularInline):
 
 class PropertiesConditionInline(admin.TabularInline):
     model = PropertiesCondition
+    form = PropertiesConditionForm
+
+
+class AvailabilityConditionInline(admin.TabularInline):
+    model = AvailabilityCondition
 
 
 class ConstraintAdmin(admin.ModelAdmin):
     form = ConstraintForm
-    inlines = (ConditionInline, PropertiesConditionInline)
+    inlines = (ConditionInline, PropertiesConditionInline, AvailabilityConditionInline)
     list_filter = ('content_type',)
 
     @atomic
@@ -1221,7 +1235,7 @@ class FeatAdmin(admin.ModelAdmin):
     list_display = ('name', 'min_level', 'text')
     list_editable = ('min_level',)
     search_fields = ('name', 'min_level', 'text')
-    ordering = ('min_level', 'name')
+    # ordering = ('min_level', 'name')
     save_on_top = True
     form = FeatForm
     fields = (
@@ -1229,7 +1243,7 @@ class FeatAdmin(admin.ModelAdmin):
         'text',
         'race',
         ('klass', 'subclass', 'power_source'),
-        # 'trained_skills',
+        'trained_skills',
         ('strength', 'constitution', 'dexterity'),
         ('intelligence', 'wisdom', 'charisma'),
     )
@@ -1242,7 +1256,7 @@ class FeatAdmin(admin.ModelAdmin):
                 form.cleaned_data.get('subclass'),
                 form.cleaned_data.get('power_source'),
                 form.cleaned_data.get('race'),
-                # form.cleaned_data.get('trained_skills'),
+                form.cleaned_data.get('trained_skills'),
                 form.cleaned_data.get('strength'),
                 form.cleaned_data.get('constitution'),
                 form.cleaned_data.get('dexterity'),
@@ -1259,12 +1273,10 @@ class FeatAdmin(admin.ModelAdmin):
                         constraint=constraint, condition=condition_value
                     )
                     condition.save()
-            # if skills := form.cleaned_data.get('trained_skills'):
-            #     for skill in skills:
-            #         condition = Condition(
-            #             constraint=constraint, condition=skill
-            #         )
-            #         condition.save()
+            if skills := form.cleaned_data.get('trained_skills'):
+                for skill in skills:
+                    condition = Condition(constraint=constraint, condition=skill)
+                    condition.save()
             for field in (
                 'strength',
                 'constitution',

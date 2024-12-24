@@ -30,7 +30,7 @@ from base.models.abstract import ConstraintAbstract
 from base.models.bonuses import BonusMixin
 from base.models.defences import NPCDefenceMixin
 from base.models.experience import NPCExperienceAbstract
-from base.models.feats import Feat
+from base.models.feats import NPCFeatAbstract
 from base.models.klass import Class, NPCClassAbstract
 from base.models.magic_items import (
     ItemAbstract,
@@ -64,7 +64,6 @@ class ArmorType(models.Model):
     minimal_enhancement = models.SmallIntegerField(
         verbose_name=_('Minimal enhancement'), default=0
     )
-    # TODO replace with bonus model logic when implemented
     fortitude_bonus = models.PositiveSmallIntegerField(
         verbose_name=_('Fortitude bonus'), default=0
     )
@@ -492,6 +491,7 @@ class NPC(
     PowerMixin,
     NPCMagicItemAbstract,
     BonusMixin,
+    NPCFeatAbstract,
 ):
     class Meta:
         verbose_name = 'NPC'
@@ -510,7 +510,7 @@ class NPC(
         blank=True,
     )
     paragon_path = models.ForeignKey(
-        'base.ParagonPath',
+        ParagonPath,
         verbose_name=_('Paragon path'),
         on_delete=models.CASCADE,
         null=True,
@@ -526,12 +526,6 @@ class NPC(
         verbose_name='Применять бонус за уровень?',
         help_text='Бонус за уровень уменьшает количество исцелений',
         default=True,
-    )
-    trained_weapons = models.ManyToManyField(
-        WeaponType,
-        blank=True,
-        verbose_name=_('Trained weapon'),
-        help_text=_('Weapon training in addition to training by race and class'),
     )
 
     armor = models.ForeignKey(
@@ -576,7 +570,6 @@ class NPC(
     )
 
     powers = models.ManyToManyField(Power, blank=True, verbose_name=_('Powers'))
-    feats = models.ManyToManyField(Feat, blank=True, verbose_name=_('Feats'))
 
     def __str__(self):
         # TODO localization
@@ -617,17 +610,6 @@ class NPC(
         """NPC bonus to attacks, defences and damage"""
         if self.is_bonus_applied:
             return self._magic_threshold * 2 + 1
-        return 0
-
-    @property
-    def class_hit_points_bonus(self) -> int:
-        # TODO add default feats to class and subclass
-        #  and remove this method
-        if (
-            self.klass.name == NPCClassEnum.RANGER
-            and self.subclass.slug == 'TWO_HANDED'
-        ):
-            return (self._tier + 1) * 5
         return 0
 
     @property
@@ -795,17 +777,6 @@ class NPC(
     @property
     def inventory_text(self):
         return map(str, self.items)
-
-    @property
-    def feats_count(self) -> int:
-        return self.feats.count() + self.trained_weapons.count()
-
-    @property
-    def max_feats_number(self) -> int:
-        result = self.half_level + self._tier + 1
-        if self.race.name == NPCRaceEnum.HUMAN:
-            result += 1
-        return result
 
     def powers_calculated(self) -> Sequence[dict]:
         """

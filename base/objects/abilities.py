@@ -1,4 +1,4 @@
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 
 from base.constants.constants import AbilityEnum
 
@@ -21,14 +21,6 @@ class Abilities:
             wisdom=self.wisdom + other.wisdom,
             charisma=self.charisma + other.charisma,
         )
-
-    @property
-    def enum_objects(self) -> list[AbilityEnum]:
-        return [
-            AbilityEnum[ability_name.upper()]
-            for ability_name, value in asdict(self).items()
-            if value
-        ]
 
     @classmethod
     def init_with_const(cls, *abilities: AbilityEnum, value: int) -> "Abilities":

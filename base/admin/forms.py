@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from base.constants.constants import (
     MagicItemSlot,
     NPCClassEnum,
+    NPCClassProperties,
     NPCRaceEnum,
     PowerSourceIntEnum,
     SexEnum,
@@ -17,7 +18,7 @@ from base.constants.constants import (
 )
 from base.models import NPC
 from base.models.abilities import Ability
-from base.models.condition import Condition, Constraint
+from base.models.condition import Condition, Constraint, PropertiesCondition
 from base.models.feats import Feat
 from base.models.klass import Class, Subclass
 from base.models.magic_items import (
@@ -397,6 +398,21 @@ class ConditionForm(forms.ModelForm):
             )
 
 
+class PropertiesConditionForm(forms.ModelForm):
+    class Meta:
+        model = PropertiesCondition
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.id and self.instance.type == NPCClassProperties.POWER_SOURCE:
+            self.fields['value'] = forms.TypedChoiceField(
+                choices=PowerSourceIntEnum.generate_choices(zero_item=(0, '---------')),
+                label=_('Value'),
+                coerce=int,
+            )
+
+
 class FeatForm(forms.ModelForm):
     class Meta:
         model = Feat
@@ -413,11 +429,11 @@ class FeatForm(forms.ModelForm):
     subclass = forms.ModelChoiceField(
         queryset=Subclass.objects.all(), required=False, label=_('Subclass')
     )
-    # trained_skills = forms.ModelMultipleChoiceField(
-    #     queryset=Skill.objects.order_by('ordering'),
-    #     required=False, label=_('Trained skills'),
-    #     # widget=forms.CheckboxSelectMultiple
-    # )
+    trained_skills = forms.ModelMultipleChoiceField(
+        queryset=Skill.objects.all(),
+        required=False,
+        label=_('Trained skills'),
+    )
 
     strength = forms.IntegerField(required=False, label=_('Strength'))
     constitution = forms.IntegerField(required=False, label=_('Constitution'))

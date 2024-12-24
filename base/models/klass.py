@@ -50,6 +50,9 @@ class Class(ClassAbstract):
     trainable_skills = models.ManyToManyField(
         Skill, verbose_name=_('Selective trainable skills'), related_name='classes'
     )
+    default_feats = models.ManyToManyField(
+        'base.Feat', verbose_name=_('Default feats'), blank=True
+    )
 
     def __str__(self):
         return self.name_display
@@ -73,6 +76,9 @@ class Subclass(ClassAbstract):
     slug = models.CharField(verbose_name='Slug', max_length=40)
     subclass_id = models.PositiveSmallIntegerField(
         verbose_name=_('Subclass id'), default=0
+    )
+    default_feats = models.ManyToManyField(
+        'base.Feat', verbose_name=_('Default feats'), blank=True
     )
 
     def __str__(self):

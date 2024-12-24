@@ -49,9 +49,6 @@ class ClassAbstract(models.Model):
         null=True,
         blank=True,
     )
-    default_feats = models.ManyToManyField(
-        'base.Feat', verbose_name=_('Default feats'), blank=True
-    )
 
 
 class ConstraintAbstract(models.Model):

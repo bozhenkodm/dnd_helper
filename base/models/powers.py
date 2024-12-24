@@ -789,6 +789,7 @@ class PowerMixin:
             (
                 models.Q(power__id__in=(p.id for p in powers))
                 | models.Q(feat__id__in=self.feats.all())
+                | models.Q(feat__id__in=self.klass.default_feats.all())
             )
             & models.Q(min_level__lte=self.level)
         )
@@ -797,7 +798,8 @@ class PowerMixin:
         self,
         *bonus_types: AbilityEnum | SkillEnum | DefenceTypeEnum | NPCOtherProperties,
     ) -> dict[AbilityEnum | SkillEnum | DefenceTypeEnum | NPCOtherProperties, int]:
-        # TODO refactor query here and in self.bonuses
+        # TODO refactor query here and in self.get_power_bonuses
+        # TODO add cache with refresh on open npc page
         result = {}
         for bonus_type in bonus_types:
             bonuses = defaultdict(list)

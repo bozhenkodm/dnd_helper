@@ -1,4 +1,4 @@
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 
 from base.constants.constants import SkillEnum
 
@@ -90,16 +90,3 @@ class Skills:
     @classmethod
     def init_with_const(cls, *skills: SkillEnum, value: int) -> "Skills":
         return Skills(**{skill.lvalue: value for skill in skills})
-
-    @property
-    def enum_objects(self) -> list[SkillEnum]:
-        return [
-            SkillEnum[skill_name.upper()]
-            for skill_name, value in asdict(self).items()
-            if value
-        ]
-
-    def display_non_zero(self) -> str:
-        return ', '.join(
-            (obj.description for obj in self.enum_objects)  # type: ignore[attr-defined]
-        )
