@@ -7,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
 
 from base.constants.constants import (
+    MODEL_NAME_TO_NPC_FIELD,
     AbilityEnum,
     ArmamentSlot,
     ArmorTypeIntEnum,
@@ -15,7 +16,7 @@ from base.constants.constants import (
     PowerSourceIntEnum,
     ShieldTypeIntEnum,
     WeaponCategoryIntEnum,
-    WeaponGroupEnum, MODEL_NAME_TO_NPC_FIELD,
+    WeaponGroupEnum,
 )
 from base.models.abstract import ClassAbstract
 from base.models.models import WeaponType

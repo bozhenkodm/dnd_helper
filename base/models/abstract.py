@@ -57,7 +57,6 @@ class ConstraintAbstract(models.Model):
 
     constraints = GenericRelation("base.Constraint")
 
-
     @classmethod
     def get_ids_for_npc(cls, npc, initial_query=None):
         ids = set()
