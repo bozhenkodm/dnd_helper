@@ -103,8 +103,28 @@ class ArmamentCondition(models.Model):
 
 class AvailabilityCondition(ClassAbstract):
     constraint = models.ForeignKey(
-        Constraint, on_delete=models.CASCADE, related_name='availability_condition'
+        Constraint, on_delete=models.CASCADE, related_name='availability_conditions'
     )
+
+    def fits(self, npc) -> bool:
+        if self.armor_types and not set(npc.available_armor_types) & set(
+            self.armor_types
+        ):
+            return False
+        if self.shields and not set(npc.available_shield_types) & set(self.shields):
+            return False
+        if self.weapon_categories and not set(npc.available_weapon_categories) & set(
+            self.weapon_categories
+        ):
+            return False
+        if self.weapon_types.count() and not (
+            set(npc.klass.weapon_types.values_list('category', flat=True).distinct())
+            & set(self.weapon_categories)
+            or npc.klass.weapon_types.intersection(self.weapon_types.all()).count()
+        ):
+            return False
+
+        return True
 
 
 class WeaponState(models.Model):

@@ -89,6 +89,10 @@ class ConstraintAbstract(models.Model):
                     if getattr(npc, condition.type.lower()) < condition.value:
                         is_fit = False
                         break
+                for condition in constraint.availability_conditions.all():
+                    if not condition.fits(npc):
+                        is_fit = False
+                        break
                 if is_fit:
                     ids.add(item.id)
                     break

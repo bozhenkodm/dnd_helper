@@ -1215,6 +1215,7 @@ class PropertiesConditionInline(admin.TabularInline):
 
 class AvailabilityConditionInline(admin.TabularInline):
     model = AvailabilityCondition
+    extra = 0
 
 
 class ConstraintAdmin(admin.ModelAdmin):
@@ -1235,7 +1236,7 @@ class FeatAdmin(admin.ModelAdmin):
     list_display = ('name', 'min_level', 'text')
     list_editable = ('min_level',)
     search_fields = ('name', 'min_level', 'text')
-    # ordering = ('min_level', 'name')
+    ordering = ('min_level', 'name')
     save_on_top = True
     form = FeatForm
     fields = (
@@ -1244,6 +1245,8 @@ class FeatAdmin(admin.ModelAdmin):
         'race',
         ('klass', 'subclass', 'power_source'),
         'trained_skills',
+        ('weapon_categories', 'weapon_types'),
+        ('armor_types', 'shields'),
         ('strength', 'constitution', 'dexterity'),
         ('intelligence', 'wisdom', 'charisma'),
     )
@@ -1257,6 +1260,10 @@ class FeatAdmin(admin.ModelAdmin):
                 form.cleaned_data.get('power_source'),
                 form.cleaned_data.get('race'),
                 form.cleaned_data.get('trained_skills'),
+                form.cleaned_data.get('weapon_categories'),
+                form.cleaned_data.get('weapon_types'),
+                form.cleaned_data.get('armor_types'),
+                form.cleaned_data.get('shields'),
                 form.cleaned_data.get('strength'),
                 form.cleaned_data.get('constitution'),
                 form.cleaned_data.get('dexterity'),
@@ -1277,6 +1284,23 @@ class FeatAdmin(admin.ModelAdmin):
                 for skill in skills:
                     condition = Condition(constraint=constraint, condition=skill)
                     condition.save()
+            if any(
+                (
+                    form.cleaned_data.get('weapon_categories'),
+                    form.cleaned_data.get('weapon_types'),
+                    form.cleaned_data.get('armor_types'),
+                    form.cleaned_data.get('shields'),
+                )
+            ):
+                condition = AvailabilityCondition(
+                    weapon_categories=form.cleaned_data.get('weapon_categories'),
+                    armor_types=form.cleaned_data.get('armor_types'),
+                    shields=form.cleaned_data.get('shields'),
+                    constraint=constraint,
+                )
+                condition.save()
+                condition.weapon_types.set(form.cleaned_data.get('weapon_types'))
+
             for field in (
                 'strength',
                 'constitution',

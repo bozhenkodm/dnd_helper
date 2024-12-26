@@ -5,8 +5,10 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from multiselectfield import MultiSelectFormField
 
 from base.constants.constants import (
+    ArmorTypeIntEnum,
     MagicItemSlot,
     NPCClassEnum,
     NPCClassProperties,
@@ -14,6 +16,7 @@ from base.constants.constants import (
     PowerSourceIntEnum,
     SexEnum,
     ShieldTypeIntEnum,
+    WeaponCategoryIntEnum,
     WeaponHandednessEnum,
 )
 from base.models import NPC
@@ -35,7 +38,7 @@ from base.models.magic_items import (
     SimpleMagicItem,
     WaistSlotItem,
 )
-from base.models.models import ParagonPath, Race, Weapon
+from base.models.models import ParagonPath, Race, Weapon, WeaponType
 from base.models.powers import Power
 from base.models.skills import Skill
 
@@ -433,6 +436,7 @@ class FeatForm(forms.ModelForm):
         queryset=Skill.objects.all(),
         required=False,
         label=_('Trained skills'),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'radiolist inline'}),
     )
 
     strength = forms.IntegerField(required=False, label=_('Strength'))
@@ -446,4 +450,30 @@ class FeatForm(forms.ModelForm):
         coerce=int,
         label=_('Power source'),
         required=False,
+    )
+
+    weapon_categories = MultiSelectFormField(
+        flat_choices=WeaponCategoryIntEnum.generate_choices(),
+        choices=WeaponCategoryIntEnum.generate_choices(),
+        required=False,
+        label=_('Weapon categories'),
+    )
+    weapon_types = forms.ModelMultipleChoiceField(
+        queryset=WeaponType.objects.all(), required=False, label=_('Weapon types')
+    )
+    armor_types = MultiSelectFormField(
+        flat_choices=ArmorTypeIntEnum.generate_choices(),
+        choices=ArmorTypeIntEnum.generate_choices(),
+        required=False,
+        label=_('Armor types'),
+    )
+    shields = MultiSelectFormField(
+        flat_choices=ShieldTypeIntEnum.generate_choices(
+            condition=lambda x: x != ShieldTypeIntEnum.NONE
+        ),
+        choices=ShieldTypeIntEnum.generate_choices(
+            condition=lambda x: x != ShieldTypeIntEnum.NONE
+        ),
+        required=False,
+        label=_('Shield types'),
     )

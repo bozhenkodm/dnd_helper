@@ -87,11 +87,10 @@ class NPCSkillAbstract(models.Model):
         )
         penalty = Skills.init_with_const(
             *(
-                SkillEnum.ACROBATICS,
-                SkillEnum.ATHLETICS,
-                SkillEnum.THIEVERY,
-                SkillEnum.ENDURANCE,
-                SkillEnum.STEALTH,
+                SkillEnum[s]
+                for s in Skill.objects.filter(is_penalty_applied=True).values_list(
+                    'title', flat=True
+                )
             ),
             value=armor_skill_penalty + shield_skill_penalty,
         )
