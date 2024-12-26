@@ -23,6 +23,7 @@ mypy = "^1.0"
 django-stubs = "^5.0.0"
 pytest = "^8"
 pytest-django = "^4"
+vulture = "^2"
 
 [tool.black]
 include = '\.py$'

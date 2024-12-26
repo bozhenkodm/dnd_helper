@@ -190,13 +190,6 @@ class ShieldTypeIntEnum(IntDescriptionEnum):
             return 2
         return 0
 
-    @classmethod
-    def get_by_value(cls, value) -> 'ShieldTypeIntEnum':
-        for item in cls:
-            if item.value == value:
-                return item
-        raise ValueError('Wrong shield')
-
 
 class WeaponGroupEnum(BaseNameValueDescriptionEnum):
     # Melee
@@ -254,9 +247,6 @@ class WeaponHandednessEnum(BaseNameValueDescriptionEnum):
     # (with +1 to damage, unless user is small)
     TWO = auto(), 'Двуручное'
     FREE = auto(), 'Не занимает руки'  # ki and symbols of faith
-
-    def can_be_hold_in_one_hand(self) -> bool:
-        return self in (self.OFF_HAND, self.ONE, self.VERSATILE)
 
 
 class PowerSourceEnum(BaseNameValueDescriptionEnum):
@@ -384,14 +374,6 @@ class PowerRangeTypeEnum(BaseNameValueDescriptionEnum):
             return 'Все существа в волне'
         return '----------'
 
-    @property
-    def is_melee_weapon(self):
-        return self in (self.MELEE_WEAPON, self.MELEE_RANGED_WEAPON)
-
-    @property
-    def is_ranged_weapon(self):
-        return self in (self.RANGED_WEAPON, self.MELEE_RANGED_WEAPON)
-
 
 class PowerPropertyTitle(BaseNameValueDescriptionEnum):
     ATTACK = auto(), 'Атака'
@@ -457,6 +439,7 @@ class NPCOtherProperties(BaseNameValueDescriptionEnum):
 
 class NPCClassProperties(BaseNameValueDescriptionEnum):
     POWER_SOURCE = auto(), 'Источник силы'
+    ROLE = auto(), 'Роль'
 
 
 MODEL_NAME_TO_NPC_FIELD = {

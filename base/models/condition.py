@@ -10,12 +10,14 @@ from base.constants.constants import (
     MODEL_NAME_TO_NPC_FIELD,
     AbilityEnum,
     ArmorTypeIntEnum,
+    ClassRoleIntEnum,
     NPCClassProperties,
     NPCOtherProperties,
     PowerSourceIntEnum,
     ShieldTypeIntEnum,
     WeaponCategoryIntEnum,
     WeaponGroupEnum,
+    WeaponHandednessEnum,
 )
 from base.models.abstract import ClassAbstract
 from base.models.models import WeaponType
@@ -118,59 +120,6 @@ class AvailabilityCondition(ClassAbstract):
         return True
 
 
-class WeaponState(models.Model):
-    is_empty = models.BooleanField(_('Is hand empty'), default=False)
-    is_off_hand = models.BooleanField(default=False)
-    category = MultiSelectField(
-        verbose_name=_('Primary hand category'),
-        choices=WeaponCategoryIntEnum.generate_choices(),
-        null=True,
-    )
-    group = MultiSelectField(
-        verbose_name=_('Primary hand group'),
-        choices=WeaponGroupEnum.generate_choices(),
-        null=True,
-    )
-    type = models.ManyToManyField(
-        WeaponType,
-        verbose_name=_('Primary hand'),
-        blank=True,
-        related_name='primary_hand_conditions',
-    )
-
-
-class ItemCondition(models.Model):
-    constraint = models.ForeignKey(
-        Constraint, on_delete=models.CASCADE, related_name='item_condition'
-    )
-    primary_hand = models.ForeignKey(
-        WeaponState,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='primary_hands',
-    )
-    secondary_hand = models.ForeignKey(
-        WeaponState,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='secondary_hands',
-    )
-    shield = MultiSelectField(
-        verbose_name=_('Shield type'),
-        choices=ShieldTypeIntEnum.generate_choices(),
-        null=True,
-        blank=True,
-    )
-    armor = MultiSelectField(
-        verbose_name=_('Armor type'),
-        choices=ArmorTypeIntEnum.generate_choices(),
-        null=True,
-        blank=True,
-    )
-
-
 class PropertiesCondition(models.Model):
     constraint = models.ForeignKey(
         Constraint, on_delete=models.CASCADE, related_name='scalar_conditions'
@@ -204,7 +153,65 @@ class PropertiesCondition(models.Model):
     def value_display(self) -> str:
         if self.type == NPCClassProperties.POWER_SOURCE:
             return PowerSourceIntEnum(self.value).description
+        if self.type == NPCClassProperties.ROLE:
+            return ClassRoleIntEnum(self.value).description
         return str(self.value)
 
     def fits(self, npc) -> bool:
         return getattr(npc, self.type.lower()) < self.value
+
+
+class WeaponState(models.Model):
+    is_empty = models.BooleanField(_('Is hand empty'), default=False)
+    handedness = models.CharField(
+        choices=WeaponHandednessEnum.generate_choices(),
+        max_length=WeaponHandednessEnum.max_length(),
+    )
+    category = MultiSelectField(
+        verbose_name=_('Weapon category'),
+        choices=WeaponCategoryIntEnum.generate_choices(),
+        null=True,
+    )
+    group = MultiSelectField(
+        verbose_name=_('Weapon group'),
+        choices=WeaponGroupEnum.generate_choices(),
+        null=True,
+    )
+    type = models.ManyToManyField(
+        WeaponType,
+        verbose_name=_('Weapon type'),
+        blank=True,
+        related_name='primary_hand_conditions',
+    )
+
+
+class ItemStateCondition(models.Model):
+    constraint = models.ForeignKey(
+        Constraint, on_delete=models.CASCADE, related_name='item_condition'
+    )
+    primary_hand = models.ForeignKey(
+        WeaponState,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='primary_hands',
+    )
+    secondary_hand = models.ForeignKey(
+        WeaponState,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='secondary_hands',
+    )
+    shield = MultiSelectField(
+        verbose_name=_('Shield type'),
+        choices=ShieldTypeIntEnum.generate_choices(),
+        null=True,
+        blank=True,
+    )
+    armor = MultiSelectField(
+        verbose_name=_('Armor type'),
+        choices=ArmorTypeIntEnum.generate_choices(),
+        null=True,
+        blank=True,
+    )
