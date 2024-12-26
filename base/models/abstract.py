@@ -57,12 +57,6 @@ class ConstraintAbstract(models.Model):
 
     constraints = GenericRelation("base.Constraint")
 
-    @staticmethod
-    def _field_fits(npc, field_name, condition) -> bool:
-        field = getattr(npc, field_name)
-        if isinstance(field, models.Manager):  # checking if it is a many to many
-            return (condition.condition in field.all()) != condition.negated
-        return (field == condition.condition) != condition.negated
 
     @classmethod
     def get_ids_for_npc(cls, npc, initial_query=None):
@@ -78,15 +72,11 @@ class ConstraintAbstract(models.Model):
             for constraint in item.constraints.all():
                 is_fit = True
                 for condition in constraint.conditions.all():
-                    field_name = MODEL_NAME_TO_NPC_FIELD.get(
-                        condition.content_type.model,
-                        condition.content_type.model,
-                    )
-                    if not cls._field_fits(npc, field_name, condition):
+                    if not condition.fits(npc):
                         is_fit = False
                         break
                 for condition in constraint.scalar_conditions.all():
-                    if getattr(npc, condition.type.lower()) < condition.value:
+                    if not condition.fits(npc):
                         is_fit = False
                         break
                 for condition in constraint.availability_conditions.all():

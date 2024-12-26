@@ -430,7 +430,9 @@ class FeatForm(forms.ModelForm):
         queryset=Class.objects.all(), required=False, label=_('Class')
     )
     subclass = forms.ModelChoiceField(
-        queryset=Subclass.objects.all(), required=False, label=_('Subclass')
+        queryset=Subclass.objects.filter(subclass_id__gt=0),
+        required=False,
+        label=_('Subclass'),
     )
     trained_skills = forms.ModelMultipleChoiceField(
         queryset=Skill.objects.all(),
@@ -459,7 +461,9 @@ class FeatForm(forms.ModelForm):
         label=_('Weapon categories'),
     )
     weapon_types = forms.ModelMultipleChoiceField(
-        queryset=WeaponType.objects.all(), required=False, label=_('Weapon types')
+        queryset=WeaponType.objects.filter(primary_end__isnull=True).order_by('name'),
+        required=False,
+        label=_('Weapon types'),
     )
     armor_types = MultiSelectFormField(
         flat_choices=ArmorTypeIntEnum.generate_choices(),

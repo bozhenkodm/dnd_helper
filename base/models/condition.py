@@ -15,7 +15,7 @@ from base.constants.constants import (
     PowerSourceIntEnum,
     ShieldTypeIntEnum,
     WeaponCategoryIntEnum,
-    WeaponGroupEnum,
+    WeaponGroupEnum, MODEL_NAME_TO_NPC_FIELD,
 )
 from base.models.abstract import ClassAbstract
 from base.models.models import WeaponType
@@ -73,6 +73,19 @@ class Condition(models.Model):
     object_id = models.PositiveIntegerField(default=0)
     condition = GenericForeignKey()
     negated = models.BooleanField(default=False)
+
+    def _field_fits(self, npc, field_name) -> bool:
+        field = getattr(npc, field_name)
+        if isinstance(field, models.Manager):  # checking if it is a many to many
+            return (self.condition in field.all()) != self.negated
+        return (field == self.condition) != self.negated
+
+    def fits(self, npc) -> bool:
+        field_name = MODEL_NAME_TO_NPC_FIELD.get(
+            self.content_type.model,
+            self.content_type.model,
+        )
+        return self._field_fits(npc, field_name)
 
 
 class ArmamentCondition(models.Model):
@@ -214,3 +227,6 @@ class PropertiesCondition(models.Model):
         if self.type == NPCClassProperties.POWER_SOURCE:
             return PowerSourceIntEnum(self.value).description
         return str(self.value)
+
+    def fits(self, npc) -> bool:
+        return getattr(npc, self.type.lower()) < self.value
