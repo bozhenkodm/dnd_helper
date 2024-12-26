@@ -4,7 +4,6 @@ from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
 
 from base.constants.constants import (
-    MODEL_NAME_TO_NPC_FIELD,
     ArmorTypeIntEnum,
     ShieldTypeIntEnum,
     WeaponCategoryIntEnum,
@@ -65,7 +64,7 @@ class ConstraintAbstract(models.Model):
         else:
             queryset = cls.objects.all()
         for item in queryset:
-            if not item.constraints.count():
+            if not item.constraints.all():
                 ids.add(item.id)
                 continue
             for constraint in item.constraints.all():

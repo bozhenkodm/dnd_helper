@@ -26,14 +26,14 @@ class Feat(ConstraintAbstract):
             else f'{self.name}, {self.min_level} уровень'
         )
         for constraint in self.constraints.all():
-            if constraint.conditions.count():
+            if constraint.conditions.all():
                 conditions.append(
                     ', '.join(
                         f'{condition.content_type}: {condition.condition}'
                         for condition in constraint.conditions.all()
                     )
                 )
-            if constraint.scalar_conditions.count():
+            if constraint.scalar_conditions.all():
                 conditions.append(
                     ', '.join(
                         f'{condition.get_type_display()}: {condition.value_display}'

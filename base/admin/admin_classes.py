@@ -564,7 +564,7 @@ class EncounterAdmin(admin.ModelAdmin):
 
     @admin.display(description='Страницы персонажей')
     def npc_links(self, obj):
-        if not obj.npcs.count():
+        if not obj.npcs.exists():
             return '-'
         return mark_safe(
             '<br>'.join(
@@ -1064,7 +1064,7 @@ class MagicItemTypeAdmin(MagicItemTypeAdminBase):
         for level in obj.level_range():
             if not SimpleMagicItem.objects.filter(
                 magic_item_type=obj, level=level
-            ).count():
+            ).exists():
                 magic_item = SimpleMagicItem(magic_item_type=obj, level=level)
                 magic_item.save()
 
@@ -1168,7 +1168,7 @@ class MagicArmItemTypeAdmin(MagicItemTypeAdminBase):
             for slot in slots:
                 if not ArmsSlotItem.objects.filter(
                     magic_item_type=obj, shield=slot, level=level
-                ).count():
+                ).exists():
                     magic_item = ArmsSlotItem(
                         magic_item_type=obj, shield=slot, level=level
                     )

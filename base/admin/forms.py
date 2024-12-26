@@ -55,9 +55,8 @@ class NPCModelForm(forms.ModelForm):
             self.fields['var_bonus_ability'].queryset = Ability.objects.filter(
                 races=self.instance.race
             )
-            self.fields['var_bonus_ability'].required = bool(
-                Ability.objects.filter(races=self.instance.race).count()
-            )
+            self.fields['var_bonus_ability'].required = Ability.objects.filter(races=self.instance.race).exists()
+
             self.fields['trained_skills'] = forms.ModelMultipleChoiceField(
                 queryset=Skill.objects.filter(classes=self.instance.klass),
                 widget=forms.CheckboxSelectMultiple,

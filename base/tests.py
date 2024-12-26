@@ -41,4 +41,4 @@ def test_exist_non_enhanced_weapon():
     for wt in WeaponType.objects.all():
         assert Weapon.objects.filter(
             weapon_type=wt, level=0
-        ).count(), f'{wt} has no weapon instance'
+        ).exists(), f'{wt} has no weapon instance'

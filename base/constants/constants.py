@@ -459,12 +459,6 @@ class NPCClassProperties(BaseNameValueDescriptionEnum):
     POWER_SOURCE = auto(), 'Источник силы'
 
 
-class ArmamentSlot(BaseNameValueDescriptionEnum):
-    PRIMARY = 'primary_hand', 'Основная рука'
-    SECONDARY = 'secondary_hand', 'Дополнительная рука'
-    NO = 'no_hand', 'Не занимает руки'
-
-
 MODEL_NAME_TO_NPC_FIELD = {
     'class': 'klass',
     'functionaltemplate': 'functional_template',

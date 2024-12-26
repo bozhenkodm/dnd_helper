@@ -1,6 +1,5 @@
 import operator
 import re
-from collections import defaultdict
 from typing import TYPE_CHECKING, Callable, Sequence
 
 from django.db import models
@@ -22,12 +21,10 @@ from base.constants.constants import (
     PowerPropertyTitle,
     PowerRangeTypeEnum,
     PowerVariables,
-    SkillEnum,
     WeaponHandednessEnum,
 )
 from base.exceptions import PowerInconsistent
 from base.managers import PowerQueryset
-from base.models.bonuses import Bonus
 from base.models.magic_items import ItemAbstract
 from base.objects.dice import DiceRoll
 from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay

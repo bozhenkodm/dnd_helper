@@ -156,6 +156,7 @@ class BonusMixin:
                 powers_query
                 | models.Q(feat__id__in=self.feats.all())
                 | models.Q(feat__id__in=self.klass.default_feats.all())
+                | models.Q(feat__id__in=self.subclass.default_feats.all())
             )
             & models.Q(min_level__lte=self.level)
         )

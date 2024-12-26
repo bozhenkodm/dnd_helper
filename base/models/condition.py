@@ -9,7 +9,6 @@ from multiselectfield import MultiSelectField
 from base.constants.constants import (
     MODEL_NAME_TO_NPC_FIELD,
     AbilityEnum,
-    ArmamentSlot,
     ArmorTypeIntEnum,
     NPCClassProperties,
     NPCOtherProperties,
@@ -89,32 +88,6 @@ class Condition(models.Model):
         return self._field_fits(npc, field_name)
 
 
-class ArmamentCondition(models.Model):
-    constraint = models.ForeignKey(Constraint, on_delete=models.CASCADE)
-    slot = models.CharField(
-        choices=ArmamentSlot.generate_choices(), max_length=ArmamentSlot.max_length()
-    )
-    weapon_groups = MultiSelectField(
-        verbose_name=_('Weapon group'),
-        choices=WeaponGroupEnum.generate_choices(),
-        null=True,
-        blank=True,
-    )
-    weapon_categories = MultiSelectField(
-        verbose_name=_('Weapon category'),
-        choices=WeaponCategoryIntEnum.generate_choices(),
-        null=True,
-        blank=True,
-    )
-    weapon_types = models.ManyToManyField(
-        "base.WeaponType",
-        verbose_name=_('Weapon type'),
-        related_name='magic_weapons_conditions',
-        blank=True,
-        limit_choices_to={'is_enhanceable': True},
-    )
-
-
 class AvailabilityCondition(ClassAbstract):
     constraint = models.ForeignKey(
         Constraint, on_delete=models.CASCADE, related_name='availability_conditions'
@@ -131,10 +104,14 @@ class AvailabilityCondition(ClassAbstract):
             self.weapon_categories
         ):
             return False
-        if self.weapon_types.count() and not (
+        if self.weapon_types.all() and not (
             set(npc.klass.weapon_types.values_list('category', flat=True).distinct())
             & set(self.weapon_categories)
             or npc.klass.weapon_types.intersection(self.weapon_types.all()).count()
+        ):
+            return False
+        if self.implement_types.all() and not (
+            npc.klass.implement_types.intersection(self.implement_types.all()).count()
         ):
             return False
 

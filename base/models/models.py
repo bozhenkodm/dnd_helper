@@ -147,7 +147,7 @@ class Armor(ItemAbstract):
             return
         if not cls.objects.filter(
             magic_item_type=magic_armor_type, armor_type=armor_type, level=level
-        ).count():
+        ).exists():
             magic_item = cls(
                 magic_item_type=magic_armor_type, armor_type=armor_type, level=level
             )
@@ -370,7 +370,7 @@ class Weapon(ItemAbstract):
     ):
         if not cls.objects.filter(
             magic_item_type=magic_weapon_type, weapon_type=weapon_type, level=level
-        ).count():
+        ).exists():
             magic_item = cls(
                 magic_item_type=magic_weapon_type, weapon_type=weapon_type, level=level
             )
@@ -741,7 +741,7 @@ class NPC(
 
     @staticmethod
     def _is_weapon_available_for_power(power: Power, weapon: Weapon) -> bool:
-        if not power.weapon_types.count():
+        if not power.weapon_types.all():
             return True
         return weapon.weapon_type in power.weapon_types.all()
 
