@@ -99,7 +99,7 @@ class NPCSkillAbstract(models.Model):
             + trained_skills
             + mandatory_skills
             + bonus_skills
-            - penalty
+            + penalty
             + self.skill_mod_bonus
         )
 

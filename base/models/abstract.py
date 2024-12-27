@@ -64,24 +64,36 @@ class ConstraintAbstract(models.Model):
         else:
             queryset = cls.objects.all()
         for item in queryset:
+            from base.models.feats import Feat
+
             if not item.constraints.all():
                 ids.add(item.id)
                 continue
             for constraint in item.constraints.all():
-                is_fit = True
+                if isinstance(item, Feat):
+                    print(item.name)
+                fits = True
                 for condition in constraint.conditions.all():
                     if not condition.fits(npc):
-                        is_fit = False
+                        if isinstance(item, Feat):
+                            print('1')
+                        fits = False
                         break
                 for condition in constraint.scalar_conditions.all():
                     if not condition.fits(npc):
-                        is_fit = False
+                        if isinstance(item, Feat):
+                            print('2')
+                        fits = False
                         break
                 for condition in constraint.availability_conditions.all():
                     if not condition.fits(npc):
-                        is_fit = False
+                        if isinstance(item, Feat):
+                            print('3')
+                        fits = False
                         break
-                if is_fit:
+                if fits:
                     ids.add(item.id)
                     break
+        # for feat in Feat.objects.filter(id__in=ids):
+        #     print(feat)
         return ids

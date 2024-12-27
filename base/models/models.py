@@ -106,11 +106,7 @@ class Armor(ItemAbstract):
 
     @property
     def armor_class(self) -> int:
-        return (
-            self.armor_type.base_armor_type
-            + self.armor_type.bonus_armor_class
-            + self.enhancement
-        )
+        return self.armor_type.armor_class + self.enhancement
 
     @property
     def speed_penalty(self):
@@ -677,7 +673,7 @@ class NPC(
             damage_modifier = self.con_mod
         if self.subclass.slug == 'STAR_PACT':
             damage_modifier = self.int_mod
-        return base_bonus + (+((self.level - 5) // 10) * 2 + 2 + damage_modifier)
+        return base_bonus + ((self.level - 5) // 10 * 2 + 2 + damage_modifier)
 
     @property
     def initiative(self) -> int:

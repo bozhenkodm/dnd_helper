@@ -177,6 +177,8 @@ class BonusMixin:
                 .union(self.subclass.bonuses.filter(bonus_type=bonus_type))
             ):
                 try:
+                    if bonus.feat and not bonus.feat.fits(self):
+                        continue
                     bonuses[bonus.source].append(
                         int(
                             self.parse_string(

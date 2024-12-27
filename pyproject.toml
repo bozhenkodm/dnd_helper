@@ -48,7 +48,8 @@ exclude = [
     "dist",
     "*/migrations",
     "settings.py",
-    "base/models/__init__.py"
+    "base/models/__init__.py",
+    "whitelist.py"
 ]
 ignore = ["W503", "E402"]
 

@@ -11,7 +11,7 @@ from base.constants.constants import (
     ArmorTypeIntEnum,
     MagicItemSlot,
     NPCClassEnum,
-    NPCClassProperties,
+    NPCOtherProperties,
     NPCRaceEnum,
     PowerSourceIntEnum,
     SexEnum,
@@ -409,7 +409,7 @@ class PropertiesConditionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance.id and self.instance.type == NPCClassProperties.POWER_SOURCE:
+        if self.instance.id and self.instance.type == NPCOtherProperties.POWER_SOURCE:
             self.fields['value'] = forms.TypedChoiceField(
                 choices=PowerSourceIntEnum.generate_choices(zero_item=(0, '---------')),
                 label=_('Value'),
@@ -434,6 +434,9 @@ class FeatForm(forms.ModelForm):
         queryset=Subclass.objects.filter(subclass_id__gt=0),
         required=False,
         label=_('Subclass'),
+    )
+    feat = forms.ModelChoiceField(
+        queryset=Feat.objects.all(), required=False, label=_('Feat')
     )
     trained_skills = forms.ModelMultipleChoiceField(
         queryset=Skill.objects.all(),

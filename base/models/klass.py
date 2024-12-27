@@ -116,14 +116,20 @@ class NPCClassAbstract(models.Model):
 
     @property
     def available_armor_types(self) -> list[int | ArmorTypeIntEnum]:
-        return list(set(self.klass.armor_types) | set(self.subclass.armor_types))
+        return list(
+            map(int, set(self.klass.armor_types) | set(self.subclass.armor_types))
+        )
 
     @property
     def available_shield_types(self) -> list[int | ShieldTypeIntEnum]:
-        return list(set(self.klass.shields) | set(self.subclass.shields))
+        return list(map(int, set(self.klass.shields) | set(self.subclass.shields)))
 
     @property
     def available_weapon_categories(self) -> list[int | WeaponCategoryIntEnum]:
         return list(
-            set(self.klass.weapon_categories) | set(self.subclass.weapon_categories)
+            map(
+                int,
+                set(self.klass.weapon_categories)
+                | set(self.subclass.weapon_categories),
+            )
         )

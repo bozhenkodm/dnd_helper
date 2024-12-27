@@ -1,7 +1,15 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from multiselectfield import MultiSelectField
 
-from base.constants.constants import NPCRaceEnum
+from base.constants.constants import (
+    ArmorTypeIntEnum,
+    NPCRaceEnum,
+    ShieldTypeIntEnum,
+    WeaponCategoryIntEnum,
+    WeaponGroupEnum,
+    WeaponHandednessEnum,
+)
 from base.models.abstract import ConstraintAbstract
 from base.objects.powers_output import PowerDisplay
 
@@ -40,10 +48,147 @@ class Feat(ConstraintAbstract):
                         for condition in constraint.scalar_conditions.all()
                     )
                 )
+            # TODO add availability_conditions
             constraints.append(', '.join(conditions))
         if not constraints:
             return f'{name}. {self.text}'
         return f'{name}. {_(" or ").join(constraints)}. {self.text}'
+
+    def fits(self, npc) -> bool:
+        for item_state in self.item_states.all():
+            if item_state.shield and str(npc.shield) not in item_state.shield:
+                return False
+            if (
+                item_state.armor
+                and str(npc.armor.armor_type.base_armor_type) not in item_state.armor
+            ):
+                return False
+            if not item_state.primary_hand_fits(npc):
+                return False
+            if not item_state.secondary_hand_fits(npc):
+                return False
+        return True
+
+
+class WeaponState(models.Model):
+    is_empty = models.BooleanField(_('Is hand empty?'), default=False, blank=True)
+    handedness = MultiSelectField(
+        choices=WeaponHandednessEnum.generate_choices(is_sorted=False),
+        null=True,
+        blank=True,
+    )
+    category = MultiSelectField(
+        verbose_name=_('Weapon category'),
+        choices=WeaponCategoryIntEnum.generate_choices(),
+        null=True,
+        blank=True,
+    )
+    group = MultiSelectField(
+        verbose_name=_('Weapon group'),
+        choices=WeaponGroupEnum.generate_choices(),
+        null=True,
+        blank=True,
+    )
+    type = models.ManyToManyField(
+        'base.WeaponType',
+        verbose_name=_('Weapon type'),
+        blank=True,
+        related_name='primary_hand_conditions',
+    )
+
+    def __str__(self):
+        if self.is_empty:
+            return 'Рука должна быть пустая'
+        result = []
+        if self.category:
+            result.append('Категория' + ': ' + str(self.category))
+        if self.group:
+            result.append('Группа' + ': ' + str(self.group))
+        if self.type.all():
+            result.append('Тип' + ': ' + ', '.join(str(wt) for wt in self.type.all()))
+        if not any((self.category, self.group, self.type.all())):
+            return 'Рука должна быть не пустая'
+        return '; '.join(result)
+
+
+class ItemState(models.Model):
+    feat = models.ForeignKey(Feat, on_delete=models.CASCADE, related_name='item_states')
+    primary_hand = models.ForeignKey(
+        WeaponState,
+        verbose_name=_('Primary hand'),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='primary_hands',
+    )
+    secondary_hand = models.ForeignKey(
+        WeaponState,
+        verbose_name=_('Secondary hand'),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='secondary_hands',
+    )
+    shield = MultiSelectField(
+        verbose_name=_('Shield type'),
+        choices=ShieldTypeIntEnum.generate_choices(),
+        null=True,
+        blank=True,
+    )
+    armor = MultiSelectField(
+        verbose_name=_('Armor type'),
+        choices=ArmorTypeIntEnum.generate_choices(),
+        null=True,
+        blank=True,
+    )
+
+    def primary_hand_fits(self, npc) -> bool:
+        if not self.primary_hand:
+            return True
+        if self.primary_hand.is_empty == bool(npc.primary_hand):
+            return False
+        if (
+            self.primary_hand.category
+            and str(npc.primary_hand.category) not in self.primary_hand.category
+        ):
+            return False
+        if self.primary_hand.group and not set(npc.primary_hand.group) & set(
+            self.primary_hand.group
+        ):
+            return False
+        if (
+            self.primary_hand.type.all()
+            and npc.primary_hand.weapon_type not in self.primary_hand.type.all()
+        ):
+            return False
+        return True
+
+    def secondary_hand_fits(self, npc) -> bool:
+        secondary_hand = npc.secondary_hand or (
+            npc.primary_hand.secondary_end
+            if hasattr(npc.primary_hand, 'secondary_end')
+            else None
+        )
+        if not self.secondary_hand:
+            return True
+        if self.secondary_hand.is_empty == bool(secondary_hand):
+            return False
+        if (
+            self.secondary_hand.category
+            and str(secondary_hand.category) not in self.secondary_hand.category
+        ):
+            return False
+        if (
+            self.secondary_hand.group
+            and str(secondary_hand.group) not in self.secondary_hand.group
+        ):
+            return False
+        if (
+            self.secondary_hand.type.all()
+            and secondary_hand.weapon_type not in self.secondary_hand.type.all()
+        ):
+            return False
+        return True
 
 
 class NPCFeatAbstract(models.Model):
@@ -78,6 +223,8 @@ class NPCFeatAbstract(models.Model):
         )
         feats: list[dict] = []
         for feat in feats_qs:
+            if not feat.fits(self):
+                continue
             feats.append(
                 PowerDisplay(
                     name=feat.name,

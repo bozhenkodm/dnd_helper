@@ -18,6 +18,7 @@ format:
 lint:
 	poetry run flake8
 	poetry run mypy .
+	#poetry run vulture .
 
 
 shell:

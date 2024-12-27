@@ -13,13 +13,7 @@ if TYPE_CHECKING:
     from base.models.models import FunctionalTemplate, Armor
     from base.models.klass import Class
 
-from base.constants.constants import (
-    ArmorTypeIntEnum,
-    DefenceTypeEnum,
-    NPCClassEnum,
-    ShieldTypeIntEnum,
-    WeaponHandednessEnum,
-)
+from base.constants.constants import DefenceTypeEnum, NPCClassEnum, ShieldTypeIntEnum
 
 INITIAL_DEFENCE_VALUE = 10
 
@@ -62,9 +56,6 @@ class NPCProtocol(Protocol):
     def _necklace_defence_bonus(self) -> int:
         pass
 
-    def _is_brawler_fighter_and_properly_armed(self) -> bool:
-        pass
-
 
 class NPCDefenceMixin:
     @property
@@ -75,7 +66,7 @@ class NPCDefenceMixin:
 
     @property
     def _shield_bonus(self: NPCProtocol) -> int:
-        if self.shield not in self.klass.shields:
+        if self.shield not in self.available_shield_types:
             return 0
         return self.shield.value
 
@@ -101,87 +92,22 @@ class NPCDefenceMixin:
             result = max(self.str_mod, result)
         return result
 
-    def _is_vampire_and_armored_properly(self) -> bool:
-        return (
-            self.klass.name == NPCClassEnum.VAMPIRE
-            and not self.shield
-            and (
-                not self.armor
-                or self.armor.armor_type.base_armor_type == ArmorTypeIntEnum.CLOTH
-            )
-        )
-
-    def _is_barbarian_and_armored_properly(self) -> bool:
-        return (
-            self.klass.name == NPCClassEnum.BARBARIAN
-            and not self.shield
-            and (not self.armor or self.armor.is_light)
-        )
-
-    def _is_brawler_fighter_and_properly_armed(self) -> bool:
-        # brawler fighter should have melee weapon in just one hand
-        if any(
-            (
-                self.klass.name != NPCClassEnum.FIGHTER,
-                self.subclass.slug != 'BRAWLER',
-                self.shield,
-                self.secondary_hand,
-                self.primary_hand and not self.primary_hand.weapon_type.is_melee,
-                self.primary_hand
-                and self.primary_hand.handedness == WeaponHandednessEnum.TWO,
-                self.primary_hand and self.primary_hand.is_double,
-            )
-        ):
-            return False
-        return True
-
-    def _is_avenger_and_armored_properly(self) -> bool:
-        return (
-            self.klass.name == NPCClassEnum.AVENGER
-            and not self.shield
-            and (
-                not self.armor
-                or self.armor.armor_type.base_armor_type == ArmorTypeIntEnum.CLOTH
-            )
-        )
-
     @property
     def armor_class_bonus(self) -> int:
         result = 0
         if self.armor:
-            available_armor_types = self.klass.armor_types + self.subclass.armor_types
-            if self.armor.armor_type.base_armor_type in available_armor_types:
+            if self.armor.armor_type.base_armor_type in self.available_armor_types:
                 result += self.armor.armor_class
             # result += self.npc.enhancement_with_magic_threshold(
             #     self.npc.armor.enhancement
             # )
         if not self.armor or self.armor.is_light:
             result += self._armor_class_ability_bonus
-
-        if self._is_vampire_and_armored_properly():
-            # Рефлексы вампира
-            result += 2
-        if self._is_barbarian_and_armored_properly():
-            result += self._tier + 1
-        if self._is_brawler_fighter_and_properly_armed():
-            result += 1
-        if self._is_avenger_and_armored_properly():
-            result += 3
-        if self.klass.name == NPCClassEnum.SWORDMAGE:
-            if (
-                not self.shield
-                and not self.secondary_hand
-                and self.primary_hand
-                and not self.primary_hand.is_double
-            ):
-                result += 3
-            else:
-                result += 1
         return result
 
     @property
     def armor_class(self: NPCProtocol) -> int:
-        result = (
+        return (
             self._defence_level_bonus
             + (
                 self.functional_template.armor_class_bonus
@@ -190,8 +116,8 @@ class NPCDefenceMixin:
             )
             + self.armor_class_bonus
             + self._shield_bonus
+            + self.calculate_bonus(DefenceTypeEnum.ARMOR_CLASS)
         )
-        return result
 
     @property
     def fortitude(self: NPCProtocol) -> int:
@@ -210,8 +136,6 @@ class NPCDefenceMixin:
             if self.armor is not None
             else 0
         )
-        if self._is_brawler_fighter_and_properly_armed():
-            result += 2
         return result
 
     @property
@@ -228,8 +152,6 @@ class NPCDefenceMixin:
             else 0
         )
         result += self._shield_bonus
-        if self._is_barbarian_and_armored_properly():
-            result += self._tier + 1
         return result
 
     @property

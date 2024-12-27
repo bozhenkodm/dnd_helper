@@ -4,23 +4,15 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from multiselectfield import MultiSelectField
 
 from base.constants.constants import (
     MODEL_NAME_TO_NPC_FIELD,
     AbilityEnum,
-    ArmorTypeIntEnum,
     ClassRoleIntEnum,
-    NPCClassProperties,
     NPCOtherProperties,
     PowerSourceIntEnum,
-    ShieldTypeIntEnum,
-    WeaponCategoryIntEnum,
-    WeaponGroupEnum,
-    WeaponHandednessEnum,
 )
 from base.models.abstract import ClassAbstract
-from base.models.models import WeaponType
 
 
 class Constraint(models.Model):
@@ -97,13 +89,15 @@ class AvailabilityCondition(ClassAbstract):
 
     def fits(self, npc) -> bool:
         if self.armor_types and not set(npc.available_armor_types) & set(
-            self.armor_types
+            map(int, self.armor_types)
         ):
             return False
-        if self.shields and not set(npc.available_shield_types) & set(self.shields):
+        if self.shields and not set(npc.available_shield_types) & set(
+            map(int, self.shields)
+        ):
             return False
         if self.weapon_categories and not set(npc.available_weapon_categories) & set(
-            self.weapon_categories
+            map(int, self.weapon_categories)
         ):
             return False
         if self.weapon_types.all() and not (
@@ -132,7 +126,6 @@ class PropertiesCondition(models.Model):
                 condition=lambda x: x
                 not in (NPCOtherProperties.ATTACK, NPCOtherProperties.DAMAGE)
             ),
-            NPCClassProperties.generate_choices(),
         ),
         max_length=max(
             map(
@@ -140,7 +133,6 @@ class PropertiesCondition(models.Model):
                 (
                     AbilityEnum,
                     NPCOtherProperties,
-                    NPCClassProperties,
                 ),
             )
         ),
@@ -149,69 +141,16 @@ class PropertiesCondition(models.Model):
         verbose_name=_('Property value'), null=False
     )
 
+    def __str__(self):
+        return f'{self.type.lower()}: {self.value}'
+
     @property
     def value_display(self) -> str:
-        if self.type == NPCClassProperties.POWER_SOURCE:
+        if self.type == NPCOtherProperties.POWER_SOURCE:
             return PowerSourceIntEnum(self.value).description
-        if self.type == NPCClassProperties.ROLE:
+        if self.type == NPCOtherProperties.ROLE:
             return ClassRoleIntEnum(self.value).description
         return str(self.value)
 
     def fits(self, npc) -> bool:
-        return getattr(npc, self.type.lower()) < self.value
-
-
-class WeaponState(models.Model):
-    is_empty = models.BooleanField(_('Is hand empty'), default=False)
-    handedness = models.CharField(
-        choices=WeaponHandednessEnum.generate_choices(),
-        max_length=WeaponHandednessEnum.max_length(),
-    )
-    category = MultiSelectField(
-        verbose_name=_('Weapon category'),
-        choices=WeaponCategoryIntEnum.generate_choices(),
-        null=True,
-    )
-    group = MultiSelectField(
-        verbose_name=_('Weapon group'),
-        choices=WeaponGroupEnum.generate_choices(),
-        null=True,
-    )
-    type = models.ManyToManyField(
-        WeaponType,
-        verbose_name=_('Weapon type'),
-        blank=True,
-        related_name='primary_hand_conditions',
-    )
-
-
-class ItemStateCondition(models.Model):
-    constraint = models.ForeignKey(
-        Constraint, on_delete=models.CASCADE, related_name='item_condition'
-    )
-    primary_hand = models.ForeignKey(
-        WeaponState,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='primary_hands',
-    )
-    secondary_hand = models.ForeignKey(
-        WeaponState,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='secondary_hands',
-    )
-    shield = MultiSelectField(
-        verbose_name=_('Shield type'),
-        choices=ShieldTypeIntEnum.generate_choices(),
-        null=True,
-        blank=True,
-    )
-    armor = MultiSelectField(
-        verbose_name=_('Armor type'),
-        choices=ArmorTypeIntEnum.generate_choices(),
-        null=True,
-        blank=True,
-    )
+        return getattr(npc, self.type.lower()) >= self.value

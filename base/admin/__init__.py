@@ -22,12 +22,13 @@ from base.admin.admin_classes import (
     RaceAdmin,
     SubclassAdmin,
     WeaponAdmin,
+    WeaponStateAdmin,
     WeaponTypeAdmin,
 )
 from base.models.bonuses import Bonus
 from base.models.condition import Constraint
 from base.models.encounters import Encounter, PCParty, PlayerCharacters
-from base.models.feats import Feat
+from base.models.feats import Feat, WeaponState
 from base.models.klass import Class, Subclass
 from base.models.magic_items import (
     ArmsSlotItem,
@@ -67,7 +68,6 @@ admin.site.register(MagicWeaponType, MagicWeaponTypeAdmin)
 admin.site.register(MagicArmItemType, MagicArmItemTypeAdmin)
 admin.site.register(Bonus, BonusAdmin)
 admin.site.register(Feat, FeatAdmin)
-admin.site.register(Constraint, ConstraintAdmin)
 
 
 # hidden from sidebar
@@ -75,3 +75,5 @@ admin.site.register(Armor, ArmorAdmin)
 admin.site.register(Weapon, WeaponAdmin)
 admin.site.register(SimpleMagicItem, MagicItemAdmin)
 admin.site.register(ArmsSlotItem, ArmsItemSlotAdmin)
+admin.site.register(WeaponState, WeaponStateAdmin)
+admin.site.register(Constraint, ConstraintAdmin)

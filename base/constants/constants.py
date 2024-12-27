@@ -187,7 +187,7 @@ class ShieldTypeIntEnum(IntDescriptionEnum):
     @property
     def skill_penalty(self):
         if self == self.HEAVY:
-            return 2
+            return -2
         return 0
 
 
@@ -425,6 +425,7 @@ class BonusSource(BaseNameValueDescriptionEnum):
     POWER = auto(), 'Бонус таланта'
     FEAT = auto(), 'Бонус черты'
     ITEM = auto(), 'Бонус предмета'
+    SHIELD = auto(), 'Бонус щита'
 
 
 class NPCOtherProperties(BaseNameValueDescriptionEnum):
@@ -433,13 +434,13 @@ class NPCOtherProperties(BaseNameValueDescriptionEnum):
     SURGE = auto(), 'Значение исцеления'
     SURGES = auto(), 'Количество исцелений'
     HIT_POINTS = auto(), 'Количество хитов'
-    ATTACK = auto(), 'Атака'
-    DAMAGE = auto(), 'Урон'
-
-
-class NPCClassProperties(BaseNameValueDescriptionEnum):
     POWER_SOURCE = auto(), 'Источник силы'
     ROLE = auto(), 'Роль'
+    SIZE = auto(), 'Размер'
+    SPEED_PENALTY = auto(), 'Штраф скорости'
+    SKILL_PENALTY = auto(), 'Штраф навыков'
+    ATTACK = auto(), 'Атака'
+    DAMAGE = auto(), 'Урон'
 
 
 MODEL_NAME_TO_NPC_FIELD = {

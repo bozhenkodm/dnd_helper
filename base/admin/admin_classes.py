@@ -53,6 +53,7 @@ from base.models.condition import (
     PropertiesCondition,
 )
 from base.models.encounters import Combatants, CombatantsPC
+from base.models.feats import ItemState
 from base.models.klass import Class
 from base.models.magic_items import (
     ArmsSlotItem,
@@ -1223,6 +1224,12 @@ class ConstraintAdmin(admin.ModelAdmin):
     inlines = (ConditionInline, PropertiesConditionInline, AvailabilityConditionInline)
     list_filter = ('content_type',)
 
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        return {}
+
     @atomic
     def save_model(self, request, obj, form, change):
         if not obj.name:
@@ -1231,8 +1238,14 @@ class ConstraintAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
 
+class ItemStateInline(admin.StackedInline):
+    model = ItemState
+    show_change_link = True
+    extra = 0
+
+
 class FeatAdmin(admin.ModelAdmin):
-    inlines = (ConstraintInline, BonusInline)
+    inlines = (ConstraintInline, BonusInline, ItemStateInline)
     list_display = ('name', 'min_level', 'text')
     list_editable = ('min_level',)
     search_fields = ('name', 'min_level', 'text')
@@ -1315,3 +1328,11 @@ class FeatAdmin(admin.ModelAdmin):
                         constraint=constraint, type=field.upper(), value=condition_value
                     )
                     condition.save()
+
+
+class WeaponStateAdmin(admin.ModelAdmin):
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        return {}
