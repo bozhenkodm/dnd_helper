@@ -4,7 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import View
-from django.views.generic import DetailView, FormView, TemplateView
+from django.views.generic import DetailView, FormView, ListView, TemplateView
 
 from base.constants.constants import SkillEnum
 from base.forms.encounter import EncounterChangeInitiativeForm
@@ -27,6 +27,10 @@ class SubclassOptionsView(View):
 class NPCFormView(FormView):
     form_class = NPCModelForm
     template_name = 'base/npc_form.html'
+
+
+class NPCListView(ListView):
+    queryset = NPC.objects.order_by('-id')
 
 
 class NPCDetailView(DetailView):

@@ -1,0 +1,8 @@
+<h1>NPCS</h1>
+<ul>
+{% for npc in object_list %}
+    <li><a href="{{ npc.get_absolute_url }}">{{ npc }}</a></li>
+{% empty %}
+    <li>No npcs yet.</li>
+{% endfor %}
+</ul>
