@@ -1,6 +1,6 @@
 from django.views.generic import DetailView
 
-from printer.models import EncounterIcons, PrintableObject
+from printer.models import EncounterIcons, GridMap, PrintableObject
 
 
 class PrintableObjectView(DetailView):
@@ -9,3 +9,7 @@ class PrintableObjectView(DetailView):
 
 class EncounterIconsView(DetailView):
     model = EncounterIcons
+
+
+class GridMapView(DetailView):
+    model = GridMap

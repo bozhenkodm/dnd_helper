@@ -78,3 +78,39 @@ class EncounterIcons(models.Model):
     @property
     def font_size(self) -> int:
         return self.width // 4
+
+
+class GridMap(models.Model):
+    name = models.CharField(verbose_name='Название', max_length=30, default='Карта')
+    base_image = models.ImageField(
+        verbose_name='Карта',
+        upload_to='maps',
+        null=True,
+        blank=True,
+    )
+    rows = models.PositiveSmallIntegerField(verbose_name='Количество строк', default=10)
+    cols = models.PositiveSmallIntegerField(
+        verbose_name='Количество столбцов', default=10
+    )
+    grid_color = models.CharField(
+        verbose_name='Цвет грида',
+        default=ColorsStyle.WHITE,
+        max_length=ColorsStyle.max_length(),
+        choices=ColorsStyle.generate_choices(),
+    )
+
+    def __str__(self):
+        return f'{self.name} №{self.pk}'
+
+    @property
+    def url(self) -> str:
+        return reverse('grid_map_icon', kwargs={'pk': self.pk})
+
+    def get_absolute_url(self):
+        return self.url
+
+    def col_range(self):
+        return range(self.cols)
+
+    def row_range(self):
+        return range(self.rows)

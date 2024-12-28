@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<style>
+.container {
+  position: relative;
+  text-align: center;
+
+  width: {{ object.width }}px;
+  font-size: {{ object.font_size }}px
+}
+.border {
+    border: 3px solid {{ object.grid_color }};
+}
+table {
+        border-collapse: collapse;
+        border: 3px solid {{ object.grid_color }};
+        width: 40vw;
+        height: 40vw;
+        max-width: 80vw;
+        max-height: 80vw;
+        background-image: url({{ object.base_image.url }}); /* Путь к изображению */
+        background-size: cover; /* Масштабирование изображения */
+        background-position: center; /* Центровка изображения */
+        background-repeat: no-repeat; /* Изображение не повторяется */
+    }
+
+    td {
+        text-align: center;
+        vertical-align: middle;
+        border: 3px solid {{ object.grid_color }};
+    }
+</style>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ object }}</title>
+</head>
+<body>
+<table class="border">
+    {% for col in object.row_range %}
+    <tr class="border">
+        {% for col in object.col_range %}
+        <td></td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
+<!-- <div class="container">-->
+<!--  <img src="{{object.base_image.url}}" alt="Snow" style="width:100%;">-->
+<!--  <div class="{{ object.number_position }}">{{ forloop.counter }}</div>-->
+<!--</div>-->
+</body>
+</html>

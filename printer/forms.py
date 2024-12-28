@@ -1,7 +1,7 @@
 from django import forms
 
 from printer.constants import ColorsStyle, Position
-from printer.models import EncounterIcons
+from printer.models import EncounterIcons, GridMap
 
 
 class EncounterIconForm(forms.ModelForm):
@@ -24,4 +24,20 @@ class EncounterIconForm(forms.ModelForm):
         choices=Position.generate_choices(),
         widget=forms.RadioSelect,
         initial=Position.TOP_LEFT,
+    )
+
+
+class GridMapForm(forms.ModelForm):
+    class Meta:
+        model = GridMap
+        fields = '__all__'
+
+    upload_from_clipboard = forms.BooleanField(
+        required=False, label='Загрузить из буфера обмена'
+    )  # TODO make mixin with this field
+    grid_color = forms.ChoiceField(
+        label='Цвет грида',
+        choices=ColorsStyle.generate_choices(),
+        widget=forms.RadioSelect,
+        initial=ColorsStyle.WHITE,
     )

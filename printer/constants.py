@@ -12,6 +12,7 @@ class ColorsStyle(BaseNameValueDescriptionEnum):
     RED = 'red', 'Красный'
     BLACK = 'black', 'Чёрный'
     WHITE = 'white', 'Белый'
+    GREEN = 'green', 'Зелёный'
 
 
 class Position(BaseNameValueDescriptionEnum):
