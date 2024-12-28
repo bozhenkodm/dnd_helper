@@ -344,7 +344,7 @@ class Weapon(ItemAbstract):
         is_melee = is_melee and self.weapon_type.is_melee
         is_ranged = is_ranged and self.weapon_type.is_ranged
         if is_melee:
-            melee_attack_type = f'Рукопашный {self.weapon_type.range}'
+            melee_attack_type = f'Рукопашный {self.weapon_type.distance}'
         if is_ranged:
             ranged_attack_type = (
                 f'Дальнобойный '
@@ -687,7 +687,7 @@ class NPC(
     def speed(self):
         bonus_speed = self.calculate_bonus(NPCOtherProperties.SPEED)
         if self.armor and self.race.name != NPCRaceEnum.DWARF:
-            return self.race.speed - self.armor.speed_penalty + bonus_speed
+            return self.race.speed + self.armor.speed_penalty + bonus_speed
         return self.race.speed + bonus_speed
 
     @property
