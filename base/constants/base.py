@@ -1,5 +1,4 @@
 from enum import Enum, IntEnum
-from functools import reduce
 from itertools import chain
 from typing import Any, Callable, Self, Sequence
 
@@ -119,22 +118,3 @@ class IntDescriptionEnum(IntEnum):
         )
         whens = (models.When(**kws) for kws in kwargs)
         return models.Case(*whens, output_field=models.CharField())
-
-
-class IntDescriptionSubclassEnum(IntDescriptionEnum):
-    @classmethod
-    def generate_choices(cls):
-        return sorted(
-            [(item.value, item.description) for item in cls] + [(0, '---------')],
-            key=lambda x: x[0],
-        )
-
-
-def generate_choices(
-    *enums: type[BaseNameValueDescriptionEnum], is_sorted: bool = True
-):
-    return tuple(
-        reduce(
-            lambda x, y: x + y, (e.generate_choices(is_sorted=is_sorted) for e in enums)
-        )
-    )

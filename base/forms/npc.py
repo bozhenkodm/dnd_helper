@@ -1,6 +1,5 @@
 from django import forms
 
-from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import SexEnum, WeaponHandednessEnum
 from base.models import NPC
 from base.models.magic_items import (
@@ -28,7 +27,6 @@ class NPCModelForm(forms.ModelForm):
 
     subclass_id = forms.TypedChoiceField(
         coerce=int,
-        choices=IntDescriptionSubclassEnum.generate_choices(),
         label='Подкласс',
         show_hidden_initial=True,
     )

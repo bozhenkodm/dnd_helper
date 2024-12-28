@@ -6,7 +6,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
 
-from base.constants.base import IntDescriptionSubclassEnum
 from base.constants.constants import (
     AbilityEnum,
     AccessoryTypeEnum,
@@ -356,7 +355,6 @@ class PowerProperty(models.Model):
     level = models.SmallIntegerField(verbose_name=_('Level'), default=1)
     subclass = models.SmallIntegerField(
         verbose_name=_('Subclass'),
-        choices=IntDescriptionSubclassEnum.generate_choices(),
         default=0,
     )
     description = models.TextField(verbose_name=('Description'), blank=True, default='')

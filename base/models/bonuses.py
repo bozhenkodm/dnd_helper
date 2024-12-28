@@ -1,9 +1,9 @@
 from collections import defaultdict
+from itertools import chain
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from base.constants.base import generate_choices
 from base.constants.constants import (
     AbilityEnum,
     BonusSource,
@@ -101,8 +101,11 @@ class Bonus(models.Model):
     )
     bonus_type = models.CharField(
         verbose_name=_('Bonus type'),
-        choices=generate_choices(
-            AbilityEnum, SkillEnum, DefenceTypeEnum, NPCOtherProperties, is_sorted=False
+        choices=chain(
+            AbilityEnum.generate_choices(is_sorted=False),
+            SkillEnum.generate_choices(is_sorted=False),
+            DefenceTypeEnum.generate_choices(is_sorted=False),
+            NPCOtherProperties.generate_choices(),
         ),
         max_length=max(
             map(
