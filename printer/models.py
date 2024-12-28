@@ -80,6 +80,31 @@ class EncounterIcons(models.Model):
         return self.width // 4
 
 
+class ParticipantPlace(models.Model):
+    participant = models.ForeignKey(
+        'printer.Participant', on_delete=models.CASCADE, related_name='places'
+    )
+    map = models.ForeignKey(
+        'printer.GridMap', on_delete=models.CASCADE, related_name='places'
+    )
+    row = models.SmallIntegerField(default=-1)
+    col = models.SmallIntegerField(default=-1)
+    is_unconscious = models.BooleanField(default=False)
+
+
+class Participant(models.Model):
+    name = models.CharField(verbose_name='Имя', max_length=30)
+    base_image = models.ImageField(
+        verbose_name='Карта',
+        upload_to='participants',
+        null=True,
+        blank=True,
+    )
+
+    def __str__(self):
+        return self.name
+
+
 class GridMap(models.Model):
     name = models.CharField(verbose_name='Название', max_length=30, default='Карта')
     base_image = models.ImageField(
@@ -97,6 +122,9 @@ class GridMap(models.Model):
         default=ColorsStyle.WHITE,
         max_length=ColorsStyle.max_length(),
         choices=ColorsStyle.generate_choices(),
+    )
+    participants = models.ManyToManyField(
+        Participant, through=ParticipantPlace, blank=True
     )
 
     def __str__(self):
@@ -117,8 +145,14 @@ class GridMap(models.Model):
 
     @property
     def min_width(self):
-        return 100 // self.cols
+        return 100 // self.cols - 1
 
     @property
     def min_height(self):
-        return 100 // self.rows
+        return 100 // self.rows - 1
+
+    def get_participants_data(self) -> dict[int, tuple[int, str]]:
+        result = {}
+        for place in self.places.all():
+            result[place.row] = (place.col, place.participant.base_image.url)
+        return result

@@ -1,7 +1,7 @@
 from django import forms
 
 from printer.constants import ColorsStyle, Position
-from printer.models import EncounterIcons, GridMap
+from printer.models import EncounterIcons, GridMap, Participant
 
 
 class EncounterIconForm(forms.ModelForm):
@@ -41,3 +41,13 @@ class GridMapForm(forms.ModelForm):
         widget=forms.RadioSelect,
         initial=ColorsStyle.WHITE,
     )
+
+
+class ParticipantForm(forms.ModelForm):
+    class Meta:
+        model = Participant
+        fields = '__all__'
+
+    upload_from_clipboard = forms.BooleanField(
+        required=False, label='Загрузить из буфера обмена'
+    )  # TODO make mixin with this field

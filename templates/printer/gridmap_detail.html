@@ -4,27 +4,33 @@
 .container {
   position: relative;
   text-align: center;
-
 }
 table {
     border-collapse: collapse;
-    border: 2px solid {{ object.grid_color }};
-    width: 50vw;
-    max-width: 80vw;
-    max-height: 80vw;
-    background-image: url({{ object.base_image.url }}); /* Путь к изображению */
-    background-size: cover; /* Масштабирование изображения */
-    background-position: center; /* Центровка изображения */
-    background-repeat: no-repeat; /* Изображение не повторяется */
+    border: 1px solid {{ object.grid_color }};
+    background-image: url({{ object.base_image.url }});
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
-th, td {
+
+/* Фиксируем размеры ячеек и заголовков */
+td, th {
     text-align: center;
     color: {{ object.grid_color }};
     vertical-align: middle;
-    border: 2px solid {{ object.grid_color }};
-    width: 5uv;
-    aspect-ratio: 1;
-    height: 0;
+    border: 1px solid {{ object.grid_color }};
+
+    /* Фиксированная ширина и высота ячейки */
+    width: {{ object.min_width }}vh;
+    height: {{ object.min_height }}vh;
+    aspect-ratio: 1 / 1;
+}
+img {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
 }
 </style>
 <head>
@@ -32,21 +38,31 @@ th, td {
     <title>{{ object }}</title>
 </head>
 <body>
-<table>
-    <tr>
-        <th></th>
-        {% for col in object.col_range %}
-        <th>{{ forloop.counter }}</th>
+{% load dict_item %}
+
+<div class="container">
+    <table>
+        <tr>
+            <th></th>
+            {% for col in object.col_range %}
+                <th>{{ forloop.counter|stringformat:"02d" }}</th>
+            {% endfor %}
+        </tr>
+        {% for row in object.row_range %}
+            {% with urls=participants|dictitem:row %}
+            <tr>
+                <td>{{ forloop.counter|stringformat:"02d" }}</td>
+                {% for col in object.col_range %}
+                    <td>
+                        {% if urls.0 == col %}
+                        <img src="{{ urls.1 }}">
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+            {% endwith %}
         {% endfor %}
-    </tr>
-    {% for col in object.row_range %}
-    <tr>
-        <td>{{ forloop.counter }}</td>
-        {% for col in object.col_range %}
-        <td></td>
-        {% endfor %}
-    </tr>
-    {% endfor %}
-</table>
+    </table>
+</div>
 </body>
 </html>
