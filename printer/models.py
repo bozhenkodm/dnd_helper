@@ -114,3 +114,11 @@ class GridMap(models.Model):
 
     def row_range(self):
         return range(self.rows)
+
+    @property
+    def min_width(self):
+        return 100 // self.cols
+
+    @property
+    def min_height(self):
+        return 100 // self.rows

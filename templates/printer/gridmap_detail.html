@@ -5,48 +5,48 @@
   position: relative;
   text-align: center;
 
-  width: {{ object.width }}px;
-  font-size: {{ object.font_size }}px
-}
-.border {
-    border: 3px solid {{ object.grid_color }};
 }
 table {
-        border-collapse: collapse;
-        border: 3px solid {{ object.grid_color }};
-        width: 40vw;
-        height: 40vw;
-        max-width: 80vw;
-        max-height: 80vw;
-        background-image: url({{ object.base_image.url }}); /* Путь к изображению */
-        background-size: cover; /* Масштабирование изображения */
-        background-position: center; /* Центровка изображения */
-        background-repeat: no-repeat; /* Изображение не повторяется */
-    }
-
-    td {
-        text-align: center;
-        vertical-align: middle;
-        border: 3px solid {{ object.grid_color }};
-    }
+    border-collapse: collapse;
+    border: 2px solid {{ object.grid_color }};
+    width: 50vw;
+    max-width: 80vw;
+    max-height: 80vw;
+    background-image: url({{ object.base_image.url }}); /* Путь к изображению */
+    background-size: cover; /* Масштабирование изображения */
+    background-position: center; /* Центровка изображения */
+    background-repeat: no-repeat; /* Изображение не повторяется */
+}
+th, td {
+    text-align: center;
+    color: {{ object.grid_color }};
+    vertical-align: middle;
+    border: 2px solid {{ object.grid_color }};
+    width: 5uv;
+    aspect-ratio: 1;
+    height: 0;
+}
 </style>
 <head>
     <meta charset="UTF-8">
     <title>{{ object }}</title>
 </head>
 <body>
-<table class="border">
+<table>
+    <tr>
+        <th></th>
+        {% for col in object.col_range %}
+        <th>{{ forloop.counter }}</th>
+        {% endfor %}
+    </tr>
     {% for col in object.row_range %}
-    <tr class="border">
+    <tr>
+        <td>{{ forloop.counter }}</td>
         {% for col in object.col_range %}
         <td></td>
         {% endfor %}
     </tr>
     {% endfor %}
 </table>
-<!-- <div class="container">-->
-<!--  <img src="{{object.base_image.url}}" alt="Snow" style="width:100%;">-->
-<!--  <div class="{{ object.number_position }}">{{ forloop.counter }}</div>-->
-<!--</div>-->
 </body>
 </html>
