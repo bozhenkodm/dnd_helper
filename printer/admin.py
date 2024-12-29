@@ -116,7 +116,7 @@ class GridMapAdmin(admin.ModelAdmin):
 
 
 class ParticipantAdmin(admin.ModelAdmin):
-    fields = ('name', 'base_image', 'upload_from_clipboard', 'image_tag')
+    fields = ('name', 'base_image', 'base_size', 'upload_from_clipboard', 'image_tag')
     readonly_fields = ('image_tag',)
     form = ParticipantForm
 

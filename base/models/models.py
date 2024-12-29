@@ -16,7 +16,7 @@ from base.constants.constants import (
     NPCRaceEnum,
     PowerActionTypeEnum,
     SexEnum,
-    SizeEnum,
+    SizeIntEnum,
     ThrownWeaponType,
     VisionEnum,
     WeaponCategoryIntEnum,
@@ -404,11 +404,10 @@ class Race(models.Model):
         max_length=VisionEnum.max_length(),
         default=VisionEnum.NORMAL.value,
     )
-    size = models.CharField(
+    size = models.SmallIntegerField(
         verbose_name=_('Size'),
-        choices=SizeEnum.generate_choices(is_sorted=False),
-        max_length=SizeEnum.max_length(),
-        default=SizeEnum.AVERAGE.value,
+        choices=SizeIntEnum.generate_choices(),
+        default=SizeIntEnum.AVERAGE.value,
     )
     weapon_types = models.ManyToManyField(
         WeaponType,

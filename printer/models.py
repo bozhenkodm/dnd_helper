@@ -2,7 +2,9 @@ from collections import defaultdict
 
 from django.db import models
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
+from base.constants.constants import SizeIntEnum
 from printer.constants import ColorsStyle, Position, PrintableObjectType
 
 
@@ -83,6 +85,7 @@ class EncounterIcons(models.Model):
 
 
 class ParticipantPlace(models.Model):
+
     participant = models.ForeignKey(
         'printer.Participant', on_delete=models.CASCADE, related_name='places'
     )
@@ -95,6 +98,8 @@ class ParticipantPlace(models.Model):
 
 
 class Participant(models.Model):
+    MIN_SIZE = SizeIntEnum.AVERAGE
+
     name = models.CharField(verbose_name='Имя', max_length=30)
     base_image = models.ImageField(
         verbose_name='Карта',
@@ -102,9 +107,18 @@ class Participant(models.Model):
         null=True,
         blank=True,
     )
+    base_size = models.SmallIntegerField(
+        verbose_name=_('Size'),
+        choices=SizeIntEnum.generate_choices(),
+        default=SizeIntEnum.AVERAGE.value,
+    )
 
     def __str__(self):
         return self.name
+
+    @property
+    def size(self) -> int:
+        return max(self.base_size, self.MIN_SIZE.value)
 
 
 class GridMap(models.Model):
@@ -146,15 +160,15 @@ class GridMap(models.Model):
         return range(self.rows)
 
     @property
-    def min_width(self):
-        return 100 // self.cols - 1
-
-    @property
-    def min_height(self):
-        return 100 // self.rows - 1
+    def min_size(self):
+        return 100 // min((self.rows, self.cols)) - 1
 
     def get_participants_data(self) -> dict[int, dict[int, list[str]]]:
         result = defaultdict(dict)
         for place in self.places.all():
-            result[place.row].setdefault(place.col, []).append(place.participant.base_image.url)
+            for i in range(place.participant.size):
+                for j in range(place.participant.size):
+                    result[place.row + i].setdefault(place.col + j, []).append(
+                        place.participant.base_image.url
+                    )
         return result

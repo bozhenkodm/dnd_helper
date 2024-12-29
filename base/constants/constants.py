@@ -43,12 +43,12 @@ class PowerVariables(StrEnum):
     ITL = auto()  # item level
 
 
-class SizeEnum(BaseNameValueDescriptionEnum):
-    TINY = auto(), 'Крошечный'
-    SMALL = auto(), 'Маленький'
-    AVERAGE = auto(), 'Средний'
-    BIG = auto(), 'Большой'
-    LARGE = auto(), 'Огромный'
+class SizeIntEnum(IntDescriptionEnum):
+    TINY = -1, 'Крошечный'
+    SMALL = 0, 'Маленький'
+    AVERAGE = 1, 'Средний'
+    BIG = 2, 'Большой'
+    LARGE = 3, 'Огромный'
 
 
 class VisionEnum(BaseNameValueDescriptionEnum):
