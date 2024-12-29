@@ -49,13 +49,17 @@ img {
             {% endfor %}
         </tr>
         {% for row in object.row_range %}
-            {% with urls=participants|dictitem:row %}
+            {% with col_urls=participants|dictitem:row %}
             <tr>
                 <td>{{ forloop.counter|stringformat:"02d" }}</td>
                 {% for col in object.col_range %}
                     <td>
-                        {% if urls.0 == col %}
-                        <img src="{{ urls.1 }}">
+                        {% if col_urls %}
+                        {% with urls=col_urls|dictitem:col %}
+                        {% if urls %}
+                        <img src="{{ urls|last }}">
+                        {% endif %}
+                        {% endwith %}
                         {% endif %}
                     </td>
                 {% endfor %}

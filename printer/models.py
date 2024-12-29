@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from django.db import models
 from django.urls import reverse
 
@@ -151,8 +153,8 @@ class GridMap(models.Model):
     def min_height(self):
         return 100 // self.rows - 1
 
-    def get_participants_data(self) -> dict[int, tuple[int, str]]:
-        result = {}
+    def get_participants_data(self) -> dict[int, dict[int, list[str]]]:
+        result = defaultdict(dict)
         for place in self.places.all():
-            result[place.row] = (place.col, place.participant.base_image.url)
+            result[place.row].setdefault(place.col, []).append(place.participant.base_image.url)
         return result
