@@ -94,7 +94,9 @@ class ParticipantPlace(models.Model):
     )
     row = models.SmallIntegerField(default=-1)
     col = models.SmallIntegerField(default=-1)
-    is_unconscious = models.BooleanField(default=False)
+    rotation = models.PositiveSmallIntegerField(
+        choices=((i, i) for i in range(0, 271, 90)), default=0
+    )
 
 
 class Participant(models.Model):

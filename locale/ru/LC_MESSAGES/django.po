@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-26 15:23+0000\n"
+"POT-Creation-Date: 2024-12-30 08:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,85 +20,89 @@ msgstr ""
 "n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
 "(n%100>=11 && n%100<=14)? 2 : 3);\n"
 
-#: base/admin/forms.py:65 base/admin/forms.py:441 base/models/skills.py:34
+#: base/admin/forms.py:65 base/admin/forms.py:444 base/models/skills.py:34
 msgid "Trained skills"
 msgstr "Тренированные навыки"
 
 #: base/admin/forms.py:302 base/models/magic_items.py:155
-#: base/models/models.py:524 base/models/powers.py:113
-#: base/models/powers.py:356
+#: base/models/models.py:519 base/models/powers.py:112
+#: base/models/powers.py:355
 msgid "Level"
 msgstr "Уровень"
 
-#: base/admin/forms.py:415 base/models/bonuses.py:122
+#: base/admin/forms.py:415 base/models/bonuses.py:125
 msgid "Value"
 msgstr "Значение"
 
-#: base/admin/forms.py:428 base/models/bonuses.py:86 base/models/models.py:382
-#: base/models/models.py:474 base/models/models.py:504 base/models/powers.py:75
+#: base/admin/forms.py:428 base/models/bonuses.py:86 base/models/models.py:378
+#: base/models/models.py:469 base/models/models.py:499 base/models/powers.py:74
 msgid "Race"
 msgstr "Раса"
 
 #: base/admin/forms.py:431 base/models/bonuses.py:47 base/models/klass.py:20
-#: base/models/klass.py:74 base/models/klass.py:98 base/models/models.py:471
-#: base/models/powers.py:64
+#: base/models/klass.py:74 base/models/klass.py:98 base/models/models.py:466
+#: base/models/powers.py:63
 msgid "Class"
 msgstr "Класс"
 
 #: base/admin/forms.py:436 base/models/bonuses.py:54 base/models/klass.py:66
-#: base/models/klass.py:101 base/models/powers.py:70 base/models/powers.py:358
+#: base/models/klass.py:101 base/models/powers.py:69 base/models/powers.py:357
 msgid "Subclass"
 msgstr "Подкласс"
 
-#: base/admin/forms.py:445
+#: base/admin/forms.py:439 base/models/bonuses.py:37 base/models/feats.py:19
+msgid "Feat"
+msgstr "Черта"
+
+#: base/admin/forms.py:448
 msgid "Strength"
 msgstr "Сила"
 
-#: base/admin/forms.py:446
+#: base/admin/forms.py:449
 msgid "Constitution"
 msgstr "Телосложение"
 
-#: base/admin/forms.py:447
+#: base/admin/forms.py:450
 msgid "Dexterity"
 msgstr "Ловкость"
 
-#: base/admin/forms.py:448
+#: base/admin/forms.py:451
 msgid "Intelligence"
 msgstr "Интеллект"
 
-#: base/admin/forms.py:449
+#: base/admin/forms.py:452
 msgid "Wisdom"
 msgstr "Мудрость"
 
-#: base/admin/forms.py:450
+#: base/admin/forms.py:453
 msgid "Charisma"
 msgstr "Харизма"
 
-#: base/admin/forms.py:454 base/models/klass.py:43
+#: base/admin/forms.py:457 base/models/klass.py:43
 msgid "Power source"
 msgstr "Источник силы"
 
-#: base/admin/forms.py:462
+#: base/admin/forms.py:465
 #, fuzzy
 #| msgid "Weapon category"
 msgid "Weapon categories"
 msgstr "Категория оружия"
 
-#: base/admin/forms.py:467 base/models/models.py:160
+#: base/admin/forms.py:470 base/models/models.py:156
 msgid "Weapon types"
 msgstr "Типы оружия"
 
-#: base/admin/forms.py:473 base/models/models.py:49
+#: base/admin/forms.py:476 base/models/models.py:49
 msgid "Armor types"
 msgstr "Типы брони"
 
-#: base/admin/forms.py:483
+#: base/admin/forms.py:486
 #, fuzzy
 #| msgid "Shield type"
 msgid "Shield types"
 msgstr "Тип щита"
 
-#: base/models/abilities.py:47 base/models/models.py:402
+#: base/models/abilities.py:47 base/models/models.py:398
 msgid "Selective ability bonus"
 msgstr "Выборочный бонус характеристик"
 
@@ -110,7 +114,7 @@ msgstr "Базовая атакующая характеристика"
 msgid "Available weapon categories"
 msgstr "Доступные категории оружия"
 
-#: base/models/abstract.py:25 base/models/models.py:419
+#: base/models/abstract.py:25 base/models/models.py:414
 msgid "Available weapon types"
 msgstr "Доступные типы оружия"
 
@@ -136,32 +140,28 @@ msgstr "Бонусы"
 
 #: base/models/bonuses.py:23 base/models/klass.py:29
 #: base/models/magic_items.py:24 base/models/models.py:51
-#: base/models/models.py:164 base/models/models.py:386
-#: base/models/models.py:392 base/models/models.py:437
-#: base/models/models.py:468 base/models/powers.py:43
+#: base/models/models.py:160 base/models/models.py:382
+#: base/models/models.py:388 base/models/models.py:432
+#: base/models/models.py:463 base/models/powers.py:42
 msgid "Title"
 msgstr "Название"
 
-#: base/models/bonuses.py:27 base/models/powers.py:38 base/models/powers.py:345
+#: base/models/bonuses.py:27 base/models/powers.py:37 base/models/powers.py:344
 msgid "Power"
 msgstr "Талант"
 
-#: base/models/bonuses.py:37 base/models/feats.py:11
-msgid "Feat"
-msgstr "Черта"
-
-#: base/models/bonuses.py:62 base/models/models.py:433
-#: base/models/models.py:508 base/models/powers.py:83
+#: base/models/bonuses.py:62 base/models/models.py:428
+#: base/models/models.py:503 base/models/powers.py:82
 msgid "Functional template"
 msgstr "Функциональный шаблон"
 
-#: base/models/bonuses.py:70 base/models/models.py:463
-#: base/models/models.py:514 base/models/powers.py:91
+#: base/models/bonuses.py:70 base/models/models.py:458
+#: base/models/models.py:509 base/models/powers.py:90
 msgid "Paragon path"
 msgstr "Путь совершенства"
 
 #: base/models/bonuses.py:78 base/models/magic_items.py:21
-#: base/models/magic_items.py:150 base/models/powers.py:99
+#: base/models/magic_items.py:150 base/models/powers.py:98
 msgid "Magic item type"
 msgstr "Тип магического предмета"
 
@@ -169,8 +169,8 @@ msgstr "Тип магического предмета"
 msgid "Bonus source"
 msgstr "Источник бонуса"
 
-#: base/models/bonuses.py:100 base/models/feats.py:16
-#: base/models/magic_items.py:26 base/models/models.py:438
+#: base/models/bonuses.py:100 base/models/feats.py:24
+#: base/models/magic_items.py:26 base/models/models.py:433
 msgid "Minimal level"
 msgstr "Минимальный уровень"
 
@@ -178,52 +178,26 @@ msgstr "Минимальный уровень"
 msgid "Bonus type"
 msgstr "Тип бонуса"
 
-#: base/models/condition.py:28
+#: base/models/condition.py:20
 msgid "Constraint"
 msgstr "Ограничение"
 
-#: base/models/condition.py:29
+#: base/models/condition.py:21
 msgid "Constraints"
 msgstr "Ограничения"
 
-#: base/models/condition.py:31 base/models/encounters.py:39
-#: base/models/feats.py:14 base/models/klass.py:78 base/models/models.py:502
+#: base/models/condition.py:23 base/models/encounters.py:39
+#: base/models/feats.py:22 base/models/klass.py:78 base/models/models.py:497
 msgid "Name"
 msgstr "Имя"
 
-#: base/models/condition.py:128
+#: base/models/condition.py:122
 msgid "Property type"
 msgstr "Тип свойства"
 
-#: base/models/condition.py:149
+#: base/models/condition.py:141
 msgid "Property value"
 msgstr "Значение свойства"
-
-#: base/models/condition.py:165
-msgid "Is hand empty?"
-msgstr "Рука пустая?"
-
-#: base/models/condition.py:171 base/models/magic_items.py:106
-msgid "Weapon category"
-msgstr "Категория оружия"
-
-#: base/models/condition.py:176 base/models/magic_items.py:100
-msgid "Weapon group"
-msgstr "Группа оружия"
-
-#: base/models/condition.py:182 base/models/magic_items.py:113
-#: base/models/models.py:159 base/models/models.py:289
-msgid "Weapon type"
-msgstr "Тип оружия"
-
-#: base/models/condition.py:207
-msgid "Shield type"
-msgstr "Тип щита"
-
-#: base/models/condition.py:213 base/models/models.py:48
-#: base/models/models.py:53 base/models/models.py:100
-msgid "Armor type"
-msgstr "Тип брони"
 
 #: base/models/encounters.py:35 base/models/encounters.py:68
 msgid "Party"
@@ -241,19 +215,53 @@ msgstr "Участники"
 msgid "Experience"
 msgstr "Опыт"
 
-#: base/models/feats.py:12 base/models/feats.py:53
+#: base/models/feats.py:20 base/models/feats.py:198
 msgid "Feats"
 msgstr "Черты"
 
-#: base/models/feats.py:18
+#: base/models/feats.py:26
 msgid "Text"
 msgstr "Текст"
 
-#: base/models/feats.py:57
+#: base/models/feats.py:74
+msgid "Is hand empty?"
+msgstr "Рука пустая?"
+
+#: base/models/feats.py:81 base/models/magic_items.py:106
+msgid "Weapon category"
+msgstr "Категория оружия"
+
+#: base/models/feats.py:87 base/models/magic_items.py:100
+msgid "Weapon group"
+msgstr "Группа оружия"
+
+#: base/models/feats.py:94 base/models/magic_items.py:113
+#: base/models/models.py:155 base/models/models.py:285
+msgid "Weapon type"
+msgstr "Тип оружия"
+
+#: base/models/feats.py:118 base/models/models.py:536
+msgid "Primary hand"
+msgstr "Основная рука"
+
+#: base/models/feats.py:126 base/models/models.py:547
+msgid "Secondary hand"
+msgstr "Дополнительная рука"
+
+#: base/models/feats.py:133
+msgid "Shield type"
+msgstr "Тип щита"
+
+#: base/models/feats.py:139 base/models/models.py:48 base/models/models.py:53
+#: base/models/models.py:100
+msgid "Armor type"
+msgstr "Тип брони"
+
+#: base/models/feats.py:202
 msgid "Trained weapon"
 msgstr "Тренировка с оружием"
 
-#: base/models/feats.py:58
+#: base/models/feats.py:203
 msgid "Weapon training in addition to training by race and class"
 msgstr "Тренировка с оружием в дополнение к расе и классу"
 
@@ -277,7 +285,7 @@ msgstr "Воля"
 msgid "Surges"
 msgstr "Исцеления"
 
-#: base/models/klass.py:37 base/models/klass.py:40 base/models/models.py:454
+#: base/models/klass.py:37 base/models/klass.py:40 base/models/models.py:449
 msgid "Hits per level"
 msgstr "Хиты за уровень"
 
@@ -319,7 +327,7 @@ msgstr "Максимальный уровень"
 msgid "Level step"
 msgstr "Шаг уровня"
 
-#: base/models/magic_items.py:33 base/models/models.py:177
+#: base/models/magic_items.py:33 base/models/models.py:173
 msgid "Category"
 msgstr "Категория"
 
@@ -455,19 +463,19 @@ msgstr "Штраф навыков"
 msgid "Minimal enhancement"
 msgstr "Минимальное зачарование"
 
-#: base/models/models.py:68 base/models/models.py:443
+#: base/models/models.py:68 base/models/models.py:438
 msgid "Fortitude bonus"
 msgstr "Бонус стойкости"
 
-#: base/models/models.py:71 base/models/models.py:445
+#: base/models/models.py:71 base/models/models.py:440
 msgid "Reflex bonus"
 msgstr "Бонус реакции"
 
-#: base/models/models.py:74 base/models/models.py:446
+#: base/models/models.py:74 base/models/models.py:441
 msgid "Will bonus"
 msgstr "Бонус воли"
 
-#: base/models/models.py:95 base/models/models.py:533
+#: base/models/models.py:95 base/models/models.py:528
 msgid "Armor"
 msgstr "Доспех"
 
@@ -475,210 +483,202 @@ msgstr "Доспех"
 msgid "Armors"
 msgstr "Доспехи"
 
-#: base/models/models.py:167
+#: base/models/models.py:163
 msgid "Handedness"
 msgstr "Сколько рук занимает"
 
-#: base/models/models.py:172
+#: base/models/models.py:168
 msgid "Group"
 msgstr "Группа"
 
-#: base/models/models.py:181
+#: base/models/models.py:177
 msgid "Range"
 msgstr "Дальность"
 
-#: base/models/models.py:181
+#: base/models/models.py:177
 msgid "For ranged weapon"
 msgstr "Для дальнобойного оружия"
 
-#: base/models/models.py:184 base/models/powers.py:170
+#: base/models/models.py:180 base/models/powers.py:169
 msgid "Distance"
 msgstr "Дистанция"
 
-#: base/models/models.py:186
+#: base/models/models.py:182
 msgid "Melee distance"
 msgstr "Рукопашная дистанция"
 
-#: base/models/models.py:189
+#: base/models/models.py:185
 msgid "Prof bonus"
 msgstr "Бонус владения"
 
-#: base/models/models.py:221
+#: base/models/models.py:217
 msgid "Primary end"
 msgstr "Основной конец оружия"
 
-#: base/models/models.py:228
+#: base/models/models.py:224
 msgid "Is weapon enhanceable?"
 msgstr "Оружие подвержено зачарованию?"
 
-#: base/models/models.py:283 base/models/models.py:284
+#: base/models/models.py:279 base/models/models.py:280
 msgid "Weapon"
 msgstr "Оружие"
 
-#: base/models/models.py:383
+#: base/models/models.py:379
 msgid "Races"
 msgstr "Расы"
 
-#: base/models/models.py:397
+#: base/models/models.py:393
 msgid "Constant ability bonuses"
 msgstr "Постоянный бонус характеристик"
 
-#: base/models/models.py:404
+#: base/models/models.py:400
 msgid "Speed"
 msgstr "Скорость"
 
-#: base/models/models.py:406
+#: base/models/models.py:402
 msgid "Vision"
 msgstr "Зрение"
 
-#: base/models/models.py:412
+#: base/models/models.py:408 printer/models.py:111
 msgid "Size"
 msgstr "Размер"
 
-#: base/models/models.py:422
+#: base/models/models.py:417
 msgid "Is race social?"
 msgstr "Раса социальна?"
 
-#: base/models/models.py:424
+#: base/models/models.py:419
 msgid "Social races are used for random npc generation"
 msgstr "Социальные расы используются при случайной генерации npc"
 
-#: base/models/models.py:434
+#: base/models/models.py:429
 msgid "Functional templates"
 msgstr "Функциональные шаблоны"
 
-#: base/models/models.py:440
+#: base/models/models.py:435
 msgid "Armor class bonus"
 msgstr "Бонус класса доспеха"
 
-#: base/models/models.py:448
+#: base/models/models.py:443
 msgid "Saving throws bonus"
 msgstr "Бонус спасброска"
 
-#: base/models/models.py:451
+#: base/models/models.py:446
 msgid "Action points"
 msgstr "Единицы действия"
 
-#: base/models/models.py:464
+#: base/models/models.py:459
 msgid "Paragon paths"
 msgstr "Пути совершенства"
 
-#: base/models/models.py:469 base/models/models.py:503 base/models/powers.py:45
+#: base/models/models.py:464 base/models/models.py:498 base/models/powers.py:44
 msgid "Description"
 msgstr "Описание"
 
-#: base/models/models.py:522
+#: base/models/models.py:517
 msgid "Sex"
 msgstr "Пол"
 
-#: base/models/models.py:541
-msgid "Primary hand"
-msgstr "Основная рука"
-
-#: base/models/models.py:552
-msgid "Secondary hand"
-msgstr "Дополнительная рука"
-
-#: base/models/models.py:563
+#: base/models/models.py:558
 msgid "No hand implement"
 msgstr "Инструмент не в руку"
 
-#: base/models/models.py:564
+#: base/models/models.py:559
 msgid "Armament that doesn't take hand slot"
 msgstr "Вооружение, которое не занимает руку"
 
-#: base/models/models.py:572 base/models/powers.py:39
+#: base/models/models.py:567 base/models/powers.py:38
 msgid "Powers"
 msgstr "Таланты"
 
-#: base/models/powers.py:48
+#: base/models/powers.py:47
 msgid "Usage frequency"
 msgstr "Частота использования"
 
-#: base/models/powers.py:53
+#: base/models/powers.py:52
 msgid "Action type"
 msgstr "Тип действия"
 
-#: base/models/powers.py:59
+#: base/models/powers.py:58
 msgid "Choose, if power frequency is not passive"
 msgstr "Выберете, если частота таланта не Пассивный"
 
-#: base/models/powers.py:107
+#: base/models/powers.py:106
 msgid "Skill"
 msgstr "Навык"
 
-#: base/models/powers.py:115
+#: base/models/powers.py:114
 msgid "Attack ability"
 msgstr "Атакующая характеристика"
 
-#: base/models/powers.py:121
+#: base/models/powers.py:120
 msgid "Attack bonus"
 msgstr "Бонус атаки"
 
-#: base/models/powers.py:123
+#: base/models/powers.py:122
 msgid "against"
 msgstr "против"
 
-#: base/models/powers.py:126
+#: base/models/powers.py:125
 msgid "defence"
 msgstr "защита"
 
-#: base/models/powers.py:131
+#: base/models/powers.py:130
 msgid "Effect type"
 msgstr "Тип эффекта"
 
-#: base/models/powers.py:138
+#: base/models/powers.py:137
 msgid "Damage type"
 msgstr "Тип урона"
 
-#: base/models/powers.py:144
+#: base/models/powers.py:143
 msgid "Dice number"
 msgstr "Количество кубов"
 
-#: base/models/powers.py:146
+#: base/models/powers.py:145
 msgid "Damage dice"
 msgstr "Куб урона"
 
-#: base/models/powers.py:152
+#: base/models/powers.py:151
 msgid "Accessory type"
 msgstr "Тип вооружения"
 
-#: base/models/powers.py:160
+#: base/models/powers.py:159
 msgid "Weapon requirement"
 msgstr "Требования к оружию"
 
-#: base/models/powers.py:161
+#: base/models/powers.py:160
 msgid "for powers with weapons"
 msgstr "для талантов с оружием"
 
-#: base/models/powers.py:165
+#: base/models/powers.py:164
 msgid "Range type"
 msgstr "Дальность"
 
-#: base/models/powers.py:171
+#: base/models/powers.py:170
 msgid "Area"
 msgstr "Площадь"
 
-#: base/models/powers.py:296
+#: base/models/powers.py:295
 msgid "Wrong attack type"
 msgstr "Неверный тип атаки"
 
-#: base/models/powers.py:340
+#: base/models/powers.py:339
 msgid "Power Property"
 msgstr "Свойство таланта"
 
-#: base/models/powers.py:341
+#: base/models/powers.py:340
 msgid "Power Properties"
 msgstr "Свойства талантов"
 
-#: base/models/powers.py:363
+#: base/models/powers.py:361
 msgid "Order"
 msgstr "Порядок"
 
-#: base/models/powers.py:426
+#: base/models/powers.py:424
 msgid "This power doesn't use weapon"
 msgstr "Этот талант используется без оружия"
 
-#: base/models/powers.py:545
+#: base/models/powers.py:543
 msgid "This power doesn't use magic item"
 msgstr "Этот талант не используется магическим предметом"
