@@ -26,32 +26,6 @@
 .daily {
     background-color: black; color: white; -webkit-print-color-adjust: exact;
 }
-.tooltip {
-  position: relative;
-  display: inline-block;
-}
-
-.tooltip-text {
-  visibility: hidden;
-  width: 100%;
-  background-color: #333;
-  color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 5px;
-  position: absolute;
-  z-index: 1;
-  top: 200%;
-  left: 200%;
-  transform: translateX(-50%);
-  opacity: 0;
-  transition: opacity 0.2s, visibility 0.2s;
-}
-
-.tooltip:hover .tooltip-text {
-  visibility: visible;
-  opacity: 1;
-}
 </style>
 <head>
     <meta charset="UTF-8">
@@ -75,18 +49,13 @@
         <div><span>Скорость {{ object.speed }}</span></div>
     </div>
     {% for feat in object.feats_calculated %}
-        <div class="npc-line passive tooltip">
+        <div class="npc-line passive" title="{{feat.description}}">
             <span><b>{{ feat.name }} ({{ feat.category }})</b></span>
-
-            <span class="tooltip-text">{{feat.description|linebreaksbr}}</span>
         </div>
     {% endfor %}
     {% for power in object.powers_calculated %}
-        <div class="npc-line {{ power.frequency }} tooltip">
+        <div class="npc-line {{ power.frequency }}" {% if power.description %}title="{{power.description}}"{% endif %}>
             <span><b>{{ power.name }} ({{ power.category }})</b> {{ power.keywords }}</span>
-            {% if power.description %}
-                <span class="tooltip-text">{{power.description|linebreaksbr}}</span>
-            {% endif %}
         </div>
         {% for property in power.properties %}
         <div><i>{{property.title}}</i>: {{property.description|linebreaksbr}}</div>
