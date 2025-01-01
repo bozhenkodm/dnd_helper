@@ -66,7 +66,6 @@ admin.site.register(MagicItemType, MagicItemTypeAdmin)
 admin.site.register(MagicArmorType, MagicArmorTypeAdmin)
 admin.site.register(MagicWeaponType, MagicWeaponTypeAdmin)
 admin.site.register(MagicArmItemType, MagicArmItemTypeAdmin)
-admin.site.register(Bonus, BonusAdmin)
 admin.site.register(Feat, FeatAdmin)
 
 
@@ -77,3 +76,4 @@ admin.site.register(SimpleMagicItem, MagicItemAdmin)
 admin.site.register(ArmsSlotItem, ArmsItemSlotAdmin)
 admin.site.register(WeaponState, WeaponStateAdmin)
 admin.site.register(Constraint, ConstraintAdmin)
+admin.site.register(Bonus, BonusAdmin)

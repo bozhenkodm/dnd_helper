@@ -178,20 +178,32 @@ class BonusMixin:
                 .filter(bonus_type=bonus_type)
                 .union(self.race.bonuses.filter(bonus_type=bonus_type))
                 .union(self.subclass.bonuses.filter(bonus_type=bonus_type))
+                .union(
+                    Bonus.objects.filter(
+                        magic_item_type__in=(
+                            item.magic_item_type for item in self.magic_items
+                        )
+                    )
+                )
             ):
                 try:
                     if bonus.feat and not bonus.feat.fits(self):
                         continue
+                    item = None
+                    if bonus.magic_item_type:
+                        # TODO deal with this shitshow
+                        for item in self.magic_items:
+                            if item.magic_item_type == bonus.magic_item_type:
+                                break
                     bonuses[bonus.source].append(
                         int(
                             self.parse_string(
-                                accessory_type=None, string=f'${bonus.value}'
+                                accessory_type=None, string=f'${bonus.value}', item=item
                             )
                         )
                     )
                 except ValueError:
                     print(f'Bonus processing failed: {bonus}, {bonus.value}')
-
             result[bonus_type] = sum(max(value) for value in bonuses.values())
         return result
 

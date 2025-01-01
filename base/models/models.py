@@ -377,6 +377,7 @@ class Race(models.Model):
     class Meta:
         verbose_name = _('Race')
         verbose_name_plural = _('Races')
+        ordering = ('name_display',)
 
     name = models.CharField(
         verbose_name=_('Title'),

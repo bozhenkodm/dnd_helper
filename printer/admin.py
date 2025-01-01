@@ -72,6 +72,8 @@ class EncounterIconsAdmin(admin.ModelAdmin):
 
 class ParticipantPlaceInline(admin.TabularInline):
     model = ParticipantPlace
+    fields = ('participant', 'rotation', 'col', 'row')
+    extra = 0
 
 
 class GridMapAdmin(admin.ModelAdmin):

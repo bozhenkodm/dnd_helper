@@ -32,12 +32,12 @@
     <title>{{ object.name }} (NPC)</title>
 </head>
 <body>
-<div class="pagenotbreak" style="width: 700px; font-size: large">
+<div class="pagenotbreak" style="width: 800px; font-size: large">
 <div class="npc-line">
     <div class="npc-header" style="float: left; width: 50%"><span><b>{{ object.name }} ({{ object.get_sex_display }})</b></span></div>
     <div class="npc-header" style="float: right; width: 50%"><span style="float: right">{{ object.race }} {{ object.klass }} {{ object.level }} уровня</span></div>
     {% if not object.is_bonus_applied %}
-        <div class="npc-line"><span>Опыт: {{ object.experience }}</span></div>
+        <div class="npc-line"><span>Опыт: {{ object.experience }}; Черты: {{ object.feats_count }}/{{ object.max_feats_number }}</span></div>
     {% endif %}
     </div>
     <div class="npc-line">
@@ -80,7 +80,7 @@
         </table>
     </div>
     <div class="npc-line attr-header"><b>Снаряжение:</b> {{ object.inventory_text|join:"; " }}</div>
-    <br><hr>
+    <br><hr></div>
 </div>
 </body>
 </html>

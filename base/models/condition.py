@@ -1,3 +1,5 @@
+import operator
+import typing
 from itertools import chain
 
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -152,5 +154,11 @@ class PropertiesCondition(models.Model):
             return ClassRoleIntEnum(self.value).description
         return str(self.value)
 
+    @property
+    def op(self) -> typing.Callable:
+        if self.type in (NPCOtherProperties.POWER_SOURCE, NPCOtherProperties.ROLE):
+            return operator.eq
+        return operator.ge
+
     def fits(self, npc) -> bool:
-        return getattr(npc, self.type.lower()) >= self.value
+        return self.op(getattr(npc, self.type.lower()), self.value)

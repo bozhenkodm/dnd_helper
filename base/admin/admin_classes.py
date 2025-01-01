@@ -34,7 +34,6 @@ from base.constants.constants import (
     ArmorTypeIntEnum,
     BonusSource,
     MagicItemSlot,
-    NPCClassEnum,
     NPCRaceEnum,
     PowerFrequencyEnum,
     PowerPropertyTitle,
@@ -266,43 +265,6 @@ class SubclassAdmin(admin.ModelAdmin):
                     instance.save()
 
 
-class RaceListFilter(admin.SimpleListFilter):
-    title = 'Раса'
-    parameter_name = 'race'
-
-    def lookups(self, request, model_admin):
-        return (
-            Race.objects.annotate(
-                name_order=NPCRaceEnum.generate_order_case(),
-                verbose_name=NPCRaceEnum.generate_case(),
-            )
-            .values_list('name', 'verbose_name')
-            .order_by('name_order')
-        )
-
-    def queryset(self, request, queryset):
-        if self.value():
-            return queryset.filter(race__name=self.value())
-
-
-class KlassListFilter(admin.SimpleListFilter):
-    title = 'Класс'
-    parameter_name = 'class'
-
-    def lookups(self, request, model_admin):
-        return (
-            Class.objects.annotate(
-                name_order=NPCClassEnum.generate_order_case(),
-            )
-            .values_list('name', 'name_display')
-            .order_by('name_order')
-        )
-
-    def queryset(self, request, queryset):
-        if self.value():
-            return queryset.filter(klass__name=self.value())
-
-
 class ParagonPathAdmin(admin.ModelAdmin):
     inlines = (
         ConstraintInline,
@@ -386,10 +348,10 @@ class NPCAdmin(admin.ModelAdmin):
     filter_horizontal = ('powers', 'feats')
     search_fields = ('name',)
     list_filter = (
-        RaceListFilter,
-        KlassListFilter,
-        'functional_template',
-        'paragon_path',
+        ('klass', admin.RelatedOnlyFieldListFilter),
+        ('race', admin.RelatedOnlyFieldListFilter),
+        ('functional_template', admin.RelatedOnlyFieldListFilter),
+        ('paragon_path', admin.RelatedOnlyFieldListFilter),
     )
     list_display = (
         'name',
@@ -843,12 +805,12 @@ class PowerAdmin(admin.ModelAdmin):
     ]
     list_filter = (
         'frequency',
-        'klass',
-        RaceListFilter,
-        'functional_template',
-        'paragon_path',
-        'magic_item_type',
-        'skill',
+        ('klass', admin.RelatedOnlyFieldListFilter),
+        ('race', admin.RelatedOnlyFieldListFilter),
+        ('functional_template', admin.RelatedOnlyFieldListFilter),
+        ('paragon_path', admin.RelatedOnlyFieldListFilter),
+        ('magic_item_type', admin.RelatedOnlyFieldListFilter),
+        ('skill', admin.RelatedOnlyFieldListFilter),
     )
     inlines = (PowerPropertyInline,)
     readonly_fields = ('syntax',)
@@ -1022,7 +984,7 @@ class PlayerCharactersAdmin(admin.ModelAdmin):
 class MagicItemTypeAdminBase(admin.ModelAdmin):
     ordering = ('name',)
     readonly_fields = ('image_tag',)
-    inlines = (PowerReadonlyInline,)
+    inlines = (PowerReadonlyInline, BonusInline)
 
     @admin.display(description='Картинка')
     def image_tag(self, obj):
@@ -1199,6 +1161,12 @@ class ArmsItemSlotAdmin(admin.ModelAdmin):
 
 class BonusAdmin(admin.ModelAdmin):
     autocomplete_fields = ('power',)
+
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        return {}
 
 
 class ConditionInline(admin.TabularInline):
