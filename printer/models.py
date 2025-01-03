@@ -92,8 +92,8 @@ class ParticipantPlace(models.Model):
     map = models.ForeignKey(
         'printer.GridMap', on_delete=models.CASCADE, related_name='places'
     )
-    row = models.SmallIntegerField(default=-1)
-    col = models.SmallIntegerField(default=-1)
+    row = models.PositiveSmallIntegerField(default=0)
+    col = models.PositiveSmallIntegerField(default=0)
     rotation = models.PositiveSmallIntegerField(
         choices=((i, i) for i in range(0, 271, 90)), default=0
     )
@@ -156,10 +156,10 @@ class GridMap(models.Model):
         return self.url
 
     def col_range(self):
-        return range(self.cols)
+        return range(1, self.cols + 1)
 
     def row_range(self):
-        return range(self.rows)
+        return range(1, self.rows + 1)
 
     @property
     def min_size(self):

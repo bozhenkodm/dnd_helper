@@ -46,7 +46,7 @@ img {
             {% with col_urls=participants|dictitem:row %}
             <tr>
                 {% for col in object.col_range %}
-                    <td title="{{ col|add:1 }}, {{ row|add:1 }}">
+                    <td title="{{ col }}, {{ row }}">
                         {% if col_urls %}
                         {% with urls=col_urls|dictitem:col %}
                         {% if urls %}

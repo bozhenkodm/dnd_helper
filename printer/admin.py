@@ -88,7 +88,7 @@ class GridMapAdmin(admin.ModelAdmin):
                     'rows',
                     'cols',
                     'grid_color',
-                    'upload_from_clipboard',
+                    ('upload_from_clipboard',  'action',),
                 )
             },
         ),
@@ -112,7 +112,18 @@ class GridMapAdmin(admin.ModelAdmin):
             process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
             output, error = process.communicate()
 
-            image_field = ImageFile(io.BytesIO(output), name=f'Icon_{obj.id}.png')
+            result_photo = io.BytesIO(output)
+
+            # if form.cleaned_data.get('action') is not None:
+            #     image = Image.open(result_photo)
+            #     image.transpose(form.cleaned_data['action'])
+            #     new_photo = io.BytesIO(output)
+            #     image.save(new_photo, format='png')
+            # obj.base_image.path(obj.base_image.path,
+            # ContentFile(new_photo.getvalue()))
+            # result_photo = new_photo
+
+            image_field = ImageFile(result_photo, name=f'Icon_{obj.id}.png')
             obj.base_image = image_field
             obj.save()
 

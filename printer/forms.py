@@ -1,4 +1,5 @@
 from django import forms
+from PIL.Image import Transpose
 
 from printer.constants import ColorsStyle, Position
 from printer.models import EncounterIcons, GridMap, Participant
@@ -35,6 +36,13 @@ class GridMapForm(forms.ModelForm):
     upload_from_clipboard = forms.BooleanField(
         required=False, label='Загрузить из буфера обмена'
     )  # TODO make mixin with this field
+    action = forms.TypedChoiceField(
+        choices=((t.value, t.name) for t in Transpose),
+        label='Действие',
+        widget=forms.RadioSelect,
+        required=False,
+        coerce=int,
+    )
     grid_color = forms.ChoiceField(
         label='Цвет грида',
         choices=ColorsStyle.generate_choices(),
