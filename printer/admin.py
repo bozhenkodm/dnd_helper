@@ -3,7 +3,9 @@ import subprocess
 
 from django.contrib import admin
 from django.core.files.images import ImageFile
+from django.urls import reverse
 from django.utils.safestring import mark_safe
+from PIL import Image
 
 from printer.forms import EncounterIconForm, GridMapForm, ParticipantForm
 from printer.models import (
@@ -88,7 +90,11 @@ class GridMapAdmin(admin.ModelAdmin):
                     'rows',
                     'cols',
                     'grid_color',
-                    ('upload_from_clipboard',  'action',),
+                    (
+                        'upload_from_clipboard',
+                        'action',
+                    ),
+                    'edit_page',
                 )
             },
         ),
@@ -97,12 +103,18 @@ class GridMapAdmin(admin.ModelAdmin):
             {'fields': ('image_tag',), 'classes': ('collapse',)},
         ),
     )
-    readonly_fields = ('image_tag',)
+    readonly_fields = ('image_tag', 'edit_page',)
     form = GridMapForm
 
     @admin.display(description='Картинка')
     def image_tag(self, obj):
         return mark_safe(f'<img src="{obj.base_image.url}" />')
+
+    @admin.display(description='Редактировать')
+    def edit_page(self, obj):
+        if not obj.id:
+            return '-'
+        return mark_safe(f'<a href="{obj.edit_url}" target="_blank">{obj}</a>')
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
@@ -112,20 +124,14 @@ class GridMapAdmin(admin.ModelAdmin):
             process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
             output, error = process.communicate()
 
-            result_photo = io.BytesIO(output)
-
-            # if form.cleaned_data.get('action') is not None:
-            #     image = Image.open(result_photo)
-            #     image.transpose(form.cleaned_data['action'])
-            #     new_photo = io.BytesIO(output)
-            #     image.save(new_photo, format='png')
-            # obj.base_image.path(obj.base_image.path,
-            # ContentFile(new_photo.getvalue()))
-            # result_photo = new_photo
-
-            image_field = ImageFile(result_photo, name=f'Icon_{obj.id}.png')
+            image_field = ImageFile(io.BytesIO(output), name=f'Icon_{obj.id}.png')
             obj.base_image = image_field
             obj.save()
+
+        if form.cleaned_data.get('action') is not None and obj.base_image is not None:
+            image = Image.open(obj.base_image.path)
+            image = image.transpose(form.cleaned_data['action'])
+            image.save(obj.base_image.path, format='png')
 
 
 class ParticipantAdmin(admin.ModelAdmin):

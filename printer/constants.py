@@ -1,4 +1,6 @@
-from base.constants.base import BaseNameValueDescriptionEnum
+from PIL.Image import Transpose
+
+from base.constants.base import BaseNameValueDescriptionEnum, IntDescriptionEnum
 
 
 class PrintableObjectType(BaseNameValueDescriptionEnum):
@@ -21,3 +23,11 @@ class Position(BaseNameValueDescriptionEnum):
     BOTTOM_RIGHT = 'bottom-right', 'Внизу справа'
     TOP_RIGHT = 'top-right', 'Вверху справа'
     CENTER = 'center', 'По центру'
+
+
+class TransponseAction(IntDescriptionEnum):
+    FLIP_LEFT_RIGHT = Transpose.FLIP_LEFT_RIGHT, 'Развернуть слева направо'
+    FLIP_TOP_BOTTOM = Transpose.FLIP_TOP_BOTTOM, 'Развернуть сверху вниз'
+    ROTATE_90 = Transpose.ROTATE_90, 'Повернуть на 90°'
+    ROTATE_180 = Transpose.ROTATE_180, 'Повернуть на 180°'
+    ROTATE_270 = Transpose.ROTATE_270, 'Повернуть на 270°'

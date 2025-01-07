@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ grid_map }} - редактировать</title>
+</head>
+<body>
+    <h1>Положения участников сцены на карте {{ grid_map }}</h1>
+    <a target="_blank" href="{% url 'gridmap' grid_map.pk %}">Карта</a>
+    <form method="post">
+        {% csrf_token %}
+        {{ formset.management_form }}
+        <table>
+            <thead>
+                <tr>
+                    <th>Participant</th>
+                    <th>Row</th>
+                    <th>Col</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in formset %}
+                    <tr>
+                        {{ form.id }}
+                        <td>{{ form.instance.participant.name }}</td>
+                        <td>{{ form.row }}</td>
+                        <td>{{ form.col }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit">Сохранить</button>
+    </form>
+</body>
+</html>

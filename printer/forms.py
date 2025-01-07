@@ -1,8 +1,7 @@
 from django import forms
-from PIL.Image import Transpose
 
-from printer.constants import ColorsStyle, Position
-from printer.models import EncounterIcons, GridMap, Participant
+from printer.constants import ColorsStyle, Position, TransponseAction
+from printer.models import EncounterIcons, GridMap, Participant, ParticipantPlace
 
 
 class EncounterIconForm(forms.ModelForm):
@@ -37,7 +36,7 @@ class GridMapForm(forms.ModelForm):
         required=False, label='Загрузить из буфера обмена'
     )  # TODO make mixin with this field
     action = forms.TypedChoiceField(
-        choices=((t.value, t.name) for t in Transpose),
+        choices=TransponseAction.generate_choices(),
         label='Действие',
         widget=forms.RadioSelect,
         required=False,
@@ -59,3 +58,13 @@ class ParticipantForm(forms.ModelForm):
     upload_from_clipboard = forms.BooleanField(
         required=False, label='Загрузить из буфера обмена'
     )  # TODO make mixin with this field
+
+
+# ---------------------- Views forms -------------------
+
+
+class ParticipantPlaceForm(forms.ModelForm):
+    class Meta:
+        model = ParticipantPlace
+        fields = ('id', 'row', 'col')
+        widgets = {'id': forms.HiddenInput()}

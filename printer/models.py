@@ -150,7 +150,11 @@ class GridMap(models.Model):
 
     @property
     def url(self) -> str:
-        return reverse('grid_map_icon', kwargs={'pk': self.pk})
+        return reverse('gridmap', kwargs={'pk': self.pk})
+
+    @property
+    def edit_url(self) -> str:
+        return reverse('gridmap_edit', kwargs={'pk': self.pk})
 
     def get_absolute_url(self):
         return self.url
