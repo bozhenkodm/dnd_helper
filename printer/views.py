@@ -19,7 +19,7 @@ class EncounterIconsView(DetailView):
 
 class GridMapListView(ListView):
     model = GridMap
-    ordering = ('-id')
+    ordering = ('-id',)
 
 
 class GridMapView(DetailView):

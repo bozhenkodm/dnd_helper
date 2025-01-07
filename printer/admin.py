@@ -103,7 +103,10 @@ class GridMapAdmin(admin.ModelAdmin):
             {'fields': ('image_tag',), 'classes': ('collapse',)},
         ),
     )
-    readonly_fields = ('image_tag', 'edit_page',)
+    readonly_fields = (
+        'image_tag',
+        'edit_page',
+    )
     form = GridMapForm
 
     @admin.display(description='Картинка')

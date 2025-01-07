@@ -3,8 +3,9 @@ from django.urls import path
 from printer.views import (
     EncounterIconsView,
     GridMapEditView,
+    GridMapListView,
     GridMapView,
-    PrintableObjectView, GridMapListView,
+    PrintableObjectView,
 )
 
 urlpatterns = [

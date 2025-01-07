@@ -10,7 +10,6 @@ from base.views import (
     PCPartyView,
 )
 
-
 urlpatterns = [
     path('npc/create/', NPCFormView.as_view(), name='npc_create'),
     path('npc/list/', NPCListView.as_view(), name='npc_list'),
