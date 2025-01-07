@@ -1,6 +1,6 @@
 from typing import Any
 
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import View
@@ -11,7 +11,6 @@ from base.forms.encounter import EncounterChangeInitiativeForm
 from base.forms.npc import NPCModelForm
 from base.models import NPC, Encounter
 from base.models.encounters import EncounterParticipants, PCParty
-from base.models.klass import Class
 
 
 class NPCFormView(FormView):
