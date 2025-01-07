@@ -1,6 +1,7 @@
 import io
 import subprocess
 
+from PIL.Image import Transpose
 from django.contrib import admin
 from django.core.files.images import ImageFile
 from django.utils.safestring import mark_safe
@@ -86,6 +87,7 @@ class GridMapAdmin(admin.ModelAdmin):
                 'fields': (
                     'name',
                     'base_image',
+                    'cells_on_longest_side',
                     'rows',
                     'cols',
                     'grid_color',
@@ -105,6 +107,8 @@ class GridMapAdmin(admin.ModelAdmin):
     readonly_fields = (
         'image_tag',
         'edit_page',
+        'rows',
+        'cols'
     )
     form = GridMapForm
 
@@ -118,6 +122,18 @@ class GridMapAdmin(admin.ModelAdmin):
             return '-'
         return mark_safe(f'<a href="{obj.edit_url}" target="_blank">{obj}</a>')
 
+    @admin.display(description='Количество строк')
+    def rows(self, obj):
+        if not obj.id:
+            return '-'
+        return obj.rows
+
+    @admin.display(description='Количество столбцов')
+    def cols(self, obj):
+        if not obj.id:
+            return '-'
+        return obj.cols
+
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
         # TODO make a mixin with this method
@@ -130,7 +146,7 @@ class GridMapAdmin(admin.ModelAdmin):
             obj.base_image = image_field
             obj.save()
 
-        if form.cleaned_data.get('action') is not None and obj.base_image is not None:
+        if form.cleaned_data.get('action') in Transpose and obj.base_image is not None:
             image = Image.open(obj.base_image.path)
             image = image.transpose(form.cleaned_data['action'])
             image.save(obj.base_image.path, format='png')

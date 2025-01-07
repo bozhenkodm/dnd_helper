@@ -128,13 +128,14 @@ class GridMap(models.Model):
     base_image = models.ImageField(
         verbose_name='Карта',
         upload_to='maps',
+        height_field='height',
+        width_field='width',
         null=True,
         blank=True,
     )
-    rows = models.PositiveSmallIntegerField(verbose_name='Количество строк', default=10)
-    cols = models.PositiveSmallIntegerField(
-        verbose_name='Количество столбцов', default=10
-    )
+    height = models.PositiveSmallIntegerField()
+    width = models.PositiveSmallIntegerField()
+    cells_on_longest_side = models.PositiveSmallIntegerField(default=10)
     grid_color = models.CharField(
         verbose_name='Цвет грида',
         default=ColorsStyle.WHITE,
@@ -147,6 +148,30 @@ class GridMap(models.Model):
 
     def __str__(self):
         return f'{self.name} №{self.pk}'
+
+    @property
+    def aspect_ratio(self):
+        # aspect_ratio >= 1 - Landscape or square
+        # aspect_ratio < 1 - Portrait
+        print('1'*88)
+        print(self.width / self.height)
+        return self.width / self.height
+
+    @property
+    def cols(self):
+        if self.aspect_ratio >= 1:
+            return self.cells_on_longest_side
+        return round(self.cells_on_longest_side * self.aspect_ratio)
+
+    @property
+    def rows(self):
+        if self.aspect_ratio >= 1:
+            return round(self.cells_on_longest_side / self.aspect_ratio)
+        return self.cells_on_longest_side
+
+    @property
+    def cell_size(self):
+        return round(min(self.width / self.cols, self.height / self.rows))
 
     @property
     def url(self) -> str:
@@ -165,9 +190,9 @@ class GridMap(models.Model):
     def row_range(self):
         return range(1, self.rows + 1)
 
-    @property
-    def min_size(self):
-        return 100 // min((self.rows, self.cols)) - 1
+    # @property
+    # def min_size(self):
+    #     return 100 // min((self.rows, self.cols)) - 1
 
     def get_participants_data(self) -> dict[int, dict[int, list[str]]]:
         result = defaultdict(dict)
