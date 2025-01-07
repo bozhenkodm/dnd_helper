@@ -76,5 +76,8 @@ class MainView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
-        context['links'] = (('Генератор', reverse('generator_main')),)
+        context['links'] = (
+            ('Генератор', reverse('generator_main')),
+            ('Карты', reverse('gridmap_list')),
+        )
         return context
