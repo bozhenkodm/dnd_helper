@@ -14,16 +14,6 @@ from base.models.encounters import EncounterParticipants, PCParty
 from base.models.klass import Class
 
 
-class SubclassOptionsView(View):
-    def get(self, request, *args, **kwargs):
-        klass_id = request.GET.get('klass')
-        try:
-            klass = Class.objects.get(id=klass_id)
-        except (Class.DoesNotExist, ValueError):
-            return JsonResponse({})
-        return JsonResponse(dict(klass.subclasses.generate_choices()))
-
-
 class NPCFormView(FormView):
     form_class = NPCModelForm
     template_name = 'base/npc_form.html'
