@@ -43,27 +43,25 @@ img {
 {% load dict_item %}
 
 <div class="container">
-    <div style="overflow-x: auto; white-space: nowrap;">
-        <table>
-            {% for row in object.row_range %}
-                {% with col_urls=participants|dictitem:row %}
-                <tr>
-                    {% for col in object.col_range %}
-                        <td title="{{ col }}, {{ row }}">
-                            {% if col_urls %}
-                            {% with urls=col_urls|dictitem:col %}
-                            {% if urls %}
-                            <img src="{{ urls|last }}">
-                            {% endif %}
-                            {% endwith %}
-                            {% endif %}
-                        </td>
-                    {% endfor %}
-                </tr>
-                {% endwith %}
-            {% endfor %}
-        </table>
-    </div>
+    <table>
+        {% for row in object.row_range %}
+            {% with col_urls=participants|dictitem:row %}
+            <tr>
+                {% for col in object.col_range %}
+                    <td title="{{ col }}, {{ row }}">
+                        {% if col_urls %}
+                        {% with urls=col_urls|dictitem:col %}
+                        {% if urls %}
+                        <img src="{{ urls|last }}">
+                        {% endif %}
+                        {% endwith %}
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+            {% endwith %}
+        {% endfor %}
+    </table>
 </div>
 </body>
 </html>
