@@ -2,6 +2,7 @@ import random
 
 from django.db import models
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 from base.constants.constants import SexEnum
 from base.models import Race
@@ -9,8 +10,8 @@ from base.models import Race
 
 class NPCName(models.Model):
     class Meta:
-        verbose_name = 'Имя'
-        verbose_name_plural = 'Имена'
+        verbose_name = _('Name')
+        verbose_name_plural = _('Names')
 
     FIRST_NAME = 'first'
     LAST_NAME = 'last'
@@ -19,18 +20,18 @@ class NPCName(models.Model):
         (LAST_NAME, 'Фамилия'),
     )
 
-    name = models.CharField(max_length=30, verbose_name='Имя', unique=True)
+    name = models.CharField(max_length=30, verbose_name=_('Name'), unique=True)
     name_type = models.CharField(
-        max_length=10, choices=NAMETYPE_CHOICES, verbose_name='Тип'
+        max_length=10, choices=NAMETYPE_CHOICES, verbose_name=_('Type')
     )
     sex = models.CharField(
         max_length=SexEnum.max_length(),
         choices=SexEnum.generate_choices(is_sorted=False),
-        verbose_name='Пол',
+        verbose_name=_('Sex'),
         null=True,
         blank=True,
     )
-    race = models.ManyToManyField(Race, verbose_name='Расы')
+    race = models.ManyToManyField(Race, verbose_name=_('Races'))
 
     def __str__(self):
         return (
@@ -80,5 +81,11 @@ class NPCName(models.Model):
         )
 
 
-class BannedNamesVariants(models.Model):
-    name = models.CharField(max_length=30, verbose_name='Имя', unique=True, null=False)
+class BannedNames(models.Model):
+    class Meta:
+        verbose_name = _('Banned name')
+        verbose_name_plural = _('Banned names')
+
+    name = models.CharField(
+        max_length=30, verbose_name=_('Name'), unique=True, null=False
+    )

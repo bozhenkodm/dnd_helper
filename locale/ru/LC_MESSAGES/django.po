@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-08 08:58+0000\n"
+"POT-Creation-Date: 2025-01-08 09:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -143,7 +143,7 @@ msgstr "Бонусы"
 #: base/models/models.py:160 base/models/models.py:383
 #: base/models/models.py:389 base/models/models.py:433
 #: base/models/models.py:464 base/models/powers.py:42 printer/models.py:16
-#: printer/models.py:40 printer/models.py:53 printer/models.py:127
+#: printer/models.py:40 printer/models.py:56 printer/models.py:138
 msgid "Title"
 msgstr "Название"
 
@@ -189,7 +189,8 @@ msgstr "Ограничения"
 
 #: base/models/condition.py:25 base/models/encounters.py:39
 #: base/models/feats.py:22 base/models/klass.py:78 base/models/models.py:498
-#: printer/models.py:105
+#: generator/models.py:13 generator/models.py:23 generator/models.py:90
+#: printer/models.py:116
 msgid "Name"
 msgstr "Имя"
 
@@ -525,7 +526,7 @@ msgstr "Оружие подвержено зачарованию?"
 msgid "Weapon"
 msgstr "Оружие"
 
-#: base/models/models.py:379
+#: base/models/models.py:379 generator/models.py:34
 msgid "Races"
 msgstr "Расы"
 
@@ -541,7 +542,7 @@ msgstr "Скорость"
 msgid "Vision"
 msgstr "Зрение"
 
-#: base/models/models.py:409 printer/models.py:113
+#: base/models/models.py:409 printer/models.py:124
 msgid "Size"
 msgstr "Размер"
 
@@ -578,7 +579,7 @@ msgstr "Пути совершенства"
 msgid "Description"
 msgstr "Описание"
 
-#: base/models/models.py:518
+#: base/models/models.py:518 generator/models.py:30
 msgid "Sex"
 msgstr "Пол"
 
@@ -686,7 +687,25 @@ msgstr "Этот талант используется без оружия"
 msgid "This power doesn't use magic item"
 msgstr "Этот талант не используется магическим предметом"
 
-#: printer/models.py:13 printer/models.py:44
+#: generator/models.py:14
+#, fuzzy
+#| msgid "Name"
+msgid "Names"
+msgstr "Имя"
+
+#: generator/models.py:25
+msgid "Type"
+msgstr "Тип"
+
+#: generator/models.py:86
+msgid "Banned name"
+msgstr "Запрещенное имя"
+
+#: generator/models.py:87
+msgid "Banned names"
+msgstr "Запрещённые имена"
+
+#: printer/models.py:13 printer/models.py:45
 msgid "Object"
 msgstr "Объект"
 
@@ -706,58 +725,58 @@ msgstr "Аттрибут"
 msgid "Attributes"
 msgstr "Аттрибуты"
 
-#: printer/models.py:50
+#: printer/models.py:53
 msgid "Icon"
 msgstr "Иконка"
 
-#: printer/models.py:51
+#: printer/models.py:54
 msgid "Icons"
 msgstr "Иконки"
 
-#: printer/models.py:55 printer/models.py:107 printer/models.py:129
+#: printer/models.py:58 printer/models.py:118 printer/models.py:140
 msgid "Base image"
 msgstr "Базовая картинка"
 
-#: printer/models.py:62
+#: printer/models.py:65
 msgid "Number color"
 msgstr "Цвет номера"
 
-#: printer/models.py:67 printer/models.py:137
+#: printer/models.py:70 printer/models.py:148
 msgid "Width"
 msgstr "Ширина"
 
-#: printer/models.py:69
+#: printer/models.py:72
 msgid "Number position"
 msgstr "Позиция номера"
 
-#: printer/models.py:90
+#: printer/models.py:94
 msgid "Participant"
 msgstr "Участник"
 
-#: printer/models.py:93
+#: printer/models.py:100
 msgid "Map"
 msgstr "Карта"
 
-#: printer/models.py:95
+#: printer/models.py:104
 msgid "Row"
 msgstr "Строка"
 
-#: printer/models.py:96
+#: printer/models.py:105
 msgid "Column"
 msgstr "Столбец"
 
-#: printer/models.py:98
+#: printer/models.py:109
 msgid "Rotation"
 msgstr "Поворот"
 
-#: printer/models.py:136
+#: printer/models.py:147
 msgid "Height"
 msgstr "Высота"
 
-#: printer/models.py:140
+#: printer/models.py:151
 msgid "Grid color"
 msgstr "Цвет грида"
 
-#: printer/models.py:146
+#: printer/models.py:160
 msgid "Participants"
 msgstr "Участники"

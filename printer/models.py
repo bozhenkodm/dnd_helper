@@ -41,7 +41,10 @@ class PrintableObjectItems(models.Model):
     )
     description = models.CharField(max_length=256, verbose_name=_('Description'))
     p_object = models.ForeignKey(
-        PrintableObject, verbose_name=_('Object'), on_delete=models.CASCADE, related_name='items'
+        PrintableObject,
+        verbose_name=_('Object'),
+        on_delete=models.CASCADE,
+        related_name='items',
     )
 
 
@@ -87,15 +90,23 @@ class EncounterIcons(models.Model):
 class ParticipantPlace(models.Model):
 
     participant = models.ForeignKey(
-        'printer.Participant', verbose_name=_('Participant'), on_delete=models.CASCADE, related_name='places'
+        'printer.Participant',
+        verbose_name=_('Participant'),
+        on_delete=models.CASCADE,
+        related_name='places',
     )
     map = models.ForeignKey(
-        'printer.GridMap', verbose_name=_('Map'), on_delete=models.CASCADE, related_name='places'
+        'printer.GridMap',
+        verbose_name=_('Map'),
+        on_delete=models.CASCADE,
+        related_name='places',
     )
     row = models.PositiveSmallIntegerField(default=0, verbose_name=_('Row'))
     col = models.PositiveSmallIntegerField(default=0, verbose_name=_('Column'))
     rotation = models.PositiveSmallIntegerField(
-        choices=((i, i) for i in range(0, 271, 90)), default=0, verbose_name=_('Rotation')
+        choices=((i, i) for i in range(0, 271, 90)),
+        default=0,
+        verbose_name=_('Rotation'),
     )
 
 
@@ -143,7 +154,10 @@ class GridMap(models.Model):
         choices=ColorsStyle.generate_choices(),
     )
     participants = models.ManyToManyField(
-        Participant, through=ParticipantPlace, blank=True, verbose_name=_('Participants')
+        Participant,
+        through=ParticipantPlace,
+        blank=True,
+        verbose_name=_('Participants'),
     )
 
     def __str__(self):
