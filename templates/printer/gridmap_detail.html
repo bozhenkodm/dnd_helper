@@ -4,6 +4,8 @@
 .container {
   position: relative;
   text-align: center;
+  overflow-x: auto; /* Enable horizontal scrolling */
+  white-space: nowrap; /* Prevent wrapping inside the container */
 }
 table {
     border-collapse: collapse;
@@ -12,6 +14,8 @@ table {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    width: max-content; /* Ensure the table does not shrink */
+    margin: 0; /* Remove auto-centering to respect horizontal scrolling */
 }
 
 /* Фиксируем размеры ячеек и заголовков */
@@ -20,8 +24,6 @@ td, th {
     color: {{ object.grid_color }};
     vertical-align: middle;
     border: 1px solid {{ object.grid_color }};
-
-    /* Фиксированная ширина и высота ячейки */
     width: {{ object.cell_size }}px;
     height: {{ object.cell_size }}px;
     aspect-ratio: 1 / 1;
@@ -41,25 +43,27 @@ img {
 {% load dict_item %}
 
 <div class="container">
-    <table>
-        {% for row in object.row_range %}
-            {% with col_urls=participants|dictitem:row %}
-            <tr>
-                {% for col in object.col_range %}
-                    <td title="{{ col }}, {{ row }}">
-                        {% if col_urls %}
-                        {% with urls=col_urls|dictitem:col %}
-                        {% if urls %}
-                        <img src="{{ urls|last }}">
-                        {% endif %}
-                        {% endwith %}
-                        {% endif %}
-                    </td>
-                {% endfor %}
-            </tr>
-            {% endwith %}
-        {% endfor %}
-    </table>
+    <div style="overflow-x: auto; white-space: nowrap;">
+        <table>
+            {% for row in object.row_range %}
+                {% with col_urls=participants|dictitem:row %}
+                <tr>
+                    {% for col in object.col_range %}
+                        <td title="{{ col }}, {{ row }}">
+                            {% if col_urls %}
+                            {% with urls=col_urls|dictitem:col %}
+                            {% if urls %}
+                            <img src="{{ urls|last }}">
+                            {% endif %}
+                            {% endwith %}
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                </tr>
+                {% endwith %}
+            {% endfor %}
+        </table>
+    </div>
 </div>
 </body>
 </html>

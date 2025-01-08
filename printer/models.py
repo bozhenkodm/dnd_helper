@@ -153,8 +153,6 @@ class GridMap(models.Model):
     def aspect_ratio(self):
         # aspect_ratio >= 1 - Landscape or square
         # aspect_ratio < 1 - Portrait
-        print('1'*88)
-        print(self.width / self.height)
         return self.width / self.height
 
     @property

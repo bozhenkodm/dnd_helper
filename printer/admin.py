@@ -1,11 +1,11 @@
 import io
 import subprocess
 
-from PIL.Image import Transpose
 from django.contrib import admin
 from django.core.files.images import ImageFile
 from django.utils.safestring import mark_safe
 from PIL import Image
+from PIL.Image import Transpose
 
 from printer.forms import EncounterIconForm, GridMapForm, ParticipantForm
 from printer.models import (
@@ -104,12 +104,7 @@ class GridMapAdmin(admin.ModelAdmin):
             {'fields': ('image_tag',), 'classes': ('collapse',)},
         ),
     )
-    readonly_fields = (
-        'image_tag',
-        'edit_page',
-        'rows',
-        'cols'
-    )
+    readonly_fields = ('image_tag', 'edit_page', 'rows', 'cols')
     form = GridMapForm
 
     @admin.display(description='Картинка')
