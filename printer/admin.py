@@ -145,6 +145,9 @@ class GridMapAdmin(admin.ModelAdmin):
             image = Image.open(obj.base_image.path)
             image = image.transpose(form.cleaned_data['action'])
             image.save(obj.base_image.path, format='png')
+            obj.height = image.height
+            obj.width = image.width
+            obj.save()
 
 
 class ParticipantAdmin(admin.ModelAdmin):

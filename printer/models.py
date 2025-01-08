@@ -10,12 +10,12 @@ from printer.constants import ColorsStyle, Position, PrintableObjectType
 
 class PrintableObject(models.Model):
     class Meta:
-        verbose_name = 'Объект'
-        verbose_name_plural = 'Объекты'
+        verbose_name = _('Object')
+        verbose_name_plural = _('Objects')
 
-    name = models.CharField(max_length=40, verbose_name='Название')
+    name = models.CharField(max_length=40, verbose_name=_('Title'))
     type = models.CharField(
-        verbose_name='Тип объекта',
+        verbose_name=_('Object type'),
         choices=PrintableObjectType.generate_choices(),
         max_length=PrintableObjectType.max_length(),
         null=True,
@@ -32,41 +32,41 @@ class PrintableObject(models.Model):
 
 class PrintableObjectItems(models.Model):
     class Meta:
-        verbose_name = 'Аттрибут'
-        verbose_name_plural = 'Аттрибуты'
+        verbose_name = _('Attribute')
+        verbose_name_plural = _('Attributes')
 
-    order = models.PositiveSmallIntegerField(verbose_name='Порядок')
+    order = models.PositiveSmallIntegerField(verbose_name=_('Order'))
     title = models.CharField(
-        max_length=15, verbose_name='Название', null=True, blank=True
+        max_length=15, verbose_name=_('Title'), null=True, blank=True
     )
-    description = models.CharField(max_length=256, verbose_name='Описание')
+    description = models.CharField(max_length=256, verbose_name=_('Description'))
     p_object = models.ForeignKey(
-        PrintableObject, on_delete=models.CASCADE, related_name='items'
+        PrintableObject, verbose_name=_('Object'), on_delete=models.CASCADE, related_name='items'
     )
 
 
 class EncounterIcons(models.Model):
     class Meta:
-        verbose_name = 'Иконка'
-        verbose_name_plural = 'Иконки'
+        verbose_name = _('Icon')
+        verbose_name_plural = _('Icons')
 
-    name = models.CharField(verbose_name='Название', max_length=30)
+    name = models.CharField(verbose_name=_('Title'), max_length=30)
     base_image = models.ImageField(
-        verbose_name='базовая картинка',
+        verbose_name=_('Base image'),
         upload_to='encounter_icons',
         null=True,
         blank=True,
     )
     number = models.PositiveSmallIntegerField(verbose_name='Количество однотипных')
     number_color = models.CharField(
-        verbose_name='Цвет номера',
+        verbose_name=_('Number color'),
         default=ColorsStyle.RED,
         max_length=ColorsStyle.max_length(),
         choices=ColorsStyle.generate_choices(),
     )
-    width = models.PositiveSmallIntegerField(verbose_name='Ширина', default=200)
+    width = models.PositiveSmallIntegerField(verbose_name=_('Width'), default=200)
     number_position = models.CharField(
-        verbose_name='Класс позиции номера на картинке',
+        verbose_name=_('Number position'),
         choices=Position.generate_choices(),
         max_length=Position.max_length(),
         default=Position.TOP_LEFT,
@@ -87,24 +87,24 @@ class EncounterIcons(models.Model):
 class ParticipantPlace(models.Model):
 
     participant = models.ForeignKey(
-        'printer.Participant', on_delete=models.CASCADE, related_name='places'
+        'printer.Participant', verbose_name=_('Participant'), on_delete=models.CASCADE, related_name='places'
     )
     map = models.ForeignKey(
-        'printer.GridMap', on_delete=models.CASCADE, related_name='places'
+        'printer.GridMap', verbose_name=_('Map'), on_delete=models.CASCADE, related_name='places'
     )
-    row = models.PositiveSmallIntegerField(default=0)
-    col = models.PositiveSmallIntegerField(default=0)
+    row = models.PositiveSmallIntegerField(default=0, verbose_name=_('Row'))
+    col = models.PositiveSmallIntegerField(default=0, verbose_name=_('Column'))
     rotation = models.PositiveSmallIntegerField(
-        choices=((i, i) for i in range(0, 271, 90)), default=0
+        choices=((i, i) for i in range(0, 271, 90)), default=0, verbose_name=_('Rotation')
     )
 
 
 class Participant(models.Model):
     MIN_SIZE = SizeIntEnum.AVERAGE
 
-    name = models.CharField(verbose_name='Имя', max_length=30)
+    name = models.CharField(verbose_name=_('Name'), max_length=30)
     base_image = models.ImageField(
-        verbose_name='Карта',
+        verbose_name=_('Base image'),
         upload_to='participants',
         null=True,
         blank=True,
@@ -124,26 +124,26 @@ class Participant(models.Model):
 
 
 class GridMap(models.Model):
-    name = models.CharField(verbose_name='Название', max_length=30, default='Карта')
+    name = models.CharField(verbose_name=_('Title'), max_length=30, default='Карта')
     base_image = models.ImageField(
-        verbose_name='Карта',
+        verbose_name=_('Base image'),
         upload_to='maps',
         height_field='height',
         width_field='width',
         null=True,
         blank=True,
     )
-    height = models.PositiveSmallIntegerField()
-    width = models.PositiveSmallIntegerField()
+    height = models.PositiveSmallIntegerField(verbose_name=_('Height'))
+    width = models.PositiveSmallIntegerField(verbose_name=_('Width'))
     cells_on_longest_side = models.PositiveSmallIntegerField(default=10)
     grid_color = models.CharField(
-        verbose_name='Цвет грида',
+        verbose_name=_('Grid color'),
         default=ColorsStyle.WHITE,
         max_length=ColorsStyle.max_length(),
         choices=ColorsStyle.generate_choices(),
     )
     participants = models.ManyToManyField(
-        Participant, through=ParticipantPlace, blank=True
+        Participant, through=ParticipantPlace, blank=True, verbose_name=_('Participants')
     )
 
     def __str__(self):
