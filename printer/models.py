@@ -202,10 +202,6 @@ class GridMap(models.Model):
     def row_range(self):
         return range(1, self.rows + 1)
 
-    # @property
-    # def min_size(self):
-    #     return 100 // min((self.rows, self.cols)) - 1
-
     def get_participants_data(self) -> dict[int, dict[int, list[str]]]:
         result = defaultdict(dict)
         for place in self.places.all():
@@ -215,3 +211,9 @@ class GridMap(models.Model):
                         (place.participant.id, place.participant.base_image.url)
                     )
         return result
+
+    def update_coords(self, participant_id, row, col):
+        pp = ParticipantPlace.objects.get(participant_id=participant_id, map=self)
+        pp.row = row
+        pp.col = col
+        pp.save()

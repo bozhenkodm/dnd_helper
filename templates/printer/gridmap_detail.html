@@ -67,25 +67,47 @@ img {
 </div>
 <script>
 function allowDrop(event) {
-    console.log("11111111111111111111111");
     event.preventDefault();
 }
 
 function drag(event) {
-    console.log("22222222222222222222222");
     event.dataTransfer.setData("text", event.target.id);
 }
 
 function drop(event) {
-    console.log("3333333333333333333333");
     event.preventDefault();
     const data = event.dataTransfer.getData("text");
     const draggedElement = document.getElementById(data);
-    console.log(draggedElement);
 
     // Ensure no duplicates in the target cell
     if (event.target.tagName === 'TD' && !event.target.querySelector('img')) {
         event.target.appendChild(draggedElement);
+
+        // Calculate the new row and column indices
+        const newRow = event.target.parentNode.rowIndex + 1;
+        const newCol = event.target.cellIndex + 1;
+
+        // Send the updated position to the server
+        fetch('/printer/gridmap/{{ object.id }}/update-coords/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}' // Include the CSRF token for Django
+            },
+            body: JSON.stringify({
+                participant_id: draggedElement.id,
+                new_row: newRow,
+                new_col: newCol
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => console.log('Grid updated:', data))
+        .catch(error => console.error('Error updating grid:', error));
     }
 }
 </script>

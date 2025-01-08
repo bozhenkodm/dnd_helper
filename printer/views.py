@@ -1,5 +1,7 @@
+import json
+
 from django.forms import inlineformset_factory
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import View
@@ -59,3 +61,11 @@ class GridMapEditView(View):
         return render(
             request, self.template_name, {'formset': formset, 'grid_map': grid_map}
         )
+
+
+class GridMapUpdateCoordsView(View):
+    def post(self, request, *args, **kwargs):
+        body = json.loads(request.body.decode())
+        grid_map = get_object_or_404(GridMap, pk=self.kwargs['pk'])
+        grid_map.update_coords(body['participant_id'], body['new_row'], body['new_col'])
+        return JsonResponse({'status': 'ok'})
