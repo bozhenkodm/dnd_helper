@@ -8,7 +8,7 @@ from base.managers import EncounterParticipantsQuerySet
 from base.models.models import NPC
 
 
-class PlayerCharacters(models.Model):
+class PlayerCharacter(models.Model):
     class Meta:
         verbose_name = 'Игровой персонаж'
         verbose_name_plural = 'Игровые персонажи'
@@ -38,7 +38,7 @@ class PCParty(models.Model):
     name = models.CharField(
         verbose_name=_('Name'), default='', blank=True, max_length=20
     )
-    members = models.ManyToManyField(PlayerCharacters, verbose_name=_('Members'))
+    members = models.ManyToManyField(PlayerCharacter, verbose_name=_('Members'))
 
     def __str__(self):
         members = ', '.join(self.members.values_list('name', flat=True))
@@ -242,7 +242,7 @@ class CombatantsPC(models.Model):
         verbose_name_plural = 'Участники сцены (ИП)'
 
     pc = models.ForeignKey(
-        PlayerCharacters, verbose_name='Игровой персонаж', on_delete=models.CASCADE
+        PlayerCharacter, verbose_name='Игровой персонаж', on_delete=models.CASCADE
     )
     encounter = models.ForeignKey(
         Encounter,

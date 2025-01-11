@@ -27,7 +27,7 @@ from base.admin.admin_classes import (
 )
 from base.models.bonuses import Bonus
 from base.models.condition import Constraint
-from base.models.encounters import Encounter, PCParty, PlayerCharacters
+from base.models.encounters import Encounter, PCParty, PlayerCharacter
 from base.models.feats import Feat, WeaponState
 from base.models.klass import Class, Subclass
 from base.models.magic_items import (
@@ -61,7 +61,7 @@ admin.site.register(ArmorType, ArmorTypeAdmin)
 admin.site.register(WeaponType, WeaponTypeAdmin)
 admin.site.register(Power, PowerAdmin)
 admin.site.register(FunctionalTemplate, FunctionalTemplateAdmin)
-admin.site.register(PlayerCharacters, PlayerCharactersAdmin)
+admin.site.register(PlayerCharacter, PlayerCharactersAdmin)
 admin.site.register(MagicItemType, MagicItemTypeAdmin)
 admin.site.register(MagicArmorType, MagicArmorTypeAdmin)
 admin.site.register(MagicWeaponType, MagicWeaponTypeAdmin)

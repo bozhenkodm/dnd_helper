@@ -1,5 +1,6 @@
 from django import forms
 
+from base.models.encounters import PCParty
 from printer.constants import ColorsStyle, Position, TransponseAction
 from printer.models import EncounterIcons, GridMap, Participant, ParticipantPlace
 
@@ -48,6 +49,7 @@ class GridMapForm(forms.ModelForm):
         widget=forms.RadioSelect,
         initial=ColorsStyle.WHITE,
     )
+    party = forms.ModelChoiceField(queryset=PCParty.objects.all(), required=False)
 
 
 class ParticipantForm(forms.ModelForm):

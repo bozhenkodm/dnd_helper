@@ -5,6 +5,8 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from base.constants.constants import SizeIntEnum
+from base.models import NPC
+from base.models.encounters import PlayerCharacter
 from printer.constants import ColorsStyle, Position, PrintableObjectType
 
 
@@ -124,6 +126,22 @@ class Participant(models.Model):
         verbose_name=_('Size'),
         choices=SizeIntEnum.generate_choices(),
         default=SizeIntEnum.AVERAGE.value,
+    )
+    pc = models.OneToOneField(
+        PlayerCharacter,
+        verbose_name=_('Player character'),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='avatar',
+    )
+    npc = models.OneToOneField(
+        NPC,
+        verbose_name=_('Non player character'),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='avatar',
     )
 
     def __str__(self):

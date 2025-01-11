@@ -95,7 +95,7 @@ class GridMapAdmin(admin.ModelAdmin):
                         'upload_from_clipboard',
                         'action',
                     ),
-                    'edit_page',
+                    'party',
                 )
             },
         ),
@@ -104,18 +104,12 @@ class GridMapAdmin(admin.ModelAdmin):
             {'fields': ('image_tag',), 'classes': ('collapse',)},
         ),
     )
-    readonly_fields = ('image_tag', 'edit_page', 'rows', 'cols')
+    readonly_fields = ('image_tag', 'rows', 'cols')
     form = GridMapForm
 
     @admin.display(description='Картинка')
     def image_tag(self, obj):
         return mark_safe(f'<img src="{obj.base_image.url}" />')
-
-    @admin.display(description='Редактировать')
-    def edit_page(self, obj):
-        if not obj.id:
-            return '-'
-        return mark_safe(f'<a href="{obj.edit_url}" target="_blank">{obj}</a>')
 
     @admin.display(description='Количество строк')
     def rows(self, obj):
@@ -131,6 +125,15 @@ class GridMapAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
+        if party := form.cleaned_data.get('party'):
+            row, col = 1, 1
+            pps = []
+            for pc in party.members.filter(avatar__isnull=False):
+                pps.append(
+                    ParticipantPlace(participant=pc.avatar, map=obj, row=row, col=col)
+                )
+                col += 1
+            ParticipantPlace.objects.bulk_create(pps)
         # TODO make a mixin with this method
         if form.cleaned_data['upload_from_clipboard']:
             bashCommand = 'xclip -selection clipboard -t image/png -o'
@@ -151,7 +154,14 @@ class GridMapAdmin(admin.ModelAdmin):
 
 
 class ParticipantAdmin(admin.ModelAdmin):
-    fields = ('name', 'base_image', 'base_size', 'upload_from_clipboard', 'image_tag')
+    fields = (
+        'name',
+        ('pc', 'npc'),
+        'base_image',
+        'base_size',
+        'upload_from_clipboard',
+        'image_tag',
+    )
     readonly_fields = ('image_tag',)
     form = ParticipantForm
 
