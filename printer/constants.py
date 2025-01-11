@@ -11,6 +11,7 @@ class PrintableObjectType(BaseNameValueDescriptionEnum):
 
 
 class ColorsStyle(BaseNameValueDescriptionEnum):
+    NONE = 'none', 'Пусто'
     RED = 'red', 'Красный'
     BLACK = 'black', 'Чёрный'
     WHITE = 'white', 'Белый'

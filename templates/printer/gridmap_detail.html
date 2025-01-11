@@ -8,8 +8,12 @@
   white-space: nowrap; /* Prevent wrapping inside the container */
 }
 table {
-    border-collapse: collapse;
-    border: 1px solid {{ object.grid_color }};
+    {% if object.grid_color == 'none' %}
+        border: none;
+    {% else %}
+        border-collapse: collapse;
+        border: 1px solid {{ object.grid_color }};
+    {% endif %}
     background-image: url({{ object.base_image.url }});
     background-size: cover;
     background-position: center;

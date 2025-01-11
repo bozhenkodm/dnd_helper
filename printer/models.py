@@ -144,14 +144,14 @@ class GridMap(models.Model):
         null=True,
         blank=True,
     )
-    height = models.PositiveSmallIntegerField(verbose_name=_('Height'))
-    width = models.PositiveSmallIntegerField(verbose_name=_('Width'))
+    height = models.PositiveSmallIntegerField(verbose_name=_('Height'), default=1)
+    width = models.PositiveSmallIntegerField(verbose_name=_('Width'), default=1)
     cells_on_longest_side = models.PositiveSmallIntegerField(default=10)
     grid_color = models.CharField(
         verbose_name=_('Grid color'),
-        default=ColorsStyle.WHITE,
+        default=ColorsStyle.NONE,
         max_length=ColorsStyle.max_length(),
-        choices=ColorsStyle.generate_choices(),
+        choices=ColorsStyle.generate_choices(start_with=(ColorsStyle.NONE,)),
     )
     participants = models.ManyToManyField(
         Participant,
