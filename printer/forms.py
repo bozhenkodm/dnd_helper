@@ -57,7 +57,7 @@ class GridMapForm(forms.ModelForm):
     npcs = forms.ModelMultipleChoiceField(
         queryset=NPC.objects.filter(avatar__isnull=False),
         required=False,
-        label=_('NPC'),
+        label='NPC',
     )
 
 

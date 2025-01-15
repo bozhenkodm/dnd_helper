@@ -281,6 +281,7 @@ class NPCAdmin(admin.ModelAdmin):
     fields = [
         (
             'name',
+            'avatar_img',
             'sex',
         ),
         'is_bonus_applied',
@@ -444,7 +445,7 @@ class NPCAdmin(admin.ModelAdmin):
         return result
 
     def get_readonly_fields(self, request, obj=None):
-        readonly_fields = ['mandatory_skills']
+        readonly_fields = ['mandatory_skills', 'avatar_img']
         if obj and obj.level < 11:
             readonly_fields.append('paragon_path')
         return readonly_fields
@@ -453,6 +454,14 @@ class NPCAdmin(admin.ModelAdmin):
     def mandatory_skills(self, obj):
         return ', '.join(
             s.get_title_display() for s in obj.klass.mandatory_skills.all()
+        )
+
+    @admin.display(description='Аватар')
+    def avatar_img(self, obj):
+        if not obj.avatar:
+            return '-'
+        return mark_safe(
+            f'<img width=50px; height=auto; src="{obj.avatar.base_image.url}" />'
         )
 
     @atomic
