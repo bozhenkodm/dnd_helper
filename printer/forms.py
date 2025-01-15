@@ -1,8 +1,10 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
+from base.models import NPC
 from base.models.encounters import PCParty
 from printer.constants import ColorsStyle, Position, TransponseAction
-from printer.models import EncounterIcons, GridMap, Participant, ParticipantPlace
+from printer.models import Avatar, EncounterIcons, GridMap, ParticipantPlace
 
 
 class EncounterIconForm(forms.ModelForm):
@@ -49,12 +51,19 @@ class GridMapForm(forms.ModelForm):
         widget=forms.RadioSelect,
         initial=ColorsStyle.WHITE,
     )
-    party = forms.ModelChoiceField(queryset=PCParty.objects.all(), required=False)
+    party = forms.ModelChoiceField(
+        queryset=PCParty.objects.all(), required=False, label=_('Party')
+    )
+    npcs = forms.ModelMultipleChoiceField(
+        queryset=NPC.objects.filter(avatar__isnull=False),
+        required=False,
+        label=_('NPC'),
+    )
 
 
 class ParticipantForm(forms.ModelForm):
     class Meta:
-        model = Participant
+        model = Avatar
         fields = '__all__'
 
     upload_from_clipboard = forms.BooleanField(

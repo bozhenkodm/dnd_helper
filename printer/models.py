@@ -92,7 +92,7 @@ class EncounterIcons(models.Model):
 class ParticipantPlace(models.Model):
 
     participant = models.ForeignKey(
-        'printer.Participant',
+        'printer.Avatar',
         verbose_name=_('Participant'),
         on_delete=models.CASCADE,
         related_name='places',
@@ -112,13 +112,13 @@ class ParticipantPlace(models.Model):
     )
 
 
-class Participant(models.Model):
+class Avatar(models.Model):
     MIN_SIZE = SizeIntEnum.AVERAGE
 
     name = models.CharField(verbose_name=_('Name'), max_length=30)
     base_image = models.ImageField(
         verbose_name=_('Base image'),
-        upload_to='participants',
+        upload_to='avatars',
         null=True,
         blank=True,
     )
@@ -172,7 +172,7 @@ class GridMap(models.Model):
         choices=ColorsStyle.generate_choices(start_with=(ColorsStyle.NONE,)),
     )
     participants = models.ManyToManyField(
-        Participant,
+        Avatar,
         through=ParticipantPlace,
         blank=True,
         verbose_name=_('Participants'),

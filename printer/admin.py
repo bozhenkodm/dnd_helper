@@ -9,9 +9,9 @@ from PIL.Image import Transpose
 
 from printer.forms import EncounterIconForm, GridMapForm, ParticipantForm
 from printer.models import (
+    Avatar,
     EncounterIcons,
     GridMap,
-    Participant,
     ParticipantPlace,
     PrintableObject,
     PrintableObjectItems,
@@ -96,6 +96,7 @@ class GridMapAdmin(admin.ModelAdmin):
                         'action',
                     ),
                     'party',
+                    'npcs',
                 )
             },
         ),
@@ -125,15 +126,23 @@ class GridMapAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
+        row, col = 1, 1
+        pps = []
         if party := form.cleaned_data.get('party'):
-            row, col = 1, 1
-            pps = []
             for pc in party.members.filter(avatar__isnull=False):
                 pps.append(
                     ParticipantPlace(participant=pc.avatar, map=obj, row=row, col=col)
                 )
                 col += 1
+        col += 1
+        if npcs := form.cleaned_data.get('npcs'):
+            for npc in npcs.all():
+                pps.append(
+                    ParticipantPlace(participant=npc.avatar, map=obj, row=row, col=col)
+                )
+        if pps:
             ParticipantPlace.objects.bulk_create(pps)
+
         # TODO make a mixin with this method
         if form.cleaned_data['upload_from_clipboard']:
             bashCommand = 'xclip -selection clipboard -t image/png -o'
@@ -185,4 +194,4 @@ class ParticipantAdmin(admin.ModelAdmin):
 admin.site.register(PrintableObject, PrintableObjectAdmin)
 admin.site.register(EncounterIcons, EncounterIconsAdmin)
 admin.site.register(GridMap, GridMapAdmin)
-admin.site.register(Participant, ParticipantAdmin)
+admin.site.register(Avatar, ParticipantAdmin)
