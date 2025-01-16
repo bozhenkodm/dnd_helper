@@ -56,6 +56,9 @@ class Class(ClassAbstract):
     default_feats = models.ManyToManyField(
         'base.Feat', verbose_name=_('Default feats'), blank=True
     )
+    default_powers = models.ManyToManyField(
+        'base.Power', verbose_name=_('Default powers'), blank=True
+    )
 
     def __str__(self):
         return self.name_display
@@ -82,6 +85,12 @@ class Subclass(ClassAbstract):
     )
     default_feats = models.ManyToManyField(
         'base.Feat', verbose_name=_('Default feats'), blank=True
+    )
+    default_powers = models.ManyToManyField(
+        'base.Power',
+        verbose_name=_('Default powers'),
+        blank=True,
+        related_name='subclasses_many',
     )
 
     def __str__(self):
