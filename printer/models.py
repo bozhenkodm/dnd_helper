@@ -134,7 +134,7 @@ class Avatar(models.Model):
         null=True,
         blank=True,
         related_name='avatar',
-        limit_choices_to={'avatar__isnull': True}
+        limit_choices_to={'avatar__isnull': True},
     )
     npc = models.OneToOneField(
         NPC,
@@ -143,7 +143,7 @@ class Avatar(models.Model):
         null=True,
         blank=True,
         related_name='avatar',
-        limit_choices_to={'avatar__isnull': True}
+        limit_choices_to={'avatar__isnull': True},
     )
 
     def __str__(self):
