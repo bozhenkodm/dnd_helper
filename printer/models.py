@@ -115,7 +115,7 @@ class ParticipantPlace(models.Model):
 class Avatar(models.Model):
     MIN_SIZE = SizeIntEnum.AVERAGE
 
-    name = models.CharField(verbose_name=_('Name'), max_length=30)
+    name = models.CharField(verbose_name=_('Name'), max_length=30, blank=True)
     base_image = models.ImageField(
         verbose_name=_('Base image'),
         upload_to='avatars',
@@ -134,6 +134,7 @@ class Avatar(models.Model):
         null=True,
         blank=True,
         related_name='avatar',
+        limit_choices_to={'avatar__isnull': True}
     )
     npc = models.OneToOneField(
         NPC,
@@ -142,6 +143,7 @@ class Avatar(models.Model):
         null=True,
         blank=True,
         related_name='avatar',
+        limit_choices_to={'avatar__isnull': True}
     )
 
     def __str__(self):

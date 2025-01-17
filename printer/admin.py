@@ -162,7 +162,7 @@ class GridMapAdmin(admin.ModelAdmin):
             obj.save()
 
 
-class ParticipantAdmin(admin.ModelAdmin):
+class AvatarAdmin(admin.ModelAdmin):
     fields = (
         'name',
         ('pc', 'npc'),
@@ -173,12 +173,18 @@ class ParticipantAdmin(admin.ModelAdmin):
     )
     readonly_fields = ('image_tag',)
     form = ParticipantForm
+    autocomplete_fields = ('npc',)
 
     @admin.display(description='Картинка')
     def image_tag(self, obj):
         return mark_safe(f'<img src="{obj.base_image.url}" />')
 
     def save_model(self, request, obj, form, change):
+        if not obj.name:
+            if obj.pc:
+                obj.name = obj.pc.name
+            elif obj.npc:
+                obj.name = obj.npc.name
         super().save_model(request, obj, form, change)
         # TODO make a mixin with this method
         if form.cleaned_data['upload_from_clipboard']:
@@ -194,4 +200,4 @@ class ParticipantAdmin(admin.ModelAdmin):
 admin.site.register(PrintableObject, PrintableObjectAdmin)
 admin.site.register(EncounterIcons, EncounterIconsAdmin)
 admin.site.register(GridMap, GridMapAdmin)
-admin.site.register(Avatar, ParticipantAdmin)
+admin.site.register(Avatar, AvatarAdmin)
