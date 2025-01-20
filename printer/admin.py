@@ -134,6 +134,11 @@ class GridMapAdmin(admin.ModelAdmin):
                     ParticipantPlace(participant=pc.avatar, map=obj, row=row, col=col)
                 )
                 col += 1
+            for npc in party.npc_members.filter(avatar__isnull=False):
+                pps.append(
+                    ParticipantPlace(participant=npc.avatar, map=obj, row=row, col=col)
+                )
+                col += 1
         col += 1
         if npcs := form.cleaned_data.get('npcs'):
             for npc in npcs.all():

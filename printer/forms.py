@@ -2,7 +2,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from base.models import NPC
-from base.models.encounters import PCParty
+from base.models.encounters import Party
 from printer.constants import ColorsStyle, Position, TransponseAction
 from printer.models import Avatar, EncounterIcons, GridMap, ParticipantPlace
 
@@ -52,7 +52,7 @@ class GridMapForm(forms.ModelForm):
         initial=ColorsStyle.WHITE,
     )
     party = forms.ModelChoiceField(
-        queryset=PCParty.objects.all(), required=False, label=_('Party')
+        queryset=Party.objects.all(), required=False, label=_('Party')
     )
     npcs = forms.ModelMultipleChoiceField(
         queryset=NPC.objects.filter(avatar__isnull=False),

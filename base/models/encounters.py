@@ -30,7 +30,7 @@ class PlayerCharacter(models.Model):
         return self.name
 
 
-class PCParty(models.Model):
+class Party(models.Model):
     class Meta:
         verbose_name = _('Party')
         verbose_name_plural = _('Parties')
@@ -38,12 +38,22 @@ class PCParty(models.Model):
     name = models.CharField(
         verbose_name=_('Name'), default='', blank=True, max_length=20
     )
-    members = models.ManyToManyField(PlayerCharacter, verbose_name=_('Members'))
+    members = models.ManyToManyField(
+        PlayerCharacter, verbose_name=_('Player characters')
+    )
+    npc_members = models.ManyToManyField(
+        NPC, verbose_name=_('Non player characters'), blank=True
+    )
 
     def __str__(self):
-        members = ', '.join(self.members.values_list('name', flat=True))
+        members = ', '.join(self.members.order_by('name').values_list('name', flat=True))
+        if self.npc_members.count():
+            npcs = ', '.join(self.npc_members.order_by('name').values_list('name', flat=True))
+            npcs = f'; {npcs}'
+        else:
+            npcs = ''
         name = f'{self.name}: ' if self.name else ''
-        return f'{name}{members}'
+        return f'{name}{members}{npcs}'
 
     def get_absolute_url(self):
         return reverse('pcparty', kwargs={'pk': self.pk})
@@ -62,7 +72,7 @@ class Encounter(models.Model):
         verbose_name='Кидать инициативу за игроков?', default=False
     )
     party = models.ForeignKey(
-        PCParty,
+        Party,
         verbose_name=_('Party'),
         on_delete=models.SET_NULL,
         null=True,

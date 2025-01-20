@@ -57,7 +57,7 @@ img {
                             {% with urls=col_urls|dictitem:col %}
                                 {% if urls %}
                                     {% with url=urls|last %}
-                                        <img id="{{ url.0 }}" src="{{ url.1 }}" draggable="true" ondragstart="drag(event)">
+                                        <img id="{{ url.0 }}" src="{{ url.2 }}" draggable="true" ondragstart="drag(event)" alt="{{ url.1 }}">
                                     {% endwith %}
                                 {% endif %}
                             {% endwith %}

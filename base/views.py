@@ -10,7 +10,7 @@ from base.constants.constants import SkillEnum
 from base.forms.encounter import EncounterChangeInitiativeForm
 from base.forms.npc import NPCModelForm
 from base.models import NPC, Encounter
-from base.models.encounters import EncounterParticipants, PCParty
+from base.models.encounters import EncounterParticipants, Party
 
 
 class NPCFormView(FormView):
@@ -67,7 +67,7 @@ class EncounterChangeInitiativeView(View):
 
 
 class PCPartyView(DetailView):
-    model = PCParty
+    model = Party
 
 
 class MainView(TemplateView):

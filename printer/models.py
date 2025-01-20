@@ -228,7 +228,11 @@ class GridMap(models.Model):
             for i in range(place.participant.size):
                 for j in range(place.participant.size):
                     result[place.row + i].setdefault(place.col + j, []).append(
-                        (place.participant.id, place.participant.base_image.url)
+                        (
+                            place.participant.id,
+                            f'{place.participant.name[0]-place.participant.name[-1]}',
+                            place.participant.base_image.url
+                        )
                     )
         return result
 

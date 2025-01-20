@@ -27,7 +27,7 @@ from base.admin.admin_classes import (
 )
 from base.models.bonuses import Bonus
 from base.models.condition import Constraint
-from base.models.encounters import Encounter, PCParty, PlayerCharacter
+from base.models.encounters import Encounter, Party, PlayerCharacter
 from base.models.feats import Feat, WeaponState
 from base.models.klass import Class, Subclass
 from base.models.magic_items import (
@@ -56,7 +56,7 @@ admin.site.register(Subclass, SubclassAdmin)
 admin.site.register(NPC, NPCAdmin)
 admin.site.register(ParagonPath, ParagonPathAdmin)
 admin.site.register(Encounter, EncounterAdmin)
-admin.site.register(PCParty)
+admin.site.register(Party)
 admin.site.register(ArmorType, ArmorTypeAdmin)
 admin.site.register(WeaponType, WeaponTypeAdmin)
 admin.site.register(Power, PowerAdmin)
