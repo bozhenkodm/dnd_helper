@@ -7,6 +7,27 @@
   overflow-x: auto; /* Enable horizontal scrolling */
   white-space: nowrap; /* Prevent wrapping inside the container */
 }
+.rotate90 {
+    -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    transform: rotate(90deg);
+}
+.rotate180 {
+    -webkit-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -o-transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+.rotate270 {
+    -webkit-transform: rotate(270deg);
+    -moz-transform: rotate(270deg);
+    -o-transform: rotate(270deg);
+    -ms-transform: rotate(270deg);
+    transform: rotate(270deg);
+}
 table {
     {% if object.grid_color == 'none' %}
         border: none;
@@ -57,7 +78,7 @@ img {
                             {% with urls=col_urls|dictitem:col %}
                                 {% if urls %}
                                     {% with url=urls|last %}
-                                        <img id="{{ url.0 }}" src="{{ url.2 }}" draggable="true" ondragstart="drag(event)" alt="{{ url.1 }}">
+                                        <img id="{{ url.0 }}" src="{{ url.2 }}" draggable="true" ondragstart="drag(event)" alt="{{ url.1 }}" class="rotate{{ url.3 }}">
                                     {% endwith %}
                                 {% endif %}
                             {% endwith %}
