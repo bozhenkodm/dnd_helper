@@ -46,9 +46,13 @@ class Party(models.Model):
     )
 
     def __str__(self):
-        members = ', '.join(self.members.order_by('name').values_list('name', flat=True))
+        members = ', '.join(
+            self.members.order_by('name').values_list('name', flat=True)
+        )
         if self.npc_members.count():
-            npcs = ', '.join(self.npc_members.order_by('name').values_list('name', flat=True))
+            npcs = ', '.join(
+                self.npc_members.order_by('name').values_list('name', flat=True)
+            )
             npcs = f'; {npcs}'
         else:
             npcs = ''
