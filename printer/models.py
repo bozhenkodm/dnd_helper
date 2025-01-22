@@ -111,6 +111,11 @@ class ParticipantPlace(models.Model):
         verbose_name=_('Rotation'),
     )
 
+    def update_coords(self, row, col):
+        self.row = row
+        self.col = col
+        self.save()
+
 
 class Avatar(models.Model):
     MIN_SIZE = SizeIntEnum.AVERAGE
@@ -238,6 +243,4 @@ class GridMap(models.Model):
 
     def update_coords(self, participant_id, row, col):
         pp = ParticipantPlace.objects.get(participant_id=participant_id, map=self)
-        pp.row = row
-        pp.col = col
-        pp.save()
+        pp.update_coords(row, col)

@@ -461,7 +461,7 @@ class NPCAdmin(admin.ModelAdmin):
         if not obj.avatar:
             return '-'
         return mark_safe(
-            f'<img width=50px; height=auto; src="{obj.avatar.base_image.url}" />'
+            f'<img width=50px; height=auto; src="{obj.avatar.base_image.url}" alt="Аватар недоступен"/>'
         )
 
     @atomic
