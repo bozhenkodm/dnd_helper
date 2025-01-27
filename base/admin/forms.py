@@ -81,14 +81,14 @@ class NPCModelForm(forms.ModelForm):
                     ),
                 ).order_by('min_level', 'name')
             self.fields['powers'].queryset = (
-                Power.objects.with_frequency_order()
+                Power.objects.order_by('frequency')
                 .filter(
                     models.Q(klass=self.instance.klass, level__gt=0)
                     | models.Q(race=self.instance.race, level__gt=0)
                     | models.Q(skill__title__in=self.instance.all_trained_skills),
                     level__lte=self.instance.level,
                 )
-                .order_by('level', 'frequency_order')
+                .order_by('level', 'frequency')
             )
             self.fields['subclass_id'] = forms.ChoiceField(
                 choices=self.instance.klass.subclasses.generate_choices(),
@@ -278,10 +278,18 @@ class NPCModelForm(forms.ModelForm):
         self.check_two_weapons_in_two_hands(primary_hand, secondary_hand)
         self.check_double_weapon(primary_hand, secondary_hand, shield_is_in_hand)
 
-        # if self.instance.feats_count > self.instance.max_feats_number:
-        #     self.add_error('feats', 'Слишком много черт')
-
         return super().clean()
+
+
+class ClassForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        if self.instance.id:
+            self.instance: Class
+            print(self.instance)
+            self.fields['default_powers'].queryset = Power.objects.filter(
+                klass=self.instance
+            ).order_by('level', 'name')
 
 
 class ParagonPathForm(forms.ModelForm):

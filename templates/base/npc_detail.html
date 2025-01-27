@@ -54,7 +54,7 @@
         </div>
     {% endfor %}
     {% for power in object.powers_calculated %}
-        <div class="npc-line {{ power.frequency }}" {% if power.description %}title="{{power.description}}"{% endif %}>
+        <div class="npc-line {{ power.frequency_css_class }}" {% if power.description %}title="{{power.description}}"{% endif %}>
             <span><b>{{ power.name }} ({{ power.category }})</b> {{ power.keywords }}</span>
         </div>
         {% for property in power.properties %}

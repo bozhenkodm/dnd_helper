@@ -9,7 +9,7 @@ from base.constants.constants import (
     BonusSource,
     DefenceTypeEnum,
     NPCOtherProperties,
-    PowerFrequencyEnum,
+    PowerFrequencyIntEnum,
     SkillEnum,
 )
 
@@ -30,7 +30,7 @@ class Bonus(models.Model):
         on_delete=models.CASCADE,
         related_name='bonuses',
         related_query_name='bonus',
-        limit_choices_to={'level': 0, 'frequency': PowerFrequencyEnum.PASSIVE.value},
+        limit_choices_to={'level': 0, 'frequency': PowerFrequencyIntEnum.PASSIVE.value},
     )
     feat = models.ForeignKey(
         "base.Feat",
@@ -134,23 +134,23 @@ class BonusMixin:
         powers_query = models.Q(
             power__in=(
                 self.powers.filter(
-                    frequency=PowerFrequencyEnum.PASSIVE,
+                    frequency=PowerFrequencyIntEnum.PASSIVE,
                     subclass__in=(self.subclass_id, 0),
                 )
             )
         ) | models.Q(
-            power__in=self.race.powers.filter(frequency=PowerFrequencyEnum.PASSIVE)
+            power__in=self.race.powers.filter(frequency=PowerFrequencyIntEnum.PASSIVE)
         )
         if self.functional_template:
             powers_query |= models.Q(
                 power__in=self.functional_template.powers.filter(
-                    frequency=PowerFrequencyEnum.PASSIVE
+                    frequency=PowerFrequencyIntEnum.PASSIVE
                 )
             )
         if self.paragon_path:
             powers_query |= models.Q(
                 power__in=self.paragon_path.powers.filter(
-                    frequency=PowerFrequencyEnum.PASSIVE
+                    frequency=PowerFrequencyIntEnum.PASSIVE
                 )
             )
         powers_query |= models.Q(power__in=self.magic_item_powers())

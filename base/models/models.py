@@ -779,18 +779,28 @@ class NPC(
         calculated powers for npc html page
         """
         powers_qs = self.race.powers.filter(level=0)
-        powers_qs |= self.powers.filter(
-            models.Q(accessory_type__isnull=True) | models.Q(accessory_type='')
+        querysets = []
+        querysets.append(
+            self.powers.filter(
+                models.Q(accessory_type__isnull=True) | models.Q(accessory_type='')
+            )
+        )
+        querysets.append(
+            self.klass.default_powers.filter(
+                models.Q(accessory_type__isnull=True) | models.Q(accessory_type='')
+            )
         )
         if self.functional_template:
-            powers_qs |= self.functional_template.powers.filter(level=0)
+            querysets.append(self.functional_template.powers.filter(level=0))
 
         if self.paragon_path:
-            powers_qs |= self.paragon_path.powers.filter(
-                level__lte=self.level, accessory_type__isnull=True
+            querysets.append(
+                self.paragon_path.powers.filter(
+                    level__lte=self.level, accessory_type__isnull=True
+                )
             )
         powers: list[dict] = []
-        for power in powers_qs.ordered_by_frequency():
+        for power in powers_qs.union(*querysets).order_by('frequency'):
             try:
                 powers.append(self.get_power_display(power=power))
             except PowerInconsistent as e:
@@ -800,16 +810,22 @@ class NPC(
             except WrongWeapon as e:
                 print(f"{power} display is not created with error: {e}")
                 continue
-        power_weapon_qs = self.powers.ordered_by_frequency().filter(  # type: ignore
+        power_weapon_qs = self.powers.filter(  # type: ignore
             accessory_type__isnull=False
         )
+        querysets = []
+        querysets.append(
+            self.klass.default_powers.filter(
+                level__lte=self.level, accessory_type__isnull=False
+            )
+        )
         if self.paragon_path:
-            power_weapon_qs |= (
-                self.paragon_path.powers.ordered_by_frequency().filter(  # type: ignore
+            querysets.append(
+                self.paragon_path.powers.filter(  # type: ignore
                     accessory_type__isnull=False
                 )
             )
-        for power in power_weapon_qs:
+        for power in power_weapon_qs.union(*querysets).order_by('frequency'):
             for weapons in self.proper_weapons_for_power(power):
                 try:
                     powers.append(self.get_power_display(power=power, weapons=weapons))
@@ -824,7 +840,7 @@ class NPC(
         for item in self.magic_items:
             if not item.magic_item_type:
                 continue
-            for power in item.magic_item_type.powers.ordered_by_frequency():
+            for power in item.magic_item_type.powers.order_by('frequency'):
                 try:
                     powers.append(self.get_power_display(power=power, item=item))
                 except PowerInconsistent as e:

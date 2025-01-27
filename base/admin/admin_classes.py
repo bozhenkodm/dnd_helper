@@ -16,6 +16,7 @@ from django.utils.safestring import mark_safe
 
 from base.admin.forms import (
     ArmsSlotItemForm,
+    ClassForm,
     ConditionForm,
     ConstraintForm,
     FeatForm,
@@ -35,7 +36,7 @@ from base.constants.constants import (
     BonusSource,
     MagicItemSlot,
     NPCRaceEnum,
-    PowerFrequencyEnum,
+    PowerFrequencyIntEnum,
     PowerPropertyTitle,
     PowerRangeTypeEnum,
     ShieldTypeIntEnum,
@@ -180,6 +181,7 @@ class ClassAdmin(admin.ModelAdmin):
     )
     fields = readonly_fields + (
         'default_feats',
+        'default_powers',
         'fortitude',
         'reflex',
         'will',
@@ -188,6 +190,7 @@ class ClassAdmin(admin.ModelAdmin):
     list_filter = ('power_source', 'role')
     list_display = ('name_display',)
     inlines = (BonusInline,)
+    form = ClassForm
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
@@ -246,7 +249,7 @@ class SubclassAdmin(admin.ModelAdmin):
     ordering = ('klass__name_display', 'subclass_id', 'name')
     list_filter = ('klass',)
     list_display = ('__str__', 'klass')
-    autocomplete_fields = ('default_feats',)
+    autocomplete_fields = ('default_feats', 'default_powers')
     inlines = (BonusInline,)
 
     def get_queryset(self, request):
@@ -470,21 +473,24 @@ class NPCAdmin(admin.ModelAdmin):
         # we remove all default powers on model save
         # to add it during save related
         if obj.id:
+            print(obj.powers.filter(level=0))
             for power in obj.powers.filter(level=0):
+                print('1' * 88)
+                print(power)
                 obj.powers.remove(power)
         obj.experience = max(obj.experience_by_level, obj.experience)
         super().save_model(request, obj, form, change)
 
-    def save_related(self, request, form, formsets, change):
-        # we remove all default powers on model save
-        # to add it during save related
-        super().save_related(request, form, formsets, change)
-        obj = form.instance
-        default_powers = Power.objects.filter(
-            models.Q(klass=obj.klass) & models.Q(subclass__in=(obj.subclass_id, 0))
-        ).filter(level=0)
-        for power in default_powers:
-            obj.powers.add(power)
+    # def save_related(self, request, form, formsets, change):
+    #     # we remove all default powers on model save
+    #     # to add it during save related
+    #     super().save_related(request, form, formsets, change)
+    #     obj = form.instance
+    #     default_powers = Power.objects.filter(
+    #         models.Q(klass=obj.klass) & models.Q(subclass__in=(obj.subclass_id, 0))
+    #     ).filter(level=0)
+    #     for power in default_powers:
+    #         obj.powers.add(power)
 
 
 class CombatantsInlineAdmin(admin.TabularInline):
@@ -875,7 +881,7 @@ class PowerAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_fields(self, request, obj=None):
-        if not obj or obj.frequency == PowerFrequencyEnum.PASSIVE:
+        if not obj or obj.frequency == PowerFrequencyIntEnum.PASSIVE:
             return (
                 'name',
                 'description',
@@ -923,7 +929,7 @@ class PowerAdmin(admin.ModelAdmin):
                 )
             property.save()
         for property in obj.properties.filter(title=PowerPropertyTitle.HIT):
-            if obj.level == 1 and obj.frequency == PowerFrequencyEnum.AT_WILL:
+            if obj.level == 1 and obj.frequency == PowerFrequencyIntEnum.AT_WILL:
                 # at will first level powers damage changes from 1WPN to 2WPN
                 # on 21 level
                 at_will_first_level_modifier = '(lvl/21+1)*'

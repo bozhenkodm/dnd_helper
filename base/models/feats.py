@@ -5,6 +5,7 @@ from multiselectfield import MultiSelectField
 from base.constants.constants import (
     ArmorTypeIntEnum,
     NPCRaceEnum,
+    PowerFrequencyIntEnum,
     ShieldTypeIntEnum,
     WeaponCategoryIntEnum,
     WeaponGroupEnum,
@@ -234,6 +235,7 @@ class NPCFeatAbstract(models.Model):
                         accessory_type=None, string=feat.text
                     ),
                     frequency_order=-1,
+                    frequency_css_class=PowerFrequencyIntEnum.PASSIVE.name.lower(),
                     frequency='',
                     properties=[],
                 ).asdict()

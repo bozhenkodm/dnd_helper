@@ -285,11 +285,11 @@ class ClassRoleIntEnum(IntDescriptionEnum):
     LEADER = 4, 'Лидер'
 
 
-class PowerFrequencyEnum(BaseNameValueDescriptionEnum):
-    PASSIVE = auto(), 'Пассивный'
-    AT_WILL = auto(), 'Неограниченный'
-    ENCOUNTER = auto(), 'На сцену'
-    DAILY = auto(), 'На день'
+class PowerFrequencyIntEnum(IntDescriptionEnum):
+    PASSIVE = 0, 'Пассивный'
+    AT_WILL = 1, 'Неограниченный'
+    ENCOUNTER = 2, 'На сцену'
+    DAILY = 3, 'На день'
 
 
 class PowerDamageTypeEnum(BaseNameValueDescriptionEnum):

@@ -16,14 +16,13 @@ from base.constants.constants import (
     PowerActionTypeEnum,
     PowerDamageTypeEnum,
     PowerEffectTypeEnum,
-    PowerFrequencyEnum,
+    PowerFrequencyIntEnum,
     PowerPropertyTitle,
     PowerRangeTypeEnum,
     PowerVariables,
     WeaponHandednessEnum,
 )
 from base.exceptions import PowerInconsistent
-from base.managers import PowerQueryset
 from base.models.magic_items import ItemAbstract
 from base.objects.dice import DiceRoll
 from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
@@ -37,16 +36,14 @@ class Power(models.Model):
         verbose_name = _('Power')
         verbose_name_plural = _('Powers')
 
-    objects = PowerQueryset.as_manager()
-
     name = models.CharField(verbose_name=_('Title'), max_length=100)
     description = models.TextField(
         verbose_name=_('Description'), default='', blank=True
     )
-    frequency = models.CharField(
+    frequency = models.PositiveSmallIntegerField(
         verbose_name=_('Usage frequency'),
-        choices=PowerFrequencyEnum.generate_choices(is_sorted=False),
-        max_length=PowerFrequencyEnum.max_length(),
+        choices=PowerFrequencyIntEnum.generate_choices(),
+        default=PowerFrequencyIntEnum.PASSIVE,
     )
     action_type = models.CharField(
         verbose_name=_('Action type'),
@@ -68,6 +65,14 @@ class Power(models.Model):
     subclass = models.SmallIntegerField(
         verbose_name=_('Subclass'),
         default=0,
+    )
+    subclass_obj = models.ForeignKey(
+        'base.Subclass',
+        related_name='powers',
+        verbose_name=_('Subclass'),
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     race = models.ForeignKey(
         'base.Race',
@@ -229,7 +234,7 @@ class Power(models.Model):
                 result.extend(map(str, weapons))
             if self.level % 2 == 0 and self.level > 0:
                 result.append('Приём')
-            if self.frequency == PowerFrequencyEnum.PASSIVE:
+            if self.frequency == PowerFrequencyIntEnum.PASSIVE:
                 result.append('Пассивный')
         except (TypeError, IndexError, ValueError) as e:
             raise PowerInconsistent(f'Power {self} is improperly configured: {e}')
@@ -295,7 +300,7 @@ class Power(models.Model):
         raise PowerInconsistent(_('Wrong attack type'))
 
     def keywords(self, weapons: Sequence["Weapon"] = ()) -> str:
-        if self.frequency == PowerFrequencyEnum.PASSIVE:
+        if self.frequency == PowerFrequencyIntEnum.PASSIVE:
             return ''
         return ', '.join(
             filter(
@@ -739,8 +744,9 @@ class PowerMixin:
                 weapons=weapons,
                 item=item,
             ),
-            frequency_order=power.frequency_order,  # type: ignore
-            frequency=power.frequency.lower(),
+            frequency_order=power.frequency,  # type: ignore
+            frequency_css_class=PowerFrequencyIntEnum(power.frequency).name.lower(),
+            frequency=power.get_frequency_display(),
             properties=[
                 PowerPropertyDisplay(
                     title=prop.get_displayed_title(),
@@ -762,6 +768,6 @@ class PowerMixin:
 
     def magic_item_powers(self) -> models.QuerySet[Power]:
         return Power.objects.filter(
-            frequency=PowerFrequencyEnum.PASSIVE,
+            frequency=PowerFrequencyIntEnum.PASSIVE,
             magic_item_type__in=(mi.magic_item_type for mi in self.magic_items),
         )

@@ -57,7 +57,9 @@ class Class(ClassAbstract):
         'base.Feat', verbose_name=_('Default feats'), blank=True
     )
     default_powers = models.ManyToManyField(
-        'base.Power', verbose_name=_('Default powers'), blank=True
+        'base.Power',
+        verbose_name=_('Default powers'),
+        blank=True,
     )
 
     def __str__(self):

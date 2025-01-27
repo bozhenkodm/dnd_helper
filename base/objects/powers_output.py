@@ -15,6 +15,7 @@ class PowerDisplay:
     category: str
     description: str
     frequency_order: int
+    frequency_css_class: str
     frequency: str
     properties: list[PowerPropertyDisplay]
 

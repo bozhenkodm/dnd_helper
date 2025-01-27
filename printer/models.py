@@ -237,7 +237,7 @@ class GridMap(models.Model):
                             place.participant.id,
                             f'{place.participant.name[0]}-{place.participant.name[-1]}',
                             place.participant.base_image.url,
-                            place.rotation
+                            place.rotation,
                         )
                     )
         return result
