@@ -2,7 +2,18 @@
 
 from django.db import migrations, models
 
-import base.constants.constants
+from base.constants.constants import PowerFrequencyIntEnum
+
+
+def fill_frequency_int(apps, schema_editor):
+    '''
+    We can't import the Post model directly as it may be a newer
+    version than this migration expects. We use the historical version.
+    '''
+    Power = apps.get_model('base', 'Power')
+    for power in Power.objects.all():
+        Power.frequency_int = PowerFrequencyIntEnum[Power.frequency].value
+        power.save()
 
 
 class Migration(migrations.Migration):
@@ -22,7 +33,7 @@ class Migration(migrations.Migration):
                     (2, 'На сцену'),
                     (3, 'На день'),
                 ],
-                default=base.constants.constants.PowerFrequencyIntEnum['PASSIVE'],
+                default=0,
                 verbose_name='Usage frequency',
             ),
         ),

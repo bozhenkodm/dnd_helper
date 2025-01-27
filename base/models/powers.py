@@ -43,7 +43,7 @@ class Power(models.Model):
     frequency = models.PositiveSmallIntegerField(
         verbose_name=_('Usage frequency'),
         choices=PowerFrequencyIntEnum.generate_choices(),
-        default=PowerFrequencyIntEnum.PASSIVE,
+        default=PowerFrequencyIntEnum.PASSIVE.value,
     )
     action_type = models.CharField(
         verbose_name=_('Action type'),
