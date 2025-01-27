@@ -286,7 +286,6 @@ class ClassForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.instance.id:
             self.instance: Class
-            print(self.instance)
             self.fields['default_powers'].queryset = Power.objects.filter(
                 klass=self.instance
             ).order_by('level', 'name')

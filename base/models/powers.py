@@ -62,11 +62,7 @@ class Power(models.Model):
         null=True,
         blank=True,
     )
-    subclass = models.SmallIntegerField(
-        verbose_name=_('Subclass'),
-        default=0,
-    )
-    subclass_obj = models.ForeignKey(
+    subclass = models.ForeignKey(
         'base.Subclass',
         related_name='powers',
         verbose_name=_('Subclass'),
@@ -362,7 +358,7 @@ class PowerProperty(models.Model):
         verbose_name=_('Subclass'),
         default=0,
     )
-    description = models.TextField(verbose_name=('Description'), blank=True, default='')
+    description = models.TextField(verbose_name=_('Description'), blank=True, default='')
     order = models.SmallIntegerField(verbose_name=_('Order'), default=0)
 
     def get_displayed_title(self):
@@ -678,12 +674,14 @@ class PowerMixin:
     @staticmethod
     def get_power_inconsistent_message(power: Power):
         message = 'POWER INCONSISTENT'
+        raise RuntimeError()
         return PowerDisplay(
             name=power.name,
             keywords=message,
             category=message,
             description=message,
             frequency_order=0,
+            frequency_css_class=PowerFrequencyIntEnum.PASSIVE.name,
             frequency=message,
             properties=[],
         ).asdict()

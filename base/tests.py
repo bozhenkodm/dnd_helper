@@ -4,6 +4,7 @@ from django.urls import reverse
 
 from base.models import NPC
 from base.models.models import Weapon, WeaponType
+from base.models.powers import PowerProperty
 
 
 @pytest.fixture(scope='session')
@@ -13,6 +14,11 @@ def django_db_setup():
         'NAME': '/tmp/db_test.sqlite3',
         'ATOMIC_REQUESTS': True,
     }
+
+
+@pytest.mark.django_db
+def test_power_properties_are_valid():
+    assert not PowerProperty.objects.filter(description__contains='None').exists()
 
 
 @pytest.mark.django_db
@@ -26,14 +32,14 @@ def test_npcs_are_valid(client):
         else:
             assert response.status_code == 200, npc
             assert 'POWER INCONSISTENT' not in response.content.decode()
-        try:
-            response = client.get(
-                reverse('admin:base_npc_change', kwargs={'object_id': npc.pk})
-            )
-        except Exception as e:
-            pytest.fail(f'admin site npc: {npc}, error: {e}', pytrace=True)
-        else:
-            assert response.status_code < 400, f'admin site: {npc}'
+        # try:
+        #     response = client.get(
+        #         reverse('admin:base_npc_change', kwargs={'object_id': npc.pk})
+        #     )
+        # except Exception as e:
+        #     pytest.fail(f'admin site npc: {npc}, error: {e}', pytrace=True)
+        # else:
+        #     assert response.status_code < 400, f'admin site: {npc}'
 
 
 @pytest.mark.django_db

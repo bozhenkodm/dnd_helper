@@ -785,7 +785,7 @@ class NPC(
             ),
             self.klass.default_powers.filter(
                 models.Q(accessory_type__isnull=True) | models.Q(accessory_type='')
-            )
+            ),
         ]
         if self.functional_template:
             querysets.append(self.functional_template.powers.filter(level=0))

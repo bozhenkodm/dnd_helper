@@ -473,10 +473,7 @@ class NPCAdmin(admin.ModelAdmin):
         # we remove all default powers on model save
         # to add it during save related
         if obj.id:
-            print(obj.powers.filter(level=0))
             for power in obj.powers.filter(level=0):
-                print('1' * 88)
-                print(power)
                 obj.powers.remove(power)
         obj.experience = max(obj.experience_by_level, obj.experience)
         super().save_model(request, obj, form, change)
