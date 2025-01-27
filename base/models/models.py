@@ -779,17 +779,14 @@ class NPC(
         calculated powers for npc html page
         """
         powers_qs = self.race.powers.filter(level=0)
-        querysets = []
-        querysets.append(
+        querysets = [
             self.powers.filter(
                 models.Q(accessory_type__isnull=True) | models.Q(accessory_type='')
-            )
-        )
-        querysets.append(
+            ),
             self.klass.default_powers.filter(
                 models.Q(accessory_type__isnull=True) | models.Q(accessory_type='')
             )
-        )
+        ]
         if self.functional_template:
             querysets.append(self.functional_template.powers.filter(level=0))
 
@@ -813,12 +810,11 @@ class NPC(
         power_weapon_qs = self.powers.filter(  # type: ignore
             accessory_type__isnull=False
         )
-        querysets = []
-        querysets.append(
+        querysets = [
             self.klass.default_powers.filter(
                 level__lte=self.level, accessory_type__isnull=False
-            )
-        )
+            ),
+        ]
         if self.paragon_path:
             querysets.append(
                 self.paragon_path.powers.filter(  # type: ignore
