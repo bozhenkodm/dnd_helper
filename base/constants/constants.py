@@ -149,26 +149,6 @@ class SkillEnum(BaseNameValueDescriptionEnum):
     STEALTH = auto(), 'Скрытность'
     HEAL = auto(), 'Целительство'
 
-    def get_base_ability(self):
-        if self in (self.ACROBATICS, self.STEALTH, self.THIEVERY):
-            return AbilityEnum.DEXTERITY
-        if self in (self.ARCANA, self.HISTORY, self.RELIGION):
-            return AbilityEnum.INTELLIGENCE
-        if self == self.ATHLETICS:
-            return AbilityEnum.STRENGTH
-        if self in (self.BLUFF, self.DIPLOMACY, self.INTIMIDATE, self.STREETWISE):
-            return AbilityEnum.CHARISMA
-        if self in (
-            self.DUNGEONEERING,
-            self.HEAL,
-            self.INSIGHT,
-            self.NATURE,
-            self.PERCEPTION,
-        ):
-            return AbilityEnum.WISDOM
-        if self == self.ENDURANCE:
-            return AbilityEnum.CONSTITUTION
-
 
 class ArmorTypeIntEnum(IntDescriptionEnum):
     CLOTH = 0, 'Тканевый'
@@ -218,10 +198,6 @@ class WeaponCategoryIntEnum(IntDescriptionEnum):
     MILITARY_RANGED = 5, 'Воинское дальнобойное'
     SUPERIOR_RANGED = 6, 'Превосходное дальнобойное'
     IMPLEMENT = 7, 'Инструмент'
-
-    @property
-    def is_melee(self):
-        return self in (self.SIMPLE, self.MILITARY, self.SUPERIOR)
 
 
 class DiceIntEnum(IntDescriptionEnum):

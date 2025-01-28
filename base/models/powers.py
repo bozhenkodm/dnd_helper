@@ -358,7 +358,9 @@ class PowerProperty(models.Model):
         verbose_name=_('Subclass'),
         default=0,
     )
-    description = models.TextField(verbose_name=_('Description'), blank=True, default='')
+    description = models.TextField(
+        verbose_name=_('Description'), blank=True, default=''
+    )
     order = models.SmallIntegerField(verbose_name=_('Order'), default=0)
 
     def get_displayed_title(self):

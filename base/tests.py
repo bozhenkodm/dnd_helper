@@ -1,6 +1,5 @@
 import pytest
 from django.conf import settings
-from django.urls import reverse
 
 from base.models import NPC
 from base.models.models import Weapon, WeaponType
