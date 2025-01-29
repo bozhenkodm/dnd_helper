@@ -254,7 +254,6 @@ class Power(models.Model):
             return 'Все существа в волне'
         return '----------'
 
-
     def attack_type(self, weapon=None) -> str:
         if (
             self.range_type

@@ -307,7 +307,10 @@ class NPCAdmin(admin.ModelAdmin):
             'base_wisdom',
             'base_charisma',
         ),
-        'var_bonus_ability',
+        (
+            'const_bonus_ability',
+            'var_bonus_ability',
+        ),
         'base_attack_ability',
         # 'level4_bonus_abilities',
         # 'level8_bonus_abilities',
@@ -447,7 +450,7 @@ class NPCAdmin(admin.ModelAdmin):
         return result
 
     def get_readonly_fields(self, request, obj=None):
-        readonly_fields = ['mandatory_skills', 'avatar_img']
+        readonly_fields = ['mandatory_skills', 'avatar_img', 'const_bonus_ability']
         if obj and obj.level < 11:
             readonly_fields.append('paragon_path')
         return readonly_fields
@@ -465,6 +468,15 @@ class NPCAdmin(admin.ModelAdmin):
         return mark_safe(
             f'<img width=50px; height=auto; src="{obj.avatar.base_image.url}" '
             f'alt="Аватар недоступен"/>'
+        )
+
+    @admin.display(description='Постоянный бонус характеристики')
+    def const_bonus_ability(self, obj):
+        if not obj.id or not obj.race.const_ability_bonus.all():
+            return '-'
+        return ', '.join(
+            ability.get_title_display()
+            for ability in obj.race.const_ability_bonus.all()
         )
 
     @atomic

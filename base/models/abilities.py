@@ -17,6 +17,10 @@ class Ability(models.Model):
     def __str__(self) -> str:
         return self.get_title_display()
 
+    @property
+    def mod(self):
+        return f'{self.title[:3].lower()}_mod'
+
 
 class NPCAbilityAbstract(models.Model):
     class Meta:

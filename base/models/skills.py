@@ -51,10 +51,8 @@ class NPCSkillAbstract(models.Model):
         """
         return Skills(
             **{
-                skill.lvalue: getattr(
-                    self, f'{skill.get_base_ability().lower()[:3]}_mod'
-                )
-                for skill in SkillEnum
+                skill.title.lower(): getattr(self, skill.based_on.mod)
+                for skill in Skill.objects.all()
             }
         )
 
