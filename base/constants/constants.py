@@ -335,21 +335,6 @@ class PowerRangeTypeEnum(BaseNameValueDescriptionEnum):
     WALL = auto(), 'Стена'
     PERSONAL = auto(), 'Персональный'
 
-    def default_target(self):
-        if self in (
-            self.MELEE_WEAPON,
-            self.MELEE,
-            self.RANGED,
-            self.MELEE_RANGED_WEAPON,
-            self.RANGED_WEAPON,
-        ):
-            return 'Одно существо'
-        if self == self.BURST:
-            return 'Все существа во вспышке'
-        if self == self.BLAST:
-            return 'Все существа в волне'
-        return '----------'
-
 
 class PowerPropertyTitle(BaseNameValueDescriptionEnum):
     ATTACK = auto(), 'Атака'

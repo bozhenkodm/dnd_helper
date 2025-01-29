@@ -38,7 +38,6 @@ from base.constants.constants import (
     NPCRaceEnum,
     PowerFrequencyIntEnum,
     PowerPropertyTitle,
-    PowerRangeTypeEnum,
     ShieldTypeIntEnum,
     WeaponCategoryIntEnum,
     WeaponGroupEnum,
@@ -952,9 +951,7 @@ class PowerAdmin(admin.ModelAdmin):
             property.save()
         for property in obj.properties.filter(title=PowerPropertyTitle.TARGET):
             if not property.description:
-                property.description = PowerRangeTypeEnum[
-                    property.power.range_type
-                ].default_target()
+                property.description = property.power.default_target
                 property.save()
         for property in obj.properties.filter(title=PowerPropertyTitle.MISS):
             if not property.description:

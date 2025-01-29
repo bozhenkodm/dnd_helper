@@ -238,6 +238,23 @@ class Power(models.Model):
             raise PowerInconsistent(f'Power {self} is improperly configured')
         return '; '.join(result)
 
+    @property
+    def default_target(self):
+        if self.range_type in (
+            PowerRangeTypeEnum.MELEE_WEAPON,
+            PowerRangeTypeEnum.MELEE,
+            PowerRangeTypeEnum.RANGED,
+            PowerRangeTypeEnum.MELEE_RANGED_WEAPON,
+            PowerRangeTypeEnum.RANGED_WEAPON,
+        ):
+            return 'Одно существо'
+        if self.range_type == PowerRangeTypeEnum.BURST:
+            return 'Все существа во вспышке'
+        if self.range_type == PowerRangeTypeEnum.BLAST:
+            return 'Все существа в волне'
+        return '----------'
+
+
     def attack_type(self, weapon=None) -> str:
         if (
             self.range_type
