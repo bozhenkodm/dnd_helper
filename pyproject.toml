@@ -15,8 +15,8 @@ django-multiselectfield = "^0.1.12"
 pillow = "^11.0.0"
 
 [tool.poetry.dev-dependencies]
-black = "^24"
-isort = "^5.7.0"
+black = "^25"
+isort = "^6"
 ipython = "^8.0.0"
 flake8 = "^7.0.0"
 mypy = "^1.0"
