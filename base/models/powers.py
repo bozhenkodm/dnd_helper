@@ -692,7 +692,6 @@ class PowerMixin:
     @staticmethod
     def get_power_inconsistent_message(power: Power):
         message = 'POWER INCONSISTENT'
-        raise RuntimeError()
         return PowerDisplay(
             name=power.name,
             keywords=message,

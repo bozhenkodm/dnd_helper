@@ -12,7 +12,7 @@ def fill_frequency_int(apps, schema_editor):
     '''
     Power = apps.get_model('base', 'Power')
     for power in Power.objects.all():
-        Power.frequency_int = PowerFrequencyIntEnum[Power.frequency].value
+        power.frequency_int = PowerFrequencyIntEnum[power.frequency].value
         power.save()
 
 
@@ -37,4 +37,5 @@ class Migration(migrations.Migration):
                 verbose_name='Usage frequency',
             ),
         ),
+        migrations.RunPython(fill_frequency_int),
     ]
