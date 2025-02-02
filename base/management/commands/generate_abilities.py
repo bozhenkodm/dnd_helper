@@ -17,6 +17,7 @@ class Kind(str, Enum):
     DUMMY = 'dummy'
     AVERAGE = 'average'
     GENIUS = 'genius'
+    MINIMAX = 'minimax'
 
 
 def average_exit(rolls: list[int]) -> bool:
@@ -31,6 +32,10 @@ def genious_exit(rolls: list[int]) -> bool:
     return max(rolls) == 18 and min(rolls) > 8
 
 
+def minimax_exit(rolls: list[int]) -> bool:
+    return max(rolls) == 18 and min(rolls) <= 8
+
+
 class Command(BaseCommand):
     help = 'Generate random abilities'
 
@@ -43,6 +48,8 @@ class Command(BaseCommand):
             exit_func = genious_exit
         elif kind == Kind.DUMMY:
             exit_func = dummy_exit
+        elif kind == Kind.MINIMAX:
+            exit_func = minimax_exit
         else:
             exit_func = average_exit
         while True:
