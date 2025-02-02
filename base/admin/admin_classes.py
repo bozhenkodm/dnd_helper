@@ -466,8 +466,9 @@ class NPCAdmin(admin.ModelAdmin):
         if not obj.avatar:
             return '-'
         return mark_safe(
+            f'<a href="{obj.avatar.admin_edit_url}" target="blank">'
             f'<img width=50px; height=auto; src="{obj.avatar.base_image.url}" '
-            f'alt="Аватар недоступен"/>'
+            f'alt="Аватар недоступен"/></a>'
         )
 
     @admin.display(description='Постоянный бонус характеристики')

@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -111,7 +112,7 @@ class ParticipantPlace(models.Model):
         verbose_name=_('Rotation'),
     )
 
-    def update_coords(self, row, col):
+    def update_coords(self, row, col) -> None:
         self.row = row
         self.col = col
         self.save()
@@ -157,6 +158,14 @@ class Avatar(models.Model):
     @property
     def size(self) -> int:
         return max(self.base_size, self.MIN_SIZE.value)
+
+    @property
+    def admin_edit_url(self):
+        content_type = ContentType.objects.get_for_model(self.__class__)
+        return reverse(
+            "admin:%s_%s_change" % (content_type.app_label, content_type.model),
+            args=(self.id,),
+        )
 
 
 class GridMap(models.Model):
