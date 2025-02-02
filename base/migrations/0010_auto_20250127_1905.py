@@ -11,7 +11,7 @@ def fill_default_powers(apps, schema_editor):
     Power = apps.get_model('base', 'Power')
     Class = apps.get_model('base', 'Class')
     for klass in Class.objects.all():
-        klass.default_powers.add(*Power.objects.filter(klass=klass))
+        klass.default_powers.add(*Power.objects.filter(klass=klass, level=0))
 
 
 class Migration(migrations.Migration):

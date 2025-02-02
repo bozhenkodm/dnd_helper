@@ -145,6 +145,7 @@ class GridMapAdmin(admin.ModelAdmin):
                 pps.append(
                     ParticipantPlace(participant=npc.avatar, map=obj, row=row, col=col)
                 )
+                col += 1
         if pps:
             ParticipantPlace.objects.bulk_create(pps)
 

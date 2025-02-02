@@ -234,7 +234,7 @@ class GridMap(models.Model):
                 for j in range(place.participant.size):
                     result[place.row + i].setdefault(place.col + j, []).append(
                         (
-                            place.participant.id,
+                            place.id,
                             f'{place.participant.name[0]}-{place.participant.name[-1]}',
                             place.participant.base_image.url,
                             place.rotation,
@@ -242,6 +242,6 @@ class GridMap(models.Model):
                     )
         return result
 
-    def update_coords(self, participant_id, row, col):
-        pp = ParticipantPlace.objects.get(participant_id=participant_id, map=self)
+    def update_coords(self, participant_place_id, row, col):
+        pp = ParticipantPlace.objects.get(id=participant_place_id)
         pp.update_coords(row, col)
