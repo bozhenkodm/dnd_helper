@@ -48,6 +48,43 @@ class NPCModelForm(forms.ModelForm):
         model = NPC
         fields = '__all__'
 
+    level4_abilities_bonus = forms.ModelMultipleChoiceField(
+        queryset=Ability.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        label=f'Бонус характеристики на 4 уровне',
+        required=False,
+    )
+    level8_abilities_bonus = forms.ModelMultipleChoiceField(
+        queryset=Ability.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        label=f'Бонус характеристики на 8 уровне',
+        required=False,
+    )
+    level14_abilities_bonus = forms.ModelMultipleChoiceField(
+        queryset=Ability.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        label=f'Бонус характеристики на 14 уровне',
+        required=False,
+    )
+    level18_abilities_bonus = forms.ModelMultipleChoiceField(
+        queryset=Ability.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        label=f'Бонус характеристики на 18 уровне',
+        required=False,
+    )
+    level24_abilities_bonus = forms.ModelMultipleChoiceField(
+        queryset=Ability.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        label=f'Бонус характеристики на 24 уровне',
+        required=False,
+    )
+    level28_abilities_bonus = forms.ModelMultipleChoiceField(
+        queryset=Ability.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        label=f'Бонус характеристики на 28 уровне',
+        required=False,
+    )
+
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if self.instance.id:
@@ -58,6 +95,15 @@ class NPCModelForm(forms.ModelForm):
             self.fields['var_bonus_ability'].required = Ability.objects.filter(
                 races=self.instance.race
             ).exists()
+
+            for level in (4, 8, 14, 18, 24, 28):
+                if level > self.instance.level:
+                    break
+                self.fields[f'level{level}_abilities_bonus'].initial = (
+                    Ability.objects.filter(
+                        level_bonuses__npc=self.instance, level_bonuses__level=level
+                    )
+                )
 
             self.fields['trained_skills'] = forms.ModelMultipleChoiceField(
                 queryset=Skill.objects.filter(classes=self.instance.klass),
@@ -113,13 +159,11 @@ class NPCModelForm(forms.ModelForm):
                 & models.Q(shield__in=self.instance.klass.shields)
                 | models.Q(shield=ShieldTypeIntEnum.NONE),
             )
-
             self.fields['left_ring_slot'].queryset = (
                 RingsSlotItem.objects.select_related('magic_item_type').filter(
                     magic_item_type__slot=RingsSlotItem.SLOT.value
                 )
             )
-
             self.fields['right_ring_slot'].queryset = (
                 RingsSlotItem.objects.select_related('magic_item_type').filter(
                     magic_item_type__slot=RingsSlotItem.SLOT.value

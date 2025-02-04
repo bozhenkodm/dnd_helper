@@ -1,10 +1,34 @@
 from django.db import models
+from django.db.models.functions import Lower
 from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
 
 from base.constants.constants import AbilityEnum
 from base.helpers import modifier
 from base.objects.abilities import Abilities
+
+
+class AbilityLevelBonus(models.Model):
+    class Meta:
+        unique_together = ('ability', 'npc', 'level')
+
+    ability = models.ForeignKey(
+        'base.Ability', on_delete=models.CASCADE, related_name='level_bonuses'
+    )
+    npc = models.ForeignKey('base.NPC', on_delete=models.CASCADE)
+    level = models.PositiveSmallIntegerField(
+        choices=(
+            (i, i)
+            for i in (
+                4,
+                8,
+                14,
+                18,
+                24,
+                28,
+            )
+        )
+    )
 
 
 class Ability(models.Model):
@@ -58,48 +82,12 @@ class NPCAbilityAbstract(models.Model):
         null=True,
         blank=True,
     )
-
-    level4_bonus_abilities = MultiSelectField(
-        verbose_name='Бонус характеристики на 4 уровне',
-        choices=AbilityEnum.generate_choices(is_sorted=False),
-        max_choices=2,
-        null=True,
+    level_ability_bonuses = models.ManyToManyField(
+        Ability,
         blank=True,
-    )
-    level8_bonus_abilities = MultiSelectField(
-        verbose_name='Бонус характеристики на 8 уровне',
-        choices=AbilityEnum.generate_choices(is_sorted=False),
-        max_choices=2,
-        null=True,
-        blank=True,
-    )
-    level14_bonus_abilities = MultiSelectField(
-        verbose_name='Бонус характеристики на 14 уровне',
-        choices=AbilityEnum.generate_choices(is_sorted=False),
-        max_choices=2,
-        null=True,
-        blank=True,
-    )
-    level18_bonus_abilities = MultiSelectField(
-        verbose_name='Бонус характеристики на 18 уровне',
-        choices=AbilityEnum.generate_choices(is_sorted=False),
-        max_choices=2,
-        null=True,
-        blank=True,
-    )
-    level24_bonus_abilities = MultiSelectField(
-        verbose_name='Бонус характеристики на 24 уровне',
-        choices=AbilityEnum.generate_choices(is_sorted=False),
-        max_choices=2,
-        null=True,
-        blank=True,
-    )
-    level28_bonus_abilities = MultiSelectField(
-        verbose_name='Бонус характеристики на 28 уровне',
-        choices=AbilityEnum.generate_choices(is_sorted=False),
-        max_choices=2,
-        null=True,
-        blank=True,
+        through=AbilityLevelBonus,
+        related_name='npcs_for_level_bonuses',
+        verbose_name=_('Ability level bonuses'),
     )
 
     @property
@@ -122,23 +110,13 @@ class NPCAbilityAbstract(models.Model):
 
     @property
     def _level_abilities_bonuses(self) -> Abilities:
-        result = Abilities()
-        for i in (
-            4,
-            8,
-            14,
-            18,
-            24,
-            28,
-        ):  # level bonus abilities on 4, 8, 14, 18, 24, 28 levels
-            result += Abilities.init_with_const(
-                *(
-                    AbilityEnum(ability)
-                    for ability in getattr(self, f'level{i}_bonus_abilities')
-                ),
-                value=1,
-            )
-        return result
+        query = (
+            AbilityLevelBonus.objects.filter(npc=self)
+            .values_list(Lower('ability__title'))
+            .annotate(bonus=models.Count('ability__title'))
+        )
+        bonuses = {item[0]: item[1] for item in query}
+        return Abilities(**bonuses)
 
     @property
     def _tier_attrs_bonus(self) -> Abilities:

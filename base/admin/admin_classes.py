@@ -44,6 +44,7 @@ from base.constants.constants import (
     WeaponHandednessEnum,
 )
 from base.models import Race
+from base.models.abilities import AbilityLevelBonus
 from base.models.bonuses import Bonus
 from base.models.condition import (
     AvailabilityCondition,
@@ -276,10 +277,6 @@ class ParagonPathAdmin(admin.ModelAdmin):
 
 
 class NPCAdmin(admin.ModelAdmin):
-    # TODO fix NPC creation process
-    class Meta:
-        js = ('base/npc_custom.js',)
-
     fields = [
         (
             'name',
@@ -312,12 +309,6 @@ class NPCAdmin(admin.ModelAdmin):
             'var_bonus_ability',
         ),
         'base_attack_ability',
-        # 'level4_bonus_abilities',
-        # 'level8_bonus_abilities',
-        # 'level14_bonus_abilities',
-        # 'level18_bonus_abilities',
-        # 'level24_bonus_abilities',
-        # 'level28_bonus_abilities',
         'mandatory_skills',
         'trained_skills',
         (
@@ -394,18 +385,12 @@ class NPCAdmin(admin.ModelAdmin):
         return self.object
 
     def _get_level_abilities_bonus_fields(self, obj) -> list[str]:
+        levels = (4, 8, 14, 18, 24, 28)
         result = []
-        level_attrs_bonuses = {
-            4: 'level4_bonus_abilities',
-            8: 'level8_bonus_abilities',
-            14: 'level14_bonus_abilities',
-            18: 'level18_bonus_abilities',
-            24: 'level24_bonus_abilities',
-            28: 'level28_bonus_abilities',
-        }
-        for level, ability in level_attrs_bonuses.items():
-            if obj and obj.level >= level:
-                result.append(ability)
+        for level in levels:
+            if not obj or obj.level < level:
+                break
+            result.append(f'level{level}_abilities_bonus')
         return result
 
     def get_fields(self, request: HttpRequest, obj=None):
@@ -439,7 +424,8 @@ class NPCAdmin(admin.ModelAdmin):
                 'race',
                 'paragon_path',
             )
-        result.insert(9, self._get_level_abilities_bonus_fields(obj))
+        index_to_insert = result.index('base_attack_ability')
+        result.insert(index_to_insert, self._get_level_abilities_bonus_fields(obj))
         if not obj.is_bonus_applied:
             result.extend(
                 [
@@ -490,16 +476,21 @@ class NPCAdmin(admin.ModelAdmin):
         obj.experience = max(obj.experience_by_level, obj.experience)
         super().save_model(request, obj, form, change)
 
-    # def save_related(self, request, form, formsets, change):
-    #     # we remove all default powers on model save
-    #     # to add it during save related
-    #     super().save_related(request, form, formsets, change)
-    #     obj = form.instance
-    #     default_powers = Power.objects.filter(
-    #         models.Q(klass=obj.klass) & models.Q(subclass__in=(obj.subclass_id, 0))
-    #     ).filter(level=0)
-    #     for power in default_powers:
-    #         obj.powers.add(power)
+    def save_related(self, request, form, formsets, change):
+        if not change:
+            super().save_related(request, form, formsets, change)
+            return
+        ability_bonuses = []
+        npc = form.instance
+        for level in (4, 8, 14, 18, 24, 28):
+            if level > npc.level:
+                break
+            for ability in form.cleaned_data[f'level{level}_abilities_bonus']:
+                ability_bonuses.append(
+                    AbilityLevelBonus(npc=npc, level=level, ability=ability)
+                )
+        AbilityLevelBonus.objects.bulk_create(ability_bonuses)
+        super().save_related(request, form, formsets, change)
 
 
 class CombatantsInlineAdmin(admin.TabularInline):
