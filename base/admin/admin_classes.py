@@ -309,7 +309,6 @@ class NPCAdmin(admin.ModelAdmin):
             'const_bonus_ability',
             'var_bonus_ability',
         ),
-        'base_attack_ability',
         'mandatory_skills',
         'trained_skills',
         (
@@ -424,7 +423,7 @@ class NPCAdmin(admin.ModelAdmin):
                 'race',
                 'paragon_path',
             )
-        index_to_insert = result.index('base_attack_ability')
+        index_to_insert = result.index('mandatory_skills')
         result.insert(index_to_insert, self._get_level_abilities_bonus_fields(obj))
         if not obj.is_bonus_applied:
             result.extend(
