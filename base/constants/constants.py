@@ -412,3 +412,6 @@ MODEL_NAME_TO_NPC_FIELD = {
     'feat': 'feats',
     'skill': 'trained_skills',
 }
+
+
+LEVELS_WITH_ABILITY_BONUS = (4, 8, 14, 18, 24, 28)

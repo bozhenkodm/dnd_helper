@@ -31,6 +31,7 @@ from base.admin.forms import (
     WeaponForm,
 )
 from base.constants.constants import (
+    LEVELS_WITH_ABILITY_BONUS,
     AccessoryTypeEnum,
     ArmorTypeIntEnum,
     BonusSource,
@@ -385,9 +386,8 @@ class NPCAdmin(admin.ModelAdmin):
         return self.object
 
     def _get_level_abilities_bonus_fields(self, obj) -> list[str]:
-        levels = (4, 8, 14, 18, 24, 28)
         result = []
-        for level in levels:
+        for level in LEVELS_WITH_ABILITY_BONUS:
             if not obj or obj.level < level:
                 break
             result.append(f'level{level}_abilities_bonus')
@@ -482,7 +482,7 @@ class NPCAdmin(admin.ModelAdmin):
             return
         ability_bonuses = []
         npc = form.instance
-        for level in (4, 8, 14, 18, 24, 28):
+        for level in LEVELS_WITH_ABILITY_BONUS:
             if level > npc.level:
                 break
             for ability in form.cleaned_data[f'level{level}_abilities_bonus']:

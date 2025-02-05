@@ -1,9 +1,8 @@
 from django.db import models
 from django.db.models.functions import Lower
 from django.utils.translation import gettext_lazy as _
-from multiselectfield import MultiSelectField
 
-from base.constants.constants import AbilityEnum
+from base.constants.constants import LEVELS_WITH_ABILITY_BONUS, AbilityEnum
 from base.helpers import modifier
 from base.objects.abilities import Abilities
 
@@ -17,17 +16,7 @@ class AbilityLevelBonus(models.Model):
     )
     npc = models.ForeignKey('base.NPC', on_delete=models.CASCADE)
     level = models.PositiveSmallIntegerField(
-        choices=(
-            (i, i)
-            for i in (
-                4,
-                8,
-                14,
-                18,
-                24,
-                28,
-            )
-        )
+        choices=((i, i) for i in LEVELS_WITH_ABILITY_BONUS)
     )
 
 
@@ -74,13 +63,6 @@ class NPCAbilityAbstract(models.Model):
         on_delete=models.SET_NULL,
         verbose_name=_('Selective ability bonus'),
         null=True,
-    )
-    base_attack_ability = models.CharField(
-        verbose_name=_('Base attack ability'),
-        choices=AbilityEnum.generate_choices(is_sorted=False),
-        max_length=AbilityEnum.max_length(),
-        null=True,
-        blank=True,
     )
     level_ability_bonuses = models.ManyToManyField(
         Ability,
