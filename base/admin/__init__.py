@@ -5,6 +5,8 @@ from base.admin.admin_classes import (
     ArmorTypeAdmin,
     ArmsItemSlotAdmin,
     BonusAdmin,
+    BookAdmin,
+    BookSourceAdmin,
     ClassAdmin,
     ConstraintAdmin,
     EncounterAdmin,
@@ -26,6 +28,7 @@ from base.admin.admin_classes import (
     WeaponTypeAdmin,
 )
 from base.models.bonuses import Bonus
+from base.models.books import Book, BookSource
 from base.models.condition import Constraint
 from base.models.encounters import Encounter, Party, PlayerCharacter
 from base.models.feats import Feat, WeaponState
@@ -77,3 +80,5 @@ admin.site.register(ArmsSlotItem, ArmsItemSlotAdmin)
 admin.site.register(WeaponState, WeaponStateAdmin)
 admin.site.register(Constraint, ConstraintAdmin)
 admin.site.register(Bonus, BonusAdmin)
+admin.site.register(Book, BookAdmin)
+admin.site.register(BookSource, BookSourceAdmin)

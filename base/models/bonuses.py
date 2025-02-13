@@ -169,7 +169,7 @@ class BonusMixin:
         *bonus_types: AbilityEnum | SkillEnum | DefenceTypeEnum | NPCOtherProperties,
     ) -> dict[AbilityEnum | SkillEnum | DefenceTypeEnum | NPCOtherProperties, int]:
         # TODO refactor query here and in self.get_power_bonuses
-        # TODO add cache with refresh on open npc page
+        # TODO add cache with refresh on save npc
         result = {}
         for bonus_type in bonus_types:
             bonuses = defaultdict(list)

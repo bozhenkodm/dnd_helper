@@ -64,10 +64,11 @@ class ConstraintAbstract(models.Model):
         else:
             queryset = cls.objects.all()
         for item in queryset:
-            if not item.constraints.all():
+            constraints_queryset = item.constraints.all()
+            if not constraints_queryset:
                 ids.add(item.id)
                 continue
-            for constraint in item.constraints.all():
+            for constraint in constraints_queryset:
                 fits = True
                 for condition in constraint.conditions.all():
                     if not condition.fits(npc):

@@ -1182,6 +1182,22 @@ class BonusAdmin(admin.ModelAdmin):
         return {}
 
 
+class BookAdmin(admin.ModelAdmin):
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        return {}
+
+
+class BookSourceAdmin(admin.ModelAdmin):
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        return {}
+
+
 class ConditionInline(admin.TabularInline):
     model = Condition
     fields = ('content_type', 'object_id')

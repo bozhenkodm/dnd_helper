@@ -1,0 +1,82 @@
+[
+{
+    "model": "base.book",
+    "pk": 1,
+    "fields": {
+        "name": "Книга игрока",
+        "code": "PHB"
+    }
+},
+{
+    "model": "base.book",
+    "pk": 2,
+    "fields": {
+        "name": "Сокровищница искателей приключений",
+        "code": "AV"
+    }
+},
+{
+    "model": "base.book",
+    "pk": 3,
+    "fields": {
+        "name": "Воинская сила",
+        "code": "MP"
+    }
+},
+{
+    "model": "base.book",
+    "pk": 4,
+    "fields": {
+        "name": "Духовная сила",
+        "code": "DP"
+    }
+},
+{
+    "model": "base.book",
+    "pk": 5,
+    "fields": {
+        "name": "Магическая сила",
+        "code": "AP"
+    }
+},
+{
+    "model": "base.book",
+    "pk": 6,
+    "fields": {
+        "name": "Журнал Дракон",
+        "code": "Dr"
+    }
+},
+{
+    "model": "base.book",
+    "pk": 7,
+    "fields": {
+        "name": "Книга игрока по забытым королевствам",
+        "code": "FRPG"
+    }
+},
+{
+    "model": "base.book",
+    "pk": 8,
+    "fields": {
+        "name": "Книга игрока по Эберрону",
+        "code": "EPG"
+    }
+},
+{
+    "model": "base.book",
+    "pk": 9,
+    "fields": {
+        "name": "Первородная сила",
+        "code": "PrP"
+    }
+},
+{
+    "model": "base.book",
+    "pk": 10,
+    "fields": {
+        "name": "Псионическая сила",
+        "code": "PsP"
+    }
+}
+]

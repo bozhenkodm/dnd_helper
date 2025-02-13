@@ -487,7 +487,7 @@ class PowerMixin:
                 or weapon.weapon_type in self.subclass.weapon_types.all()
                 and weapon.weapon_type.slug in ('Dagger', 'Sling', 'HandCrossbow')
             )
-        ):  # should choose either dagger or ranged
+        ):  # TODO handle rogue subclasses for it
             result += 1
         return result
 
