@@ -666,6 +666,15 @@ class WeaponTypeAdmin(admin.ModelAdmin):
             'primary_end',
         )
 
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        if self.model._meta.app_label == 'base':
+            return {}
+
+        return super().get_model_perms(request)
+
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
