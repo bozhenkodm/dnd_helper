@@ -851,6 +851,15 @@ class PowerAdmin(admin.ModelAdmin):
     )
     save_as = True
 
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        if self.model._meta.app_label == 'base':
+            return {}
+
+        return super().get_model_perms(request)
+
     @admin.display(description='Синтаксис')
     def syntax(self, obj):
         return textwrap.dedent(
@@ -1275,6 +1284,15 @@ class FeatAdmin(admin.ModelAdmin):
         ('strength', 'constitution', 'dexterity'),
         ('intelligence', 'wisdom', 'charisma'),
     )
+
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        if self.model._meta.app_label == 'base':
+            return {}
+
+        return super().get_model_perms(request)
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)

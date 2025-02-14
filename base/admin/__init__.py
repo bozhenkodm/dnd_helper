@@ -44,10 +44,13 @@ admin.site.register(NPC, NPCAdmin)
 admin.site.register(ParagonPath, ParagonPathAdmin)
 admin.site.register(Encounter, EncounterAdmin)
 admin.site.register(Party)
-admin.site.register(WeaponType, WeaponTypeAdmin)
-admin.site.register(Power, PowerAdmin)
 admin.site.register(FunctionalTemplate, FunctionalTemplateAdmin)
 admin.site.register(PlayerCharacter, PlayerCharactersAdmin)
+
+
+# for autocomplete fields
+admin.site.register(WeaponType, WeaponTypeAdmin)
+admin.site.register(Power, PowerAdmin)
 admin.site.register(Feat, FeatAdmin)
 
 

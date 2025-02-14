@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'multiselectfield',
     'base',
     'items',
+    'features',
     'printer',
     'generator',
 ]
