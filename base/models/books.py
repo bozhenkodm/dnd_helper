@@ -6,6 +6,7 @@ class Book(models.Model):
     class Meta:
         verbose_name = _('Book')
         verbose_name_plural = _('Books')
+        ordering = ('name',)
 
     name = models.CharField(verbose_name=_('Name'), max_length=100)
     code = models.CharField(verbose_name=_('Code'), max_length=10, unique=True)
@@ -19,6 +20,7 @@ class BookSource(models.Model):
         verbose_name = _('Book source')
         verbose_name_plural = _('Book sources')
         unique_together = ('book', 'book_number', 'page_number', 'is_english')
+        ordering = ('is_english', 'book', 'book_number', 'page_number')
 
     book = models.ForeignKey(Book, verbose_name=_('Book'), on_delete=models.CASCADE)
     book_number = models.PositiveSmallIntegerField(

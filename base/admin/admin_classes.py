@@ -1026,6 +1026,7 @@ class MagicItemTypeAdmin(MagicItemTypeAdminBase):
         'upload_from_clipboard',
         'image_tag',
         'source',
+        'book_source',
     )
 
     form = MagicItemTypeForm

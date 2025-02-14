@@ -14,6 +14,7 @@ from base.constants.constants import (
     WeaponGroupEnum,
 )
 from base.managers import ItemAbstractQuerySet
+from base.models.books import BookSource
 
 
 class MagicItemType(models.Model):
@@ -42,6 +43,13 @@ class MagicItemType(models.Model):
         verbose_name=_('Source'),
         max_length=20,
         help_text=_('Book and page'),
+        null=True,
+        blank=True,
+    )
+    book_source = models.ForeignKey(
+        BookSource,
+        verbose_name=_('Source'),
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )
