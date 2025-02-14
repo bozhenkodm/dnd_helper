@@ -39,13 +39,6 @@ class MagicItemType(models.Model):
     picture = models.ImageField(
         verbose_name=_('Picture'), null=True, upload_to='items', blank=True
     )
-    source = models.CharField(
-        verbose_name=_('Source'),
-        max_length=20,
-        help_text=_('Book and page'),
-        null=True,
-        blank=True,
-    )
     book_source = models.ForeignKey(
         BookSource,
         verbose_name=_('Source'),

@@ -1025,9 +1025,9 @@ class MagicItemTypeAdmin(MagicItemTypeAdminBase):
         'picture',
         'upload_from_clipboard',
         'image_tag',
-        'source',
         'book_source',
     )
+    autocomplete_fields = ('book_source',)
 
     form = MagicItemTypeForm
     list_display = ('name', 'slot')
@@ -1057,8 +1057,9 @@ class MagicArmorTypeAdmin(MagicItemTypeAdminBase):
         'picture',
         'upload_from_clipboard',
         'image_tag',
-        'source',
+        'book_source',
     )
+    autocomplete_fields = ('book_source',)
     form = MagicArmorTypeForm
 
     @atomic
@@ -1097,8 +1098,9 @@ class MagicWeaponTypeAdmin(MagicItemTypeAdminBase):
         'picture',
         'upload_from_clipboard',
         'image_tag',
-        'source',
+        'book_source',
     )
+    autocomplete_fields = ('book_source',)
     form = MagicWeaponTypeForm
 
     @atomic
@@ -1132,8 +1134,9 @@ class MagicArmItemTypeAdmin(MagicItemTypeAdminBase):
         'picture',
         'upload_from_clipboard',
         'image_tag',
-        'source',
+        'book_source',
     )
+    autocomplete_fields = ('book_source',)
     form = MagicArmItemTypeForm
 
     @atomic
@@ -1192,6 +1195,8 @@ class BookAdmin(admin.ModelAdmin):
 
 
 class BookSourceAdmin(admin.ModelAdmin):
+    search_fields = ('book__name', 'page_number')
+
     def get_model_perms(self, request):
         """
         Return empty perms dict thus hiding the model from admin index.

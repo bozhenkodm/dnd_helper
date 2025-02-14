@@ -39,8 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'multiselectfield',
     'base',
-    'generator',
+    'items',
     'printer',
+    'generator',
 ]
 
 MIDDLEWARE = [

@@ -2,8 +2,6 @@ from django.contrib import admin
 
 from base.admin.admin_classes import (
     ArmorAdmin,
-    ArmorTypeAdmin,
-    ArmsItemSlotAdmin,
     BonusAdmin,
     BookAdmin,
     BookSourceAdmin,
@@ -12,11 +10,6 @@ from base.admin.admin_classes import (
     EncounterAdmin,
     FeatAdmin,
     FunctionalTemplateAdmin,
-    MagicArmItemTypeAdmin,
-    MagicArmorTypeAdmin,
-    MagicItemAdmin,
-    MagicItemTypeAdmin,
-    MagicWeaponTypeAdmin,
     NPCAdmin,
     ParagonPathAdmin,
     PlayerCharactersAdmin,
@@ -33,18 +26,9 @@ from base.models.condition import Constraint
 from base.models.encounters import Encounter, Party, PlayerCharacter
 from base.models.feats import Feat, WeaponState
 from base.models.klass import Class, Subclass
-from base.models.magic_items import (
-    ArmsSlotItem,
-    MagicArmItemType,
-    MagicArmorType,
-    MagicItemType,
-    MagicWeaponType,
-    SimpleMagicItem,
-)
 from base.models.models import (
     NPC,
     Armor,
-    ArmorType,
     FunctionalTemplate,
     ParagonPath,
     Race,
@@ -60,23 +44,16 @@ admin.site.register(NPC, NPCAdmin)
 admin.site.register(ParagonPath, ParagonPathAdmin)
 admin.site.register(Encounter, EncounterAdmin)
 admin.site.register(Party)
-admin.site.register(ArmorType, ArmorTypeAdmin)
 admin.site.register(WeaponType, WeaponTypeAdmin)
 admin.site.register(Power, PowerAdmin)
 admin.site.register(FunctionalTemplate, FunctionalTemplateAdmin)
 admin.site.register(PlayerCharacter, PlayerCharactersAdmin)
-admin.site.register(MagicItemType, MagicItemTypeAdmin)
-admin.site.register(MagicArmorType, MagicArmorTypeAdmin)
-admin.site.register(MagicWeaponType, MagicWeaponTypeAdmin)
-admin.site.register(MagicArmItemType, MagicArmItemTypeAdmin)
 admin.site.register(Feat, FeatAdmin)
 
 
 # hidden from sidebar
 admin.site.register(Armor, ArmorAdmin)
 admin.site.register(Weapon, WeaponAdmin)
-admin.site.register(SimpleMagicItem, MagicItemAdmin)
-admin.site.register(ArmsSlotItem, ArmsItemSlotAdmin)
 admin.site.register(WeaponState, WeaponStateAdmin)
 admin.site.register(Constraint, ConstraintAdmin)
 admin.site.register(Bonus, BonusAdmin)

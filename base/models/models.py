@@ -277,7 +277,7 @@ class WeaponType(models.Model):
 class Weapon(ItemAbstract):
     class Meta:
         verbose_name = _('Weapon')
-        verbose_name_plural = _('Weapon')
+        verbose_name_plural = _('Weapons')
         unique_together = ('magic_item_type', 'level', 'weapon_type')
 
     weapon_type = models.ForeignKey(
