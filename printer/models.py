@@ -119,6 +119,10 @@ class ParticipantPlace(models.Model):
 
 
 class Avatar(models.Model):
+    class Meta:
+        verbose_name = _('Avatar')
+        verbose_name_plural = _('Avatars')
+
     MIN_SIZE = SizeIntEnum.AVERAGE
 
     name = models.CharField(verbose_name=_('Name'), max_length=30, blank=True)
@@ -169,6 +173,10 @@ class Avatar(models.Model):
 
 
 class GridMap(models.Model):
+    class Meta:
+        verbose_name = _('Map')
+        verbose_name_plural = _('Maps')
+
     name = models.CharField(verbose_name=_('Title'), max_length=30, default='Карта')
     base_image = models.ImageField(
         verbose_name=_('Base image'),
