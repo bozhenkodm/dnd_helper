@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'base',
     'items',
     'features',
+    'encounters',
     'printer',
     'generator',
 ]

@@ -7,12 +7,10 @@ from base.admin.admin_classes import (
     BookSourceAdmin,
     ClassAdmin,
     ConstraintAdmin,
-    EncounterAdmin,
     FeatAdmin,
     FunctionalTemplateAdmin,
     NPCAdmin,
     ParagonPathAdmin,
-    PlayerCharactersAdmin,
     PowerAdmin,
     RaceAdmin,
     SubclassAdmin,
@@ -23,7 +21,6 @@ from base.admin.admin_classes import (
 from base.models.bonuses import Bonus
 from base.models.books import Book, BookSource
 from base.models.condition import Constraint
-from base.models.encounters import Encounter, Party, PlayerCharacter
 from base.models.feats import Feat, WeaponState
 from base.models.klass import Class, Subclass
 from base.models.models import (
@@ -42,10 +39,7 @@ admin.site.register(Class, ClassAdmin)
 admin.site.register(Subclass, SubclassAdmin)
 admin.site.register(NPC, NPCAdmin)
 admin.site.register(ParagonPath, ParagonPathAdmin)
-admin.site.register(Encounter, EncounterAdmin)
-admin.site.register(Party)
 admin.site.register(FunctionalTemplate, FunctionalTemplateAdmin)
-admin.site.register(PlayerCharacter, PlayerCharactersAdmin)
 
 
 # for autocomplete fields

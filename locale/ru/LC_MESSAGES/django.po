@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-14 20:43+0000\n"
+"POT-Creation-Date: 2025-02-16 14:13+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -232,22 +232,35 @@ msgstr "Тип свойства"
 msgid "Property value"
 msgstr "Значение свойства"
 
+#: base/models/encounters.py:13 encounters/models.py:26 printer/models.py:142
+msgid "Player character"
+msgstr "Игровой персонаж"
+
+#: base/models/encounters.py:14 base/models/encounters.py:42
+#: encounters/models.py:27
+msgid "Player characters"
+msgstr "Игровые персонажи"
+
 #: base/models/encounters.py:35 base/models/encounters.py:80
-#: printer/forms.py:55
+#: encounters/models.py:19 printer/forms.py:55
 msgid "Party"
 msgstr "Партия"
 
-#: base/models/encounters.py:36
+#: base/models/encounters.py:36 encounters/models.py:20
 msgid "Parties"
 msgstr "Партии"
-
-#: base/models/encounters.py:42
-msgid "Player characters"
-msgstr "Игровые персонажи"
 
 #: base/models/encounters.py:45
 msgid "Non player characters"
 msgstr "Неигровоые персонажи"
+
+#: base/models/encounters.py:68 encounters/models.py:12
+msgid "Encounter"
+msgstr "Сцена"
+
+#: base/models/encounters.py:69 encounters/apps.py:8 encounters/models.py:13
+msgid "Encounters"
+msgstr "Сцены"
 
 #: base/models/experience.py:49
 msgid "Experience"
@@ -831,10 +844,6 @@ msgstr "Аватар"
 #: printer/models.py:124
 msgid "Avatars"
 msgstr "Аватары"
-
-#: printer/models.py:142
-msgid "Player character"
-msgstr "Игровой персонаж"
 
 #: printer/models.py:151
 msgid "Non player character"

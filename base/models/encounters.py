@@ -10,8 +10,8 @@ from base.models.models import NPC
 
 class PlayerCharacter(models.Model):
     class Meta:
-        verbose_name = 'Игровой персонаж'
-        verbose_name_plural = 'Игровые персонажи'
+        verbose_name = _('Player character')
+        verbose_name_plural = _('Player characters')
 
     name = models.CharField(verbose_name='Имя', max_length=50)
     armor_class = models.PositiveSmallIntegerField(verbose_name='КД', null=False)
@@ -65,8 +65,8 @@ class Party(models.Model):
 
 class Encounter(models.Model):
     class Meta:
-        verbose_name = 'Сцена'
-        verbose_name_plural = 'Сцены'
+        verbose_name = _('Encounter')
+        verbose_name_plural = _('Encounters')
 
     short_description = models.CharField(
         max_length=30, verbose_name='Краткое описание', null=True, blank=True
