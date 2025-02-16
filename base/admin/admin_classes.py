@@ -569,6 +569,7 @@ class ArmorTypeAdmin(admin.ModelAdmin):
         'fortitude_bonus',
         'reflex_bonus',
         'will_bonus',
+        'book_source',
     )
     readonly_fields = ('armor_class',)
     list_display = ('__str__', 'base_armor_type')
@@ -641,7 +642,12 @@ class WeaponTypeAdmin(admin.ModelAdmin):
     ordering = ('name',)
     list_display = ('name', 'category', 'handedness')
     search_fields = ('name',)
-    readonly_fields = ('prof_bonus', 'damage', 'properties')
+    readonly_fields = (
+        'prof_bonus',
+        'damage',
+        'properties',
+        'group_display',
+    )
     list_filter = ('handedness', 'category')
     save_as = True
 
@@ -655,6 +661,7 @@ class WeaponTypeAdmin(admin.ModelAdmin):
                 'handedness',
                 'properties',
                 'primary_end',
+                'book_source',
             )
         return (
             'slug',
@@ -664,6 +671,7 @@ class WeaponTypeAdmin(admin.ModelAdmin):
             'damage',
             'handedness',
             'primary_end',
+            'book_source',
         )
 
     def get_model_perms(self, request):
@@ -678,8 +686,8 @@ class WeaponTypeAdmin(admin.ModelAdmin):
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
+    # def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
+    #     return False
 
     def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
@@ -705,6 +713,8 @@ class WeaponTypeAdmin(admin.ModelAdmin):
     @atomic
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
+        if change:
+            return
         queries = [
             models.Q(weapon_type_slots__contains=obj.slug),
             models.Q(weapon_categories__contains=obj.slug),

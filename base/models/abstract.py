@@ -8,6 +8,7 @@ from base.constants.constants import (
     ShieldTypeIntEnum,
     WeaponCategoryIntEnum,
 )
+from base.models.books import BookSource
 
 
 class ClassAbstract(models.Model):
@@ -45,6 +46,13 @@ class ClassAbstract(models.Model):
         choices=ShieldTypeIntEnum.generate_choices(
             lambda x: x != ShieldTypeIntEnum.NONE
         ),
+        null=True,
+        blank=True,
+    )
+    book_source = models.ForeignKey(
+        BookSource,
+        verbose_name=_('Source'),
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )

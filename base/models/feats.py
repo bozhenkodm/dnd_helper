@@ -12,6 +12,7 @@ from base.constants.constants import (
     WeaponHandednessEnum,
 )
 from base.models.abstract import ConstraintAbstract
+from base.models.books import BookSource
 from base.objects.powers_output import PowerDisplay
 
 
@@ -25,6 +26,13 @@ class Feat(ConstraintAbstract):
         verbose_name=_('Minimal level'), default=1, choices=((1, 1), (11, 11), (21, 21))
     )
     text = models.TextField(verbose_name=_('Text'), null=True, blank=True)
+    book_source = models.ForeignKey(
+        BookSource,
+        verbose_name=_('Source'),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         constraints = []

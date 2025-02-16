@@ -23,6 +23,7 @@ from base.constants.constants import (
     WeaponHandednessEnum,
 )
 from base.exceptions import PowerInconsistent
+from base.models.books import BookSource
 from base.models.magic_items import ItemAbstract
 from base.objects.dice import DiceRoll
 from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
@@ -169,6 +170,13 @@ class Power(models.Model):
     )
     range = models.SmallIntegerField(verbose_name=_('Distance'), default=0)
     burst = models.SmallIntegerField(verbose_name=_('Area'), default=0)
+    book_source = models.ForeignKey(
+        BookSource,
+        verbose_name=_('Source'),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         if self.race:

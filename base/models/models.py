@@ -28,6 +28,7 @@ from base.managers import WeaponTypeQuerySet
 from base.models.abilities import Ability, NPCAbilityAbstract
 from base.models.abstract import ConstraintAbstract
 from base.models.bonuses import BonusMixin
+from base.models.books import BookSource
 from base.models.defences import NPCDefenceMixin
 from base.models.experience import NPCExperienceAbstract
 from base.models.feats import NPCFeatAbstract
@@ -72,6 +73,13 @@ class ArmorType(models.Model):
     )
     will_bonus = models.PositiveSmallIntegerField(
         verbose_name=_('Will bonus'), default=0
+    )
+    book_source = models.ForeignKey(
+        BookSource,
+        verbose_name=_('Source'),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
     )
 
     def __str__(self) -> str:
@@ -222,6 +230,13 @@ class WeaponType(models.Model):
     )
     is_enhanceable = models.BooleanField(
         verbose_name=_('Is weapon enhanceable?'), default=True
+    )
+    book_source = models.ForeignKey(
+        BookSource,
+        verbose_name=_('Source'),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
     )
 
     def __str__(self) -> str:
@@ -419,6 +434,13 @@ class Race(models.Model):
         default=True,
         help_text=_('Social races are used for random npc generation'),
     )
+    book_source = models.ForeignKey(
+        BookSource,
+        verbose_name=_('Source'),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return NPCRaceEnum[self.name].description
@@ -449,6 +471,13 @@ class FunctionalTemplate(models.Model):
     hit_points_per_level = models.SmallIntegerField(
         verbose_name=_('Hits per level'), default=8
     )
+    book_source = models.ForeignKey(
+        BookSource,
+        verbose_name=_('Source'),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return self.title
@@ -468,6 +497,13 @@ class ParagonPath(ConstraintAbstract):
     )
     race = models.ForeignKey(
         Race, on_delete=models.CASCADE, verbose_name=_('Race'), null=True, blank=True
+    )
+    book_source = models.ForeignKey(
+        BookSource,
+        verbose_name=_('Source'),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
     )
 
     def __str__(self):
