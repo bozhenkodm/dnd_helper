@@ -5,6 +5,7 @@ from base.models.encounters import (
     Party as BaseParty,
     PlayerCharacter as BasePlayerCharacter,
 )
+from printer.models import Avatar as BaseAvatar, GridMap as BaseGridMap
 
 
 class Encounter(BaseEncounter):
@@ -25,4 +26,18 @@ class PlayerCharacter(BasePlayerCharacter):
     class Meta:
         verbose_name = _('Player character')
         verbose_name_plural = _('Player characters')
+        proxy = True
+
+
+class Avatar(BaseAvatar):
+    class Meta:
+        verbose_name = _('Avatar')
+        verbose_name_plural = _('Avatars')
+        proxy = True
+
+
+class GridMap(BaseGridMap):
+    class Meta:
+        verbose_name = _('Map')
+        verbose_name_plural = _('Maps')
         proxy = True

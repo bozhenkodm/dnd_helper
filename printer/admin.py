@@ -95,8 +95,7 @@ class GridMapAdmin(admin.ModelAdmin):
                         'upload_from_clipboard',
                         'action',
                     ),
-                    'party',
-                    'npcs',
+                    'encounter',
                 )
             },
         ),
@@ -128,24 +127,31 @@ class GridMapAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
         row, col = 1, 1
         pps = []
-        if party := form.cleaned_data.get('party'):
-            for pc in party.members.filter(avatar__isnull=False):
+        if encounter := form.cleaned_data.get('encounter'):
+            if party := encounter.party:
+                for pc in party.members.filter(avatar__isnull=False):
+                    pps.append(
+                        ParticipantPlace(participant=pc.avatar, map=obj, row=row, col=col)
+                    )
+                    col += pc.avatar.size
+                for npc in party.npc_members.filter(avatar__isnull=False):
+                    pps.append(
+                        ParticipantPlace(participant=npc.avatar, map=obj, row=row, col=col)
+                    )
+                    col += npc.avatar.size
+            col += 1
+            if npcs := encounter.npcs:
+                for npc in npcs.filter(avatar__isnull=False):
+                    pps.append(
+                        ParticipantPlace(participant=npc.avatar, map=obj, row=row, col=col)
+                    )
+                    col += npc.avatar.size
+            for combatant in encounter.combatants.filter(avatar__isnull=False):
                 pps.append(
-                    ParticipantPlace(participant=pc.avatar, map=obj, row=row, col=col)
+                    ParticipantPlace(participant=combatant.avatar, map=obj, row=row, col=col)
                 )
-                col += 1
-            for npc in party.npc_members.filter(avatar__isnull=False):
-                pps.append(
-                    ParticipantPlace(participant=npc.avatar, map=obj, row=row, col=col)
-                )
-                col += 1
-        col += 1
-        if npcs := form.cleaned_data.get('npcs'):
-            for npc in npcs.all():
-                pps.append(
-                    ParticipantPlace(participant=npc.avatar, map=obj, row=row, col=col)
-                )
-                col += 1
+                col += combatant.avatar.size
+
         if pps:
             ParticipantPlace.objects.bulk_create(pps)
 

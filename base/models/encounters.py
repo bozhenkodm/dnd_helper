@@ -69,9 +69,9 @@ class Encounter(models.Model):
         verbose_name_plural = _('Encounters')
 
     short_description = models.CharField(
-        max_length=30, verbose_name='Краткое описание', null=True, blank=True
+        max_length=30, verbose_name=_('Short description'), null=True, blank=True
     )
-    description = models.TextField(verbose_name='Описание', null=True, blank=True)
+    description = models.TextField(verbose_name=_('Description'), null=True, blank=True)
     roll_for_players = models.BooleanField(
         verbose_name='Кидать инициативу за игроков?', default=False
     )
@@ -129,6 +129,7 @@ class Encounter(models.Model):
                 cpc = CombatantsPC(pc=pc, encounter=self)
                 cpc.save()
                 self.combatants_pcs.add(cpc)
+            self.npcs.add(*self.party.npc_members.all())
         for combatant in self.combatants_pcs.all():
             if self.roll_for_players:
                 initiative = combatant.pc.initiative + DiceIntEnum.D20.roll()
@@ -242,6 +243,14 @@ class Combatants(models.Model):
     initiative = models.PositiveSmallIntegerField(verbose_name='Инициатива', default=0)
     number = models.PositiveSmallIntegerField(
         verbose_name='Количество однотипных', default=1
+    )
+    avatar = models.ForeignKey(
+        'printer.Avatar',
+        verbose_name=_('Avatar'),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        limit_choices_to={'pc__isnull': True, 'npc__isnull': True},
     )
 
     def __str__(self):

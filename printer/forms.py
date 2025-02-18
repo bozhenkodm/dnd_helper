@@ -1,8 +1,7 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from base.models import NPC
-from base.models.encounters import Party
+from base.models.encounters import Encounter
 from printer.constants import ColorsStyle, Position, TransponseAction
 from printer.models import Avatar, EncounterIcons, GridMap, ParticipantPlace
 
@@ -51,13 +50,8 @@ class GridMapForm(forms.ModelForm):
         widget=forms.RadioSelect,
         initial=ColorsStyle.WHITE,
     )
-    party = forms.ModelChoiceField(
-        queryset=Party.objects.all(), required=False, label=_('Party')
-    )
-    npcs = forms.ModelMultipleChoiceField(
-        queryset=NPC.objects.filter(avatar__isnull=False),
-        required=False,
-        label='NPC',
+    encounter = forms.ModelChoiceField(
+        queryset=Encounter.objects.order_by('-id'), required=False, label=_('Encounter')
     )
 
 
