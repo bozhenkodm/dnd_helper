@@ -121,7 +121,7 @@ class NPCDefenceMixin:
 
     @property
     def fortitude(self: NPCProtocol) -> int:
-        result = (
+        return (
             self._defence_level_bonus
             + max(self.str_mod, self.con_mod)
             + (
@@ -136,23 +136,19 @@ class NPCDefenceMixin:
             if self.armor is not None
             else 0
         )
-        return result
 
     @property
     def reflex(self: NPCProtocol) -> int:
-        result = (
+        return (
             self._defence_level_bonus
             + max(self.dex_mod, self.int_mod)
             + (self.functional_template.reflex_bonus if self.functional_template else 0)
             + self.calculate_bonus(DefenceTypeEnum.REFLEX)
             + self.klass.reflex
             + self._necklace_defence_bonus
-            + self.armor.armor_type.reflex_bonus
-            if self.armor
-            else 0
+            + (self.armor.armor_type.reflex_bonus if self.armor else 0)
+            + self._shield_bonus
         )
-        result += self._shield_bonus
-        return result
 
     @property
     def will(self: NPCProtocol) -> int:

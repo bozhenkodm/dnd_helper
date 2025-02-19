@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-17 19:48+0000\n"
+"POT-Creation-Date: 2025-02-18 07:18+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -250,7 +250,7 @@ msgid "Player characters"
 msgstr "Игровые персонажи"
 
 #: base/models/encounters.py:35 base/models/encounters.py:80
-#: encounters/models.py:20 printer/forms.py:55
+#: encounters/models.py:20
 msgid "Party"
 msgstr "Партия"
 
@@ -262,7 +262,7 @@ msgstr "Партии"
 msgid "Non player characters"
 msgstr "Неигровоые персонажи"
 
-#: base/models/encounters.py:68 encounters/models.py:13
+#: base/models/encounters.py:68 encounters/models.py:13 printer/forms.py:54
 msgid "Encounter"
 msgstr "Сцена"
 
@@ -862,13 +862,14 @@ msgstr "Неигровой персонаж"
 msgid "Height"
 msgstr "Высота"
 
-#: printer/models.py:193
+#: printer/models.py:192
+msgid "Cells on longest side"
+msgstr "Количество ячеек на длинной стороне"
+
+#: printer/models.py:195
 msgid "Grid color"
 msgstr "Цвет грида"
 
-#: printer/models.py:202
+#: printer/models.py:204
 msgid "Participants"
 msgstr "Участники"
-
-#~ msgid " or "
-#~ msgstr " или "

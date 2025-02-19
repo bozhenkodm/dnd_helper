@@ -188,7 +188,9 @@ class GridMap(models.Model):
     )
     height = models.PositiveSmallIntegerField(verbose_name=_('Height'), default=1)
     width = models.PositiveSmallIntegerField(verbose_name=_('Width'), default=1)
-    cells_on_longest_side = models.PositiveSmallIntegerField(default=10)
+    cells_on_longest_side = models.PositiveSmallIntegerField(
+        verbose_name=_('Cells on longest side'), default=10
+    )
     grid_color = models.CharField(
         verbose_name=_('Grid color'),
         default=ColorsStyle.NONE,
