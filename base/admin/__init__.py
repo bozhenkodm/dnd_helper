@@ -22,15 +22,13 @@ from base.models.bonuses import Bonus
 from base.models.books import Book, BookSource
 from base.models.condition import Constraint
 from base.models.feats import Feat, WeaponState
+from base.models.items import Armor, WeaponType, Weapon
 from base.models.klass import Class, Subclass
 from base.models.models import (
     NPC,
-    Armor,
     FunctionalTemplate,
     ParagonPath,
     Race,
-    Weapon,
-    WeaponType,
 )
 from base.models.powers import Power
 

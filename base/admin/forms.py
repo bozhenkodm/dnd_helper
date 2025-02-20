@@ -20,11 +20,9 @@ from base.constants.constants import (
     WeaponCategoryIntEnum,
     WeaponHandednessEnum,
 )
-from base.models import NPC
 from base.models.abilities import Ability
 from base.models.condition import Condition, Constraint, PropertiesCondition
 from base.models.feats import Feat
-from base.models.klass import Class, Subclass
 from base.models.items import (
     ArmsSlotItem,
     FeetSlotItem,
@@ -37,9 +35,10 @@ from base.models.items import (
     NeckSlotItem,
     RingsSlotItem,
     SimpleMagicItem,
-    WaistSlotItem,
+    WaistSlotItem, WeaponType, Weapon,
 )
-from base.models.models import ParagonPath, Race, Weapon, WeaponType
+from base.models.klass import Class, Subclass
+from base.models.models import NPC, ParagonPath, Race
 from base.models.powers import Power
 from base.models.skills import Skill
 

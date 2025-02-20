@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from base.constants.constants import SexEnum
-from base.models import Race
+from base.models.models import Race
 
 
 class NPCName(models.Model):

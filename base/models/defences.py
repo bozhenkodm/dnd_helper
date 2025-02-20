@@ -10,7 +10,8 @@ if TYPE_CHECKING:
         WaistSlotItem,
         HandsSlotItem,
     )
-    from base.models.models import FunctionalTemplate, Armor
+    from base.models.models import FunctionalTemplate
+    from base.models import Armor
     from base.models.klass import Class
 
 from base.constants.constants import DefenceTypeEnum, NPCClassEnum, ShieldTypeIntEnum

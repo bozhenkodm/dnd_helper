@@ -9,8 +9,8 @@ from django.views.generic import DetailView, FormView, ListView, TemplateView
 from base.constants.constants import SkillEnum
 from base.forms.encounter import EncounterChangeInitiativeForm
 from base.forms.npc import NPCModelForm
-from base.models import NPC, Encounter
-from base.models.encounters import EncounterParticipants, Party
+from base.models.encounters import Encounter, EncounterParticipants, Party
+from base.models.models import NPC
 
 
 class NPCFormView(FormView):

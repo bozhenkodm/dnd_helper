@@ -1,8 +1,8 @@
 import pytest
 from django.conf import settings
 
-from base.models import NPC
-from base.models.models import Weapon, WeaponType
+from base.models.models import NPC
+from base.models.items import WeaponType, Weapon
 from base.models.powers import PowerProperty
 
 

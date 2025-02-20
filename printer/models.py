@@ -6,8 +6,8 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from base.constants.constants import SizeIntEnum
-from base.models import NPC
 from base.models.encounters import PlayerCharacter
+from base.models.models import NPC
 from printer.constants import ColorsStyle, Position, PrintableObjectType
 
 

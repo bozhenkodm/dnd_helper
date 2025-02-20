@@ -24,12 +24,12 @@ from base.constants.constants import (
 )
 from base.exceptions import PowerInconsistent
 from base.models.books import BookSource
-from base.models.items import ItemAbstract
+from base.models.items import ItemAbstract, Weapon
 from base.objects.dice import DiceRoll
 from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
 
 if TYPE_CHECKING:
-    from base.models.models import Weapon
+    pass
 
 
 class Power(models.Model):

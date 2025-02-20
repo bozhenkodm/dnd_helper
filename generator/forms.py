@@ -1,7 +1,7 @@
 from django import forms
 
 from base.constants.constants import NPCRaceEnum, SexEnum
-from base.models import Race
+from base.models.models import Race
 from generator.models import NPCName
 
 

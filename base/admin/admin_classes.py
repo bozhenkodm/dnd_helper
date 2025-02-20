@@ -44,7 +44,6 @@ from base.constants.constants import (
     WeaponGroupEnum,
     WeaponHandednessEnum,
 )
-from base.models import Race
 from base.models.abilities import AbilityLevelBonus
 from base.models.bonuses import Bonus
 from base.models.condition import (
@@ -55,15 +54,17 @@ from base.models.condition import (
 )
 from base.models.encounters import Combatants, CombatantsPC
 from base.models.feats import ItemState
-from base.models.klass import Class
 from base.models.items import (
+    Armor,
+    ArmorType,
     ArmsSlotItem,
     MagicArmorType,
     MagicItemType,
     MagicWeaponType,
-    SimpleMagicItem,
+    SimpleMagicItem, WeaponType, Weapon,
 )
-from base.models.models import NPC, Armor, ArmorType, Weapon, WeaponType
+from base.models.klass import Class
+from base.models.models import NPC, Race
 from base.models.powers import Power, PowerProperty
 
 

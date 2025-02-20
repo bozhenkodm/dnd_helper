@@ -1,7 +1,6 @@
 from django import forms
 
 from base.constants.constants import SexEnum, WeaponHandednessEnum
-from base.models import NPC
 from base.models.items import (
     ArmsSlotItem,
     FeetSlotItem,
@@ -9,9 +8,9 @@ from base.models.items import (
     HeadSlotItem,
     NeckSlotItem,
     RingsSlotItem,
-    WaistSlotItem,
+    WaistSlotItem, Weapon,
 )
-from base.models.models import Weapon
+from base.models.models import NPC
 
 
 class NPCModelForm(forms.ModelForm):
