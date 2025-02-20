@@ -1,6 +1,6 @@
 from django.utils.translation import gettext_lazy as _
 
-from base.models.magic_items import (
+from base.models.items import (
     ArmsSlotItem as BaseArmsSlotItem,
     MagicArmItemType as BaseMagicArmItemType,
     MagicArmorType as BaseMagicArmorType,

@@ -33,7 +33,7 @@ from base.models.defences import NPCDefenceMixin
 from base.models.experience import NPCExperienceAbstract
 from base.models.feats import NPCFeatAbstract
 from base.models.klass import Class, NPCClassAbstract
-from base.models.magic_items import (
+from base.models.items import (
     ItemAbstract,
     MagicArmorType,
     MagicWeaponType,

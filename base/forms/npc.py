@@ -2,7 +2,7 @@ from django import forms
 
 from base.constants.constants import SexEnum, WeaponHandednessEnum
 from base.models import NPC
-from base.models.magic_items import (
+from base.models.items import (
     ArmsSlotItem,
     FeetSlotItem,
     HandsSlotItem,

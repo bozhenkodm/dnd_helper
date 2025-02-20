@@ -25,7 +25,7 @@ from base.models.abilities import Ability
 from base.models.condition import Condition, Constraint, PropertiesCondition
 from base.models.feats import Feat
 from base.models.klass import Class, Subclass
-from base.models.magic_items import (
+from base.models.items import (
     ArmsSlotItem,
     FeetSlotItem,
     HandsSlotItem,

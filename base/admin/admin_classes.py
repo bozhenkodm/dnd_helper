@@ -56,7 +56,7 @@ from base.models.condition import (
 from base.models.encounters import Combatants, CombatantsPC
 from base.models.feats import ItemState
 from base.models.klass import Class
-from base.models.magic_items import (
+from base.models.items import (
     ArmsSlotItem,
     MagicArmorType,
     MagicItemType,
@@ -584,6 +584,8 @@ class ArmorTypeAdmin(admin.ModelAdmin):
     @atomic
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
+        if change:
+            return
         for magic_armor_type in MagicArmorType.objects.filter(
             armor_type_slots__contains=obj.base_armor_type
         ):
@@ -1094,6 +1096,8 @@ class MagicArmorTypeAdmin(MagicItemTypeAdminBase):
     def save_model(self, request, obj, form, change):
         obj.slot = MagicItemSlot.ARMOR.value
         super().save_model(request, obj, form, change)
+        if change:
+            return
         armor_types = ArmorType.objects.filter(
             reduce(
                 lambda x, y: x | y,
@@ -1135,6 +1139,8 @@ class MagicWeaponTypeAdmin(MagicItemTypeAdminBase):
     def save_model(self, request, obj, form, change):
         obj.slot = MagicItemSlot.WEAPON.value
         super().save_model(request, obj, form, change)
+        if change:
+            return
         queries = [
             models.Q(id__in=obj.weapon_types.values_list('id', flat=True)),
             models.Q(category__in=obj.weapon_categories),

@@ -24,7 +24,7 @@ from base.constants.constants import (
 )
 from base.exceptions import PowerInconsistent
 from base.models.books import BookSource
-from base.models.magic_items import ItemAbstract
+from base.models.items import ItemAbstract
 from base.objects.dice import DiceRoll
 from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
 
