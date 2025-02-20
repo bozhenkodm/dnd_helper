@@ -8,7 +8,9 @@ from base.models.items import (
     MagicArmorType as BaseMagicArmorType,
     MagicItemType as BaseMagicItemType,
     MagicWeaponType as BaseMagicWeaponType,
-    SimpleMagicItem as BaseSimpleMagicItem, WeaponType as BaseWeaponType, Weapon as BaseWeapon,
+    SimpleMagicItem as BaseSimpleMagicItem,
+    Weapon as BaseWeapon,
+    WeaponType as BaseWeaponType,
 )
 
 

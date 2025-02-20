@@ -61,7 +61,10 @@ from base.models.items import (
     MagicArmorType,
     MagicItemType,
     MagicWeaponType,
-    SimpleMagicItem, WeaponType, Weapon,
+    ShieldType,
+    SimpleMagicItem,
+    Weapon,
+    WeaponType,
 )
 from base.models.klass import Class
 from base.models.models import NPC, Race
@@ -1181,11 +1184,12 @@ class MagicArmItemTypeAdmin(MagicItemTypeAdminBase):
         slots = obj.shield_slots if obj.shield_slots else (ShieldTypeIntEnum.NONE,)
         for level in obj.level_range():
             for slot in slots:
+                shield_type = ShieldType.objects.get(base_shield_type=slot)
                 if not ArmsSlotItem.objects.filter(
-                    magic_item_type=obj, shield=slot, level=level
+                    magic_item_type=obj, shield_type=shield_type, level=level
                 ).exists():
                     magic_item = ArmsSlotItem(
-                        magic_item_type=obj, shield=slot, level=level
+                        magic_item_type=obj, shield_type=shield_type, level=level
                     )
                     magic_item.save()
 

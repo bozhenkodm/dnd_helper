@@ -61,9 +61,9 @@ class NPCProtocol(Protocol):
 class NPCDefenceMixin:
     @property
     def shield(self: NPCProtocol) -> ShieldTypeIntEnum:
-        if not self.arms_slot:
+        if not self.arms_slot or not self.arms_slot.shield:
             return ShieldTypeIntEnum.NONE
-        return ShieldTypeIntEnum(self.arms_slot.shield)
+        return self.arms_slot.shield
 
     @property
     def _shield_bonus(self: NPCProtocol) -> int:

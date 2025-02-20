@@ -27,7 +27,9 @@ from base.models.feats import NPCFeatAbstract
 from base.models.items import (
     Armor,
     ItemAbstract,
-    NPCMagicItemAbstract, WeaponType, Weapon,
+    NPCMagicItemAbstract,
+    Weapon,
+    WeaponType,
 )
 from base.models.klass import Class, NPCClassAbstract
 from base.models.powers import Power, PowerMixin

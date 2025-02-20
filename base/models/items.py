@@ -10,9 +10,12 @@ from base.constants.constants import (
     DiceIntEnum,
     MagicItemCategory,
     MagicItemSlot,
+    PowerActionTypeEnum,
     ShieldTypeIntEnum,
+    ThrownWeaponType,
     WeaponCategoryIntEnum,
-    WeaponGroupEnum, WeaponHandednessEnum, ThrownWeaponType, PowerActionTypeEnum,
+    WeaponGroupEnum,
+    WeaponHandednessEnum,
 )
 from base.exceptions import WrongWeapon
 from base.managers import ItemAbstractQuerySet, WeaponTypeQuerySet
@@ -26,11 +29,11 @@ class ArmorType(models.Model):
         verbose_name_plural = _('Armor types')
 
     name = models.CharField(verbose_name=_('Title'), max_length=100)
-    base_armor_type = models.SmallIntegerField(
+    base_armor_type = models.PositiveSmallIntegerField(
         verbose_name=_('Armor type'),
         choices=ArmorTypeIntEnum.generate_choices(),
     )
-    bonus_armor_class = models.SmallIntegerField(
+    bonus_armor_class = models.PositiveSmallIntegerField(
         verbose_name=_('Additional armor class'),
         default=0,
     )
@@ -38,7 +41,7 @@ class ArmorType(models.Model):
     skill_penalty = models.SmallIntegerField(
         verbose_name=_('Skills penalty'), default=0
     )
-    minimal_enhancement = models.SmallIntegerField(
+    minimal_enhancement = models.PositiveSmallIntegerField(
         verbose_name=_('Minimal enhancement'), default=0
     )
     fortitude_bonus = models.PositiveSmallIntegerField(
@@ -72,6 +75,23 @@ class ArmorType(models.Model):
             ArmorTypeIntEnum.LEATHER,
             ArmorTypeIntEnum.HIDE,
         )
+
+
+class ShieldType(models.Model):
+    class Meta:
+        verbose_name = _('Shield type')
+        verbose_name_plural = _('Shield types')
+
+    base_shield_type = models.PositiveSmallIntegerField(
+        verbose_name=_('Armor type'),
+        choices=ShieldTypeIntEnum.generate_choices(),
+    )
+    skill_penalty = models.SmallIntegerField(
+        verbose_name=_('Skills penalty'), default=0
+    )
+
+    def __str__(self) -> str:
+        return self.get_base_shield_type_display()
 
 
 class WeaponType(models.Model):
@@ -419,6 +439,7 @@ class Armor(ItemAbstract):
             )
             magic_item.save()
 
+
 class Weapon(ItemAbstract):
     class Meta:
         verbose_name = _('Weapon')
@@ -562,24 +583,36 @@ class ArmsSlotItem(ItemAbstract):
     class Meta:
         verbose_name = _('Hand item/shield')
         verbose_name_plural = _('Hand items/shields')
-        unique_together = ('magic_item_type', 'level', 'shield')
+        unique_together = ('magic_item_type', 'level', 'shield_type')
 
     SLOT = MagicItemSlot.ARMS
 
-    shield = models.SmallIntegerField(
+    shield_type = models.ForeignKey(
+        ShieldType,
         verbose_name=_('Shield'),
-        choices=ShieldTypeIntEnum.generate_choices(),
-        default=ShieldTypeIntEnum.NONE.value,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
     )
 
     def __str__(self):
         if self.magic_item_type and not self.shield:
             return f'{self.magic_item_type} {self.level} уровня'
         if not self.magic_item_type and self.shield:
-            return self.get_shield_display()
-        return (
-            f'{self.magic_item_type} ({self.get_shield_display()}) {self.level} уровня'
-        )
+            return self.shield.description
+        return f'{self.magic_item_type} ({self.shield.description}) {self.level} уровня'
+
+    @property
+    def shield(self) -> ShieldTypeIntEnum:
+        if not self.shield_type:
+            return ShieldTypeIntEnum.NONE
+        return ShieldTypeIntEnum(self.shield_type.base_shield_type)
+
+    @property
+    def skill_penalty(self) -> int:
+        if not self.shield_type:
+            return 0
+        return self.shield_type.skill_penalty
 
 
 class WaistSlotItem(SimpleMagicItem):

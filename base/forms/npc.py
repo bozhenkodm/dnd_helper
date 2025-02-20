@@ -8,7 +8,8 @@ from base.models.items import (
     HeadSlotItem,
     NeckSlotItem,
     RingsSlotItem,
-    WaistSlotItem, Weapon,
+    WaistSlotItem,
+    Weapon,
 )
 from base.models.models import NPC
 

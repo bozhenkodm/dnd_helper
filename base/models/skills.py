@@ -81,7 +81,7 @@ class NPCSkillAbstract(models.Model):
             self.armor.skill_penalty if self.armor else 0  # type: ignore
         )
         shield_skill_penalty = (
-            self.shield.skill_penalty if self.shield else 0  # type: ignore
+            self.arms_slot.skill_penalty if self.arms_slot else 0  # type: ignore
         )
         penalty = Skills.init_with_const(
             *(
