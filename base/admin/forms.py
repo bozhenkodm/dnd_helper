@@ -154,13 +154,17 @@ class NPCModelForm(forms.ModelForm):
             self.fields['feet_slot'].queryset = FeetSlotItem.objects.select_related(
                 'magic_item_type'
             ).filter(magic_item_type__slot=FeetSlotItem.SLOT.value)
-            self.fields['arms_slot'].queryset = ArmsSlotItem.objects.select_related(
-                'magic_item_type'
-            ).filter(
-                models.Q(magic_item_type__slot=ArmsSlotItem.SLOT.value)
-                & models.Q(shield_type__base_shield_type__in=self.instance.klass.shields)
-                | models.Q(shield_type__isnull=True),
-            ).order_by('magic_item_type__name', 'shield_type__base_shield_type')
+            self.fields['arms_slot'].queryset = (
+                ArmsSlotItem.objects.select_related('magic_item_type')
+                .filter(
+                    models.Q(magic_item_type__slot=ArmsSlotItem.SLOT.value)
+                    & models.Q(
+                        shield_type__base_shield_type__in=self.instance.klass.shields
+                    )
+                    | models.Q(shield_type__isnull=True),
+                )
+                .order_by('magic_item_type__name', 'shield_type__base_shield_type')
+            )
             self.fields['left_ring_slot'].queryset = (
                 RingsSlotItem.objects.select_related('magic_item_type').filter(
                     magic_item_type__slot=RingsSlotItem.SLOT.value

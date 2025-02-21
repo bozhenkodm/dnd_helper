@@ -489,9 +489,12 @@ class NPCAdmin(admin.ModelAdmin):
             if level > npc.level:
                 break
             for ability in form.cleaned_data[f'level{level}_abilities_bonus']:
-                ability_bonuses.append(
-                    AbilityLevelBonus(npc=npc, level=level, ability=ability)
-                )
+                if not AbilityLevelBonus.objects.filter(
+                    npc=npc, level=level, ability=ability
+                ).exists():
+                    ability_bonuses.append(
+                        AbilityLevelBonus(npc=npc, level=level, ability=ability)
+                    )
         AbilityLevelBonus.objects.bulk_create(ability_bonuses)
         super().save_related(request, form, formsets, change)
 
@@ -661,6 +664,7 @@ class WeaponTypeAdmin(admin.ModelAdmin):
         if obj and obj.id:
             return (
                 'category',
+                'groups',
                 'group_display',
                 'prof_bonus',
                 'damage',
@@ -672,6 +676,7 @@ class WeaponTypeAdmin(admin.ModelAdmin):
         return (
             'slug',
             'category',
+            'groups',
             'group',
             'prof_bonus',
             'damage',

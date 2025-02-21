@@ -164,12 +164,6 @@ class ShieldTypeIntEnum(IntDescriptionEnum):
     LIGHT = 1, 'Лёгкий щит'
     HEAVY = 2, 'Тяжелый щит'
 
-    @property
-    def skill_penalty(self):
-        if self == self.HEAVY:
-            return -2
-        return 0
-
 
 class WeaponGroupEnum(BaseNameValueDescriptionEnum):
     # Melee

@@ -94,6 +94,24 @@ class ShieldType(models.Model):
         return self.get_base_shield_type_display()
 
 
+class WeaponGroup(models.Model):
+    class Meta:
+        verbose_name = _('Weapon group')
+        verbose_name_plural = _('Weapon group')
+        ordering = ('is_ranged', WeaponGroupEnum.generate_case())
+
+    name = models.CharField(
+        verbose_name=_('Name'),
+        choices=WeaponGroupEnum.generate_choices(),
+        max_length=WeaponGroupEnum.max_length(),
+        unique=True,
+    )
+    is_ranged = models.BooleanField(verbose_name=_('Ranged'), default=False)
+
+    def __str__(self):
+        return self.get_name_display()
+
+
 class WeaponType(models.Model):
     class Meta:
         verbose_name = _('Weapon type')
@@ -113,6 +131,8 @@ class WeaponType(models.Model):
         min_choices=1,
         choices=WeaponGroupEnum.generate_choices(),
     )
+    # TODO finish with groups field
+    groups = models.ManyToManyField(WeaponGroup, verbose_name=_('Groups'), blank=False)
     category = models.PositiveSmallIntegerField(
         verbose_name=_('Category'),
         choices=WeaponCategoryIntEnum.generate_choices(),
