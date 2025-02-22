@@ -8,11 +8,11 @@ from base.constants.constants import (
     PowerFrequencyIntEnum,
     ShieldTypeIntEnum,
     WeaponCategoryIntEnum,
-    WeaponGroupEnum,
     WeaponHandednessEnum,
 )
 from base.models.abstract import ConstraintAbstract
 from base.models.books import BookSource
+from base.models.items import WeaponGroup
 from base.objects.powers_output import PowerDisplay
 
 
@@ -92,10 +92,9 @@ class WeaponState(models.Model):
         null=True,
         blank=True,
     )
-    group = MultiSelectField(
-        verbose_name=_('Weapon group'),
-        choices=WeaponGroupEnum.generate_choices(),
-        null=True,
+    groups = models.ManyToManyField(
+        WeaponGroup,
+        verbose_name=_('Weapon groups'),
         blank=True,
     )
     type = models.ManyToManyField(
@@ -111,11 +110,15 @@ class WeaponState(models.Model):
         result = []
         if self.category:
             result.append('Категория' + ': ' + str(self.category))
-        if self.group:
-            result.append('Группа' + ': ' + str(self.group))
+        if self.groups.all():
+            result.append(
+                'Группа'
+                + ': '
+                + ', '.join(wg.get_name_display() for wg in self.groups.all())
+            )
         if self.type.all():
             result.append('Тип' + ': ' + ', '.join(str(wt) for wt in self.type.all()))
-        if not any((self.category, self.group, self.type.all())):
+        if not any((self.category, self.groups.all(), self.type.all())):
             return 'Рука должна быть не пустая'
         return '; '.join(result)
 
@@ -161,8 +164,12 @@ class ItemState(models.Model):
             and str(npc.primary_hand.category) not in self.primary_hand.category
         ):
             return False
-        if self.primary_hand.group and not set(npc.primary_hand.group) & set(
-            self.primary_hand.group
+        if (
+            self.primary_hand
+            and self.primary_hand.groups.all()
+            and not npc.primary_hand.groups().exclude(
+                id__in=self.primary_hand.groups.values_list('id', flat=True)
+            )
         ):
             return False
         if (
@@ -188,8 +195,11 @@ class ItemState(models.Model):
         ):
             return False
         if (
-            self.secondary_hand.group
-            and str(secondary_hand.group) not in self.secondary_hand.group
+            self.secondary_hand
+            and self.secondary_hand.groups.all()
+            and not npc.secondary_hand.groups().exclude(
+                id__in=self.secondary_hand.groups.values_list('id', flat=True)
+            )
         ):
             return False
         if (

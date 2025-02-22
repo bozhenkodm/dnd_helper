@@ -655,7 +655,6 @@ class WeaponTypeAdmin(admin.ModelAdmin):
         'prof_bonus',
         'damage',
         'properties',
-        'group_display',
     )
     list_filter = ('handedness', 'category')
     save_as = True
@@ -665,7 +664,6 @@ class WeaponTypeAdmin(admin.ModelAdmin):
             return (
                 'category',
                 'groups',
-                'group_display',
                 'prof_bonus',
                 'damage',
                 'handedness',
@@ -677,7 +675,6 @@ class WeaponTypeAdmin(admin.ModelAdmin):
             'slug',
             'category',
             'groups',
-            'group',
             'prof_bonus',
             'damage',
             'handedness',
@@ -709,12 +706,6 @@ class WeaponTypeAdmin(admin.ModelAdmin):
             return '-'
         return obj.properties_text
 
-    @admin.display(description='Группа оружия')
-    def group_display(self, obj):
-        if not obj.id:
-            return '-'
-        return ', '.join(WeaponGroupEnum[g].description for g in obj.group)
-
     @admin.display(description='Урон')
     def damage(self, obj):
         if not obj.id:
@@ -729,7 +720,9 @@ class WeaponTypeAdmin(admin.ModelAdmin):
         queries = [
             models.Q(weapon_type_slots__contains=obj.slug),
             models.Q(weapon_categories__contains=obj.slug),
-        ] + [models.Q(weapon_groups__contains=g) for g in obj.group]
+            # TODO test this query
+            models.Q(weapon_groups__id__in=obj.groups.values_list('id', flat=True)),
+        ]
         for magic_weapon_type in MagicWeaponType.objects.filter(
             reduce(lambda x, y: x | y, queries)
         ):
@@ -744,7 +737,7 @@ class WeaponAdmin(admin.ModelAdmin):
     )
     readonly_fields = (
         'category',
-        'group',
+        'groups',
         'damage',
     )
     list_display = ('__str__',)
@@ -799,8 +792,11 @@ class WeaponAdmin(admin.ModelAdmin):
         return obj.weapon_type.category
 
     @admin.display(description='Группа оружия')
-    def group(self, obj):
-        return obj.weapon_type.group
+    def groups(self, obj):
+        return ', '.join(
+            WeaponGroupEnum(wg).description
+            for wg in obj.weapon_type.groups.values_list('name', flat=True)
+        )
 
     @admin.display(description='Урон')
     def damage(self, obj):
@@ -1148,15 +1144,17 @@ class MagicWeaponTypeAdmin(MagicItemTypeAdminBase):
     def save_model(self, request, obj, form, change):
         obj.slot = MagicItemSlot.WEAPON.value
         super().save_model(request, obj, form, change)
-        if change:
-            return
         queries = [
             models.Q(id__in=obj.weapon_types.values_list('id', flat=True)),
             models.Q(category__in=obj.weapon_categories),
-        ] + [models.Q(group__contains=g) for g in obj.weapon_groups]
-        weapon_types = WeaponType.objects.filter(
-            reduce(lambda x, y: x | y, queries)
-        ).filter(is_enhanceable=True)
+            # TODO test this query
+            models.Q(groups__id__in=obj.weapon_groups.values_list('id', flat=True)),
+        ]
+        weapon_types = (
+            WeaponType.objects.prefetch_related('groups')
+            .filter(reduce(lambda x, y: x | y, queries))
+            .filter(is_enhanceable=True)
+        )
         for weapon_type in weapon_types:
             for level in obj.level_range():
                 Weapon.create_on_base(weapon_type, obj, level)

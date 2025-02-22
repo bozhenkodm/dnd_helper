@@ -27,14 +27,6 @@ class SkillQuerySet(models.QuerySet):
         return Skills(**{s.title.lower(): value for s in self})
 
 
-class WeaponTypeQuerySet(models.QuerySet):
-    def of_category(self, category: int):
-        return self.filter(category=category)
-
-    def of_group(self, group: str):
-        return self.filter(group=group)
-
-
 class SubclassQuerySet(models.QuerySet):
     def generate_choices(self):
         yield from (

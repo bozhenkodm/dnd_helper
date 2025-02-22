@@ -18,7 +18,7 @@ from base.constants.constants import (
     WeaponHandednessEnum,
 )
 from base.exceptions import WrongWeapon
-from base.managers import ItemAbstractQuerySet, WeaponTypeQuerySet
+from base.managers import ItemAbstractQuerySet
 from base.models.books import BookSource
 from base.objects.dice import DiceRoll
 
@@ -117,8 +117,6 @@ class WeaponType(models.Model):
         verbose_name = _('Weapon type')
         verbose_name_plural = _('Weapon types')
 
-    objects = WeaponTypeQuerySet.as_manager()
-
     name = models.CharField(verbose_name=_('Title'), max_length=30, blank=True)
     slug = models.CharField(verbose_name='Slug', max_length=30, unique=True, blank=True)
     handedness = models.CharField(
@@ -126,12 +124,6 @@ class WeaponType(models.Model):
         choices=WeaponHandednessEnum.generate_choices(is_sorted=False),
         max_length=WeaponHandednessEnum.max_length(),
     )
-    group = MultiSelectField(
-        verbose_name=_('Group'),
-        min_choices=1,
-        choices=WeaponGroupEnum.generate_choices(),
-    )
-    # TODO finish with groups field
     groups = models.ManyToManyField(WeaponGroup, verbose_name=_('Groups'), blank=False)
     category = models.PositiveSmallIntegerField(
         verbose_name=_('Category'),
@@ -325,11 +317,8 @@ class MagicWeaponType(MagicItemType):
         verbose_name = _('Magic weapon type')
         verbose_name_plural = _('Magic weapon types')
 
-    weapon_groups = MultiSelectField(
-        verbose_name=_('Weapon group'),
-        choices=WeaponGroupEnum.generate_choices(),
-        null=True,
-        blank=True,
+    weapon_groups = models.ManyToManyField(
+        WeaponGroup, verbose_name=_('Weapon group'), blank=True
     )
     weapon_categories = MultiSelectField(
         verbose_name=_('Weapon category'),
@@ -512,9 +501,8 @@ class Weapon(ItemAbstract):
     def handedness(self):
         return self.weapon_type.handedness
 
-    @cached_property
-    def group(self):
-        return self.weapon_type.group
+    def groups(self):
+        return self.weapon_type.groups.all()
 
     @cached_property
     def category(self):

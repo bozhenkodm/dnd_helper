@@ -233,12 +233,19 @@ class NPCModelForm(forms.ModelForm):
                     error='Двойное и двуручное оружие занимает две руки',
                 )
                 return
-            if (
+            subclass_slug = self.instance.klass.subclasses.get(
+                subclass_id=self.cleaned_data['subclass_id']
+            ).slug
+            can_wield_two_one_handed_weapons = (
                 self.instance.klass.name == NPCClassEnum.RANGER
-                and self.cleaned_data['subclass_id'] == 'TWO_HANDED'
+                and subclass_slug == 'TWO_HANDED'
                 or self.instance.klass.name == NPCClassEnum.BARBARIAN
-                and self.cleaned_data['subclass_id'] == 'WHIRLING'
-            ) and secondary_hand.handedness == WeaponHandednessEnum.TWO:
+                and subclass_slug == 'WHIRLING'
+            )
+            if (
+                can_wield_two_one_handed_weapons
+                and secondary_hand.handedness == WeaponHandednessEnum.TWO
+            ):
                 self.add_error(
                     'secondary_hand',
                     ValidationError(
@@ -246,14 +253,9 @@ class NPCModelForm(forms.ModelForm):
                         'не могут держать двуручное оружие во второй руке'
                     ),
                 )
-            elif not (
-                self.instance.klass.name == NPCClassEnum.RANGER
-                and self.cleaned_data['subclass_id'] == 'TWO_HANDED'
-                or self.instance.klass.name == NPCClassEnum.BARBARIAN
-                and self.cleaned_data['subclass_id'] == 'WHIRLING'
-            ) and not (
-                secondary_hand
-                and secondary_hand.handedness == WeaponHandednessEnum.OFF_HAND
+            elif (
+                not can_wield_two_one_handed_weapons
+                and secondary_hand.handedness != WeaponHandednessEnum.OFF_HAND
             ):
                 self.add_error(
                     'secondary_hand',
@@ -372,7 +374,7 @@ class MagicItemForm(ItemAbstractForm):
         fields = '__all__'
 
     def __init__(self, *args, **kwargs):
-        super(MagicItemForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['magic_item_type'].required = True
 
 
@@ -382,7 +384,7 @@ class ArmsSlotItemForm(ItemAbstractForm):
         fields = '__all__'
 
     def __init__(self, *args, **kwargs):
-        super(ArmsSlotItemForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['magic_item_type'].queryset = MagicItemType.objects.filter(
             slot=MagicItemSlot.ARMS.value
         )
