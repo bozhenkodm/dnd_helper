@@ -219,19 +219,7 @@ class WeaponHandednessEnum(BaseNameValueDescriptionEnum):
     FREE = auto(), 'Не занимает руки'  # ki and symbols of faith
 
 
-class PowerSourceEnum(BaseNameValueDescriptionEnum):
-    MARTIAL = auto(), 'Воинский'
-    DIVINE = auto(), 'Духовный'
-    ARCANE = auto(), 'Магический'
-    PRIMAL = auto(), 'Первородный'
-    SHADOW = auto(), 'Теневой'
-    PSIONIC = auto(), 'Псионический'
-
-
 class PowerSourceIntEnum(IntDescriptionEnum):
-    # workaround to not make another
-    # PropertiesCondition model for strings
-    # maybe change power source and role to int
     MARTIAL = 1, 'Воинский'
     DIVINE = 2, 'Духовный'
     ARCANE = 3, 'Магический'
@@ -240,15 +228,7 @@ class PowerSourceIntEnum(IntDescriptionEnum):
     PSIONIC = 6, 'Псионический'
 
 
-class ClassRoleEnum(BaseNameValueDescriptionEnum):
-    STRIKER = auto(), 'Атакующий'
-    DEFENDER = auto(), 'Защитник'
-    CONTROLLER = auto(), 'Контроллер'
-    LEADER = auto(), 'Лидер'
-
-
 class ClassRoleIntEnum(IntDescriptionEnum):
-    # see comment to PowerSourceIntEnum
     STRIKER = 1, 'Атакующий'
     DEFENDER = 2, 'Защитник'
     CONTROLLER = 3, 'Контроллер'

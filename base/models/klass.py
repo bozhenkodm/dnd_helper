@@ -3,9 +3,8 @@ from django.utils.translation import gettext_lazy as _
 
 from base.constants.constants import (
     ArmorTypeIntEnum,
-    ClassRoleEnum,
+    ClassRoleIntEnum,
     NPCClassEnum,
-    PowerSourceEnum,
     PowerSourceIntEnum,
     ShieldTypeIntEnum,
     WeaponCategoryIntEnum,
@@ -39,15 +38,12 @@ class Class(ClassAbstract):
     hit_points_per_level_npc = models.PositiveSmallIntegerField(
         verbose_name=_('Hits per level'), default=8
     )
-    power_source = models.CharField(
+    power_source = models.PositiveSmallIntegerField(
         verbose_name=_('Power source'),
-        choices=PowerSourceEnum.generate_choices(),
-        max_length=PowerSourceEnum.max_length(),
+        choices=PowerSourceIntEnum.generate_choices(),
     )
-    role = models.CharField(
-        verbose_name=_('Role'),
-        choices=ClassRoleEnum.generate_choices(),
-        max_length=ClassRoleEnum.max_length(),
+    role = models.PositiveSmallIntegerField(
+        verbose_name=_('Role'), choices=ClassRoleIntEnum.generate_choices()
     )
     mandatory_skills = models.ManyToManyField(Skill, verbose_name=_('Mandatory skills'))
     trainable_skills = models.ManyToManyField(
@@ -118,11 +114,11 @@ class NPCClassAbstract(models.Model):
         return self.klass.subclasses.get(subclass_id=self.subclass_id)
 
     @property
-    def power_source(self) -> PowerSourceIntEnum:
-        return PowerSourceIntEnum[self.klass.power_source]  # type: ignore
+    def power_source(self) -> int:
+        return self.klass.power_source
 
     @property
-    def role(self) -> str:
+    def role(self) -> int:
         return self.klass.role
 
     @property
