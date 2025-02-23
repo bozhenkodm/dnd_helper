@@ -1,6 +1,6 @@
 import operator
 import re
-from typing import TYPE_CHECKING, Callable, Sequence
+from typing import Callable, Sequence
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -28,8 +28,14 @@ from base.models.items import ItemAbstract, Weapon
 from base.objects.dice import DiceRoll
 from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
 
-if TYPE_CHECKING:
-    pass
+
+class Effect(models.Model):
+    class Meta:
+        verbose_name = _('Effect type')
+        verbose_name_plural = _('Effect types')
+
+    name = models.CharField(verbose_name=_('Name'), max_length=20)
+    effect_type = models.CharField(verbose_name=_('Type'), max_length=20)
 
 
 class Power(models.Model):
@@ -142,6 +148,7 @@ class Power(models.Model):
         null=True,
         blank=True,
     )
+    effects = models.ManyToManyField(Effect, verbose_name=_('Effects'), blank=True)
     dice_number = models.SmallIntegerField(verbose_name=_('Dice number'), default=1)
     damage_dice = models.SmallIntegerField(
         verbose_name=_('Damage dice'),
