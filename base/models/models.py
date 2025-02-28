@@ -470,6 +470,9 @@ class NPC(
             self.klass.default_powers.filter(
                 models.Q(accessory_type__isnull=True) | models.Q(accessory_type='')
             ),
+            self.subclass.default_powers.filter(
+                models.Q(accessory_type__isnull=True) | models.Q(accessory_type='')
+            ),
         ]
         if self.functional_template:
             querysets.append(self.functional_template.powers.filter(level=0))
@@ -496,6 +499,9 @@ class NPC(
         )
         querysets = [
             self.klass.default_powers.filter(
+                level__lte=self.level, accessory_type__isnull=False
+            ),
+            self.subclass.default_powers.filter(
                 level__lte=self.level, accessory_type__isnull=False
             ),
         ]
