@@ -53,7 +53,9 @@ class GridMapForm(forms.ModelForm):
         initial=ColorsStyle.WHITE,
     )
     encounter = forms.ModelChoiceField(
-        queryset=Encounter.objects.order_by('-id'), required=False, label=_('Encounter')
+        queryset=Encounter.objects.filter(is_passed=False).order_by('-id'),
+        required=False,
+        label=_('Encounter'),
     )
 
 
