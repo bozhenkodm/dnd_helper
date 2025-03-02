@@ -123,7 +123,7 @@ class Avatar(models.Model):
         verbose_name = _('Avatar')
         verbose_name_plural = _('Avatars')
 
-    MIN_SIZE = SizeIntEnum.AVERAGE
+    MIN_SIZE = SizeIntEnum.MEDIUM
 
     name = models.CharField(verbose_name=_('Name'), max_length=30, blank=True)
     base_image = models.ImageField(
@@ -135,7 +135,7 @@ class Avatar(models.Model):
     base_size = models.SmallIntegerField(
         verbose_name=_('Size'),
         choices=SizeIntEnum.generate_choices(),
-        default=SizeIntEnum.AVERAGE.value,
+        default=SizeIntEnum.MEDIUM.value,
     )
     pc = models.OneToOneField(
         PlayerCharacter,

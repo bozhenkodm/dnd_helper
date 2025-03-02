@@ -71,7 +71,7 @@ class Race(models.Model):
     size = models.SmallIntegerField(
         verbose_name=_('Size'),
         choices=SizeIntEnum.generate_choices(),
-        default=SizeIntEnum.AVERAGE.value,
+        default=SizeIntEnum.MEDIUM.value,
     )
     weapon_types = models.ManyToManyField(
         WeaponType,

@@ -46,9 +46,10 @@ class PowerVariables(StrEnum):
 class SizeIntEnum(IntDescriptionEnum):
     TINY = -1, 'Крошечный'
     SMALL = 0, 'Маленький'
-    AVERAGE = 1, 'Средний'
-    BIG = 2, 'Большой'
-    LARGE = 3, 'Огромный'
+    MEDIUM = 1, 'Средний'
+    LARGE = 2, 'Большой'
+    HUGE = 3, 'Огромный'
+    GARGANTUAN = 4, 'Гигантский'
 
 
 class VisionEnum(BaseNameValueDescriptionEnum):
