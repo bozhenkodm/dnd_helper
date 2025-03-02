@@ -36,7 +36,6 @@ from base.constants.constants import (
     ArmorTypeIntEnum,
     BonusSource,
     MagicItemSlot,
-    NPCRaceEnum,
     PowerFrequencyIntEnum,
     PowerPropertyTitle,
     ShieldTypeIntEnum,
@@ -135,10 +134,6 @@ class RaceAdmin(admin.ModelAdmin):
         BonusInline,
         PowerReadonlyInline,
     )
-
-    def get_queryset(self, request):
-        qs = super().get_queryset(request).annotate(title=NPCRaceEnum.generate_case())
-        return qs.order_by('title')
 
     def get_readonly_fields(self, request, obj=None) -> tuple:
         if obj and obj.id:
@@ -720,7 +715,6 @@ class WeaponTypeAdmin(admin.ModelAdmin):
         queries = [
             models.Q(weapon_type_slots__contains=obj.slug),
             models.Q(weapon_categories__contains=obj.slug),
-            # TODO test this query
             models.Q(weapon_groups__id__in=obj.groups.values_list('id', flat=True)),
         ]
         for magic_weapon_type in MagicWeaponType.objects.filter(
@@ -907,9 +901,7 @@ class PowerAdmin(admin.ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'race':
-            kwargs['queryset'] = Race.objects.annotate(
-                title=NPCRaceEnum.generate_case()
-            ).order_by('title')
+            kwargs['queryset'] = Race.objects.order_by('name_display')
         if db_field.name == 'klass':
             kwargs['queryset'] = Class.objects.order_by('name_display')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
@@ -1147,7 +1139,6 @@ class MagicWeaponTypeAdmin(MagicItemTypeAdminBase):
         queries = [
             models.Q(id__in=obj.weapon_types.values_list('id', flat=True)),
             models.Q(category__in=obj.weapon_categories),
-            # TODO test this query
             models.Q(groups__id__in=obj.weapon_groups.values_list('id', flat=True)),
         ]
         weapon_types = (

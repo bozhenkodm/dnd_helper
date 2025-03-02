@@ -182,7 +182,8 @@ class BonusMixin:
                     Bonus.objects.filter(
                         magic_item_type__in=(
                             item.magic_item_type for item in self.magic_items
-                        )
+                        ),
+                        bonus_type=bonus_type,
                     )
                 )
             ):

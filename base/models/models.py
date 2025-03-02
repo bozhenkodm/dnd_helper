@@ -370,6 +370,9 @@ class NPC(
     @property
     def speed(self):
         bonus_speed = self.calculate_bonus(NPCOtherProperties.SPEED)
+        print('1' * 88)
+        print(bonus_speed)
+        print(self.calculate_bonuses(NPCOtherProperties.SPEED))
         if self.armor and self.race.name != NPCRaceEnum.DWARF:
             return self.race.speed + self.armor.speed_penalty + bonus_speed
         return self.race.speed + bonus_speed
