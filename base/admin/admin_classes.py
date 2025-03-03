@@ -348,6 +348,8 @@ class NPCAdmin(admin.ModelAdmin):
         ('race', admin.RelatedOnlyFieldListFilter),
         ('functional_template', admin.RelatedOnlyFieldListFilter),
         ('paragon_path', admin.RelatedOnlyFieldListFilter),
+        'sex',
+        ('avatar', admin.EmptyFieldListFilter),  # TODO change to simple list filter
     )
     list_display = (
         'name',

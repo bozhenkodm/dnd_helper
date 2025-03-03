@@ -2,8 +2,8 @@ from random import choice
 
 from django.core.management import BaseCommand
 
-from base.models import Race
 from base.models.klass import Class
+from base.models.models import Race
 
 
 class Command(BaseCommand):
@@ -19,7 +19,5 @@ class Command(BaseCommand):
             race = choice(Race.objects.filter(is_social=True))
         klass = choice(Class.objects.all())
         self.stdout.write(
-            self.style.SUCCESS(
-                '%s; %s' % (race.get_name_display(), klass.get_name_display())
-            )
+            self.style.SUCCESS('%s; %s' % (race.name_display, klass.name_display))
         )

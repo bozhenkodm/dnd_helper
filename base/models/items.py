@@ -112,6 +112,29 @@ class WeaponGroup(models.Model):
         return self.get_name_display()
 
 
+class WeaponCategory(models.Model):
+    class Meta:
+        verbose_name = _('Weapon category')
+        verbose_name_plural = _('Weapon categories')
+
+    code = models.PositiveSmallIntegerField(
+        verbose_name=_('Category'),
+        choices=WeaponCategoryIntEnum.generate_choices(),
+        unique=True,
+    )
+    is_ranged = models.BooleanField(verbose_name=_('Ranged'), null=True)
+    category = models.PositiveSmallIntegerField(
+        verbose_name=_('Base category'),
+        choices=WeaponCategoryIntEnum.generate_choices(
+            condition=lambda x: x <= WeaponCategoryIntEnum.SUPERIOR
+        ),
+        null=True,
+    )
+
+    def __str__(self):
+        return self.get_code_display()
+
+
 class WeaponType(models.Model):
     class Meta:
         verbose_name = _('Weapon type')
@@ -128,6 +151,10 @@ class WeaponType(models.Model):
     category = models.PositiveSmallIntegerField(
         verbose_name=_('Category'),
         choices=WeaponCategoryIntEnum.generate_choices(),
+    )
+    # TODO finish the transition
+    category_fk = models.ForeignKey(
+        WeaponCategory, verbose_name=_('Category'), on_delete=models.CASCADE, null=True
     )
     range = models.PositiveSmallIntegerField(
         verbose_name=_('Range'), default=0, help_text=_('For ranged weapon')
