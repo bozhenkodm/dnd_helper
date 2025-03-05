@@ -5,11 +5,10 @@ from base.constants.constants import (
     ClassRoleIntEnum,
     NPCClassEnum,
     PowerSourceIntEnum,
-    ShieldTypeIntEnum,
 )
 from base.managers import SubclassQuerySet
 from base.models.abstract import ClassAbstract
-from base.models.items import BaseArmorType, WeaponCategory
+from base.models.items import BaseArmorType, ShieldType, WeaponCategory
 from base.models.skills import Skill
 
 
@@ -128,8 +127,8 @@ class NPCClassAbstract(models.Model):
         )
 
     @property
-    def available_shield_types(self) -> list[int | ShieldTypeIntEnum]:
-        return list(map(int, set(self.klass.shields) | set(self.subclass.shields)))
+    def available_shield_types(self) -> models.QuerySet[ShieldType]:
+        return self.klass.shields.all().union(self.subclass.shields.all())
 
     @property
     def available_weapon_categories(self) -> models.QuerySet[WeaponCategory]:

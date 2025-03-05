@@ -97,8 +97,9 @@ class AvailabilityCondition(ClassAbstract):
             ).exists()
         ):
             return False
-        if self.shields and not set(npc.available_shield_types) & set(
-            map(int, self.shields)
+        if (
+            self.shields.all()
+            and not npc.available_shield_types.intersection(self.shields.all()).exists()
         ):
             return False
         if (

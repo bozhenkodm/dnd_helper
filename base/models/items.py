@@ -3,7 +3,6 @@ from typing import ClassVar
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from multiselectfield import MultiSelectField
 
 from base.constants.constants import (
     ArmorTypeIntEnum,
@@ -43,11 +42,7 @@ class ArmorType(models.Model):
         verbose_name_plural = _('Armor types')
 
     name = models.CharField(verbose_name=_('Title'), max_length=100)
-    base_armor_type = models.PositiveSmallIntegerField(
-        verbose_name=_('Armor type'),
-        choices=ArmorTypeIntEnum.generate_choices(),
-    )
-    base_armor_type_fk = models.ForeignKey(
+    base_armor_type = models.ForeignKey(
         BaseArmorType, verbose_name=_('Armor type'), on_delete=models.CASCADE, null=True
     )
     bonus_armor_class = models.PositiveSmallIntegerField(
@@ -79,15 +74,15 @@ class ArmorType(models.Model):
     )
 
     def __str__(self) -> str:
-        return f'{self.get_base_armor_type_display()}, {self.name}'
+        return f'{self.base_armor_type.get_armor_class_display()}, ({self.name})'
 
     @property
     def armor_class(self) -> int:
-        return self.base_armor_type_fk.armor_class + self.bonus_armor_class
+        return self.base_armor_type.armor_class + self.bonus_armor_class
 
     @property
     def is_light(self) -> bool:
-        return self.base_armor_type_fk.is_light
+        return self.base_armor_type.is_light
 
 
 class ShieldType(models.Model):
@@ -335,13 +330,8 @@ class MagicArmItemType(MagicItemType):
         verbose_name = _('Magic shield/arms slot item type')
         verbose_name_plural = _('Magic shield/arms slot item types')
 
-    shield_slots = MultiSelectField(
-        verbose_name=_('Shield slots'),
-        choices=ShieldTypeIntEnum.generate_choices(
-            condition=lambda x: x != ShieldTypeIntEnum.NONE
-        ),
-        null=True,
-        blank=True,
+    shield_slots = models.ManyToManyField(
+        ShieldType, verbose_name=_('Shield slots'), blank=True
     )
 
 
@@ -450,11 +440,7 @@ class Armor(ItemAbstract):
         magic_item_type = (
             f', {self.magic_item_type.name}' if self.magic_item_type else ''
         )
-        return (
-            f'{self.armor_type.get_base_armor_type_display()} '
-            f'({self.armor_type.name})'
-            f'{magic_item_type}'
-        )
+        return f'{self.armor_type}{magic_item_type}'
 
     @property
     def is_light(self) -> bool:
@@ -630,17 +616,15 @@ class ArmsSlotItem(ItemAbstract):
     )
 
     def __str__(self):
-        if self.magic_item_type and not self.shield:
+        if self.magic_item_type and not self.shield_type:
             return f'{self.magic_item_type} {self.level} уровня'
-        if not self.magic_item_type and self.shield:
-            return self.shield.description
-        return f'{self.magic_item_type} ({self.shield.description}) {self.level} уровня'
-
-    @property
-    def shield(self) -> ShieldTypeIntEnum:
-        if not self.shield_type:
-            return ShieldTypeIntEnum.NONE
-        return ShieldTypeIntEnum(self.shield_type.base_shield_type)
+        if not self.magic_item_type and self.shield_type:
+            return self.shield_type.get_base_shield_type_display()
+        return (
+            f'{self.magic_item_type}'
+            f' ({self.shield_type.get_base_shield_type_display()})'
+            f' {self.level} уровня'
+        )
 
     @property
     def skill_penalty(self) -> int:

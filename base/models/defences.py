@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Optional, Protocol
 
 if TYPE_CHECKING:
     from base.models.items import (
@@ -9,12 +9,13 @@ if TYPE_CHECKING:
         RingsSlotItem,
         WaistSlotItem,
         HandsSlotItem,
+        ShieldType,
     )
     from base.models.models import FunctionalTemplate
     from base.models import Armor
     from base.models.klass import Class
 
-from base.constants.constants import DefenceTypeEnum, NPCClassEnum, ShieldTypeIntEnum
+from base.constants.constants import DefenceTypeEnum, NPCClassEnum
 
 INITIAL_DEFENCE_VALUE = 10
 
@@ -50,7 +51,7 @@ class NPCProtocol(Protocol):
         pass
 
     @property
-    def shield(self) -> ShieldTypeIntEnum:
+    def shield(self) -> Optional['ShieldType']:
         pass
 
     @property
@@ -60,16 +61,16 @@ class NPCProtocol(Protocol):
 
 class NPCDefenceMixin:
     @property
-    def shield(self: NPCProtocol) -> ShieldTypeIntEnum:
-        if not self.arms_slot or not self.arms_slot.shield:
-            return ShieldTypeIntEnum.NONE
-        return self.arms_slot.shield
+    def shield(self: NPCProtocol) -> Optional['ShieldType']:
+        if not self.arms_slot or not self.arms_slot.shield_type:
+            return None
+        return self.arms_slot.shield_type
 
     @property
     def _shield_bonus(self: NPCProtocol) -> int:
         if self.shield not in self.available_shield_types:
             return 0
-        return self.shield.value
+        return self.shield.base_shield_type
 
     @property
     def _defence_level_bonus(self: NPCProtocol) -> int:

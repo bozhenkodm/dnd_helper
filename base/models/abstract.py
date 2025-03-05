@@ -1,9 +1,7 @@
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from multiselectfield import MultiSelectField
 
-from base.constants.constants import ShieldTypeIntEnum
 from base.models.books import BookSource
 
 
@@ -33,13 +31,8 @@ class ClassAbstract(models.Model):
         verbose_name=_('Available armor types'),
         blank=True,
     )
-    shields = MultiSelectField(
-        verbose_name=_('Available shields'),
-        choices=ShieldTypeIntEnum.generate_choices(
-            lambda x: x != ShieldTypeIntEnum.NONE
-        ),
-        null=True,
-        blank=True,
+    shields = models.ManyToManyField(
+        'base.ShieldType', verbose_name=_('Available shields'), blank=True
     )
     book_source = models.ForeignKey(
         BookSource,

@@ -5,7 +5,6 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from multiselectfield import MultiSelectFormField
 
 from base.constants.constants import (
     LEVELS_WITH_ABILITY_BONUS,
@@ -15,7 +14,6 @@ from base.constants.constants import (
     NPCRaceEnum,
     PowerSourceIntEnum,
     SexEnum,
-    ShieldTypeIntEnum,
     WeaponHandednessEnum,
 )
 from base.models.abilities import Ability
@@ -33,6 +31,7 @@ from base.models.items import (
     MagicWeaponType,
     NeckSlotItem,
     RingsSlotItem,
+    ShieldType,
     SimpleMagicItem,
     WaistSlotItem,
     Weapon,
@@ -162,9 +161,8 @@ class NPCModelForm(forms.ModelForm):
                 ArmsSlotItem.objects.select_related('magic_item_type')
                 .filter(
                     models.Q(magic_item_type__slot=ArmsSlotItem.SLOT.value)
-                    & models.Q(
-                        shield_type__base_shield_type__in=self.instance.klass.shields
-                    )
+                    & models.Q(shield_type__in=self.instance.klass.shields.all())
+                    & models.Q(shield_type__in=self.instance.subclass.shields.all())
                     | models.Q(shield_type__isnull=True),
                 )
                 .order_by('magic_item_type__name', 'shield_type__base_shield_type')
@@ -528,13 +526,8 @@ class FeatForm(forms.ModelForm):
     armor_types = forms.ModelMultipleChoiceField(
         queryset=BaseArmorType.objects.all(), required=False, label=_('Armor types')
     )
-    shields = MultiSelectFormField(
-        flat_choices=ShieldTypeIntEnum.generate_choices(
-            condition=lambda x: x != ShieldTypeIntEnum.NONE
-        ),
-        choices=ShieldTypeIntEnum.generate_choices(
-            condition=lambda x: x != ShieldTypeIntEnum.NONE
-        ),
+    shields = forms.ModelMultipleChoiceField(
+        queryset=ShieldType.objects.all(),
         required=False,
         label=_('Shield types'),
     )

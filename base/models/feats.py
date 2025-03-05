@@ -3,15 +3,13 @@ from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
 
 from base.constants.constants import (
-    ArmorTypeIntEnum,
     NPCRaceEnum,
     PowerFrequencyIntEnum,
-    ShieldTypeIntEnum,
     WeaponHandednessEnum,
 )
 from base.models.abstract import ConstraintAbstract
 from base.models.books import BookSource
-from base.models.items import WeaponCategory, WeaponGroup
+from base.models.items import BaseArmorType, ShieldType, WeaponCategory, WeaponGroup
 from base.objects.powers_output import PowerDisplay
 
 
@@ -64,11 +62,11 @@ class Feat(ConstraintAbstract):
 
     def fits(self, npc) -> bool:
         for item_state in self.item_states.all():
-            if item_state.shield and str(npc.shield) not in item_state.shield:
+            if item_state.shield.all() and (npc.shield not in item_state.shield.all()):
                 return False
             if (
-                item_state.armor
-                and str(npc.armor.armor_type.base_armor_type) not in item_state.armor
+                item_state.armor.all()
+                and npc.armor.armor_type.base_armor_type not in item_state.armor.all()
             ):
                 return False
             if not item_state.primary_hand_fits(npc):
@@ -139,16 +137,14 @@ class ItemState(models.Model):
         blank=True,
         related_name='secondary_hands',
     )
-    shield = MultiSelectField(
+    shield = models.ManyToManyField(
+        ShieldType,
         verbose_name=_('Shield type'),
-        choices=ShieldTypeIntEnum.generate_choices(),
-        null=True,
         blank=True,
     )
-    armor = MultiSelectField(
+    armor = models.ManyToManyField(
+        BaseArmorType,
         verbose_name=_('Armor type'),
-        choices=ArmorTypeIntEnum.generate_choices(),
-        null=True,
         blank=True,
     )
 

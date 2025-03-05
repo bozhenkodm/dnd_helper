@@ -38,7 +38,6 @@ from base.constants.constants import (
     MagicItemSlot,
     PowerFrequencyIntEnum,
     PowerPropertyTitle,
-    ShieldTypeIntEnum,
     WeaponGroupEnum,
     WeaponHandednessEnum,
 )
@@ -206,7 +205,7 @@ class ClassAdmin(admin.ModelAdmin):
 
     @admin.display(description='Ношение щитов')
     def available_shield_types(self, obj):
-        return obj.shields
+        return obj.shields.all()
 
     @admin.display(description='Владение оружием')
     def available_weapons(self, obj):
@@ -560,7 +559,7 @@ class EncounterAdmin(admin.ModelAdmin):
 class ArmorTypeAdmin(admin.ModelAdmin):
     fields = (
         'name',
-        'base_armor_type_fk',
+        'base_armor_type',
         'bonus_armor_class',
         'minimal_enhancement',
         'armor_class',
@@ -572,8 +571,8 @@ class ArmorTypeAdmin(admin.ModelAdmin):
         'book_source',
     )
     readonly_fields = ('armor_class',)
-    list_display = ('__str__', 'base_armor_type_fk')
-    ordering = ('base_armor_type_fk', 'minimal_enhancement')
+    list_display = ('__str__', 'base_armor_type')
+    ordering = ('base_armor_type', 'minimal_enhancement')
 
     @admin.display(description='Класс доспеха')
     def armor_class(self, obj):
@@ -587,7 +586,7 @@ class ArmorTypeAdmin(admin.ModelAdmin):
         if change:
             return
         for magic_armor_type in MagicArmorType.objects.filter(
-            armor_type_slots__contains=obj.base_armor_type
+            armor_type_slots__id__in=obj.base_armor_type.id
         ):
             for level in magic_armor_type.level_range():
                 Armor.create_on_base(obj, magic_armor_type, level)
@@ -634,7 +633,7 @@ class ArmorAdmin(admin.ModelAdmin):
             .with_enhancement()
             .annotate(
                 displayed_name=ArmorTypeIntEnum.generate_value_description_case(
-                    field='armor_type__base_armor_type'
+                    field='armor_type__base_armor_type__armor_class'
                 ),
             )
         )
@@ -1094,7 +1093,7 @@ class MagicArmorTypeAdmin(MagicItemTypeAdminBase):
         if change:
             return
         armor_types = ArmorType.objects.filter(
-            base_armor_type_fk__id__in=obj.armor_type_slots.values_list('id', flat=True)
+            base_armor_type__id__in=obj.armor_type_slots.values_list('id', flat=True)
         )
         for armor_type in armor_types:
             for level in obj.level_range():
@@ -1167,7 +1166,9 @@ class MagicArmItemTypeAdmin(MagicItemTypeAdminBase):
     def save_model(self, request, obj, form, change):
         obj.slot = MagicItemSlot.ARMS.value
         super().save_model(request, obj, form, change)
-        slots = obj.shield_slots if obj.shield_slots else (ShieldTypeIntEnum.NONE,)
+        slots = obj.shield_slots.all()
+        if not slots:
+            return
         for level in obj.level_range():
             for slot in slots:
                 shield_type = ShieldType.objects.get(base_shield_type=slot)
