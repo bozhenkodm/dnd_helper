@@ -9,7 +9,6 @@ from multiselectfield import MultiSelectFormField
 
 from base.constants.constants import (
     LEVELS_WITH_ABILITY_BONUS,
-    ArmorTypeIntEnum,
     MagicItemSlot,
     NPCClassEnum,
     NPCOtherProperties,
@@ -17,7 +16,6 @@ from base.constants.constants import (
     PowerSourceIntEnum,
     SexEnum,
     ShieldTypeIntEnum,
-    WeaponCategoryIntEnum,
     WeaponHandednessEnum,
 )
 from base.models.abilities import Ability
@@ -25,6 +23,7 @@ from base.models.condition import Condition, Constraint, PropertiesCondition
 from base.models.feats import Feat
 from base.models.items import (
     ArmsSlotItem,
+    BaseArmorType,
     FeetSlotItem,
     HandsSlotItem,
     HeadSlotItem,
@@ -37,6 +36,7 @@ from base.models.items import (
     SimpleMagicItem,
     WaistSlotItem,
     Weapon,
+    WeaponCategory,
     WeaponType,
 )
 from base.models.klass import Class, Subclass
@@ -133,7 +133,11 @@ class NPCModelForm(forms.ModelForm):
                 .filter(
                     models.Q(klass=self.instance.klass, level__gt=0)
                     | models.Q(race=self.instance.race, level__gt=0)
-                    | models.Q(skill__title__in=self.instance.all_trained_skills),
+                    | models.Q(
+                        skill__id__in=self.instance.all_trained_skills.values_list(
+                            'id', flat=True
+                        )
+                    ),
                     level__lte=self.instance.level,
                 )
                 .order_by('level', 'frequency')
@@ -511,9 +515,8 @@ class FeatForm(forms.ModelForm):
         required=False,
     )
 
-    weapon_categories = MultiSelectFormField(
-        flat_choices=WeaponCategoryIntEnum.generate_choices(),
-        choices=WeaponCategoryIntEnum.generate_choices(),
+    weapon_categories = forms.ModelMultipleChoiceField(
+        queryset=WeaponCategory.objects.all(),
         required=False,
         label=_('Weapon categories'),
     )
@@ -522,11 +525,8 @@ class FeatForm(forms.ModelForm):
         required=False,
         label=_('Weapon types'),
     )
-    armor_types = MultiSelectFormField(
-        flat_choices=ArmorTypeIntEnum.generate_choices(),
-        choices=ArmorTypeIntEnum.generate_choices(),
-        required=False,
-        label=_('Armor types'),
+    armor_types = forms.ModelMultipleChoiceField(
+        queryset=BaseArmorType.objects.all(), required=False, label=_('Armor types')
     )
     shields = MultiSelectFormField(
         flat_choices=ShieldTypeIntEnum.generate_choices(

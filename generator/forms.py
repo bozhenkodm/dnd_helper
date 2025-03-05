@@ -1,6 +1,6 @@
 from django import forms
 
-from base.constants.constants import NPCRaceEnum, SexEnum
+from base.constants.constants import SexEnum
 from base.models.models import Race
 from generator.models import NPCName
 
@@ -19,9 +19,7 @@ class NPCNameForm(forms.ModelForm):
         choices=SexEnum.generate_choices(is_sorted=False),
     )
     race = forms.ModelMultipleChoiceField(
-        queryset=Race.objects.filter(is_social=True)
-        .annotate(title=NPCRaceEnum.generate_case())
-        .order_by('title'),
+        queryset=Race.objects.filter(is_social=True).order_by('name_display'),
         widget=forms.CheckboxSelectMultiple,
         label='Раса',
     )

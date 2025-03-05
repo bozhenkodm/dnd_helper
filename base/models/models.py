@@ -90,8 +90,8 @@ class Race(models.Model):
         blank=True,
     )
 
-    def __str__(self):
-        return NPCRaceEnum[self.name].description
+    def __str__(self) -> str:
+        return self.name_display
 
 
 class FunctionalTemplate(models.Model):
@@ -370,9 +370,6 @@ class NPC(
     @property
     def speed(self):
         bonus_speed = self.calculate_bonus(NPCOtherProperties.SPEED)
-        print('1' * 88)
-        print(bonus_speed)
-        print(self.calculate_bonuses(NPCOtherProperties.SPEED))
         if self.armor and self.race.name != NPCRaceEnum.DWARF:
             return self.race.speed + self.armor.speed_penalty + bonus_speed
         return self.race.speed + bonus_speed
@@ -406,7 +403,8 @@ class NPC(
     def is_weapon_proficient(self, weapon: Weapon) -> bool:
         return any(
             (
-                weapon.weapon_type.category in map(int, self.klass.weapon_categories),
+                weapon.category in self.klass.weapon_categories.all(),
+                weapon.category in self.subclass.weapon_categories.all(),
                 weapon.weapon_type in self.klass.weapon_types.all(),
                 weapon.weapon_type in self.subclass.weapon_types.all(),
                 weapon.weapon_type in self.race.weapon_types.all(),
@@ -437,7 +435,7 @@ class NPC(
                         weapon
                         and self.is_weapon_proficient(weapon)
                         and self._is_weapon_available_for_power(power, weapon)
-                        and weapon.weapon_type.category
+                        and weapon.weapon_type.category.code
                         != WeaponCategoryIntEnum.IMPLEMENT
                     ):
                         result.append((weapon,))

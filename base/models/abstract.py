@@ -3,11 +3,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
 
-from base.constants.constants import (
-    ArmorTypeIntEnum,
-    ShieldTypeIntEnum,
-    WeaponCategoryIntEnum,
-)
+from base.constants.constants import ShieldTypeIntEnum
 from base.models.books import BookSource
 
 
@@ -15,11 +11,8 @@ class ClassAbstract(models.Model):
     class Meta:
         abstract = True
 
-    weapon_categories = MultiSelectField(
-        verbose_name=_('Available weapon categories'),
-        choices=WeaponCategoryIntEnum.generate_choices(),
-        null=True,
-        blank=True,
+    weapon_categories = models.ManyToManyField(
+        'base.WeaponCategory', verbose_name=_('Available weapon categories'), blank=True
     )
     weapon_types = models.ManyToManyField(
         'base.WeaponType',
@@ -35,10 +28,9 @@ class ClassAbstract(models.Model):
         related_name='implement_%(app_label)s_%(class)s_wielders',
         blank=True,
     )
-    armor_types = MultiSelectField(
+    armor_types = models.ManyToManyField(
+        'base.BaseArmorType',
         verbose_name=_('Available armor types'),
-        choices=ArmorTypeIntEnum.generate_choices(),
-        null=True,
         blank=True,
     )
     shields = MultiSelectField(

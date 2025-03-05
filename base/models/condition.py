@@ -90,22 +90,32 @@ class AvailabilityCondition(ClassAbstract):
     )
 
     def fits(self, npc) -> bool:
-        if self.armor_types and not set(npc.available_armor_types) & set(
-            map(int, self.armor_types)
+        if (
+            self.armor_types.all()
+            and not npc.available_armor_types.intersection(
+                self.armor_types.all()
+            ).exists()
         ):
             return False
         if self.shields and not set(npc.available_shield_types) & set(
             map(int, self.shields)
         ):
             return False
-        if self.weapon_categories and not set(npc.available_weapon_categories) & set(
-            map(int, self.weapon_categories)
+        if (
+            self.weapon_categories.all()
+            and not npc.available_weapon_categories.intersection(
+                self.weapon_categories.all()
+            )
         ):
             return False
         if self.weapon_types.all() and not (
-            set(npc.klass.weapon_types.values_list('category', flat=True).distinct())
-            & set(self.weapon_categories)
-            or npc.klass.weapon_types.intersection(self.weapon_types.all()).count()
+            npc.klass.weapon_types.filter(
+                category__in=self.weapon_categories.all()
+            ).exists()
+            or npc.subclass.weapon_types.filter(
+                category__in=self.weapon_categories.all()
+            ).exists()
+            or npc.klass.weapon_types.intersection(self.weapon_types.all()).exists()
         ):
             return False
         if self.implement_types.all() and not (

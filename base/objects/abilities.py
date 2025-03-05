@@ -1,6 +1,10 @@
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from base.constants.constants import AbilityEnum
+from django.db.models import QuerySet
+
+if TYPE_CHECKING:
+    from base.models.abilities import Ability
 
 
 @dataclass
@@ -23,5 +27,5 @@ class Abilities:
         )
 
     @classmethod
-    def init_with_const(cls, *abilities: AbilityEnum, value: int) -> "Abilities":
-        return Abilities(**{ability.lvalue: value for ability in abilities})
+    def init_with_const(cls, abilities: QuerySet['Ability'], value: int) -> 'Abilities':
+        return Abilities(**{ability.name: value for ability in abilities})

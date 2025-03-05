@@ -1,6 +1,10 @@
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from base.constants.constants import SkillEnum
+from django.db.models import QuerySet
+
+if TYPE_CHECKING:
+    from base.models.skills import Skill
 
 
 @dataclass
@@ -88,5 +92,5 @@ class Skills:
         )
 
     @classmethod
-    def init_with_const(cls, *skills: SkillEnum, value: int) -> "Skills":
-        return Skills(**{skill.lvalue: value for skill in skills})
+    def init_with_const(cls, skills: QuerySet['Skill'], value: int) -> "Skills":
+        return Skills(**{skill.name: value for skill in skills})

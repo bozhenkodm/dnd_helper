@@ -39,7 +39,6 @@ from base.constants.constants import (
     PowerFrequencyIntEnum,
     PowerPropertyTitle,
     ShieldTypeIntEnum,
-    WeaponCategoryIntEnum,
     WeaponGroupEnum,
     WeaponHandednessEnum,
 )
@@ -203,7 +202,7 @@ class ClassAdmin(admin.ModelAdmin):
 
     @admin.display(description='Ношение брони')
     def available_armor_types(self, obj):
-        return obj.armor_types
+        return obj.armor_types_fk.all()
 
     @admin.display(description='Ношение щитов')
     def available_shield_types(self, obj):
@@ -215,10 +214,7 @@ class ClassAdmin(admin.ModelAdmin):
             return '-'
         try:
             return ', '.join(
-                [
-                    WeaponCategoryIntEnum(int(wc)).description
-                    for wc in obj.weapon_categories
-                ]
+                [wc.get_code_display() for wc in obj.weapon_categories.all()]
                 + [weapon_type.name for weapon_type in obj.weapon_types.all()]
             )
         except TypeError:
@@ -564,7 +560,7 @@ class EncounterAdmin(admin.ModelAdmin):
 class ArmorTypeAdmin(admin.ModelAdmin):
     fields = (
         'name',
-        'base_armor_type',
+        'base_armor_type_fk',
         'bonus_armor_class',
         'minimal_enhancement',
         'armor_class',
@@ -576,8 +572,8 @@ class ArmorTypeAdmin(admin.ModelAdmin):
         'book_source',
     )
     readonly_fields = ('armor_class',)
-    list_display = ('__str__', 'base_armor_type')
-    ordering = ('base_armor_type', 'minimal_enhancement')
+    list_display = ('__str__', 'base_armor_type_fk')
+    ordering = ('base_armor_type_fk', 'minimal_enhancement')
 
     @admin.display(description='Класс доспеха')
     def armor_class(self, obj):
@@ -715,8 +711,8 @@ class WeaponTypeAdmin(admin.ModelAdmin):
         if change:
             return
         queries = [
-            models.Q(weapon_type_slots__contains=obj.slug),
-            models.Q(weapon_categories__contains=obj.slug),
+            models.Q(weapon_type__id=obj.pk),
+            models.Q(weapon_categories__id=obj.category.pk),
             models.Q(weapon_groups__id__in=obj.groups.values_list('id', flat=True)),
         ]
         for magic_weapon_type in MagicWeaponType.objects.filter(
@@ -785,7 +781,7 @@ class WeaponAdmin(admin.ModelAdmin):
 
     @admin.display(description='Категория оружия')
     def category(self, obj):
-        return obj.weapon_type.category
+        return obj.weapon_type.category.get_code_display()
 
     @admin.display(description='Группа оружия')
     def groups(self, obj):
@@ -943,7 +939,7 @@ class PowerAdmin(admin.ModelAdmin):
         obj = form.instance
         if not obj.attack_ability:
             return
-        ability_mod = obj.attack_ability[:3].lower()
+        ability_mod = obj.attack_ability.short_name
         for property in obj.properties.filter(title=PowerPropertyTitle.ATTACK):
             if not property.description:
                 property.description = (
@@ -1098,13 +1094,7 @@ class MagicArmorTypeAdmin(MagicItemTypeAdminBase):
         if change:
             return
         armor_types = ArmorType.objects.filter(
-            reduce(
-                lambda x, y: x | y,
-                (
-                    models.Q(base_armor_type__contains=slot)
-                    for slot in obj.armor_type_slots
-                ),
-            )
+            base_armor_type_fk__id__in=obj.armor_type_slots.values_list('id', flat=True)
         )
         for armor_type in armor_types:
             for level in obj.level_range():
@@ -1140,7 +1130,7 @@ class MagicWeaponTypeAdmin(MagicItemTypeAdminBase):
         super().save_model(request, obj, form, change)
         queries = [
             models.Q(id__in=obj.weapon_types.values_list('id', flat=True)),
-            models.Q(category__in=obj.weapon_categories),
+            models.Q(category__in=obj.weapon_categories.values_list('code', flat=True)),
             models.Q(groups__id__in=obj.weapon_groups.values_list('id', flat=True)),
         ]
         weapon_types = (
@@ -1353,12 +1343,14 @@ class FeatAdmin(admin.ModelAdmin):
                 )
             ):
                 condition = AvailabilityCondition(
-                    weapon_categories=form.cleaned_data.get('weapon_categories'),
                     armor_types=form.cleaned_data.get('armor_types'),
                     shields=form.cleaned_data.get('shields'),
                     constraint=constraint,
                 )
                 condition.save()
+                condition.weapon_categories.set(
+                    form.cleaned_data.get('weapon_categories')
+                )
                 condition.weapon_types.set(form.cleaned_data.get('weapon_types'))
 
             for field in (

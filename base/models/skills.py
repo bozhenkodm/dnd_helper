@@ -1,5 +1,3 @@
-from dataclasses import asdict
-
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -20,6 +18,10 @@ class Skill(models.Model):
     based_on = models.ForeignKey(Ability, on_delete=models.CASCADE)
     is_penalty_applied = models.BooleanField(default=False)
 
+    @property
+    def name(self) -> str:
+        return self.title.lower()
+
     def __str__(self):
         return self.get_title_display()
 
@@ -35,14 +37,11 @@ class NPCSkillAbstract(models.Model):
     )
 
     @property
-    def all_trained_skills(self) -> list[SkillEnum]:
-        return [
-            SkillEnum(skill.title)  # type: ignore
-            for skill in self.klass.mandatory_skills.all()
-        ] + [
-            SkillEnum(skill.title)  # type: ignore
-            for skill in self.trained_skills.all()
-        ]
+    def all_trained_skills(self) -> models.QuerySet[Skill]:
+        return Skill.objects.filter(
+            models.Q(id__in=self.klass.mandatory_skills.values_list('id', flat=True))
+            | models.Q(id__in=self.trained_skills.values_list('id', flat=True))
+        )
 
     @property
     def skill_mod_bonus(self) -> Skills:
@@ -51,26 +50,23 @@ class NPCSkillAbstract(models.Model):
         """
         return Skills(
             **{
-                skill.title.lower(): getattr(self, skill.based_on.mod)
+                skill.name: getattr(self, skill.based_on.mod)
                 for skill in Skill.objects.all()
             }
         )
 
     @property
     def skills(self) -> Skills:
-        half_level = Skills.init_with_const(*SkillEnum, value=self.half_level)
+        half_level = Skills.init_with_const(Skill.objects.all(), value=self.half_level)
         trained_skills = Skills.init_with_const(
-            *[
-                SkillEnum[trained_skill.title]
-                for trained_skill in self.trained_skills.all()  # type: ignore
-            ],
+            self.trained_skills.all(),
             value=5,
         )
         if self.klass.name == NPCClassEnum.BARD:
             # TODO figure out how to move this logic to common bonus logic
             trained_skills += Skills.max(
                 trained_skills,
-                Skills.init_with_const(*SkillEnum, value=1),
+                Skills.init_with_const(Skill.objects.all(), value=1),
             )
 
         bonus_skills = Skills(
@@ -84,12 +80,7 @@ class NPCSkillAbstract(models.Model):
             self.arms_slot.skill_penalty if self.arms_slot else 0  # type: ignore
         )
         penalty = Skills.init_with_const(
-            *(
-                SkillEnum[s]
-                for s in Skill.objects.filter(is_penalty_applied=True).values_list(
-                    'title', flat=True
-                )
-            ),
+            Skill.objects.filter(is_penalty_applied=True),
             value=armor_skill_penalty + shield_skill_penalty,
         )
         return (
@@ -190,10 +181,11 @@ class NPCSkillAbstract(models.Model):
     def skills_text(self) -> list[str]:
         result = []
         ordinary_skills = self.skill_mod_bonus + Skills.init_with_const(
-            *SkillEnum, value=self.half_level
+            Skill.objects.all(), value=self.half_level
         )
-        for skill, value in asdict(self.skills).items():
-            if getattr(ordinary_skills, skill) != value:
-                description = SkillEnum[skill.upper()].description
-                result.append(f'{description}' f' +{value}')
+        for skill in Skill.objects.all():
+            if getattr(ordinary_skills, skill.name) != (
+                value := getattr(self.skills, skill.name)
+            ):
+                result.append(f'{skill}' f' +{value}')
         return sorted(result)

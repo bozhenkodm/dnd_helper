@@ -23,6 +23,20 @@ from base.models.books import BookSource
 from base.objects.dice import DiceRoll
 
 
+class BaseArmorType(models.Model):
+    armor_class = models.PositiveSmallIntegerField(
+        verbose_name=_('Name'), choices=ArmorTypeIntEnum.generate_choices(), unique=True
+    )
+    is_light = models.BooleanField(verbose_name=_('Is light?'), default=True)
+    speed_penalty = models.SmallIntegerField(verbose_name=_('Speed penalty'), default=0)
+    skill_penalty = models.SmallIntegerField(
+        verbose_name=_('Skills penalty'), default=0
+    )
+
+    def __str__(self) -> str:
+        return self.get_armor_class_display()
+
+
 class ArmorType(models.Model):
     class Meta:
         verbose_name = _('Armor type')
@@ -32,6 +46,9 @@ class ArmorType(models.Model):
     base_armor_type = models.PositiveSmallIntegerField(
         verbose_name=_('Armor type'),
         choices=ArmorTypeIntEnum.generate_choices(),
+    )
+    base_armor_type_fk = models.ForeignKey(
+        BaseArmorType, verbose_name=_('Armor type'), on_delete=models.CASCADE, null=True
     )
     bonus_armor_class = models.PositiveSmallIntegerField(
         verbose_name=_('Additional armor class'),
@@ -66,15 +83,11 @@ class ArmorType(models.Model):
 
     @property
     def armor_class(self) -> int:
-        return self.base_armor_type + self.bonus_armor_class
+        return self.base_armor_type_fk.armor_class + self.bonus_armor_class
 
     @property
     def is_light(self) -> bool:
-        return self.base_armor_type in (
-            ArmorTypeIntEnum.CLOTH,
-            ArmorTypeIntEnum.LEATHER,
-            ArmorTypeIntEnum.HIDE,
-        )
+        return self.base_armor_type_fk.is_light
 
 
 class ShieldType(models.Model):
@@ -148,12 +161,7 @@ class WeaponType(models.Model):
         max_length=WeaponHandednessEnum.max_length(),
     )
     groups = models.ManyToManyField(WeaponGroup, verbose_name=_('Groups'), blank=False)
-    category = models.PositiveSmallIntegerField(
-        verbose_name=_('Category'),
-        choices=WeaponCategoryIntEnum.generate_choices(),
-    )
-    # TODO finish the transition
-    category_fk = models.ForeignKey(
+    category = models.ForeignKey(
         WeaponCategory, verbose_name=_('Category'), on_delete=models.CASCADE, null=True
     )
     range = models.PositiveSmallIntegerField(
@@ -316,11 +324,9 @@ class MagicArmorType(MagicItemType):
         verbose_name = _('Magic armor type')
         verbose_name_plural = _('Magic armor types')
 
-    armor_type_slots = MultiSelectField(
+    armor_type_slots = models.ManyToManyField(
+        BaseArmorType,
         verbose_name=_('Armor type slots'),
-        choices=ArmorTypeIntEnum.generate_choices(),
-        min_choices=1,
-        null=False,
     )
 
 
@@ -347,26 +353,23 @@ class MagicWeaponType(MagicItemType):
     weapon_groups = models.ManyToManyField(
         WeaponGroup, verbose_name=_('Weapon group'), blank=True
     )
-    weapon_categories = MultiSelectField(
-        verbose_name=_('Weapon category'),
-        choices=WeaponCategoryIntEnum.generate_choices(),
-        null=True,
-        blank=True,
+    weapon_categories = models.ManyToManyField(
+        WeaponCategory, verbose_name=_('Weapon category'), blank=True
     )
     weapon_types = models.ManyToManyField(
-        "base.WeaponType",
+        WeaponType,
         verbose_name=_('Weapon type'),
         related_name='magic_weapons',
         blank=True,
         limit_choices_to={'is_enhanceable': True},
     )
     implement_type = models.ForeignKey(
-        "base.WeaponType",
+        WeaponType,
         verbose_name=_('Implement type'),
         help_text=_('Does item has additional implement property?'),
         null=True,
         blank=True,
-        limit_choices_to={'category': WeaponCategoryIntEnum.IMPLEMENT.value},
+        limit_choices_to={'category__code': WeaponCategoryIntEnum.IMPLEMENT.value},
         on_delete=models.SET_NULL,
     )
     crit_dice = models.SmallIntegerField(
@@ -455,11 +458,7 @@ class Armor(ItemAbstract):
 
     @property
     def is_light(self) -> bool:
-        return self.armor_type.base_armor_type in (
-            ArmorTypeIntEnum.CLOTH,
-            ArmorTypeIntEnum.LEATHER,
-            ArmorTypeIntEnum.HIDE,
-        )
+        return self.armor_type.is_light
 
     @classmethod
     def create_on_base(

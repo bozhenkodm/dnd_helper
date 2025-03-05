@@ -2,15 +2,14 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from base.constants.constants import (
-    ArmorTypeIntEnum,
     ClassRoleIntEnum,
     NPCClassEnum,
     PowerSourceIntEnum,
     ShieldTypeIntEnum,
-    WeaponCategoryIntEnum,
 )
 from base.managers import SubclassQuerySet
 from base.models.abstract import ClassAbstract
+from base.models.items import BaseArmorType, WeaponCategory
 from base.models.skills import Skill
 
 
@@ -122,9 +121,10 @@ class NPCClassAbstract(models.Model):
         return self.klass.role
 
     @property
-    def available_armor_types(self) -> list[int | ArmorTypeIntEnum]:
-        return list(
-            map(int, set(self.klass.armor_types) | set(self.subclass.armor_types))
+    def available_armor_types(self) -> models.QuerySet[BaseArmorType]:
+        return BaseArmorType.objects.filter(
+            models.Q(id__in=self.klass.armor_types.values_list('id', flat=True))
+            | models.Q(id__in=self.subclass.armor_types.values_list('id', flat=True))
         )
 
     @property
@@ -132,11 +132,12 @@ class NPCClassAbstract(models.Model):
         return list(map(int, set(self.klass.shields) | set(self.subclass.shields)))
 
     @property
-    def available_weapon_categories(self) -> list[int | WeaponCategoryIntEnum]:
-        return list(
-            map(
-                int,
-                set(self.klass.weapon_categories)
-                | set(self.subclass.weapon_categories),
+    def available_weapon_categories(self) -> models.QuerySet[WeaponCategory]:
+        return WeaponCategory.objects.filter(
+            models.Q(
+                code__in=self.klass.weapon_categories.values_list('code', flat=True)
+            )
+            | models.Q(
+                code__in=self.subclass.weapon_categories.values_list('code', flat=True)
             )
         )

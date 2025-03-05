@@ -31,8 +31,16 @@ class Ability(models.Model):
         return self.get_title_display()
 
     @property
-    def mod(self):
-        return f'{self.title[:3].lower()}_mod'
+    def name(self) -> str:
+        return self.title.lower()
+
+    @property
+    def short_name(self) -> str:
+        return self.name[:3]
+
+    @property
+    def mod(self) -> str:
+        return f'{self.short_name}_mod'
 
 
 class NPCAbilityAbstract(models.Model):
@@ -76,15 +84,12 @@ class NPCAbilityAbstract(models.Model):
     def _initial_abilities_bonuses(self) -> Abilities:
         # getting one of variable ability bonus for specific npc
         const_ability_bonus = Abilities.init_with_const(
-            *[
-                AbilityEnum(a)
-                for a in self.race.const_ability_bonus.values_list('title', flat=True)
-            ],
+            self.race.const_ability_bonus.all(),
             value=2,
         )
         if self.var_bonus_ability:
             var_ability_bonus = Abilities.init_with_const(
-                AbilityEnum(self.var_bonus_ability.title), value=2
+                Ability.objects.filter(title=self.var_bonus_ability.title), value=2
             )
         else:
             var_ability_bonus = Abilities()
@@ -102,7 +107,7 @@ class NPCAbilityAbstract(models.Model):
 
     @property
     def _tier_attrs_bonus(self) -> Abilities:
-        return Abilities.init_with_const(*AbilityEnum, value=self._tier)
+        return Abilities.init_with_const(Ability.objects.all(), value=self._tier)
 
     @property
     def _base_abilities(self) -> Abilities:

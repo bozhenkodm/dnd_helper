@@ -7,7 +7,6 @@ from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
 
 from base.constants.constants import (
-    AbilityEnum,
     AccessoryTypeEnum,
     DefenceTypeEnum,
     DiceIntEnum,
@@ -23,6 +22,7 @@ from base.constants.constants import (
     WeaponHandednessEnum,
 )
 from base.exceptions import PowerInconsistent
+from base.models.abilities import Ability
 from base.models.books import BookSource
 from base.models.items import ItemAbstract, Weapon
 from base.objects.dice import DiceRoll
@@ -118,10 +118,10 @@ class Power(models.Model):
         related_name='powers',
     )
     level = models.SmallIntegerField(verbose_name=_('Level'), default=0)
-    attack_ability = models.CharField(
+    attack_ability = models.ForeignKey(
+        Ability,
         verbose_name=_('Attack ability'),
-        choices=AbilityEnum.generate_choices(is_sorted=False),
-        max_length=AbilityEnum.max_length(),
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )

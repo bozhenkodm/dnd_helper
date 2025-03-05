@@ -7,12 +7,11 @@ from base.constants.constants import (
     NPCRaceEnum,
     PowerFrequencyIntEnum,
     ShieldTypeIntEnum,
-    WeaponCategoryIntEnum,
     WeaponHandednessEnum,
 )
 from base.models.abstract import ConstraintAbstract
 from base.models.books import BookSource
-from base.models.items import WeaponGroup
+from base.models.items import WeaponCategory, WeaponGroup
 from base.objects.powers_output import PowerDisplay
 
 
@@ -86,11 +85,8 @@ class WeaponState(models.Model):
         null=True,
         blank=True,
     )
-    category = MultiSelectField(
-        verbose_name=_('Weapon category'),
-        choices=WeaponCategoryIntEnum.generate_choices(),
-        null=True,
-        blank=True,
+    categories = models.ManyToManyField(
+        WeaponCategory, verbose_name=_('Weapon category'), blank=True
     )
     groups = models.ManyToManyField(
         WeaponGroup,
@@ -108,17 +104,19 @@ class WeaponState(models.Model):
         if self.is_empty:
             return 'Рука должна быть пустая'
         result = []
-        if self.category:
-            result.append('Категория' + ': ' + str(self.category))
+        if self.categories.all():
+            result.append(
+                'Категория: '
+                + ', '.join(c.get_code_display() for c in self.categories.all())
+            )
         if self.groups.all():
             result.append(
-                'Группа'
-                + ': '
+                'Группа: '
                 + ', '.join(wg.get_name_display() for wg in self.groups.all())
             )
         if self.type.all():
-            result.append('Тип' + ': ' + ', '.join(str(wt) for wt in self.type.all()))
-        if not any((self.category, self.groups.all(), self.type.all())):
+            result.append('Тип: ' + ', '.join(str(wt) for wt in self.type.all()))
+        if not any((self.categories.all(), self.groups.all(), self.type.all())):
             return 'Рука должна быть не пустая'
         return '; '.join(result)
 
@@ -160,8 +158,8 @@ class ItemState(models.Model):
         if self.primary_hand.is_empty == bool(npc.primary_hand):
             return False
         if (
-            self.primary_hand.category
-            and str(npc.primary_hand.category) not in self.primary_hand.category
+            self.primary_hand.categories.all()
+            and npc.primary_hand.category not in self.primary_hand.categories.all()
         ):
             return False
         if (
@@ -190,8 +188,8 @@ class ItemState(models.Model):
         if self.secondary_hand.is_empty == bool(secondary_hand):
             return False
         if (
-            self.secondary_hand.category
-            and str(secondary_hand.category) not in self.secondary_hand.category
+            self.secondary_hand.categories.all()
+            and secondary_hand.category not in self.secondary_hand.categories.all()
         ):
             return False
         if (
