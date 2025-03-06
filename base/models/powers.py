@@ -1,10 +1,10 @@
 import operator
 import re
+from itertools import chain
 from typing import Callable, Sequence
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from multiselectfield import MultiSelectField
 
 from base.constants.constants import (
     AccessoryTypeEnum,
@@ -33,8 +33,27 @@ class Effect(models.Model):
         verbose_name = _('Effect type')
         verbose_name_plural = _('Effect types')
 
-    name = models.CharField(verbose_name=_('Name'), max_length=20)
-    effect_type = models.CharField(verbose_name=_('Type'), max_length=20)
+    name = models.CharField(
+        verbose_name=_('Name'),
+        choices=chain(
+            PowerDamageTypeEnum.generate_choices(),
+            PowerEffectTypeEnum.generate_choices(
+                condition=lambda x: x != PowerEffectTypeEnum.NONE
+            ),
+        ),
+        max_length=max(
+            (PowerEffectTypeEnum.max_length(), PowerDamageTypeEnum.max_length())
+        ),
+        unique=True,
+    )
+    is_damage = models.BooleanField(
+        verbose_name=_('Is damage?'),
+        help_text=_('Shows if damage can have this effect'),
+        default=False,
+    )
+
+    def __str__(self) -> str:
+        return self.get_name_display()
 
 
 class Power(models.Model):
@@ -133,21 +152,19 @@ class Power(models.Model):
         null=True,
         blank=True,
     )
-    effect_type = MultiSelectField(
-        verbose_name=_('Effect type'),
-        choices=PowerEffectTypeEnum.generate_choices(),
-        default=PowerEffectTypeEnum.NONE.value,
-        null=True,
-        blank=True,
-    )
-    damage_type = MultiSelectField(
+    damage_types = models.ManyToManyField(
+        Effect,
         verbose_name=_('Damage type'),
-        choices=PowerDamageTypeEnum.generate_choices(),
-        default=PowerDamageTypeEnum.UNTYPED.value,
-        null=True,
         blank=True,
+        limit_choices_to={'is_damage': True},
+        related_name='powers',
     )
-    effects = models.ManyToManyField(Effect, verbose_name=_('Effects'), blank=True)
+    effects = models.ManyToManyField(
+        Effect,
+        verbose_name=_('Effects'),
+        blank=True,
+        limit_choices_to={'is_damage': False},
+    )
     dice_number = models.SmallIntegerField(verbose_name=_('Dice number'), default=1)
     damage_dice = models.SmallIntegerField(
         verbose_name=_('Damage dice'),
@@ -195,7 +212,7 @@ class Power(models.Model):
             return (
                 f'{self.name}, '
                 f'{self.klass.get_name_display()} '
-                f'({(self.get_attack_ability_display() or "Пр")[:3]}), '
+                f'({(str(self.attack_ability) if self.attack_ability else "Пр")[:3]}), '
                 f'{self.get_frequency_display()}, '
                 f'{self.level} уровень'
             )
@@ -338,15 +355,12 @@ class Power(models.Model):
                 )
                 + tuple(self.attack_type(weapon) for weapon in weapons if weapon)
                 + tuple(
-                    PowerDamageTypeEnum[type_].description  # type: ignore
-                    for type_ in self.damage_type
-                    if type_ != PowerDamageTypeEnum.UNTYPED
+                    damage_type.get_name_display()
+                    for damage_type in self.damage_types.exclude(
+                        name=PowerDamageTypeEnum.UNTYPED
+                    )
                 )
-                + tuple(
-                    PowerEffectTypeEnum[type_].description  # type: ignore
-                    for type_ in self.effect_type
-                    if type_ != PowerEffectTypeEnum.NONE
-                ),
+                + tuple(effect.get_name_display() for effect in self.effects.all()),
             )
         )
 

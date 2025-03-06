@@ -11,6 +11,7 @@ from django.contrib.contenttypes.admin import GenericTabularInline
 from django.core.files.images import ImageFile
 from django.db import models
 from django.db.transaction import atomic
+from django.forms import CheckboxSelectMultiple
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 
@@ -167,8 +168,8 @@ class ClassAdmin(admin.ModelAdmin):
     search_fields = ('name_display',)
     ordering = ('name_display',)
     readonly_fields = (
-        'available_armor_types',
-        'available_shield_types',
+        'armor_types',
+        'shields',
         'available_weapons',
         'available_implements',
         'mandatory_skills',
@@ -200,11 +201,7 @@ class ClassAdmin(admin.ModelAdmin):
 
     @admin.display(description='Ношение брони')
     def available_armor_types(self, obj):
-        return obj.armor_types_fk.all()
-
-    @admin.display(description='Ношение щитов')
-    def available_shield_types(self, obj):
-        return obj.shields.all()
+        return obj.armor_types.all()
 
     @admin.display(description='Владение оружием')
     def available_weapons(self, obj):
@@ -828,7 +825,7 @@ class PowerAdmin(admin.ModelAdmin):
         'level',
         ('frequency', 'action_type'),
         ('attack_ability', 'defence', 'attack_bonus'),
-        ('effect_type', 'damage_type'),
+        ('effects', 'damage_types'),
         ('dice_number', 'damage_dice'),
         ('accessory_type', 'weapon_types'),
         ('range_type', 'range', 'burst'),
@@ -1084,6 +1081,9 @@ class MagicArmorTypeAdmin(MagicItemTypeAdminBase):
     )
     autocomplete_fields = ('book_source',)
     form = MagicArmorTypeForm
+    formfield_overrides = {
+        models.ManyToManyField: {'widget': CheckboxSelectMultiple},
+    }
 
     @atomic
     def save_model(self, request, obj, form, change):
@@ -1160,6 +1160,9 @@ class MagicArmItemTypeAdmin(MagicItemTypeAdminBase):
     )
     autocomplete_fields = ('book_source',)
     form = MagicArmItemTypeForm
+    formfield_overrides = {
+        models.ManyToManyField: {'widget': CheckboxSelectMultiple},
+    }
 
     @atomic
     def save_model(self, request, obj, form, change):
@@ -1270,6 +1273,9 @@ class ItemStateInline(admin.StackedInline):
     model = ItemState
     show_change_link = True
     extra = 0
+    formfield_overrides = {
+        models.ManyToManyField: {'widget': CheckboxSelectMultiple},
+    }
 
 
 class FeatAdmin(admin.ModelAdmin):
