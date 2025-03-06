@@ -1,15 +1,19 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from multiselectfield import MultiSelectField
 
 from base.constants.constants import (
     NPCRaceEnum,
     PowerFrequencyIntEnum,
-    WeaponHandednessEnum,
 )
 from base.models.abstract import ConstraintAbstract
 from base.models.books import BookSource
-from base.models.items import BaseArmorType, ShieldType, WeaponCategory, WeaponGroup
+from base.models.items import (
+    BaseArmorType,
+    ShieldType,
+    WeaponCategory,
+    WeaponGroup,
+    WeaponHandedness,
+)
 from base.objects.powers_output import PowerDisplay
 
 
@@ -78,10 +82,9 @@ class Feat(ConstraintAbstract):
 
 class WeaponState(models.Model):
     is_empty = models.BooleanField(_('Is hand empty?'), default=False, blank=True)
-    handedness = MultiSelectField(
-        choices=WeaponHandednessEnum.generate_choices(is_sorted=False),
-        null=True,
-        blank=True,
+    # TODO handle handedness in Feat.fits()
+    handedness = models.ManyToManyField(
+        WeaponHandedness, verbose_name=_('Handedness'), blank=True
     )
     categories = models.ManyToManyField(
         WeaponCategory, verbose_name=_('Weapon category'), blank=True

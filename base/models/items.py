@@ -43,7 +43,9 @@ class ArmorType(models.Model):
 
     name = models.CharField(verbose_name=_('Title'), max_length=100)
     base_armor_type = models.ForeignKey(
-        BaseArmorType, verbose_name=_('Armor type'), on_delete=models.CASCADE, null=True
+        BaseArmorType,
+        verbose_name=_('Armor type'),
+        on_delete=models.CASCADE,
     )
     bonus_armor_class = models.PositiveSmallIntegerField(
         verbose_name=_('Additional armor class'),
@@ -102,6 +104,33 @@ class ShieldType(models.Model):
         return self.get_base_shield_type_display()
 
 
+class WeaponHandedness(models.Model):
+    name = models.CharField(
+        verbose_name=_('Handedness'),
+        choices=WeaponHandednessEnum.generate_choices(is_sorted=False),
+        max_length=WeaponHandednessEnum.max_length(),
+        unique=True,
+    )
+    is_one_handed = models.BooleanField(
+        verbose_name=_('One handed'), default=True, null=True
+    )
+
+    def __str__(self) -> str:
+        return self.get_name_display()
+
+    @property
+    def is_no_hand(self) -> bool:
+        return self.is_one_handed is None
+
+    @property
+    def is_off_hand(self) -> bool:
+        return self.name == WeaponHandednessEnum.OFF_HAND
+
+    @property
+    def is_two_handed(self) -> bool:
+        return self.is_one_handed is False
+
+
 class WeaponGroup(models.Model):
     class Meta:
         verbose_name = _('Weapon group')
@@ -150,14 +179,15 @@ class WeaponType(models.Model):
 
     name = models.CharField(verbose_name=_('Title'), max_length=30, blank=True)
     slug = models.CharField(verbose_name='Slug', max_length=30, unique=True, blank=True)
-    handedness = models.CharField(
+    handedness = models.ForeignKey(
+        WeaponHandedness,
         verbose_name=_('Handedness'),
-        choices=WeaponHandednessEnum.generate_choices(is_sorted=False),
-        max_length=WeaponHandednessEnum.max_length(),
+        on_delete=models.CASCADE,
+        null=True,
     )
     groups = models.ManyToManyField(WeaponGroup, verbose_name=_('Groups'), blank=False)
     category = models.ForeignKey(
-        WeaponCategory, verbose_name=_('Category'), on_delete=models.CASCADE, null=True
+        WeaponCategory, verbose_name=_('Category'), on_delete=models.CASCADE
     )
     range = models.PositiveSmallIntegerField(
         verbose_name=_('Range'), default=0, help_text=_('For ranged weapon')
@@ -471,7 +501,6 @@ class Weapon(ItemAbstract):
         WeaponType,
         verbose_name=_('Weapon type'),
         on_delete=models.CASCADE,
-        null=False,
         related_name='weapons',
     )
 

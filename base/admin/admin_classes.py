@@ -39,7 +39,6 @@ from base.constants.constants import (
     PowerFrequencyIntEnum,
     PowerPropertyTitle,
     WeaponGroupEnum,
-    WeaponHandednessEnum,
 )
 from base.models.abilities import AbilityLevelBonus
 from base.models.bonuses import Bonus
@@ -762,7 +761,7 @@ class WeaponAdmin(admin.ModelAdmin):
             return queryset, may_have_duplicates
         if field_name == 'no_hand':
             queryset = queryset.filter(
-                weapon_type__handedness=WeaponHandednessEnum.FREE
+                weapon_type__handedness__is_one_handed__isnull=False
             )
         return queryset, may_have_duplicates
 

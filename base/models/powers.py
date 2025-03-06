@@ -19,7 +19,6 @@ from base.constants.constants import (
     PowerPropertyTitle,
     PowerRangeTypeEnum,
     PowerVariables,
-    WeaponHandednessEnum,
 )
 from base.exceptions import PowerInconsistent
 from base.models.abilities import Ability
@@ -469,21 +468,18 @@ class PowerMixin:
             if self.subclass.slug == 'GREAT_WEAPON':
                 if (
                     not self.shield
-                    and weapon.weapon_type.handedness == WeaponHandednessEnum.TWO
+                    and weapon.handedness.is_two_handed
                     and bool(self.primary_hand) != bool(self.secondary_hand)  # xor
                 ):
                     result += 1
             if self.subclass.slug == 'GUARDIAN':
-                if weapon.weapon_type.handedness in (
-                    WeaponHandednessEnum.ONE,
-                    WeaponHandednessEnum.VERSATILE,
-                ):
+                if weapon.handedness.is_one_handed:
                     return result + 1
             if self.subclass.slug == 'TEMPPEST':
                 if (
                     self.primary_hand
                     and self.secondary_hand
-                    and weapon.weapon_type.handedness == WeaponHandednessEnum.OFF_HAND
+                    and weapon.handedness.is_off_hand
                 ):
                     return result + 1
 

@@ -14,7 +14,6 @@ from base.constants.constants import (
     SizeIntEnum,
     VisionEnum,
     WeaponCategoryIntEnum,
-    WeaponHandednessEnum,
 )
 from base.exceptions import PowerInconsistent, WrongWeapon
 from base.models.abilities import Ability, NPCAbilityAbstract
@@ -223,9 +222,7 @@ class NPC(
         null=True,
         on_delete=models.SET_NULL,
         related_name='in_primary_hands',
-        limit_choices_to=~models.Q(
-            weapon_type__handedness=WeaponHandednessEnum.FREE.value
-        ),
+        limit_choices_to=~models.Q(weapon_type__handedness__is_one_handed__isnull=True),
     )
     secondary_hand = models.ForeignKey(
         Weapon,
@@ -234,9 +231,7 @@ class NPC(
         null=True,
         on_delete=models.SET_NULL,
         related_name='in_secondary_hands',
-        limit_choices_to=~models.Q(
-            weapon_type__handedness=WeaponHandednessEnum.FREE.value
-        ),
+        limit_choices_to=~models.Q(weapon_type__handedness__is_one_handed__isnull=True),
     )
     no_hand = models.ForeignKey(
         Weapon,
@@ -246,7 +241,7 @@ class NPC(
         null=True,
         on_delete=models.SET_NULL,
         related_name='in_no_hands',
-        limit_choices_to={'weapon_type__handedness': WeaponHandednessEnum.FREE.value},
+        limit_choices_to={'weapon_type__handedness__is_one_handed__isnull': True},
     )
 
     powers = models.ManyToManyField(Power, blank=True, verbose_name=_('Powers'))

@@ -14,7 +14,6 @@ from base.constants.constants import (
     NPCRaceEnum,
     PowerSourceIntEnum,
     SexEnum,
-    WeaponHandednessEnum,
 )
 from base.models.abilities import Ability
 from base.models.condition import Condition, Constraint, PropertiesCondition
@@ -196,7 +195,7 @@ class NPCModelForm(forms.ModelForm):
     def check_two_handed_weapon_held_with_two_hands(
         self, primary_hand, secondary_hand, shield_is_in_hand: bool
     ) -> None:
-        if primary_hand and primary_hand.handedness == WeaponHandednessEnum.TWO:
+        if primary_hand and primary_hand.handedness.is_two_handed:
             error = ValidationError(
                 'Двуручное оружие занимает обе руки, '
                 'во второй руке не может быть другого предмета'
@@ -219,16 +218,10 @@ class NPCModelForm(forms.ModelForm):
                 'secondary_hand',
                 error='Двойное оружие занимает две руки',
             )
-        if primary_hand.handedness in (
-            WeaponHandednessEnum.ONE,
-            WeaponHandednessEnum.VERSATILE,
-        ):
-            if secondary_hand.handedness == WeaponHandednessEnum.OFF_HAND:
+        if primary_hand.handedness.is_one_handed:
+            if secondary_hand.handedness.is_off_hand:
                 return
-            if (
-                secondary_hand.handedness == WeaponHandednessEnum.TWO
-                or secondary_hand.is_double
-            ):
+            if secondary_hand.handedness.is_two_handed or secondary_hand.is_double:
                 self.add_errors(
                     'primary_hand',
                     'secondary_hand',
@@ -246,7 +239,7 @@ class NPCModelForm(forms.ModelForm):
             )
             if (
                 can_wield_two_one_handed_weapons
-                and secondary_hand.handedness == WeaponHandednessEnum.TWO
+                and secondary_hand.handedness.is_two_handed
             ):
                 self.add_error(
                     'secondary_hand',
@@ -257,7 +250,7 @@ class NPCModelForm(forms.ModelForm):
                 )
             elif (
                 not can_wield_two_one_handed_weapons
-                and secondary_hand.handedness != WeaponHandednessEnum.OFF_HAND
+                and not secondary_hand.handedness.is_off_hand
             ):
                 self.add_error(
                     'secondary_hand',
