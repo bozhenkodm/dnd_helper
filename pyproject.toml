@@ -11,7 +11,6 @@ version = "1.0.0"
 [tool.poetry.dependencies]
 python = "^3.12"
 Django = "^5"
-django-multiselectfield = "^0.1.13"
 pillow = "^11"
 
 [tool.poetry.dev-dependencies]
