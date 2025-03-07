@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-07 14:12+0000\n"
+"POT-Creation-Date: 2025-03-07 20:14+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,90 +20,90 @@ msgstr ""
 "n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
 "(n%100>=11 && n%100<=14)? 2 : 3);\n"
 
-#: base/admin/forms.py:111 base/admin/forms.py:508 base/models/skills.py:36
+#: base/admin/forms.py:112 base/admin/forms.py:514 base/models/skills.py:36
 msgid "Trained skills"
 msgstr "Тренированные навыки"
 
-#: base/admin/forms.py:332 base/models/abstract.py:31
+#: base/admin/forms.py:338 base/models/abstract.py:31
 msgid "Available armor types"
 msgstr "Доступные типы брони"
 
-#: base/admin/forms.py:338 base/models/abstract.py:35
+#: base/admin/forms.py:344 base/models/abstract.py:35
 msgid "Available shields"
 msgstr "Доступные щиты"
 
-#: base/admin/forms.py:372 base/models/items.py:425 base/models/models.py:205
+#: base/admin/forms.py:378 base/models/items.py:425 base/models/models.py:205
 #: base/models/powers.py:138 base/models/powers.py:398
 msgid "Level"
 msgstr "Уровень"
 
-#: base/admin/forms.py:479 base/models/bonuses.py:125
+#: base/admin/forms.py:485 base/models/bonuses.py:125
 msgid "Value"
 msgstr "Значение"
 
-#: base/admin/forms.py:492 base/models/bonuses.py:86 base/models/models.py:40
+#: base/admin/forms.py:498 base/models/bonuses.py:86 base/models/models.py:40
 #: base/models/models.py:148 base/models/models.py:185
 #: base/models/powers.py:100
 msgid "Race"
 msgstr "Раса"
 
-#: base/admin/forms.py:495 base/models/bonuses.py:47 base/models/klass.py:17
+#: base/admin/forms.py:501 base/models/bonuses.py:47 base/models/klass.py:17
 #: base/models/klass.py:73 base/models/klass.py:103 base/models/models.py:145
 #: base/models/powers.py:85
 msgid "Class"
 msgstr "Класс"
 
-#: base/admin/forms.py:500 base/models/bonuses.py:54 base/models/klass.py:65
+#: base/admin/forms.py:506 base/models/bonuses.py:54 base/models/klass.py:65
 #: base/models/klass.py:106 base/models/powers.py:93 base/models/powers.py:400
 msgid "Subclass"
 msgstr "Подкласс"
 
-#: base/admin/forms.py:503 base/models/bonuses.py:37 base/models/feats.py:22
+#: base/admin/forms.py:509 base/models/bonuses.py:37 base/models/feats.py:22
 #: features/models.py:16
 msgid "Feat"
 msgstr "Черта"
 
-#: base/admin/forms.py:512
+#: base/admin/forms.py:518
 msgid "Strength"
 msgstr "Сила"
 
-#: base/admin/forms.py:513
+#: base/admin/forms.py:519
 msgid "Constitution"
 msgstr "Телосложение"
 
-#: base/admin/forms.py:514
+#: base/admin/forms.py:520
 msgid "Dexterity"
 msgstr "Ловкость"
 
-#: base/admin/forms.py:515
+#: base/admin/forms.py:521
 msgid "Intelligence"
 msgstr "Интеллект"
 
-#: base/admin/forms.py:516
+#: base/admin/forms.py:522
 msgid "Wisdom"
 msgstr "Мудрость"
 
-#: base/admin/forms.py:517
+#: base/admin/forms.py:523
 msgid "Charisma"
 msgstr "Харизма"
 
-#: base/admin/forms.py:521 base/models/klass.py:40
+#: base/admin/forms.py:527 base/models/klass.py:40
 msgid "Power source"
 msgstr "Источник силы"
 
-#: base/admin/forms.py:528 base/models/items.py:155
+#: base/admin/forms.py:534 base/models/items.py:155
 msgid "Weapon categories"
 msgstr "Категории оружия"
 
-#: base/admin/forms.py:533 base/models/items.py:178 items/models.py:83
+#: base/admin/forms.py:539 base/models/items.py:178 items/models.py:83
 msgid "Weapon types"
 msgstr "Типы оружия"
 
-#: base/admin/forms.py:536 base/models/items.py:42 items/models.py:69
+#: base/admin/forms.py:542 base/models/items.py:42 items/models.py:69
 msgid "Armor types"
 msgstr "Типы брони"
 
-#: base/admin/forms.py:541 base/models/items.py:93
+#: base/admin/forms.py:547 base/models/items.py:93
 msgid "Shield types"
 msgstr "Типы щита"
 
@@ -294,6 +294,10 @@ msgstr "Черты"
 #: base/models/feats.py:29
 msgid "Text"
 msgstr "Текст"
+
+#: base/models/feats.py:65
+msgid " or "
+msgstr " или "
 
 #: base/models/feats.py:84
 msgid "Is hand empty?"

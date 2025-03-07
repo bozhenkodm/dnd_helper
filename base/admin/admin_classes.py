@@ -502,12 +502,13 @@ class NPCAdmin(admin.ModelAdmin):
         if obj.id:
             for power in obj.powers.filter(level=0):
                 obj.powers.remove(power)
-        obj.level = max(
-            obj.level_by_experience(form.cleaned_data['experience']), obj.level
-        )
-        obj.experience = max(
-            obj.experience_by_level(form.cleaned_data['level']), obj.experience
-        )
+        if change:
+            obj.level = max(
+                obj.level_by_experience(form.cleaned_data['experience']), obj.level
+            )
+            obj.experience = max(
+                obj.experience_by_level(form.cleaned_data['level']), obj.experience
+            )
         super().save_model(request, obj, form, change)
 
     def save_related(self, request, form, formsets, change):

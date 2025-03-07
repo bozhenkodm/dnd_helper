@@ -19,6 +19,7 @@ from base.models.abilities import Ability
 from base.models.condition import Condition, Constraint, PropertiesCondition
 from base.models.feats import Feat
 from base.models.items import (
+    Armor,
     ArmsSlotItem,
     BaseArmorType,
     FeetSlotItem,
@@ -144,6 +145,14 @@ class NPCModelForm(forms.ModelForm):
                 choices=self.instance.klass.subclasses.generate_choices(),
                 label='Подкласс',
             )
+
+            # TODO doesn't work
+            self.fields['armor'].queryset = Armor.objects.select_related(
+                'armor_type', 'armor_type__base_armor_type'
+            ).filter(
+                armor_type__base_armor_type__in=self.instance.available_armor_types
+            )
+
             self.fields['neck_slot'].queryset = NeckSlotItem.objects.select_related(
                 'magic_item_type'
             ).filter(magic_item_type__slot=NeckSlotItem.SLOT.value)
