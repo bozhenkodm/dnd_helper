@@ -155,7 +155,7 @@ class PropertiesCondition(models.Model):
     )
 
     def __str__(self):
-        return f'{self.type.lower()}: {self.value}'
+        return f'{self.get_type_display()}: {self.value_display}'
 
     @property
     def value_display(self) -> str:

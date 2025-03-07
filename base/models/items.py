@@ -76,7 +76,7 @@ class ArmorType(models.Model):
     )
 
     def __str__(self) -> str:
-        return f'{self.base_armor_type.get_armor_class_display()}, ({self.name})'
+        return f'{self.base_armor_type}, ({self.name})'
 
     @property
     def armor_class(self) -> int:
@@ -309,7 +309,9 @@ class MagicItemType(models.Model):
     max_level = models.PositiveSmallIntegerField(
         verbose_name=_('Maximum level'), default=30
     )
-    step = models.PositiveSmallIntegerField(_('Level step'), default=5)
+    step = models.PositiveSmallIntegerField(
+        _('Level step'), default=5, choices=((5, 5), (10, 10))
+    )
     category = models.CharField(
         verbose_name=_('Category'),
         choices=MagicItemCategory.generate_choices(is_sorted=False),
@@ -648,11 +650,9 @@ class ArmsSlotItem(ItemAbstract):
         if self.magic_item_type and not self.shield_type:
             return f'{self.magic_item_type} {self.level} уровня'
         if not self.magic_item_type and self.shield_type:
-            return self.shield_type.get_base_shield_type_display()
+            return str(self.shield_type)
         return (
-            f'{self.magic_item_type}'
-            f' ({self.shield_type.get_base_shield_type_display()})'
-            f' {self.level} уровня'
+            f'{self.magic_item_type}' f' ({self.shield_type})' f' {self.level} уровня'
         )
 
     @property
@@ -748,6 +748,6 @@ class NPCMagicItemAbstract(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name=_('Arms slot'),
+        verbose_name=_('Arms slot/shield'),
         related_name='npc_hands',
     )

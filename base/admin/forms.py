@@ -188,9 +188,11 @@ class NPCModelForm(forms.ModelForm):
         self, secondary_hand, shield_is_in_hand: bool
     ) -> None:
         if secondary_hand and shield_is_in_hand:
-            error = ValidationError('Нельзя удержать в одной руке оружие и щит')
-            self.add_error('arms_slot', error)
-            self.add_error('secondary_hand', error)
+            self.add_errors(
+                'arms_slot',
+                'secondary_hand',
+                'Нельзя удержать в одной руке оружие и щит',
+            )
 
     def check_two_handed_weapon_held_with_two_hands(
         self, primary_hand, secondary_hand, shield_is_in_hand: bool
@@ -285,17 +287,13 @@ class NPCModelForm(forms.ModelForm):
                 self.cleaned_data['race'].name == NPCRaceEnum.HAMADRYAD
                 and self.cleaned_data['sex'] != SexEnum.F
             ):
-                error = ValidationError('Гамадриады только женщины')
-                self.add_error('sex', error)
-                self.add_error('race', error)
+                self.add_errors('sex', 'race', 'Гамадриады только женщины')
 
             if (
                 self.cleaned_data['race'].name == NPCRaceEnum.SATYR
                 and self.cleaned_data['sex'] != SexEnum.M
             ):
-                error = ValidationError('Сатиры только мужчины')
-                self.add_error('sex', error)
-                self.add_error('race', error)
+                self.add_errors('sex', 'race', 'Сатиры только мужчины')
 
     def check_npc_without_paragon_path(self):
         if self.cleaned_data['is_bonus_applied'] and self.cleaned_data.get(
@@ -305,8 +303,7 @@ class NPCModelForm(forms.ModelForm):
                 'Неигровые персонажи c бонусом уровня '
                 'не могут иметь путь совершенства'
             )
-            self.add_error('paragon_path', message)
-            self.add_error('is_bonus_applied', message)
+            self.add_errors('paragon_path', 'is_bonus_applied', message)
 
     def clean(self) -> dict[str, Any] | None:
         cast(NPC, self.instance)
@@ -328,7 +325,22 @@ class NPCModelForm(forms.ModelForm):
         return super().clean()
 
 
-class ClassForm(forms.ModelForm):
+class ClassAbstractForm(forms.ModelForm):
+    armor_types = forms.ModelMultipleChoiceField(
+        queryset=BaseArmorType.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        label=_('Available armor types'),
+        required=True,
+    )
+    shields = forms.ModelMultipleChoiceField(
+        queryset=ShieldType.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        label=_('Available shields'),
+        required=False,
+    )
+
+
+class ClassForm(ClassAbstractForm):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if self.instance.id:
@@ -336,6 +348,10 @@ class ClassForm(forms.ModelForm):
             self.fields['default_powers'].queryset = Power.objects.filter(
                 klass=self.instance
             ).order_by('level', 'name')
+
+
+class SubclassForm(ClassAbstractForm):
+    pass
 
 
 class ParagonPathForm(forms.ModelForm):

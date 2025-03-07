@@ -100,7 +100,9 @@ class FunctionalTemplate(models.Model):
         ordering = ('title',)
 
     title = models.CharField(max_length=50, null=False, verbose_name=_('Title'))
-    min_level = models.SmallIntegerField(verbose_name=_('Minimal level'), default=0)
+    min_level = models.SmallIntegerField(
+        verbose_name=_('Minimal level'), default=1, choices=((1, 1), (11, 11), (21, 21))
+    )
     armor_class_bonus = models.SmallIntegerField(
         verbose_name=_('Armor class bonus'), default=0
     )

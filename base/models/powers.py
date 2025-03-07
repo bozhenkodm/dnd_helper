@@ -203,15 +203,13 @@ class Power(models.Model):
 
     def __str__(self):
         if self.race:
-            return (
-                f'{self.name}, ({self.race.get_name_display()}), {self.level} уровень'
-            )
+            return f'{self.name}, ({self.race}), {self.level} уровень'
         if self.functional_template:
             return f'{self.name}, ({self.functional_template})'
         if self.klass:
             return (
                 f'{self.name}, '
-                f'{self.klass.get_name_display()} '
+                f'{self.klass} '
                 f'({(str(self.attack_ability) if self.attack_ability else "Пр")[:3]}), '
                 f'{self.get_frequency_display()}, '
                 f'{self.level} уровень'
@@ -249,9 +247,9 @@ class Power(models.Model):
             if self.paragon_path:
                 result.append(self.paragon_path.title)
             if self.race:
-                result.append(self.race.get_name_display())
+                result.append(str(self.race))
             if self.klass:
-                result.append(self.klass.get_name_display())
+                result.append(str(self.klass))
             if self.accessory_type in (
                 AccessoryTypeEnum.WEAPON,
                 AccessoryTypeEnum.IMPLEMENT,
@@ -355,12 +353,12 @@ class Power(models.Model):
                 )
                 + tuple(self.attack_type(weapon) for weapon in weapons if weapon)
                 + tuple(
-                    damage_type.get_name_display()
+                    str(damage_type)
                     for damage_type in self.damage_types.exclude(
                         name=PowerDamageTypeEnum.UNTYPED
                     )
                 )
-                + tuple(effect.get_name_display() for effect in self.effects.all()),
+                + tuple(str(effect) for effect in self.effects.all()),
             )
         )
 

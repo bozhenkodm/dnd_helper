@@ -29,6 +29,7 @@ from base.admin.forms import (
     NPCModelForm,
     ParagonPathForm,
     PropertiesConditionForm,
+    SubclassForm,
     WeaponForm,
 )
 from base.constants.constants import (
@@ -168,21 +169,40 @@ class ClassAdmin(admin.ModelAdmin):
     search_fields = ('name_display',)
     ordering = ('name_display',)
     readonly_fields = (
-        'armor_types',
-        'shields',
         'available_weapons',
-        'available_implements',
+        'implement_types',
         'mandatory_skills',
         'trainable_skills',
-        # 'power_source',
-        # 'role',
+        'power_source',
+        'role',
     )
-    fields = readonly_fields + (
-        'default_feats',
-        'default_powers',
-        'fortitude',
-        'reflex',
-        'will',
+    fields = (
+        (
+            'armor_types',
+            'shields',
+        ),
+        (
+            'available_weapons',
+            'implement_types',
+        ),
+        (
+            'mandatory_skills',
+            'trainable_skills',
+        ),
+        (
+            'power_source',
+            'role',
+        ),
+        (
+            'default_feats',
+            'default_powers',
+        ),
+        (
+            'fortitude',
+            'reflex',
+            'will',
+        ),
+        'book_source',
     )
     autocomplete_fields = ('default_feats',)
     list_filter = ('power_source', 'role')
@@ -199,29 +219,17 @@ class ClassAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
 
-    @admin.display(description='Ношение брони')
-    def available_armor_types(self, obj):
-        return obj.armor_types.all()
-
     @admin.display(description='Владение оружием')
     def available_weapons(self, obj):
         if not obj.id:
             return '-'
         try:
             return ', '.join(
-                [wc.get_code_display() for wc in obj.weapon_categories.all()]
+                [str(wc) for wc in obj.weapon_categories.all()]
                 + [weapon_type.name for weapon_type in obj.weapon_types.all()]
             )
         except TypeError:
             return '-'
-
-    @admin.display(description='Владение инструментами')
-    def available_implements(self, obj):
-        if not obj.id:
-            return '-'
-        return ', '.join(
-            [implement_type.name for implement_type in obj.implement_types.all()]
-        )
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
@@ -242,9 +250,44 @@ class SubclassAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'klass')
     autocomplete_fields = ('default_feats', 'default_powers')
     inlines = (BonusInline,)
+    form = SubclassForm
+    readonly_fields = ('available_weapons',)
+    fields = (
+        (
+            'name',
+            'slug',
+            'subclass_id',
+        ),
+        'klass',
+        (
+            'armor_types',
+            'shields',
+        ),
+        (
+            'available_weapons',
+            'implement_types',
+        ),
+        (
+            'default_feats',
+            'default_powers',
+        ),
+        'book_source',
+    )
 
     def get_queryset(self, request):
         return super().get_queryset(request).exclude(subclass_id=0)
+
+    @admin.display(description='Владение оружием')
+    def available_weapons(self, obj):
+        if not obj.id:
+            return '-'
+        try:
+            return ', '.join(
+                [str(wc) for wc in obj.weapon_categories.all()]
+                + [weapon_type.name for weapon_type in obj.weapon_types.all()]
+            )
+        except TypeError:
+            return '-'
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
@@ -434,9 +477,7 @@ class NPCAdmin(admin.ModelAdmin):
 
     @admin.display(description='Тренированные навыки')
     def mandatory_skills(self, obj):
-        return ', '.join(
-            s.get_title_display() for s in obj.klass.mandatory_skills.all()
-        )
+        return ', '.join(str(s) for s in obj.klass.mandatory_skills.all())
 
     @admin.display(description='Аватар')
     def avatar_img(self, obj):
@@ -452,10 +493,7 @@ class NPCAdmin(admin.ModelAdmin):
     def const_bonus_ability(self, obj):
         if not obj.id or not obj.race.const_ability_bonus.all():
             return '-'
-        return ', '.join(
-            ability.get_title_display()
-            for ability in obj.race.const_ability_bonus.all()
-        )
+        return ', '.join(str(ability) for ability in obj.race.const_ability_bonus.all())
 
     @atomic
     def save_model(self, request, obj, form, change):
@@ -464,7 +502,12 @@ class NPCAdmin(admin.ModelAdmin):
         if obj.id:
             for power in obj.powers.filter(level=0):
                 obj.powers.remove(power)
-        obj.experience = max(obj.experience_by_level, obj.experience)
+        obj.level = max(
+            obj.level_by_experience(form.cleaned_data['experience']), obj.level
+        )
+        obj.experience = max(
+            obj.experience_by_level(form.cleaned_data['level']), obj.experience
+        )
         super().save_model(request, obj, form, change)
 
     def save_related(self, request, form, formsets, change):
@@ -776,7 +819,7 @@ class WeaponAdmin(admin.ModelAdmin):
 
     @admin.display(description='Категория оружия')
     def category(self, obj):
-        return obj.weapon_type.category.get_code_display()
+        return str(obj.category)
 
     @admin.display(description='Группа оружия')
     def groups(self, obj):
@@ -1038,9 +1081,7 @@ class MagicItemTypeAdmin(MagicItemTypeAdminBase):
     fields = (
         'name',
         'slot',
-        'min_level',
-        'step',
-        'max_level',
+        ('min_level', 'step', 'max_level'),
         'category',
         'picture',
         'upload_from_clipboard',
@@ -1070,9 +1111,7 @@ class MagicArmorTypeAdmin(MagicItemTypeAdminBase):
     fields = (
         'name',
         'armor_type_slots',
-        'min_level',
-        'step',
-        'max_level',
+        ('min_level', 'step', 'max_level'),
         'category',
         'picture',
         'upload_from_clipboard',
@@ -1108,12 +1147,9 @@ class MagicWeaponTypeAdmin(MagicItemTypeAdminBase):
         ),
         'weapon_types',
         'implement_type',
-        'min_level',
-        'step',
-        'max_level',
+        ('min_level', 'step', 'max_level'),
         'category',
-        'crit_dice',
-        'crit_property',
+        ('crit_dice', 'crit_property'),
         'picture',
         'upload_from_clipboard',
         'image_tag',
@@ -1149,9 +1185,7 @@ class MagicArmItemTypeAdmin(MagicItemTypeAdminBase):
     fields = (
         'name',
         'shield_slots',
-        'min_level',
-        'step',
-        'max_level',
+        ('min_level', 'step', 'max_level'),
         'category',
         'picture',
         'upload_from_clipboard',

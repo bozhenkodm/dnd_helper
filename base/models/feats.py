@@ -54,7 +54,7 @@ class Feat(ConstraintAbstract):
             if constraint.scalar_conditions.all():
                 conditions.append(
                     ', '.join(
-                        f'{condition.get_type_display()}: {condition.value_display}'
+                        str(condition)
                         for condition in constraint.scalar_conditions.all()
                     )
                 )
@@ -82,7 +82,6 @@ class Feat(ConstraintAbstract):
 
 class WeaponState(models.Model):
     is_empty = models.BooleanField(_('Is hand empty?'), default=False, blank=True)
-    # TODO handle handedness in Feat.fits()
     handedness = models.ManyToManyField(
         WeaponHandedness, verbose_name=_('Handedness'), blank=True
     )
@@ -108,13 +107,10 @@ class WeaponState(models.Model):
         if self.categories.all():
             result.append(
                 'Категория: '
-                + ', '.join(c.get_code_display() for c in self.categories.all())
+                + ', '.join(str(category) for category in self.categories.all())
             )
         if self.groups.all():
-            result.append(
-                'Группа: '
-                + ', '.join(wg.get_name_display() for wg in self.groups.all())
-            )
+            result.append('Группа: ' + ', '.join(str(wg) for wg in self.groups.all()))
         if self.type.all():
             result.append('Тип: ' + ', '.join(str(wt) for wt in self.type.all()))
         if not any((self.categories.all(), self.groups.all(), self.type.all())):
@@ -174,6 +170,11 @@ class ItemState(models.Model):
             and npc.primary_hand.weapon_type not in self.primary_hand.type.all()
         ):
             return False
+        if (
+            self.primary_hand.handedness.all()
+            and npc.primary_hand.handedness not in self.primary_hand.handedness.all()
+        ):
+            return False
         return True
 
     def secondary_hand_fits(self, npc) -> bool:
@@ -202,6 +203,11 @@ class ItemState(models.Model):
         if (
             self.secondary_hand.type.all()
             and secondary_hand.weapon_type not in self.secondary_hand.type.all()
+        ):
+            return False
+        if (
+            self.secondary_hand.handedness.all()
+            and secondary_hand.handedness not in self.secondary_hand.handedness.all()
         ):
             return False
         return True
