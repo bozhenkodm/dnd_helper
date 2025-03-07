@@ -10,14 +10,13 @@ def fill_data(apps, schema_editor):
     '''
     BaseArmorType = apps.get_model('base', 'BaseArmorType')
     for at in (0, 2, 3, 6, 7, 8):
-        print('1' * 88)
         skill_penalty = 0
         if at == ArmorTypeIntEnum.PLATE:
             skill_penalty = 2
         if at in (ArmorTypeIntEnum.CHAINMAIL, ArmorTypeIntEnum.HIDE):
             skill_penalty = 1
         bat = BaseArmorType(
-            armor_class=at.value,
+            armor_class=at,
             is_light=(at <= 3),
             speed_penalty=(at > 3),
             skill_penalty=skill_penalty,
