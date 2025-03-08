@@ -158,13 +158,28 @@ class BonusMixin:
     ) -> dict[AbilityEnum | SkillEnum | DefenceTypeEnum | NPCOtherProperties, int]:
         # TODO add cache with refresh on save npc
         result = {}
-        bonuses_qs = Bonus.objects.filter(bonus_type__in=bonus_types).filter(
-            self.get_power_feats_bonuses_query()
-            | models.Q(race=self.race)
-            | models.Q(subclass=self.subclass)
-            | models.Q(
-                magic_item_type__in=(item.magic_item_type for item in self.magic_items)
+        bonuses_qs = (
+            Bonus.objects.select_related(
+                'race',
+                'subclass',
+                'magic_item_type',
+                'functional_template',
+                'paragon_path',
+                'power',
+                'feat',
             )
+            .filter(bonus_type__in=bonus_types)
+            .filter(
+                self.get_power_feats_bonuses_query()
+                | models.Q(race=self.race)
+                | models.Q(subclass=self.subclass)
+                | models.Q(
+                    magic_item_type__in=(
+                        item.magic_item_type for item in self.magic_items
+                    )
+                )
+            )
+            .distinct()
         )
         for bonus_type in bonus_types:
             bonuses = defaultdict(list)

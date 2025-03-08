@@ -132,11 +132,8 @@ class NPCModelForm(forms.ModelForm):
                 .filter(
                     models.Q(klass=self.instance.klass, level__gt=0)
                     | models.Q(race=self.instance.race, level__gt=0)
-                    | models.Q(
-                        skill__id__in=self.instance.all_trained_skills.values_list(
-                            'id', flat=True
-                        )
-                    ),
+                    | models.Q(skill__classes_for_mandatory=self.instance.klass)
+                    | models.Q(skill__npcs=self.instance),
                     level__lte=self.instance.level,
                 )
                 .order_by('level', 'frequency')

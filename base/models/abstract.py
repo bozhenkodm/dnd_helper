@@ -32,7 +32,9 @@ class ClassAbstract(models.Model):
         blank=True,
     )
     shields = models.ManyToManyField(
-        'base.ShieldType', verbose_name=_('Available shields'), blank=True
+        'base.ShieldType',
+        verbose_name=_('Available shields'),
+        blank=True,
     )
     book_source = models.ForeignKey(
         BookSource,

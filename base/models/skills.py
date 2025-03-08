@@ -33,15 +33,8 @@ class NPCSkillAbstract(models.Model):
     half_level: int
 
     trained_skills = models.ManyToManyField(
-        Skill, verbose_name=_('Trained skills'), blank=True
+        Skill, verbose_name=_('Trained skills'), blank=True, related_name='npcs'
     )
-
-    @property
-    def all_trained_skills(self) -> models.QuerySet[Skill]:
-        return Skill.objects.filter(
-            models.Q(id__in=self.klass.mandatory_skills.values_list('id', flat=True))
-            | models.Q(id__in=self.trained_skills.values_list('id', flat=True))
-        )
 
     @property
     def skill_mod_bonus(self) -> Skills:

@@ -43,7 +43,9 @@ class Class(ClassAbstract):
     role = models.PositiveSmallIntegerField(
         verbose_name=_('Role'), choices=ClassRoleIntEnum.generate_choices()
     )
-    mandatory_skills = models.ManyToManyField(Skill, verbose_name=_('Mandatory skills'))
+    mandatory_skills = models.ManyToManyField(
+        Skill, verbose_name=_('Mandatory skills'), related_name='classes_for_mandatory'
+    )
     trainable_skills = models.ManyToManyField(
         Skill, verbose_name=_('Selective trainable skills'), related_name='classes'
     )

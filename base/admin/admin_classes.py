@@ -627,7 +627,7 @@ class ArmorTypeAdmin(admin.ModelAdmin):
         if change:
             return
         for magic_armor_type in MagicArmorType.objects.filter(
-            armor_type_slots__id__in=obj.base_armor_type.id
+            armor_type_slots=obj.base_armor_type
         ):
             for level in magic_armor_type.level_range():
                 Armor.create_on_base(obj, magic_armor_type, level)
@@ -1167,8 +1167,8 @@ class MagicWeaponTypeAdmin(MagicItemTypeAdminBase):
         super().save_model(request, obj, form, change)
         queries = [
             models.Q(id__in=obj.weapon_types.values_list('id', flat=True)),
-            models.Q(category__in=obj.weapon_categories.values_list('code', flat=True)),
-            models.Q(groups__id__in=obj.weapon_groups.values_list('id', flat=True)),
+            models.Q(category__in=obj.weapon_categories.all()),
+            models.Q(groups__in=obj.weapon_groups.all()),
         ]
         weapon_types = (
             WeaponType.objects.prefetch_related('groups')

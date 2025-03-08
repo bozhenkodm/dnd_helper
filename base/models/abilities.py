@@ -178,14 +178,11 @@ class NPCAbilityAbstract(models.Model):
     def cha_mod(self) -> int:
         return modifier(self.charisma)
 
-    def get_ability_text(self, ability: AbilityEnum) -> str:
-        ability_value = getattr(self, ability.lvalue)
-        mod = modifier(ability_value)
-        return (
-            f'{ability.description[:3]} '  # type: ignore
-            f'{ability_value} ({mod + self.half_level})'
-        )
+    def get_ability_text(self, ability: Ability) -> str:
+        ability_value = getattr(self, ability.name)
+        mod = getattr(self, ability.mod)
+        return f'{str(ability)[:3]} ' f'{ability_value} ({mod + self.half_level})'
 
     @property
     def abilities_texts(self) -> list[str]:
-        return list(self.get_ability_text(ability) for ability in AbilityEnum)
+        return list(self.get_ability_text(ability) for ability in Ability.objects.all())
