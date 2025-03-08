@@ -48,7 +48,7 @@ class Class(ClassAbstract):
         Skill, verbose_name=_('Selective trainable skills'), related_name='classes'
     )
     default_feats = models.ManyToManyField(
-        'base.Feat', verbose_name=_('Default feats'), blank=True
+        'base.Feat', verbose_name=_('Default feats'), blank=True, related_name='classes'
     )
     default_powers = models.ManyToManyField(
         'base.Power',
@@ -80,7 +80,10 @@ class Subclass(ClassAbstract):
         verbose_name=_('Subclass id'), default=0
     )
     default_feats = models.ManyToManyField(
-        'base.Feat', verbose_name=_('Default feats'), blank=True
+        'base.Feat',
+        verbose_name=_('Default feats'),
+        blank=True,
+        related_name='subclasses',
     )
     default_powers = models.ManyToManyField(
         'base.Power',
@@ -128,7 +131,10 @@ class NPCClassAbstract(models.Model):
 
     @property
     def available_shield_types(self) -> models.QuerySet[ShieldType]:
-        return self.klass.shields.all().union(self.subclass.shields.all())
+        return ShieldType.objects.filter(
+            models.Q(id__in=self.klass.shields.values_list('id', flat=True))
+            | models.Q(id__in=self.subclass.shields.values_list('id', flat=True))
+        )
 
     @property
     def available_weapon_categories(self) -> models.QuerySet[WeaponCategory]:

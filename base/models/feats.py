@@ -217,7 +217,9 @@ class NPCFeatAbstract(models.Model):
     class Meta:
         abstract = True
 
-    feats = models.ManyToManyField(Feat, blank=True, verbose_name=_('Feats'))
+    feats = models.ManyToManyField(
+        Feat, blank=True, verbose_name=_('Feats'), related_name='npcs'
+    )
     trained_weapons = models.ManyToManyField(
         'base.WeaponType',
         blank=True,

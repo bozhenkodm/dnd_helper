@@ -40,7 +40,7 @@ from base.models.items import (
 )
 from base.models.klass import Class, Subclass
 from base.models.models import NPC, ParagonPath, Race
-from base.models.powers import Power
+from base.models.powers import Effect, Power
 from base.models.skills import Skill
 
 
@@ -548,4 +548,23 @@ class FeatForm(forms.ModelForm):
         queryset=ShieldType.objects.all(),
         required=False,
         label=_('Shield types'),
+    )
+
+
+class PowerForm(forms.ModelForm):
+    class Meta:
+        model = Power
+        fields = '__all__'
+
+    effects = forms.ModelMultipleChoiceField(
+        queryset=Effect.objects.filter(is_damage=False),
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        label=_('Effects'),
+    )
+    damage_types = forms.ModelMultipleChoiceField(
+        queryset=Effect.objects.filter(is_damage=True),
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        label=_('Damage type'),
     )

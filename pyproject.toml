@@ -13,13 +13,14 @@ python = "^3.12"
 Django = "^5"
 pillow = "^11"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 black = "^25"
 isort = "^6"
 ipython = "^9"
 flake8 = "^7"
 mypy = "^1"
 django-stubs = "^5"
+django-debug-toolbar = "^5"
 pytest = "^8"
 pytest-django = "^4"
 pre-commit = "^4"

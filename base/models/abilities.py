@@ -98,7 +98,8 @@ class NPCAbilityAbstract(models.Model):
     @property
     def _level_abilities_bonuses(self) -> Abilities:
         query = (
-            AbilityLevelBonus.objects.filter(npc=self)
+            AbilityLevelBonus.objects.select_related('npc', 'ability')
+            .filter(npc=self)
             .values_list(Lower('ability__title'))
             .annotate(bonus=models.Count('ability__title'))
         )

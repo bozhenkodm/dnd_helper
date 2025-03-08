@@ -28,6 +28,7 @@ from base.admin.forms import (
     MagicWeaponTypeForm,
     NPCModelForm,
     ParagonPathForm,
+    PowerForm,
     PropertiesConditionForm,
     SubclassForm,
     WeaponForm,
@@ -802,7 +803,7 @@ class WeaponAdmin(admin.ModelAdmin):
             return queryset, may_have_duplicates
         if field_name == 'no_hand':
             queryset = queryset.filter(
-                weapon_type__handedness__is_one_handed__isnull=False
+                weapon_type__handedness__is_one_handed__isnull=True
             )
         return queryset, may_have_duplicates
 
@@ -897,6 +898,7 @@ class PowerAdmin(admin.ModelAdmin):
         'magic_item_type__name',
         'skill__title',
     )
+    form = PowerForm
     save_as = True
 
     def get_model_perms(self, request):

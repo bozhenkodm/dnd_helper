@@ -246,7 +246,9 @@ class NPC(
         limit_choices_to={'weapon_type__handedness__is_one_handed__isnull': True},
     )
 
-    powers = models.ManyToManyField(Power, blank=True, verbose_name=_('Powers'))
+    powers = models.ManyToManyField(
+        Power, blank=True, verbose_name=_('Powers'), related_name='npcs'
+    )
 
     def __str__(self):
         # TODO localization

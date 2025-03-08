@@ -130,63 +130,45 @@ class Bonus(models.Model):
 
 
 class BonusMixin:
-    def get_power_bonuses(self) -> models.QuerySet[Bonus]:
+    def get_power_feats_bonuses_query(self) -> models.Q:
         powers_query = models.Q(
-            power__in=(
-                self.powers.filter(
-                    frequency=PowerFrequencyIntEnum.PASSIVE,
-                    subclass__in=(self.subclass_id, 0),
-                )
-            )
-        ) | models.Q(
-            power__in=self.race.powers.filter(frequency=PowerFrequencyIntEnum.PASSIVE)
-        )
+            power__npcs=self,
+            power__subclass__subclass_id__in=(self.subclass_id, 0),
+        ) | models.Q(power__race=self.race)
         if self.functional_template:
             powers_query |= models.Q(
-                power__in=self.functional_template.powers.filter(
-                    frequency=PowerFrequencyIntEnum.PASSIVE
-                )
+                power__functional_template=self.functional_template
             )
         if self.paragon_path:
-            powers_query |= models.Q(
-                power__in=self.paragon_path.powers.filter(
-                    frequency=PowerFrequencyIntEnum.PASSIVE
-                )
-            )
-        powers_query |= models.Q(power__in=self.magic_item_powers())
-        return Bonus.objects.filter(
-            (
-                powers_query
-                | models.Q(feat__id__in=self.feats.all())
-                | models.Q(feat__id__in=self.klass.default_feats.all())
-                | models.Q(feat__id__in=self.subclass.default_feats.all())
-            )
-            & models.Q(min_level__lte=self.level)
+            powers_query |= models.Q(power__paragon_path=self.paragon_path)
+        powers_query = (
+            models.Q(power__frequency=PowerFrequencyIntEnum.PASSIVE) & powers_query
         )
+        powers_query |= models.Q(power__in=self.magic_item_powers())
+        return (
+            powers_query
+            | models.Q(feat__npcs=self)
+            | models.Q(feat__classes=self.klass)
+            | models.Q(feat__subclasses=self.subclass)
+        ) & models.Q(min_level__lte=self.level)
 
     def calculate_bonuses(
         self,
         *bonus_types: AbilityEnum | SkillEnum | DefenceTypeEnum | NPCOtherProperties,
     ) -> dict[AbilityEnum | SkillEnum | DefenceTypeEnum | NPCOtherProperties, int]:
-        # TODO refactor query here and in self.get_power_bonuses
         # TODO add cache with refresh on save npc
         result = {}
+        bonuses_qs = Bonus.objects.filter(bonus_type__in=bonus_types).filter(
+            self.get_power_feats_bonuses_query()
+            | models.Q(race=self.race)
+            | models.Q(subclass=self.subclass)
+            | models.Q(
+                magic_item_type__in=(item.magic_item_type for item in self.magic_items)
+            )
+        )
         for bonus_type in bonus_types:
             bonuses = defaultdict(list)
-            for bonus in (
-                self.get_power_bonuses()
-                .filter(bonus_type=bonus_type)
-                .union(self.race.bonuses.filter(bonus_type=bonus_type))
-                .union(self.subclass.bonuses.filter(bonus_type=bonus_type))
-                .union(
-                    Bonus.objects.filter(
-                        magic_item_type__in=(
-                            item.magic_item_type for item in self.magic_items
-                        ),
-                        bonus_type=bonus_type,
-                    )
-                )
-            ):
+            for bonus in bonuses_qs.filter(bonus_type=bonus_type):
                 try:
                     if bonus.feat and not bonus.feat.fits(self):
                         continue
