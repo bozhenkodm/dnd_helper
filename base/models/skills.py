@@ -63,7 +63,10 @@ class NPCSkillAbstract(models.Model):
             )
 
         bonus_skills = Skills(
-            **{k.lower(): v for k, v in self.calculate_bonuses(*SkillEnum).items()}
+            **{
+                k.lower(): v
+                for k, v in self.calculate_bonuses(*SkillEnum, check_cache=True).items()
+            }
         )
         mandatory_skills = self.klass.mandatory_skills.obj(value=5)
         armor_skill_penalty = (

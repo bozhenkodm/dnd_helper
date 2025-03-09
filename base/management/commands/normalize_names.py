@@ -4,7 +4,10 @@ from base.models.feats import Feat
 
 
 class Command(BaseCommand):
-    help = 'Generate random abilities'
+    help = (
+        'Update feats names.'
+        ' Strip, uncapitalize words (except 1st one), remove extra spaces'
+    )
 
     def handle(self, *args, **options):
         for feat in Feat.objects.all():

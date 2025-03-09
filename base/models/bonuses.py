@@ -1,6 +1,7 @@
 from collections import defaultdict
 from itertools import chain
 
+from django.core.cache import cache
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -155,8 +156,11 @@ class BonusMixin:
     def calculate_bonuses(
         self,
         *bonus_types: AbilityEnum | SkillEnum | DefenceTypeEnum | NPCOtherProperties,
+        check_cache: bool = False,
     ) -> dict[AbilityEnum | SkillEnum | DefenceTypeEnum | NPCOtherProperties, int]:
-        # TODO add cache with refresh on save npc
+        if check_cache:
+            if result := cache.get(self._bonus_cache_key):
+                return {bonus_type: result[bonus_type] for bonus_type in bonus_types}
         result = {}
         bonuses_qs = (
             Bonus.objects.select_related(
@@ -203,9 +207,27 @@ class BonusMixin:
                 except ValueError:
                     print(f'Bonus processing failed: {bonus}, {bonus.value}')
             result[bonus_type] = sum(max(value) for value in bonuses.values())
-        return result
+        cached_result = cache.get(self._bonus_cache_key, {})
+        cached_result.update(result)
+        cache.set(self._bonus_cache_key, cached_result)
+        return cached_result
 
     def calculate_bonus(
         self, bonus_type: AbilityEnum | SkillEnum | DefenceTypeEnum | NPCOtherProperties
     ) -> int:
+        bonus = cache.get(self._bonus_cache_key)
+        if bonus:
+            return bonus[bonus_type]
         return self.calculate_bonuses(bonus_type)[bonus_type]
+
+    def cache_bonuses(self):
+        cache.set(
+            self._bonus_cache_key,
+            self.calculate_bonuses(
+                *chain(AbilityEnum, SkillEnum, DefenceTypeEnum, NPCOtherProperties)
+            ),
+        )
+
+    @property
+    def _bonus_cache_key(self) -> str:
+        return f'npc-{self.id}-bonuses'

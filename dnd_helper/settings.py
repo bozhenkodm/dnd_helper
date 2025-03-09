@@ -77,6 +77,15 @@ TEMPLATES = [
     },
 ]
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'dnd-helper-cache',
+        'TIMEOUT': None,
+        'OPTIONS': {'MAX_ENTRIES': 1000},
+    }
+}
+
 WSGI_APPLICATION = 'dnd_helper.wsgi.application'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

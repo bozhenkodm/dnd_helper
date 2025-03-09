@@ -511,6 +511,7 @@ class NPCAdmin(admin.ModelAdmin):
                 obj.experience_by_level(form.cleaned_data['level']), obj.experience
             )
         super().save_model(request, obj, form, change)
+        obj.cache_bonuses()
 
     def save_related(self, request, form, formsets, change):
         if not change:
