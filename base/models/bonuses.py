@@ -172,7 +172,7 @@ class BonusMixin:
                 'power',
                 'feat',
             )
-            .filter(bonus_type__in=bonus_types)
+            # .filter(bonus_type__in=bonus_types)
             .filter(
                 self.get_power_feats_bonuses_query()
                 | models.Q(race=self.race)
@@ -182,9 +182,9 @@ class BonusMixin:
                         item.magic_item_type for item in self.magic_items
                     )
                 )
-            )
-            .distinct()
+            ).distinct()
         )
+        bonus_types = chain(AbilityEnum, SkillEnum, DefenceTypeEnum, NPCOtherProperties)
         for bonus_type in bonus_types:
             bonuses = defaultdict(list)
             for bonus in bonuses_qs.filter(bonus_type=bonus_type):
@@ -216,7 +216,7 @@ class BonusMixin:
         self, bonus_type: AbilityEnum | SkillEnum | DefenceTypeEnum | NPCOtherProperties
     ) -> int:
         bonus = cache.get(self._bonus_cache_key)
-        if bonus:
+        if bonus and bonus_type in bonus:
             return bonus[bonus_type]
         return self.calculate_bonuses(bonus_type)[bonus_type]
 

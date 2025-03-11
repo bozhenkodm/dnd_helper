@@ -462,29 +462,26 @@ class NPC(
         """
         calculated powers for npc html page
         """
-        powers_qs = self.race.powers.filter(level=0)
-        querysets = [
-            self.powers.filter(
-                models.Q(accessory_type__isnull=True) | models.Q(accessory_type='')
-            ),
-            self.klass.default_powers.filter(
-                models.Q(accessory_type__isnull=True) | models.Q(accessory_type='')
-            ),
-            self.subclass.default_powers.filter(
-                models.Q(accessory_type__isnull=True) | models.Q(accessory_type='')
-            ),
-        ]
+        # TODO cache result
+        query = models.Q(race=self.race, level=0) | models.Q(
+            accessory_type__isnull=True
+        ) & (
+            models.Q(npcs=self)
+            | models.Q(classes=self.klass)
+            | models.Q(subclasses=self.subclass)
+        )
         if self.functional_template:
-            querysets.append(self.functional_template.powers.filter(level=0))
-
-        if self.paragon_path:
-            querysets.append(
-                self.paragon_path.powers.filter(
-                    level__lte=self.level, accessory_type__isnull=True
-                )
+            query |= models.Q(
+                functional_template=self.functional_template,
+                accessory_type__isnull=True,
             )
+        if self.paragon_path:
+            query |= models.Q(
+                paragon_path=self.paragon_path, accessory_type__isnull=True
+            )
+        powers_qs = Power.objects.filter(query).order_by('frequency')
         powers: list[dict] = []
-        for power in powers_qs.union(*querysets).order_by('frequency'):
+        for power in powers_qs:
             try:
                 powers.append(self.get_power_display(power=power))
             except PowerInconsistent as e:
@@ -494,24 +491,21 @@ class NPC(
             except WrongWeapon as e:
                 print(f"{power} display is not created with error: {e}")
                 continue
-        power_weapon_qs = self.powers.filter(  # type: ignore
-            accessory_type__isnull=False
+        query = models.Q(accessory_type__isnull=False) & (
+            models.Q(classes=self.klass, level__lte=self.level)
+            | models.Q(subclasses=self.subclass, level__lte=self.level)
         )
-        querysets = [
-            self.klass.default_powers.filter(
-                level__lte=self.level, accessory_type__isnull=False
-            ),
-            self.subclass.default_powers.filter(
-                level__lte=self.level, accessory_type__isnull=False
-            ),
-        ]
-        if self.paragon_path:
-            querysets.append(
-                self.paragon_path.powers.filter(  # type: ignore
-                    accessory_type__isnull=False
-                )
+        if self.functional_template:
+            query |= models.Q(
+                functional_template=self.functional_template,
+                accessory_type__isnull=False,
             )
-        for power in power_weapon_qs.union(*querysets).order_by('frequency'):
+        if self.paragon_path:
+            query |= models.Q(
+                paragon_path=self.paragon_path, accessory_type__isnull=False
+            )
+        power_weapon_qs = Power.objects.filter(query).order_by('frequency')
+        for power in power_weapon_qs:
             for weapons in self.proper_weapons_for_power(power):
                 try:
                     powers.append(self.get_power_display(power=power, weapons=weapons))

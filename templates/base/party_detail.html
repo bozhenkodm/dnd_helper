@@ -45,6 +45,17 @@
       <td class="border center"><span><b>{{ member.passive_insight }}</b></span></td>
     </tr>
 {% endfor %}
+{% for member in object.npc_members.all %}
+    <tr class="border">
+      <td class="border center"><span><b>{{ member.name }}</b></span></td>
+      <td class="border center"><span><b>{{ member.armor_class }}</b></span></td>
+      <td class="border center"><span><b>{{ member.fortitude }}</b></span></td>
+      <td class="border center"><span><b>{{ member.reflex }}</b></span></td>
+      <td class="border center"><span><b>{{ member.will }}</b></span></td>
+      <td class="border center"><span><b>{{ member.perception|add:10 }}</b></span></td>
+      <td class="border center"><span><b>{{ member.insight|add:10}}</b></span></td>
+    </tr>
+{% endfor %}
 </table>
 </div>
 </body>

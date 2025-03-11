@@ -56,6 +56,7 @@ class Class(ClassAbstract):
         'base.Power',
         verbose_name=_('Default powers'),
         blank=True,
+        related_name='classes',
     )
 
     def __str__(self):
@@ -91,7 +92,7 @@ class Subclass(ClassAbstract):
         'base.Power',
         verbose_name=_('Default powers'),
         blank=True,
-        related_name='subclasses_many',
+        related_name='subclasses',
     )
 
     def __str__(self):
