@@ -479,7 +479,8 @@ class NPC(
             query |= models.Q(
                 paragon_path=self.paragon_path, accessory_type__isnull=True
             )
-        powers_qs = Power.objects.filter(query).order_by('frequency')
+        # TODO get rid of distinct
+        powers_qs = Power.objects.filter(query).distinct().order_by('frequency')
         powers: list[dict] = []
         for power in powers_qs:
             try:
@@ -494,6 +495,7 @@ class NPC(
         query = models.Q(accessory_type__isnull=False) & (
             models.Q(classes=self.klass, level__lte=self.level)
             | models.Q(subclasses=self.subclass, level__lte=self.level)
+            | models.Q(npcs=self)
         )
         if self.functional_template:
             query |= models.Q(
@@ -504,7 +506,7 @@ class NPC(
             query |= models.Q(
                 paragon_path=self.paragon_path, accessory_type__isnull=False
             )
-        power_weapon_qs = Power.objects.filter(query).order_by('frequency')
+        power_weapon_qs = Power.objects.filter(query).distinct().order_by('frequency')
         for power in power_weapon_qs:
             for weapons in self.proper_weapons_for_power(power):
                 try:

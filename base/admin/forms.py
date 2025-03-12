@@ -166,9 +166,11 @@ class NPCModelForm(forms.ModelForm):
                 ArmsSlotItem.objects.select_related('magic_item_type')
                 .filter(
                     models.Q(magic_item_type__slot=ArmsSlotItem.SLOT.value)
-                    & models.Q(shield_type__in=self.instance.klass.shields.all())
-                    & models.Q(shield_type__in=self.instance.subclass.shields.all())
-                    | models.Q(shield_type__isnull=True),
+                    & (
+                        models.Q(shield_type__in=self.instance.klass.shields.all())
+                        | models.Q(shield_type__in=self.instance.subclass.shields.all())
+                        | models.Q(shield_type__isnull=True)
+                    ),
                 )
                 .order_by('magic_item_type__name', 'shield_type__base_shield_type')
             )
@@ -319,7 +321,8 @@ class NPCModelForm(forms.ModelForm):
         primary_hand = self.cleaned_data.get('primary_hand')
         secondary_hand = self.cleaned_data.get('secondary_hand')
         shield_is_in_hand = bool(
-            self.cleaned_data['arms_slot'] and self.cleaned_data['arms_slot'].shield
+            self.cleaned_data['arms_slot']
+            and self.cleaned_data['arms_slot'].shield_type
         )
         self.check_shield_and_weapon_in_one_hand(secondary_hand, shield_is_in_hand)
         self.check_two_handed_weapon_held_with_two_hands(
