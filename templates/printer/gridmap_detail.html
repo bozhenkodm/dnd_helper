@@ -73,24 +73,27 @@ img {
             {% with col_urls=participants|dictitem:row %}
             <tr>
                 {% for col in object.col_range %}
-                    <td title="{{ col }}, {{ row }}" ondrop="drop(event)" ondragover="allowDrop(event)">
-                        {% if col_urls %}
-                            {% with urls=col_urls|dictitem:col %}
-                                {% if urls %}
-                                    {% with url=urls|last %}
+                    {% if col_urls %}
+                        {% with urls=col_urls|dictitem:col %}
+                            {% if urls %}
+                                {% with url=urls|last %}
+                                    <td title="{{ col }}, {{ row }}; {{ url.1 }}" ondrop="drop(event)" ondragover="allowDrop(event)">
                                         <img
                                             id="{{ url.0 }}"
                                             src="{{ url.2 }}"
                                             draggable="true"
                                             ondragstart="drag(event)"
-                                            alt="{{ url.1 }}"
                                             class="rotate{{ url.3 }}"
                                         >
-                                    {% endwith %}
-                                {% endif %}
-                            {% endwith %}
-                        {% endif %}
-                    </td>
+                                    </td>
+                                {% endwith %}
+                            {% else %}
+                                <td title="{{ col }}, {{ row }}" ondrop="drop(event)" ondragover="allowDrop(event)"></td>
+                            {% endif %}
+                        {% endwith %}
+                    {% else %}
+                        <td title="{{ col }}, {{ row }}" ondrop="drop(event)" ondragover="allowDrop(event)"></td>
+                    {% endif %}
                 {% endfor %}
             </tr>
             {% endwith %}
