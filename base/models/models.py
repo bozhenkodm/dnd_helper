@@ -428,6 +428,8 @@ class NPC(
     def proper_weapons_for_power(self, power: Power) -> Sequence[tuple[Weapon, ...]]:
         result: list[tuple[Weapon, ...]] = []
         match power.accessory_type:
+            case None:
+                return [()]
             case AccessoryTypeEnum.WEAPON:
                 for weapon in filter(None, (self.primary_hand, self.secondary_hand)):
                     if (
@@ -463,51 +465,23 @@ class NPC(
         calculated powers for npc html page
         """
         # TODO cache result
-        query = models.Q(race=self.race, level=0) | models.Q(
-            accessory_type__isnull=True
-        ) & (
-            models.Q(npcs=self)
-            | models.Q(classes=self.klass)
-            | models.Q(subclasses=self.subclass)
+        query = (
+            models.Q(race=self.race, level=0)
+            | models.Q(npcs=self)
+            | models.Q(classes=self.klass, level__lte=self.level)
+            | models.Q(subclasses=self.subclass, level__lte=self.level)
+            # | models.Q(magic_item_type__item_set__in=self.magic_items)
         )
         if self.functional_template:
             query |= models.Q(
                 functional_template=self.functional_template,
-                accessory_type__isnull=True,
             )
         if self.paragon_path:
-            query |= models.Q(
-                paragon_path=self.paragon_path, accessory_type__isnull=True
-            )
+            query |= models.Q(paragon_path=self.paragon_path)
         # TODO get rid of distinct
-        powers_qs = Power.objects.filter(query).distinct().order_by('frequency')
+        powers_qs = Power.objects.filter(query).distinct().order_by('frequency', 'name')
         powers: list[dict] = []
         for power in powers_qs:
-            try:
-                powers.append(self.get_power_display(power=power))
-            except PowerInconsistent as e:
-                print(f"{power} display is not created with error: {e}")
-                powers.append(self.get_power_inconsistent_message(power))
-                continue
-            except WrongWeapon as e:
-                print(f"{power} display is not created with error: {e}")
-                continue
-        query = models.Q(accessory_type__isnull=False) & (
-            models.Q(classes=self.klass, level__lte=self.level)
-            | models.Q(subclasses=self.subclass, level__lte=self.level)
-            | models.Q(npcs=self)
-        )
-        if self.functional_template:
-            query |= models.Q(
-                functional_template=self.functional_template,
-                accessory_type__isnull=False,
-            )
-        if self.paragon_path:
-            query |= models.Q(
-                paragon_path=self.paragon_path, accessory_type__isnull=False
-            )
-        power_weapon_qs = Power.objects.filter(query).distinct().order_by('frequency')
-        for power in power_weapon_qs:
             for weapons in self.proper_weapons_for_power(power):
                 try:
                     powers.append(self.get_power_display(power=power, weapons=weapons))
@@ -518,7 +492,6 @@ class NPC(
                 except WrongWeapon as e:
                     print(f"{power} display is not created with error: {e}")
                     continue
-
         for item in self.magic_items:
             if not item.magic_item_type:
                 continue
@@ -531,4 +504,5 @@ class NPC(
                 except WrongWeapon as e:
                     print(f"{power} display is not created with error: {e}")
                     continue
+        # return powers
         return sorted(powers, key=lambda x: (x['frequency_order'], x['name']))
