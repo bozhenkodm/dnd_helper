@@ -60,7 +60,7 @@ class Party(models.Model):
         return f'{name}{members}{npcs}'
 
     def get_absolute_url(self):
-        return reverse('pcparty', kwargs={'pk': self.pk})
+        return reverse('party', kwargs={'pk': self.pk})
 
 
 class Encounter(models.Model):
