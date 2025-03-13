@@ -512,6 +512,7 @@ class NPCAdmin(admin.ModelAdmin):
             )
         super().save_model(request, obj, form, change)
         obj.cache_bonuses()
+        obj.cache_powers()
 
     def save_related(self, request, form, formsets, change):
         if not change:

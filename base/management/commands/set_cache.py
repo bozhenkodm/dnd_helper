@@ -10,3 +10,5 @@ class Command(BaseCommand):
         for npc in NPC.objects.all():
             npc.cache_bonuses()
             self.stdout.write(self.style.SUCCESS(f'{npc.name} bonuses has been cached'))
+            npc.cache_powers()
+            self.stdout.write(self.style.SUCCESS(f'{npc.name} powers has been cached'))

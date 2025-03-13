@@ -1,6 +1,7 @@
 from typing import Sequence
 
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -26,6 +27,7 @@ from base.models.feats import NPCFeatAbstract
 from base.models.items import (
     Armor,
     ItemAbstract,
+    MagicItemType,
     NPCMagicItemAbstract,
     Weapon,
     WeaponType,
@@ -399,6 +401,10 @@ class NPC(
     def magic_items(self) -> Sequence[ItemAbstract]:
         return tuple(filter(lambda x: getattr(x, 'magic_item_type'), self.items))
 
+    @property
+    def magic_item_types(self) -> Sequence[MagicItemType]:
+        return tuple(item.magic_item_type for item in self.magic_items)
+
     def is_weapon_proficient(self, weapon: Weapon) -> bool:
         return any(
             (
@@ -460,17 +466,16 @@ class NPC(
     def inventory_text(self):
         return map(str, self.items)
 
-    def powers_calculated(self) -> Sequence[dict]:
+    def powers_calculate(self) -> Sequence[dict]:
         """
         calculated powers for npc html page
         """
-        # TODO cache result
         query = (
             models.Q(race=self.race, level=0)
             | models.Q(npcs=self)
             | models.Q(classes=self.klass, level__lte=self.level)
             | models.Q(subclasses=self.subclass, level__lte=self.level)
-            # | models.Q(magic_item_type__item_set__in=self.magic_items)
+            | models.Q(magic_item_type__in=self.magic_item_types)
         )
         if self.functional_template:
             query |= models.Q(
@@ -482,27 +487,31 @@ class NPC(
         powers_qs = Power.objects.filter(query).distinct().order_by('frequency', 'name')
         powers: list[dict] = []
         for power in powers_qs:
-            for weapons in self.proper_weapons_for_power(power):
-                try:
-                    powers.append(self.get_power_display(power=power, weapons=weapons))
-                except PowerInconsistent as e:
-                    print(f"{power} display is not created with error: {e}")
-                    powers.append(self.get_power_inconsistent_message(power))
-                    continue
-                except WrongWeapon as e:
-                    print(f"{power} display is not created with error: {e}")
-                    continue
-        for item in self.magic_items:
-            if not item.magic_item_type:
+            if not power.magic_item_type:
+                for weapons in self.proper_weapons_for_power(power):
+                    try:
+                        powers.append(
+                            self.get_power_display(power=power, weapons=weapons)
+                        )
+                    except PowerInconsistent as e:
+                        print(f"{power} display is not created with error: {e}")
+                        powers.append(self.get_power_inconsistent_message(power))
+                        continue
+                    except WrongWeapon as e:
+                        print(f"{power} display is not created with error: {e}")
+                        continue
                 continue
-            for power in item.magic_item_type.powers.order_by('frequency'):
+            for item in self.magic_items:
+                if power.magic_item_type != item.magic_item_type:
+                    continue
                 try:
                     powers.append(self.get_power_display(power=power, item=item))
                 except PowerInconsistent as e:
                     print(f"{power} display is not created with error: {e}")
                     powers.append(self.get_power_inconsistent_message(power))
-                except WrongWeapon as e:
-                    print(f"{power} display is not created with error: {e}")
-                    continue
-        # return powers
-        return sorted(powers, key=lambda x: (x['frequency_order'], x['name']))
+        return powers
+
+    def powers_calculated(self) -> Sequence[dict]:
+        if result := cache.get(self._powers_cache_key):
+            return result
+        return self.powers_calculate()

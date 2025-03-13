@@ -3,6 +3,7 @@ import re
 from itertools import chain
 from typing import Callable, Sequence
 
+from django.core.cache import cache
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -809,3 +810,10 @@ class PowerMixin:
             frequency=PowerFrequencyIntEnum.PASSIVE,
             magic_item_type__in=(mi.magic_item_type for mi in self.magic_items),
         )
+
+    @property
+    def _powers_cache_key(self) -> str:
+        return f'npc-{self.id}-powers'
+
+    def cache_powers(self):
+        cache.set(self._powers_cache_key, self.powers_calculate())
