@@ -311,6 +311,12 @@ class ParagonPathAdmin(admin.ModelAdmin):
     form = ParagonPathForm
 
 
+@admin.action(description='Кэшировать')
+def cache_npc(modeladmin, request, queryset):
+    for npc in queryset:
+        npc.cache_all()
+
+
 class NPCAdmin(admin.ModelAdmin):
     fields = [
         (
@@ -397,6 +403,7 @@ class NPCAdmin(admin.ModelAdmin):
     radio_fields = {'sex': admin.VERTICAL, 'var_bonus_ability': admin.VERTICAL}
     list_per_page = 20
     form = NPCModelForm
+    actions = (cache_npc,)
 
     def get_queryset(self, request: HttpRequest) -> models.QuerySet:
         qs = super().get_queryset(request)
@@ -511,8 +518,7 @@ class NPCAdmin(admin.ModelAdmin):
                 obj.experience_by_level(form.cleaned_data['level']), obj.experience
             )
         super().save_model(request, obj, form, change)
-        obj.cache_bonuses()
-        obj.cache_powers()
+        obj.cache_all()
 
     def save_related(self, request, form, formsets, change):
         if not change:

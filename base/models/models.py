@@ -515,3 +515,7 @@ class NPC(
         if result := cache.get(self._powers_cache_key):
             return result
         return self.powers_calculate()
+
+    def cache_all(self):
+        self.cache_bonuses()
+        self.cache_powers()

@@ -1,7 +1,6 @@
 from typing import Any
 
-from django.contrib import messages
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import View
@@ -58,28 +57,6 @@ class EncounterChangeInitiativeView(View):
 
 class PCPartyView(DetailView):
     model = Party
-
-
-class ControlPanelView(TemplateView):
-    template_name = "base/control_panel.html"
-
-    def post(self, request, *args, **kwargs):
-        action = request.POST.get('action')
-
-        if action == 'cache_everything':
-            for npc in NPC.objects.all():
-                npc.cache_bonuses()
-                print(f'{npc.name} bonuses has been cached')
-                npc.cache_powers()
-                print(f'{npc.name} power has been cached')
-            messages.info(request, 'Cached')
-            return HttpResponseRedirect(reverse('control_panel'))
-        elif action == 'hello':
-            messages.info(request, 'Hello!')
-            return HttpResponseRedirect(reverse('control_panel'))
-        else:
-            messages.error(request, "Invalid action requested")
-            return HttpResponseRedirect(reverse('control_panel'))
 
 
 class MainView(TemplateView):

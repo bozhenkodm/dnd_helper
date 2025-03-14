@@ -1,7 +1,6 @@
 from django.urls import path
 
 from base.views import (
-    ControlPanelView,
     EncounterChangeInitiativeView,
     EncounterDetailView,
     MainView,
@@ -22,6 +21,5 @@ urlpatterns = [
         name='encounter-change',
     ),
     path('party/detail/<pk>', PCPartyView.as_view(), name='party'),
-    path('control-panel/', ControlPanelView.as_view(), name='control_panel'),
     path('', MainView.as_view(), name='main_view'),
 ]
