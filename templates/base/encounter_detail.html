@@ -79,7 +79,13 @@
                 <input type="hidden" name="participant_id" value="{{ combatant.id }}">
                 <input type="submit" name="kill_participant" value="Убить">
             </form>
-            {% endif %}
+            {% else %}
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="participant_id" value="{{ combatant.id }}">
+                <input type="submit" name="unkill_participant" value="Вернуть">
+            </form>
+    {% endif %}
         </td>
     </tr>
     {% endfor %}

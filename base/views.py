@@ -45,6 +45,11 @@ class EncounterDetailView(DetailView):
             participant = EncounterParticipants.objects.get(id=participant_id)
             participant.is_active = False
             participant.save()
+        elif 'unkill_participant' in request.POST:
+            participant_id = request.POST.get('participant_id')
+            participant = EncounterParticipants.objects.get(id=participant_id)
+            participant.is_active = True
+            participant.save()
         else:
             obj.roll_initiative()
         return self.get(request, *args, **kwargs)
