@@ -669,12 +669,6 @@ class ArmorAdmin(admin.ModelAdmin):
             ).order_by('name')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    @admin.display(description='Класс доспеха')
-    def armor_class(self, obj):
-        if not obj.id:
-            return '-'
-        return obj.armor_class
-
     def get_queryset(self, request):
         return (
             super()

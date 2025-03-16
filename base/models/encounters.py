@@ -196,6 +196,7 @@ class EncounterParticipants(models.Model):
     will = models.PositiveSmallIntegerField()
     number = models.SmallIntegerField(null=True)
     status = models.TextField(default='')
+    is_active = models.BooleanField(default=True)
 
     def __str__(self) -> str:
         return f'{self.name} {self.number}, +{self.initiative}'

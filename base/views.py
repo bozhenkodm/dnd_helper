@@ -40,6 +40,11 @@ class EncounterDetailView(DetailView):
             obj.next_turn(request.POST)
         elif 'previous_turn' in request.POST:
             obj.previous_turn(request.POST)
+        elif 'kill_participant' in request.POST:
+            participant_id = request.POST.get('participant_id')
+            participant = EncounterParticipants.objects.get(id=participant_id)
+            participant.is_active = False
+            participant.save()
         else:
             obj.roll_initiative()
         return self.get(request, *args, **kwargs)

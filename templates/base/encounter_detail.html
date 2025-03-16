@@ -24,6 +24,9 @@
 .current_turn {
     background-color: green
 }
+.inactive-name {
+    text-decoration: line-through;
+}
 </style>
 <head>
     <meta charset="UTF-8">
@@ -43,7 +46,8 @@
     <colgroup>
        <col span="1" style="width: 5%;">
        <col span="1" style="width: 20%;">
-       <col span="1" style="width: 70%;">
+       <col span="1" style="width: 65%;">
+       <col span="1" style="width: 5%;">
        <col span="1" style="width: 5%;">
     </colgroup>
     <tr class="border">
@@ -51,21 +55,34 @@
     <th class="border">Имя</th>
     <th class="border">Ходы</th>
     <th class="border"></th>
+    <th class="border"></th>
   </tr>
 {% for combatant in object.participants.ordered %}
     <tr class="border {% if object.turn_number_in_round == forloop.counter %}current_turn{% endif %}">
         <td class="border"><span><b>{{ forloop.counter }}</b></span></td>
-        <td class="border"><span><b>{{ combatant.full_name }}</b></span><br>
-        {% if combatant.display_defences %}
-        <span style="font-size: small"><b>КД</b>: {{combatant.ac}}, <b>Ст</b>: {{combatant.fortitude}}, <b>Р</b>: {{combatant.reflex}}, <b>В</b>: {{combatant.will}} </span>
-        {% endif %}
+        <td class="border">
+            <span>
+                <b class="{% if not combatant.is_active %}inactive-name{% endif %}">{{ combatant.full_name }}</b>
+            </span><br>
+            {% if combatant.display_defences %}
+            <span style="font-size: small"><b>КД</b>: {{combatant.ac}}, <b>Ст</b>: {{combatant.fortitude}}, <b>Р</b>: {{combatant.reflex}}, <b>В</b>: {{combatant.will}} </span>
+            {% endif %}
         </td>
         <td>
             <textarea name="status{{ forloop.counter }}" form="round_form" style="width: 98%">{{ combatant.status }}</textarea>
         </td>
         <td class="border"><span style="float: right">{{ combatant.initiative|floatformat:"0" }} </span></td>
+        <td class="border">
+            {% if combatant.is_active %}
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="participant_id" value="{{ combatant.id }}">
+                <input type="submit" name="kill_participant" value="Убить">
+            </form>
+            {% endif %}
+        </td>
     </tr>
-{% endfor %}
+    {% endfor %}
 </table>
 </div>
 <br>
