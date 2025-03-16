@@ -92,12 +92,18 @@ class Encounter(models.Model):
         return f'Сцена №{self.id}'
 
     def next_turn(self, form) -> None:
-        self.turn_number += 1
+        while True:
+            self.turn_number += 1
+            if self.participants.ordered()[self.turn_number_in_round - 1].is_active:
+                break
         EncounterParticipants.save_statuses(self, form)
         self.save()
 
     def previous_turn(self, form) -> None:
-        self.turn_number -= 1
+        while True:
+            self.turn_number -= 1
+            if self.participants.ordered()[self.turn_number_in_round - 1].is_active:
+                break
         EncounterParticipants.save_statuses(self, form)
         self.save()
 
