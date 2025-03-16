@@ -1,7 +1,6 @@
 from django.urls import path
 
 from base.views import (
-    EncounterChangeInitiativeView,
     EncounterDetailView,
     MainView,
     NPCDetailView,
@@ -15,11 +14,6 @@ urlpatterns = [
     path('npc/list/', NPCListView.as_view(), name='npc_list'),
     path('npc/detail/<pk>', NPCDetailView.as_view(), name='npc'),
     path('encounter/detail/<pk>', EncounterDetailView.as_view(), name='encounter'),
-    path(
-        'encounter/detail/<pk>/change-initiative',
-        EncounterChangeInitiativeView.as_view(),
-        name='encounter-change',
-    ),
     path('party/detail/<pk>', PCPartyView.as_view(), name='party'),
     path('', MainView.as_view(), name='main_view'),
 ]
