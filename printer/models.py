@@ -320,12 +320,15 @@ class Zone(models.Model):
         verbose_name=_('Style'),
         choices=ZoneStyle.generate_choices(is_sorted=False),
         max_length=ZoneStyle.max_length(),
+        null=True,
+        blank=True,
     )
     color = models.CharField(
         verbose_name=_('Color'),
         max_length=20,
         choices=ColorsStyle.generate_choices(start_with=(ColorsStyle.NONE,)),
         null=True,
+        blank=True,
     )
 
     def clean(self):
