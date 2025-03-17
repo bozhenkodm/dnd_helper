@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 
 from django.forms import inlineformset_factory
 from django.http import HttpResponseRedirect, JsonResponse
@@ -26,11 +27,6 @@ class GridMapListView(ListView):
 
 class GridMapView(DetailView):
     model = GridMap
-
-    def get_context_data(self, **kwargs):
-        obj = self.get_object()
-        kwargs['participants'] = obj.get_participants_data()
-        return super().get_context_data(**kwargs)
 
 
 class GridMapEditView(View):

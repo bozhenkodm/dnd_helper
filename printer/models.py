@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -8,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from base.constants.constants import SizeIntEnum
 from base.models.encounters import PlayerCharacter
 from base.models.models import NPC
-from printer.constants import ColorsStyle, Position, PrintableObjectType
+from printer.constants import ColorsStyle, Position, PrintableObjectType, ZoneStyle
 
 
 class PrintableObject(models.Model):
@@ -240,12 +241,6 @@ class GridMap(models.Model):
     def get_absolute_url(self):
         return self.url
 
-    def col_range(self):
-        return range(1, self.cols + 1)
-
-    def row_range(self):
-        return range(1, self.rows + 1)
-
     def get_participants_data(self) -> dict[int, dict[int, list[str]]]:
         result = defaultdict(dict)
         for place in self.places.all():
@@ -261,6 +256,72 @@ class GridMap(models.Model):
                     )
         return result
 
+    @property
+    def grid_data(self) -> list:
+        """Returns a grid structure with all cell data"""
+        grid = []
+        participants_data = self.get_participants_data()
+        zones = self.zones.all()
+
+        for row in range(1, self.rows + 1):
+            current_row = []
+            for col in range(1, self.cols + 1):
+                # Get cell participants
+                participant = participants_data.get(row, {}).get(col, [None])[-1]
+
+                # Get zone styles
+                styles = []
+                for zone in zones:
+                    if (
+                        zone.top_left_x <= col <= zone.bottom_right_x
+                        and zone.top_left_y <= row <= zone.bottom_right_y
+                    ):
+                        styles.append(f'zone-{zone.style}')
+
+                current_row.append(
+                    {
+                        'row': row,
+                        'col': col,
+                        'participant': participant,
+                        'styles': ' '.join(styles),
+                    }
+                )
+            grid.append(current_row)
+        return grid
+
     def update_coords(self, participant_place_id, row, col):
         pp = ParticipantPlace.objects.get(id=participant_place_id)
         pp.update_coords(row, col)
+
+
+class Zone(models.Model):
+    class Meta:
+        verbose_name = _('Zone')
+        verbose_name_plural = _('Zones')
+
+    map = models.ForeignKey(
+        GridMap,
+        verbose_name=_('Map'),
+        on_delete=models.CASCADE,
+        related_name='zones',
+    )
+    name = models.CharField(
+        verbose_name=_('Name'), max_length=20, null=True, blank=True
+    )
+    top_left_x = models.PositiveSmallIntegerField(verbose_name=_('Top left x'))
+    top_left_y = models.PositiveSmallIntegerField(verbose_name=_('Top left y'))
+    bottom_right_x = models.PositiveSmallIntegerField(verbose_name=_('Bottom right x'))
+    bottom_right_y = models.PositiveSmallIntegerField(verbose_name=_('Bottom right y'))
+    style = models.CharField(
+        verbose_name=_('Style'),
+        choices=ZoneStyle.generate_choices(is_sorted=False),
+        max_length=ZoneStyle.max_length(),
+    )
+
+    def clean(self):
+        super().clean()
+        if (
+            self.top_left_x > self.bottom_right_x
+            or self.top_left_y > self.bottom_right_y
+        ):
+            raise ValidationError(_('Invalid zone coordinates'))

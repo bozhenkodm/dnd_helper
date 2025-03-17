@@ -32,3 +32,11 @@ class TransponseAction(IntDescriptionEnum):
     ROTATE_90 = Transpose.ROTATE_90, 'Повернуть на 90°'
     ROTATE_180 = Transpose.ROTATE_180, 'Повернуть на 180°'
     ROTATE_270 = Transpose.ROTATE_270, 'Повернуть на 270°'
+
+
+class ZoneStyle(BaseNameValueDescriptionEnum):
+    THICK = 'thick', 'Толстый'
+    DASHED = 'dashed', 'Чёрточки'
+    DOTTED = 'dotted', 'Точки'
+    DOUBLE = 'double', 'Двойной'
+    NONE = 'none', 'Пустой'

@@ -28,6 +28,11 @@
     -ms-transform: rotate(270deg);
     transform: rotate(270deg);
 }
+.zone-thick { border-width: 3px !important; }
+.zone-dashed { border-style: dashed !important; }
+.zone-dotted { border-style: dotted !important; }
+.zone-double { border-style: double !important; }
+.zone-none { border: none !important; }
 table {
     {% if object.grid_color == 'none' %}
         border: none;
@@ -69,34 +74,24 @@ img {
 
 <div class="container">
     <table>
-        {% for row in object.row_range %}
-            {% with col_urls=participants|dictitem:row %}
-            <tr>
-                {% for col in object.col_range %}
-                    {% if col_urls %}
-                        {% with urls=col_urls|dictitem:col %}
-                            {% if urls %}
-                                {% with url=urls|last %}
-                                    <td title="{{ col }}, {{ row }}; {{ url.1 }}" ondrop="drop(event)" ondragover="allowDrop(event)">
-                                        <img
-                                            id="{{ url.0 }}"
-                                            src="{{ url.2 }}"
-                                            draggable="true"
-                                            ondragstart="drag(event)"
-                                            class="rotate{{ url.3 }}"
-                                        >
-                                    </td>
-                                {% endwith %}
-                            {% else %}
-                                <td title="{{ col }}, {{ row }}" ondrop="drop(event)" ondragover="allowDrop(event)"></td>
-                            {% endif %}
-                        {% endwith %}
-                    {% else %}
-                        <td title="{{ col }}, {{ row }}" ondrop="drop(event)" ondragover="allowDrop(event)"></td>
-                    {% endif %}
-                {% endfor %}
-            </tr>
-            {% endwith %}
+        {% for row in object.grid_data %}
+        <tr>
+            {% for cell in row %}
+            <td title="{{ cell.col }}, {{ cell.row }}{% if cell.participant %}; {{ cell.participant.1 }}{% endif %}"
+                ondrop="drop(event)"
+                ondragover="allowDrop(event)"
+                class="{{ cell.styles }}">
+
+                {% if cell.participant %}
+                <img id="{{ cell.participant.0 }}"
+                     src="{{ cell.participant.2 }}"
+                     draggable="true"
+                     ondragstart="drag(event)"
+                     class="rotate{{ cell.participant.3 }}">
+                {% endif %}
+            </td>
+            {% endfor %}
+        </tr>
         {% endfor %}
     </table>
 </div>

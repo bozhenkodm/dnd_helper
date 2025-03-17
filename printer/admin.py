@@ -15,6 +15,7 @@ from printer.models import (
     ParticipantPlace,
     PrintableObject,
     PrintableObjectItems,
+    Zone,
 )
 
 
@@ -78,8 +79,16 @@ class ParticipantPlaceInline(admin.TabularInline):
     extra = 0
 
 
+class ZonesInline(admin.TabularInline):
+    model = Zone
+    extra = 0
+
+
 class GridMapAdmin(admin.ModelAdmin):
-    inlines = (ParticipantPlaceInline,)
+    inlines = (
+        ParticipantPlaceInline,
+        ZonesInline,
+    )
     fieldsets = (
         (
             None,
