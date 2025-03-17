@@ -269,14 +269,17 @@ class GridMap(models.Model):
                 # Get cell participants
                 participant = participants_data.get(row, {}).get(col, [None])[-1]
 
-                # Get zone styles
+                # Zone styles and colors
                 styles = []
+                border_color = None
                 for zone in zones:
                     if (
                         zone.top_left_x <= col <= zone.bottom_right_x
                         and zone.top_left_y <= row <= zone.bottom_right_y
                     ):
                         styles.append(f'zone-{zone.style}')
+                        if zone.color != ColorsStyle.NONE:
+                            border_color = zone.color
 
                 current_row.append(
                     {
@@ -284,6 +287,7 @@ class GridMap(models.Model):
                         'col': col,
                         'participant': participant,
                         'styles': ' '.join(styles),
+                        'border_color': border_color,
                     }
                 )
             grid.append(current_row)
@@ -316,6 +320,12 @@ class Zone(models.Model):
         verbose_name=_('Style'),
         choices=ZoneStyle.generate_choices(is_sorted=False),
         max_length=ZoneStyle.max_length(),
+    )
+    color = models.CharField(
+        verbose_name=_('Color'),
+        max_length=20,
+        choices=ColorsStyle.generate_choices(start_with=(ColorsStyle.NONE,)),
+        null=True,
     )
 
     def clean(self):

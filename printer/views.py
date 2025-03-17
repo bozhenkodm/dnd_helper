@@ -1,5 +1,4 @@
 import json
-from collections import defaultdict
 
 from django.forms import inlineformset_factory
 from django.http import HttpResponseRedirect, JsonResponse

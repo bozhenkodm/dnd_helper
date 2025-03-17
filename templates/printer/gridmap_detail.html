@@ -28,11 +28,25 @@
     -ms-transform: rotate(270deg);
     transform: rotate(270deg);
 }
-.zone-thick { border-width: 3px !important; }
-.zone-dashed { border-style: dashed !important; }
-.zone-dotted { border-style: dotted !important; }
-.zone-double { border-style: double !important; }
-.zone-none { border: none !important; }
+.zone-thick {
+    border-width: 3px !important;
+    border-color: inherit !important;
+}
+.zone-dashed {
+    border-style: dashed !important;
+    border-color: inherit !important;
+}
+.zone-dotted {
+    border-style: dotted !important;
+    border-color: inherit !important;
+}
+.zone-double {
+    border-style: double !important;
+    border-color: inherit !important;
+}
+.zone-none {
+    border: none !important;
+}
 table {
     {% if object.grid_color == 'none' %}
         border: none;
@@ -80,7 +94,8 @@ img {
             <td title="{{ cell.col }}, {{ cell.row }}{% if cell.participant %}; {{ cell.participant.1 }}{% endif %}"
                 ondrop="drop(event)"
                 ondragover="allowDrop(event)"
-                class="{{ cell.styles }}">
+                class="{{ cell.styles }}"
+                style="{% if cell.border_color %}border-color: {{ cell.border_color }} !important;{% endif %}">
 
                 {% if cell.participant %}
                 <img id="{{ cell.participant.0 }}"
