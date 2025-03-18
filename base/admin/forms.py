@@ -130,12 +130,13 @@ class NPCModelForm(forms.ModelForm):
             self.fields['powers'].queryset = (
                 Power.objects.order_by('frequency')
                 .filter(
-                    models.Q(klass=self.instance.klass, level__gt=0)
+                    models.Q(klass=self.instance.klass)
                     | models.Q(race=self.instance.race, level__gt=0)
                     | models.Q(skill__classes_for_mandatory=self.instance.klass)
                     | models.Q(skill__npcs=self.instance),
                     level__lte=self.instance.level,
                 )
+                .exclude(classes=self.instance.klass)
                 .order_by('level', 'frequency')
             )
             self.fields['subclass_id'] = forms.ChoiceField(

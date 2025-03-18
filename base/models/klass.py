@@ -56,7 +56,7 @@ class Class(ClassAbstract):
         'base.Power',
         verbose_name=_('Default powers'),
         blank=True,
-        related_name='classes',
+        related_name='classes',  # TODO rename related_name
     )
 
     def __str__(self):

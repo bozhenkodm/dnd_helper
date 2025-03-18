@@ -293,7 +293,8 @@ class GridMap(models.Model):
             grid.append(current_row)
         return grid
 
-    def update_coords(self, participant_place_id, row, col):
+    @staticmethod
+    def update_coords(participant_place_id, row, col):
         pp = ParticipantPlace.objects.get(id=participant_place_id)
         pp.update_coords(row, col)
 
