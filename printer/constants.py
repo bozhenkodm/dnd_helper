@@ -10,7 +10,7 @@ class PrintableObjectType(BaseNameValueDescriptionEnum):
     DAILY = 'DAILY', 'Талант на день'
 
 
-class ColorsStyle(BaseNameValueDescriptionEnum):
+class ColorStyle(BaseNameValueDescriptionEnum):
     NONE = 'none', 'Пусто'
     RED = 'red', 'Красный'
     BLACK = 'black', 'Чёрный'

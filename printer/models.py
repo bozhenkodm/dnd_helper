@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from base.constants.constants import SizeIntEnum
 from base.models.encounters import PlayerCharacter
 from base.models.models import NPC
-from printer.constants import ColorsStyle, Position, PrintableObjectType, ZoneStyle
+from printer.constants import ColorStyle, Position, PrintableObjectType, ZoneStyle
 
 
 class PrintableObject(models.Model):
@@ -67,9 +67,9 @@ class EncounterIcons(models.Model):
     number = models.PositiveSmallIntegerField(verbose_name='Количество однотипных')
     number_color = models.CharField(
         verbose_name=_('Number color'),
-        default=ColorsStyle.RED,
-        max_length=ColorsStyle.max_length(),
-        choices=ColorsStyle.generate_choices(),
+        default=ColorStyle.RED.value,
+        max_length=ColorStyle.max_length(),
+        choices=ColorStyle.generate_choices(),
     )
     width = models.PositiveSmallIntegerField(verbose_name=_('Width'), default=200)
     number_position = models.CharField(
@@ -194,9 +194,9 @@ class GridMap(models.Model):
     )
     grid_color = models.CharField(
         verbose_name=_('Grid color'),
-        default=ColorsStyle.NONE,
-        max_length=ColorsStyle.max_length(),
-        choices=ColorsStyle.generate_choices(start_with=(ColorsStyle.NONE,)),
+        default=ColorStyle.NONE,
+        max_length=ColorStyle.max_length(),
+        choices=ColorStyle.generate_choices(start_with=(ColorStyle.NONE,)),
     )
     participants = models.ManyToManyField(
         Avatar,
@@ -278,7 +278,7 @@ class GridMap(models.Model):
                         and zone.top_left_y <= row <= zone.bottom_right_y
                     ):
                         styles.append(f'zone-{zone.style}')
-                        if zone.color != ColorsStyle.NONE:
+                        if zone.color != ColorStyle.NONE:
                             border_color = zone.color
 
                 current_row.append(
@@ -326,7 +326,7 @@ class Zone(models.Model):
     color = models.CharField(
         verbose_name=_('Color'),
         max_length=20,
-        choices=ColorsStyle.generate_choices(start_with=(ColorsStyle.NONE,)),
+        choices=ColorStyle.generate_choices(start_with=(ColorStyle.NONE,)),
         null=True,
         blank=True,
     )

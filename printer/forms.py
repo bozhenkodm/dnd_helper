@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 from base.models.encounters import Encounter, PlayerCharacter
 from base.models.models import NPC
-from printer.constants import ColorsStyle, Position, TransponseAction
+from printer.constants import ColorStyle, Position, TransponseAction
 from printer.models import Avatar, EncounterIcons, GridMap, ParticipantPlace
 
 
@@ -19,9 +19,9 @@ class EncounterIconForm(forms.ModelForm):
 
     number_color = forms.ChoiceField(
         label='Цвет номера',
-        choices=ColorsStyle.generate_choices(),
+        choices=ColorStyle.generate_choices(),
         widget=forms.RadioSelect,
-        initial=ColorsStyle.RED,
+        initial=ColorStyle.RED,
     )
     number_position = forms.ChoiceField(
         label='Класс позиции номера на картинке',
@@ -48,9 +48,9 @@ class GridMapForm(forms.ModelForm):
     )
     grid_color = forms.ChoiceField(
         label='Цвет грида',
-        choices=ColorsStyle.generate_choices(),
+        choices=ColorStyle.generate_choices(),
         widget=forms.RadioSelect,
-        initial=ColorsStyle.WHITE,
+        initial=ColorStyle.WHITE,
     )
     encounter = forms.ModelChoiceField(
         queryset=Encounter.objects.filter(is_passed=False).order_by('-id'),
