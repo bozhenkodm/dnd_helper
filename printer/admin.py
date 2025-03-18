@@ -1,9 +1,10 @@
 import io
 import subprocess
 
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.core.files.images import ImageFile
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext_lazy as _
 from PIL import Image
 from PIL.Image import Transpose
 
@@ -189,6 +190,41 @@ class GridMapAdmin(admin.ModelAdmin):
             obj.height = image.height
             obj.width = image.width
             obj.save()
+
+    def save_formset(self, request, form, formset, change):
+        if formset.model == ParticipantPlace:
+            is_updated = False
+            # Track instances where `is_updated` is reset
+            for form in formset.forms:
+                # Skip invalid/deleted forms
+                if not form.is_valid() or form.cleaned_data.get('DELETE', False):
+                    continue
+
+                instance = form.instance
+                # Check if it's an existing instance (not new)
+                if instance.pk:
+                    # Check if `row`/`col` changed AND `is_updated` was originally True
+                    if instance.is_updated and (
+                        'row' in form.changed_data or 'col' in form.changed_data
+                    ):
+                        instance.is_updated = False
+                        form.instance.refresh_from_db()
+                        is_updated = True
+
+            # Save the formset normally (includes our changes to `is_updated`)
+            super().save_formset(request, form, formset, change)
+
+            # Show message if changes occurred
+            if is_updated:
+                messages.warning(
+                    request,
+                    _(
+                        'Some participants were moved on gridmap.'
+                        ' Check coords and save again.'
+                    ),
+                )
+        else:
+            super().save_formset(request, form, formset, change)
 
 
 class AvatarAdmin(admin.ModelAdmin):

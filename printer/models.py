@@ -112,10 +112,12 @@ class ParticipantPlace(models.Model):
         default=0,
         verbose_name=_('Rotation'),
     )
+    is_updated = models.BooleanField(editable=False, default=False)
 
     def update_coords(self, row, col) -> None:
         self.row = row
         self.col = col
+        self.is_updated = True
         self.save()
 
 
