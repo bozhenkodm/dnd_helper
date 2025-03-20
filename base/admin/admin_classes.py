@@ -249,7 +249,7 @@ class SubclassAdmin(admin.ModelAdmin):
     ordering = ('klass__name_display', 'subclass_id', 'name')
     list_filter = ('klass',)
     list_display = ('__str__', 'klass')
-    autocomplete_fields = ('default_feats', 'default_powers')
+    autocomplete_fields = ('default_feats',)
     inlines = (BonusInline,)
     form = SubclassForm
     readonly_fields = ('available_weapons',)
@@ -900,6 +900,14 @@ class PowerAdmin(admin.ModelAdmin):
         'magic_item_type__name',
         'skill__title',
     )
+    radio_fields = {
+        'frequency': admin.VERTICAL,
+        'action_type': admin.VERTICAL,
+        'attack_ability': admin.VERTICAL,
+        'defence': admin.VERTICAL,
+        'accessory_type': admin.VERTICAL,
+        'range_type': admin.VERTICAL,
+    }
     form = PowerForm
     save_as = True
 

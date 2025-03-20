@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 
 from base.constants.constants import (
     LEVELS_WITH_ABILITY_BONUS,
+    DiceIntEnum,
     MagicItemSlot,
     NPCClassEnum,
     NPCOtherProperties,
@@ -137,6 +138,7 @@ class NPCModelForm(forms.ModelForm):
                     level__lte=self.instance.level,
                 )
                 .exclude(classes=self.instance.klass)
+                .exclude(subclasses__klass=self.instance.klass)
                 .order_by('level', 'frequency')
             )
             self.fields['subclass_id'] = forms.ChoiceField(
@@ -361,7 +363,13 @@ class ClassForm(ClassAbstractForm):
 
 
 class SubclassForm(ClassAbstractForm):
-    pass
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        if self.instance.id:
+            self.instance: Subclass
+            self.fields['default_powers'].queryset = Power.objects.filter(
+                klass=self.instance.klass
+            ).order_by('level', 'name')
 
 
 class ParagonPathForm(forms.ModelForm):
