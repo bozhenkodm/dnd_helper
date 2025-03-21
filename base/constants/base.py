@@ -1,6 +1,6 @@
 from enum import Enum, IntEnum
 from itertools import chain
-from typing import Any, Callable, Self, Sequence
+from typing import Any, Callable, Iterable, Self, Sequence
 
 from django.db import models
 
@@ -100,7 +100,9 @@ class IntDescriptionEnum(IntEnum):
         condition: Callable[['IntDescriptionEnum'], bool] = lambda x: True,
         zero_item: tuple[int, str] | None = None,
     ):
-        result = ((item.value, item.description) for item in cls if condition(item))
+        result: Iterable[tuple[int, str]] = (
+            (item.value, item.description) for item in cls if condition(item)
+        )
         if zero_item is not None:
             result = chain((zero_item,), result)
         return sorted(result, key=lambda x: x[0])

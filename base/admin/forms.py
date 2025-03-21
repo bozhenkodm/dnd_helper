@@ -8,7 +8,6 @@ from django.utils.translation import gettext_lazy as _
 
 from base.constants.constants import (
     LEVELS_WITH_ABILITY_BONUS,
-    DiceIntEnum,
     MagicItemSlot,
     NPCClassEnum,
     NPCOtherProperties,

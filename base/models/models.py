@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Iterable, Sequence
 
 from django.contrib.auth.models import User
 from django.core.cache import cache
@@ -257,7 +257,7 @@ class NPC(
         return f'{self.name} {self.race} {self.full_class_name} {self.level} уровня'
 
     @property
-    def full_class_name(self):
+    def full_class_name(self) -> str:
         if self.paragon_path:
             return f'{self.klass} ({self.paragon_path.title})'
         if self.functional_template:
@@ -265,14 +265,14 @@ class NPC(
         return self.klass
 
     @property
-    def url(self):
+    def url(self) -> str:
         return reverse('npc', kwargs={'pk': self.pk})
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return self.url
 
     @property
-    def half_level(self):
+    def half_level(self) -> int:
         return self.level // 2
 
     @property
@@ -323,7 +323,7 @@ class NPC(
         return self.bloodied // 2 + self.calculate_bonus(NPCOtherProperties.SURGE)
 
     @property
-    def _tier(self):
+    def _tier(self) -> int:
         if self.level < 11:
             return 0
         if self.level >= 21:
@@ -369,14 +369,14 @@ class NPC(
         )
 
     @property
-    def speed(self):
+    def speed(self) -> int:
         bonus_speed = self.calculate_bonus(NPCOtherProperties.SPEED)
         if self.armor and self.race.name != NPCRaceEnum.DWARF:
             return self.race.speed + self.armor.speed_penalty + bonus_speed
         return self.race.speed + bonus_speed
 
     @property
-    def items(self):
+    def items(self) -> tuple[ItemAbstract, ...]:
         return tuple(
             filter(
                 None,
@@ -463,7 +463,7 @@ class NPC(
         return result
 
     @property
-    def inventory_text(self):
+    def inventory_text(self) -> Iterable[str]:
         return map(str, self.items)
 
     def powers_calculate(self) -> Sequence[dict]:
