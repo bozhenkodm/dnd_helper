@@ -432,7 +432,7 @@ class PowerMixin:
     }
 
     @property
-    def _power_attrs(self: NPCProtocol):
+    def _power_attrs(self: NPCProtocol) -> dict[PowerVariables, int]:
         return {
             PowerVariables.STR: self.str_mod,
             PowerVariables.CON: self.con_mod,
