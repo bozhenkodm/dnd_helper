@@ -108,28 +108,41 @@ class Command(BaseCommand):
                 type_hints = get_type_hints(attr)
                 return_type = type_hints.get('return', sig.return_annotation)
 
-                # Build parameter list
+                # Build parameter list with string annotations for models
                 params = []
                 for param in sig.parameters.values():
                     param_type = type_hints.get(param.name, param.annotation)
                     param_str = param.name
                     if param_type is not inspect.Parameter.empty:
-                        param_type_str = (
-                            param_type.__name__
-                            if hasattr(param_type, '__name__')
-                            else str(param_type)
-                        )
-                        param_str += f': {param_type_str}'
+                        # Convert model classes to string literals
+                        if inspect.isclass(param_type) and issubclass(
+                            param_type, models.Model
+                        ):
+                            type_str = f"'{param_type.__name__}'"
+                        else:
+                            type_str = (
+                                param_type.__name__
+                                if hasattr(param_type, '__name__')
+                                else str(param_type)
+                            )
+                        param_str += f': {type_str}'
                     if param.default is not inspect.Parameter.empty:
                         param_str += f' = {param.default!r}'
                     params.append(param_str)
 
                 params_str = ', '.join(params)
-                return_str = (
-                    f' -> {return_type.__name__}'
-                    if return_type is not inspect.Parameter.empty
-                    else ''
-                )
+
+                # Handle return type annotations
+                if inspect.isclass(return_type) and issubclass(
+                    return_type, models.Model
+                ):
+                    return_str = f" -> '{return_type.__name__}'"
+                else:
+                    return_str = (
+                        f' -> {return_type.__name__}'
+                        if return_type is not inspect.Parameter.empty
+                        else ''
+                    )
                 code_lines.append(f'    def {name}({params_str}){return_str}: ...')
 
             # Handle properties
@@ -139,15 +152,21 @@ class Command(BaseCommand):
                     type_hints = get_type_hints(attr.fget)
                     return_type = type_hints.get('return', inspect.Parameter.empty)
 
-                return_type_str = (
-                    return_type.__name__
-                    if hasattr(return_type, '__name__')
-                    else (
-                        str(return_type)
-                        if return_type is not inspect.Parameter.empty
-                        else 'Any'
+                # Convert model return types to string literals
+                if inspect.isclass(return_type) and issubclass(
+                    return_type, models.Model
+                ):
+                    return_type_str = return_type.__name__
+                else:
+                    return_type_str = (
+                        return_type.__name__
+                        if hasattr(return_type, '__name__')
+                        else (
+                            str(return_type)
+                            if return_type is not inspect.Parameter.empty
+                            else 'Any'
+                        )
                     )
-                )
                 code_lines.append(f'    @property')
                 code_lines.append(f'    def {name}(self) -> {return_type_str}: ...')
 
