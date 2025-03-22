@@ -1,7 +1,7 @@
 import operator
 import re
 from itertools import chain
-from typing import Callable, Sequence
+from typing import Sequence
 
 from django.core.cache import cache
 from django.db import models
@@ -25,6 +25,7 @@ from base.exceptions import PowerInconsistent
 from base.models.abilities import Ability
 from base.models.books import BookSource
 from base.models.items import ItemAbstract, Weapon
+from base.models.npc_protocol import NPCProtocol
 from base.objects.dice import DiceRoll
 from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
 
@@ -430,12 +431,8 @@ class PowerMixin:
         '_': (min, 2),
     }
 
-    _magic_threshold: int
-    no_hand: "Weapon"
-    is_implement_proficient: Callable[["Weapon"], bool]
-
     @property
-    def _power_attrs(self):
+    def _power_attrs(self: NPCProtocol):
         return {
             PowerVariables.STR: self.str_mod,
             PowerVariables.CON: self.con_mod,
@@ -447,13 +444,13 @@ class PowerMixin:
         }
 
     @property
-    def _is_no_hand_implement_ki_focus(self) -> bool:
+    def _is_no_hand_implement_ki_focus(self: NPCProtocol) -> bool:
         if not self.no_hand:
             return False
         return self.no_hand.weapon_type.slug == 'KiFocus'
 
     def _can_get_bonus_from_implement_to_weapon(
-        self, accessory_type: AccessoryTypeEnum | None
+        self: NPCProtocol, accessory_type: AccessoryTypeEnum | None
     ):
         return (
             self._is_no_hand_implement_ki_focus
@@ -463,7 +460,7 @@ class PowerMixin:
         )
 
     def _calculate_weapon_damage(
-        self, weapon: "Weapon", accessory_type: AccessoryTypeEnum | None
+        self: NPCProtocol, weapon: "Weapon", accessory_type: AccessoryTypeEnum | None
     ):
         if not weapon:
             # TODO deal with error message
@@ -473,7 +470,7 @@ class PowerMixin:
             damage_roll.addendant = max(damage_roll.addendant, self.no_hand.enhancement)
         return damage_roll.threshold(self._magic_threshold)
 
-    def attack_bonus(self, weapon=None, is_implement: bool = False) -> int:
+    def attack_bonus(self: NPCProtocol, weapon=None, is_implement: bool = False) -> int:
         result = self._level_bonus + self.half_level
         if weapon and not is_implement and self.is_weapon_proficient(weapon=weapon):
             result += weapon.prof_bonus
@@ -516,7 +513,7 @@ class PowerMixin:
         return result
 
     def _calculate_attack(
-        self, weapon: "Weapon", accessory_type: AccessoryTypeEnum | None
+        self: NPCProtocol, weapon: "Weapon", accessory_type: AccessoryTypeEnum | None
     ):
         if not weapon:
             return self.attack_bonus()
@@ -534,7 +531,7 @@ class PowerMixin:
         )
 
     def _calculate_damage_bonus(
-        self, weapon: "Weapon", accessory_type: AccessoryTypeEnum | None
+        self: NPCProtocol, weapon: "Weapon", accessory_type: AccessoryTypeEnum | None
     ):
         enhancement = weapon and weapon.enhancement or 0
         if self._can_get_bonus_from_implement_to_weapon(accessory_type):
@@ -546,7 +543,7 @@ class PowerMixin:
         )
 
     def calculate_token(
-        self,
+        self: NPCProtocol,
         token: str,
         accessory_type: AccessoryTypeEnum | None,
         weapon=None,
@@ -589,11 +586,11 @@ class PowerMixin:
             return self._power_attrs[token]
         return DiceRoll.from_str(token)
 
-    def enhancement_with_magic_threshold(self, enhancement: int) -> int:
+    def enhancement_with_magic_threshold(self: NPCProtocol, enhancement: int) -> int:
         return max((0, enhancement - self._magic_threshold))
 
     def calculate_reverse_polish_notation(
-        self,
+        self: NPCProtocol,
         expression: str,
         accessory_type: AccessoryTypeEnum | None,
         weapon=None,
@@ -683,7 +680,7 @@ class PowerMixin:
         return ' '.join(result)
 
     def evaluate_power_expression(
-        self,
+        self: NPCProtocol,
         string: str,
         accessory_type: AccessoryTypeEnum | None = None,
         weapon=None,
@@ -698,7 +695,7 @@ class PowerMixin:
             item,
         )
 
-    def valid_properties(self, power: Power):
+    def valid_properties(self: NPCProtocol, power: Power):
         """collecting power properties,
         replacing properties without subclass with subclassed properties
         and properties with lower level with properties with high level
@@ -728,7 +725,7 @@ class PowerMixin:
         ).asdict()
 
     def parse_string(
-        self,
+        self: NPCProtocol,
         accessory_type: AccessoryTypeEnum | None,
         string: str,
         weapons: Sequence["Weapon"] = (),
@@ -763,7 +760,7 @@ class PowerMixin:
         return template.format(*calculated_expressions)
 
     def get_power_display(
-        self,
+        self: NPCProtocol,
         *,
         power: Power,
         weapons: Sequence["Weapon"] = (),
@@ -805,15 +802,15 @@ class PowerMixin:
             ],
         ).asdict()
 
-    def magic_item_powers(self) -> models.QuerySet[Power]:
+    def magic_item_powers(self: NPCProtocol) -> models.QuerySet[Power]:
         return Power.objects.filter(
             frequency=PowerFrequencyIntEnum.PASSIVE,
             magic_item_type__in=(mi.magic_item_type for mi in self.magic_items),
         )
 
     @property
-    def _powers_cache_key(self) -> str:
+    def _powers_cache_key(self: NPCProtocol) -> str:
         return f'npc-{self.id}-powers'
 
-    def cache_powers(self):
+    def cache_powers(self: NPCProtocol):
         cache.set(self._powers_cache_key, self.powers_calculate())

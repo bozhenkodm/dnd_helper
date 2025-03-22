@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 from base.constants.constants import LEVELS_WITH_ABILITY_BONUS, AbilityEnum
 from base.helpers import modifier
+from base.models.npc_protocol import NPCProtocol
 from base.objects.abilities import Abilities
 
 
@@ -81,7 +82,7 @@ class NPCAbilityAbstract(models.Model):
     )
 
     @property
-    def _initial_abilities_bonuses(self) -> Abilities:
+    def _initial_abilities_bonuses(self: NPCProtocol) -> Abilities:
         # getting one of variable ability bonus for specific npc
         const_ability_bonus = Abilities.init_with_const(
             self.race.const_ability_bonus.all(),

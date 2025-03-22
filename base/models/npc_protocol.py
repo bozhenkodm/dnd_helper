@@ -1,62 +1,71 @@
-from typing import Any, Iterable, Protocol, Sequence
+# flake8: noqa
+from __future__ import annotations
 
-from django.contrib.auth.models import User
+from typing import TYPE_CHECKING, Any, Iterable, Protocol, Sequence
 
-from base.models.abilities import Ability
-from base.models.items import (
-    Armor,
-    ArmsSlotItem,
-    FeetSlotItem,
-    HandsSlotItem,
-    HeadSlotItem,
-    NeckSlotItem,
-    RingsSlotItem,
-    WaistSlotItem,
-    Weapon,
-)
-from base.models.klass import Class
-from base.models.models import FunctionalTemplate, ParagonPath, Race
-from base.models.powers import Power
+from django.db.models import Manager
+
+if TYPE_CHECKING:
+    from django.contrib.auth.models import User
+
+    from base.models.abilities import Ability
+    from base.models.feats import Feat
+    from base.models.items import (
+        Armor,
+        ArmsSlotItem,
+        FeetSlotItem,
+        HandsSlotItem,
+        HeadSlotItem,
+        NeckSlotItem,
+        RingsSlotItem,
+        WaistSlotItem,
+        Weapon,
+        WeaponType,
+    )
+    from base.models.klass import Class
+    from base.models.models import FunctionalTemplate, ParagonPath, Race
+    from base.models.powers import Power
+    from base.models.skills import Skill
 
 
 class NPCProtocol(Protocol):
     id: int
-    neck_slot: NeckSlotItem
-    head_slot: HeadSlotItem
-    feet_slot: FeetSlotItem
-    waist_slot: WaistSlotItem
-    gloves_slot: HandsSlotItem
-    left_ring_slot: RingsSlotItem
-    right_ring_slot: RingsSlotItem
-    arms_slot: ArmsSlotItem
+    neck_slot: 'NeckSlotItem'
+    head_slot: 'HeadSlotItem'
+    feet_slot: 'FeetSlotItem'
+    waist_slot: 'WaistSlotItem'
+    gloves_slot: 'HandsSlotItem'
+    left_ring_slot: 'RingsSlotItem'
+    right_ring_slot: 'RingsSlotItem'
+    arms_slot: 'ArmsSlotItem'
     base_strength: int
     base_constitution: int
     base_dexterity: int
     base_intelligence: int
     base_wisdom: int
     base_charisma: int
-    var_bonus_ability: Ability
+    var_bonus_ability: 'Ability'
     experience: int
-    klass: Class
+    klass: 'Class'
     subclass_id: int
-    owner: User
+    owner: 'User'
     name: str
     description: str
-    race: Race
-    functional_template: FunctionalTemplate
-    paragon_path: ParagonPath
+    race: 'Race'
+    functional_template: 'FunctionalTemplate'
+    paragon_path: 'ParagonPath'
     sex: str
     level: int
     is_bonus_applied: bool
-    armor: Armor
-    primary_hand: Weapon
-    secondary_hand: Weapon
-    no_hand: Weapon
-    feats: Any
-    trained_weapons: Any
-    level_ability_bonuses: Any
-    trained_skills: Any
-    powers: Any
+    armor: 'Armor'
+    primary_hand: 'Weapon'
+    secondary_hand: 'Weapon'
+    no_hand: 'Weapon'
+    feats: Manager['Feat']
+    trained_weapons: Manager['WeaponType']
+    level_ability_bonuses: Manager['Ability']
+    trained_skills: Manager['Skill']
+    powers: Manager['Power']
 
     @property
     def full_class_name(self) -> str: ...

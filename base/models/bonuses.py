@@ -13,6 +13,7 @@ from base.constants.constants import (
     PowerFrequencyIntEnum,
     SkillEnum,
 )
+from base.models.npc_protocol import NPCProtocol
 
 
 class Bonus(models.Model):
@@ -131,7 +132,7 @@ class Bonus(models.Model):
 
 
 class BonusMixin:
-    def get_power_feats_bonuses_query(self) -> models.Q:
+    def get_power_feats_bonuses_query(self: NPCProtocol) -> models.Q:
         powers_query = models.Q(
             power__npcs=self,
             power__subclass__subclass_id__in=(self.subclass_id, 0),
@@ -154,7 +155,7 @@ class BonusMixin:
         ) & models.Q(min_level__lte=self.level)
 
     def calculate_bonuses(
-        self,
+        self: NPCProtocol,
         *bonus_types: AbilityEnum | SkillEnum | DefenceTypeEnum | NPCOtherProperties,
         check_cache: bool = False,
     ) -> dict[AbilityEnum | SkillEnum | DefenceTypeEnum | NPCOtherProperties, int]:
@@ -213,14 +214,15 @@ class BonusMixin:
         return cached_result
 
     def calculate_bonus(
-        self, bonus_type: AbilityEnum | SkillEnum | DefenceTypeEnum | NPCOtherProperties
+        self: NPCProtocol,
+        bonus_type: AbilityEnum | SkillEnum | DefenceTypeEnum | NPCOtherProperties,
     ) -> int:
         bonus = cache.get(self._bonus_cache_key)
         if bonus and bonus_type in bonus:
             return bonus[bonus_type]
         return self.calculate_bonuses(bonus_type)[bonus_type]
 
-    def cache_bonuses(self):
+    def cache_bonuses(self: NPCProtocol):
         cache.set(
             self._bonus_cache_key,
             self.calculate_bonuses(
@@ -229,5 +231,5 @@ class BonusMixin:
         )
 
     @property
-    def _bonus_cache_key(self) -> str:
+    def _bonus_cache_key(self: NPCProtocol) -> str:
         return f'npc-{self.id}-bonuses'
