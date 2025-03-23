@@ -30,12 +30,8 @@ class Command(BaseCommand):
 
     @staticmethod
     def create_django_protocol_code(model_cls: type, protocol_name: str) -> str:
-        """
-        Generates Protocol code for a Django model, including fields as Python types
-        (e.g., CharField → str) and user-defined methods/properties.
-        """
-        imports: Set[str] = set({'from typing import TYPE_CHECKING'})
-        typing_imports: Set[str] = set()
+        imports: Set[str] = set()
+        typing_imports: Set[str] = {'TYPE_CHECKING'}
         fields_code = []
 
         def process_annotation(annotation: Any) -> str:
@@ -43,23 +39,37 @@ class Command(BaseCommand):
             if annotation is inspect.Parameter.empty:
                 return ''
 
-            # Handle ForwardRefs and string annotations
-            if isinstance(annotation, ForwardRef):
-                return f"'{annotation.__forward_arg__}'"
-            if isinstance(annotation, str):
-                return f"'{annotation}'"
+            # Handle Optional types
+            if get_origin(annotation) is Union and type(None) in get_args(annotation):
+                args = [a for a in get_args(annotation) if a is not type(None)]
+                if len(args) == 1:
+                    typing_imports.add('Optional')
+                    inner = process_annotation(args[0])
+                    return f"Optional[{inner}]"
 
-            # Handle generic types from typing
+            # Handle Union types
+            if get_origin(annotation) is Union:
+                typing_imports.add('Union')
+                args = [process_annotation(a) for a in get_args(annotation)]
+                return f"Union[{', '.join(args)}]"
+
+            # Handle other generic types
             origin = get_origin(annotation)
             if origin:
                 args = get_args(annotation)
                 origin_name = (
                     origin.__name__ if hasattr(origin, '__name__') else str(origin)
                 )
-                if origin not in (Union, tuple):
+                if origin.__module__ != 'builtins':
                     typing_imports.add(origin_name)
                 processed_args = ', '.join(process_annotation(arg) for arg in args)
                 return f"{origin_name}[{processed_args}]"
+
+            # Handle ForwardRefs and string annotations
+            if isinstance(annotation, ForwardRef):
+                return f"'{annotation.__forward_arg__}'"
+            if isinstance(annotation, str):
+                return f"'{annotation}'"
 
             # Handle regular types
             if isinstance(annotation, type):
@@ -72,42 +82,48 @@ class Command(BaseCommand):
 
             return str(annotation)
 
-        # Process fields
+        # Process fields with proper type detection
         for field in model_cls._meta.fields + model_cls._meta.many_to_many:
-            if isinstance(field, (models.ForeignKey, models.OneToOneField)):
-                related_model = field.related_model
-                if related_model:
-                    imports.add(
-                        f'from {related_model.__module__} import {related_model.__name__}'
-                    )
-                    field_type = f"'{related_model.__name__}'"
-                else:
-                    field_type = 'Any'
-                    typing_imports.add('Any')
-            elif isinstance(field, models.ManyToManyField):
-                related_model = field.related_model
-                if related_model:
-                    imports.add(
-                        f'from {related_model.__module__} import {related_model.__name__}'
-                    )
-                    imports.add('from django.db.models import Manager')
-                    field_type = f"'Manager[{related_model.__name__}]'"
-                else:
-                    field_type = 'Any'
-                    typing_imports.add('Any')
+            if isinstance(field, models.IntegerField):
+                field_type = 'int'
             else:
                 python_type = DJANGO_FIELD_TO_PYTHON_TYPE.get(field.__class__, Any)
-                if python_type is Any:
-                    typing_imports.add('Any')
                 field_type = process_annotation(python_type)
             fields_code.append(f'    {field.name}: {field_type}')
+
+        # Collect all ancestor classes except Django Model
+        ancestors = model_cls.mro()[1:-1]
+        django_model_methods = set(dir(models.Model))
 
         methods_code = []
         properties_code = []
 
+        def should_include(name: str, member: Any) -> bool:
+            if name.startswith('__'):
+                return False
+            if name in django_model_methods:
+                return False
+            return any(
+                cls.__dict__.get(name) is member for cls in [model_cls] + ancestors
+            )
+
         # Process methods and properties
         for name, member in inspect.getmembers(model_cls):
-            if name.startswith('_'):
+            if not should_include(name, member):
+                continue
+
+            # Handle properties
+            if isinstance(member, property):
+                fget = member.fget
+                if fget:
+                    try:
+                        sig = inspect.signature(fget)
+                        return_ann = process_annotation(sig.return_annotation)
+                        properties_code.append(
+                            f'    @property\n    def {name}(self) -> {return_ann}: ...'
+                        )
+                    except (ValueError, AttributeError):
+                        continue
                 continue
 
             # Handle static methods
@@ -127,9 +143,11 @@ class Command(BaseCommand):
 
                 return_ann = process_annotation(sig.return_annotation)
                 return_str = f' -> {return_ann}' if return_ann else ''
-                methods_code.append(
-                    f'    @staticmethod\n    def {name}({", ".join(params)}){return_str}: ...'
+                method_code = (
+                    f'    @staticmethod\n'
+                    f'    def {name}({", ".join(params)}){return_str}: ...'
                 )
+                methods_code.append(method_code)
                 continue
 
             # Handle regular methods
@@ -156,28 +174,24 @@ class Command(BaseCommand):
                     f'    def {name}({", ".join(params)}){return_str}: ...'
                 )
 
-            # Handle properties
-            elif isinstance(member, property):
-                fget = member.fget
-                if fget:
-                    try:
-                        sig = inspect.signature(fget)
-                        return_ann = process_annotation(sig.return_annotation)
-                        properties_code.append(
-                            f'    @property\n    def {name}(self) -> {return_ann}: ...'
-                        )
-                    except (ValueError, AttributeError):
-                        continue
-
         # Build final code
-        code_lines = ['from typing import Protocol, TYPE_CHECKING']
+        code_lines = ['# flake8: noqa', 'from typing import Protocol, TYPE_CHECKING']
 
-        # Add typing imports if needed
+        # Add typing imports
+        typing_imports.discard('NoneType')
         if typing_imports:
             code_lines.append(f'from typing import {", ".join(sorted(typing_imports))}')
 
         code_lines.append('\nif TYPE_CHECKING:')
-        code_lines.extend(f'    {imp}' for imp in sorted(imports))
+        # Filter out unnecessary imports
+        filtered_imports = [
+            imp
+            for imp in sorted(imports)
+            if not imp.startswith(
+                ('from typing import', 'from django.contrib.auth.models import User')
+            )
+        ]
+        code_lines.extend(f'    {imp}' for imp in filtered_imports)
 
         code_lines.append(f'\nclass {protocol_name}(Protocol):')
         if not fields_code and not methods_code and not properties_code:
@@ -186,10 +200,6 @@ class Command(BaseCommand):
             code_lines.extend(fields_code)
             code_lines.extend(methods_code)
             code_lines.extend(properties_code)
-
-        # Add ForwardRef import if used
-        if any('ForwardRef' in line for line in code_lines):
-            code_lines.insert(1, 'from typing import ForwardRef')
 
         return '\n'.join(code_lines)
 

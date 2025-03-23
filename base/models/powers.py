@@ -432,7 +432,7 @@ class PowerMixin:
     }
 
     @property
-    def _power_attrs(self: NPCProtocol) -> dict[PowerVariables, int]:
+    def _power_attrs(self: NPCProtocol) -> dict[PowerVariables | str, int]:
         return {
             PowerVariables.STR: self.str_mod,
             PowerVariables.CON: self.con_mod,
@@ -451,7 +451,7 @@ class PowerMixin:
 
     def _can_get_bonus_from_implement_to_weapon(
         self: NPCProtocol, accessory_type: AccessoryTypeEnum | None
-    ):
+    ) -> bool:
         return (
             self._is_no_hand_implement_ki_focus
             and self.is_implement_proficient(self.no_hand)
@@ -460,8 +460,8 @@ class PowerMixin:
         )
 
     def _calculate_weapon_damage(
-        self: NPCProtocol, weapon: "Weapon", accessory_type: AccessoryTypeEnum | None
-    ):
+        self: NPCProtocol, weapon: 'Weapon', accessory_type: AccessoryTypeEnum | None
+    ) -> DiceRoll:
         if not weapon:
             # TODO deal with error message
             raise PowerInconsistent(_("This power doesn't use weapon"))
@@ -514,7 +514,7 @@ class PowerMixin:
 
     def _calculate_attack(
         self: NPCProtocol, weapon: "Weapon", accessory_type: AccessoryTypeEnum | None
-    ):
+    ) -> int:
         if not weapon:
             return self.attack_bonus()
         enhancement = weapon.enhancement
@@ -531,8 +531,8 @@ class PowerMixin:
         )
 
     def _calculate_damage_bonus(
-        self: NPCProtocol, weapon: "Weapon", accessory_type: AccessoryTypeEnum | None
-    ):
+        self: NPCProtocol, weapon: 'Weapon', accessory_type: AccessoryTypeEnum | None
+    ) -> int:
         enhancement = weapon and weapon.enhancement or 0
         if self._can_get_bonus_from_implement_to_weapon(accessory_type):
             enhancement = max(enhancement, self.no_hand.enhancement)
@@ -544,7 +544,7 @@ class PowerMixin:
 
     def calculate_token(
         self: NPCProtocol,
-        token: str,
+        token: PowerVariables | str,
         accessory_type: AccessoryTypeEnum | None,
         weapon=None,
         secondary_weapon=None,

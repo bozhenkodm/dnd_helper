@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING, cast
+
 from django.db import models
 from django.db.models.functions import Lower
 from django.utils.translation import gettext_lazy as _
@@ -6,6 +8,9 @@ from base.constants.constants import LEVELS_WITH_ABILITY_BONUS, AbilityEnum
 from base.helpers import modifier
 from base.models.npc_protocol import NPCProtocol
 from base.objects.abilities import Abilities
+
+if TYPE_CHECKING:
+    from base.models.models import NPC
 
 
 class AbilityLevelBonus(models.Model):
@@ -97,10 +102,10 @@ class NPCAbilityAbstract(models.Model):
         return const_ability_bonus + var_ability_bonus
 
     @property
-    def _level_abilities_bonuses(self) -> Abilities:
+    def _level_abilities_bonuses(self: NPCProtocol) -> Abilities:
         query = (
             AbilityLevelBonus.objects.select_related('npc', 'ability')
-            .filter(npc=self)
+            .filter(npc=cast('NPC', self))
             .values_list(Lower('ability__title'))
             .annotate(bonus=models.Count('ability__title'))
         )
@@ -108,11 +113,11 @@ class NPCAbilityAbstract(models.Model):
         return Abilities(**bonuses)
 
     @property
-    def _tier_attrs_bonus(self) -> Abilities:
+    def _tier_attrs_bonus(self: NPCProtocol) -> Abilities:
         return Abilities.init_with_const(Ability.objects.all(), value=self._tier)
 
     @property
-    def _base_abilities(self) -> Abilities:
+    def _base_abilities(self: NPCProtocol) -> Abilities:
         return Abilities(
             strength=self.base_strength,
             constitution=self.base_constitution,
@@ -123,7 +128,7 @@ class NPCAbilityAbstract(models.Model):
         )
 
     @property
-    def _abilities(self) -> Abilities:
+    def _abilities(self: NPCProtocol) -> Abilities:
         return (
             self._initial_abilities_bonuses
             + self._tier_attrs_bonus
@@ -132,51 +137,51 @@ class NPCAbilityAbstract(models.Model):
         )
 
     @property
-    def strength(self) -> int:
+    def strength(self: NPCProtocol) -> int:
         return self._abilities.strength
 
     @property
-    def constitution(self) -> int:
+    def constitution(self: NPCProtocol) -> int:
         return self._abilities.constitution
 
     @property
-    def dexterity(self) -> int:
+    def dexterity(self: NPCProtocol) -> int:
         return self._abilities.dexterity
 
     @property
-    def intelligence(self) -> int:
+    def intelligence(self: NPCProtocol) -> int:
         return self._abilities.intelligence
 
     @property
-    def wisdom(self) -> int:
+    def wisdom(self: NPCProtocol) -> int:
         return self._abilities.wisdom
 
     @property
-    def charisma(self) -> int:
+    def charisma(self: NPCProtocol) -> int:
         return self._abilities.charisma
 
     @property
-    def str_mod(self) -> int:
+    def str_mod(self: NPCProtocol) -> int:
         return modifier(self.strength)
 
     @property
-    def con_mod(self) -> int:
+    def con_mod(self: NPCProtocol) -> int:
         return modifier(self.constitution)
 
     @property
-    def dex_mod(self) -> int:
+    def dex_mod(self: NPCProtocol) -> int:
         return modifier(self.dexterity)
 
     @property
-    def int_mod(self) -> int:
+    def int_mod(self: NPCProtocol) -> int:
         return modifier(self.intelligence)
 
     @property
-    def wis_mod(self) -> int:
+    def wis_mod(self: NPCProtocol) -> int:
         return modifier(self.wisdom)
 
     @property
-    def cha_mod(self) -> int:
+    def cha_mod(self: NPCProtocol) -> int:
         return modifier(self.charisma)
 
     def get_ability_text(self, ability: Ability) -> str:

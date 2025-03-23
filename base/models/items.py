@@ -272,7 +272,7 @@ class WeaponType(models.Model):
     @property
     def is_double(self) -> bool:
         try:
-            return self.primary_end or self.secondary_end
+            return bool(self.primary_end or self.secondary_end)
         except WeaponType.DoesNotExist:
             return False
 

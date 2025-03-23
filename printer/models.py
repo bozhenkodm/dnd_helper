@@ -243,8 +243,8 @@ class GridMap(models.Model):
     def get_absolute_url(self):
         return self.url
 
-    def get_participants_data(self) -> dict[int, dict[int, list[str]]]:
-        result = defaultdict(dict)
+    def get_participants_data(self) -> dict[int, dict[int, list[tuple]]]:
+        result: dict[int, dict[int, list[tuple]]] = defaultdict(dict)
         for place in self.places.all():
             for i in range(place.participant.size):
                 for j in range(place.participant.size):

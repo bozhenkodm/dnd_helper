@@ -1,3 +1,5 @@
+from typing import cast
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -10,10 +12,13 @@ from base.models.books import BookSource
 from base.models.items import (
     BaseArmorType,
     ShieldType,
+    Weapon,
     WeaponCategory,
     WeaponGroup,
     WeaponHandedness,
+    WeaponType,
 )
+from base.models.npc_protocol import NPCProtocol
 from base.objects.powers_output import PowerDisplay
 
 
@@ -183,10 +188,11 @@ class ItemState(models.Model):
             if hasattr(npc.primary_hand, 'secondary_end')
             else None
         )
-        if not self.secondary_hand:
+        if self.secondary_hand is None:
             return True
         if self.secondary_hand.is_empty == bool(secondary_hand):
             return False
+        secondary_hand = cast(Weapon, secondary_hand)
         if (
             self.secondary_hand.categories.all()
             and secondary_hand.category not in self.secondary_hand.categories.all()
@@ -232,13 +238,13 @@ class NPCFeatAbstract(models.Model):
         return self.feats.count() + self.trained_weapons.count()
 
     @property
-    def max_feats_number(self) -> int:
+    def max_feats_number(self: NPCProtocol) -> int:
         result = self.half_level + self._tier + 1
         if self.race.name == NPCRaceEnum.HUMAN:
             result += 1
         return result
 
-    def feats_calculated(self):
+    def feats_calculated(self: NPCProtocol):
         not_empty_text_query = models.Q(text__isnull=False) & ~models.Q(text='')
         feats_qs = (
             self.klass.default_feats.filter(not_empty_text_query)
@@ -255,7 +261,7 @@ class NPCFeatAbstract(models.Model):
                     keywords='',
                     category='Черта',
                     description=self.parse_string(
-                        accessory_type=None, string=feat.text
+                        accessory_type=None, string=feat.text or ''
                     ),
                     frequency_order=-1,
                     frequency_css_class=PowerFrequencyIntEnum.PASSIVE.name.lower(),

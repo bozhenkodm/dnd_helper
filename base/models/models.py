@@ -262,7 +262,7 @@ class NPC(
             return f'{self.klass} ({self.paragon_path.title})'
         if self.functional_template:
             return f'{self.klass} ({self.functional_template})'
-        return self.klass
+        return str(self.klass)
 
     @property
     def url(self) -> str:

@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from base.constants.constants import NPCClassEnum, SkillEnum
 from base.managers import SkillQuerySet
 from base.models.abilities import Ability
+from base.models.npc_protocol import NPCProtocol
 from base.objects.skills import Skills
 
 
@@ -49,7 +50,7 @@ class NPCSkillAbstract(models.Model):
         )
 
     @property
-    def skills(self) -> Skills:
+    def skills(self: NPCProtocol) -> Skills:
         half_level = Skills.init_with_const(Skill.objects.all(), value=self.half_level)
         trained_skills = Skills.init_with_const(
             self.trained_skills.all(),
@@ -89,92 +90,92 @@ class NPCSkillAbstract(models.Model):
         )
 
     @property
-    def acrobatics(self) -> int:
+    def acrobatics(self: NPCProtocol) -> int:
         """Акробатика"""
         return self.skills.acrobatics
 
     @property
-    def arcana(self) -> int:
+    def arcana(self: NPCProtocol) -> int:
         """Магия"""
         return self.skills.arcana
 
     @property
-    def athletics(self) -> int:
+    def athletics(self: NPCProtocol) -> int:
         """Атлетика"""
         return self.skills.athletics
 
     @property
-    def bluff(self) -> int:
+    def bluff(self: NPCProtocol) -> int:
         """Обман"""
         return self.skills.bluff
 
     @property
-    def diplomacy(self) -> int:
+    def diplomacy(self: NPCProtocol) -> int:
         """Переговоры"""
         return self.skills.diplomacy
 
     @property
-    def dungeoneering(self) -> int:
+    def dungeoneering(self: NPCProtocol) -> int:
         """Подземелья"""
         return self.skills.dungeoneering
 
     @property
-    def endurance(self) -> int:
+    def endurance(self: NPCProtocol) -> int:
         """Выносливость"""
         return self.skills.endurance
 
     @property
-    def heal(self) -> int:
+    def heal(self: NPCProtocol) -> int:
         """Целительство"""
         return self.skills.heal
 
     @property
-    def history(self) -> int:
+    def history(self: NPCProtocol) -> int:
         """История"""
         return self.skills.history
 
     @property
-    def insight(self) -> int:
+    def insight(self: NPCProtocol) -> int:
         """Проницательность"""
         return self.skills.insight
 
     @property
-    def intimidate(self) -> int:
+    def intimidate(self: NPCProtocol) -> int:
         """Запугивание"""
         return self.skills.intimidate
 
     @property
-    def nature(self) -> int:
+    def nature(self: NPCProtocol) -> int:
         """Природа"""
         return self.skills.nature
 
     @property
-    def perception(self) -> int:
+    def perception(self: NPCProtocol) -> int:
         """Внимательность"""
         return self.skills.perception
 
     @property
-    def religion(self) -> int:
+    def religion(self: NPCProtocol) -> int:
         """Религия"""
         return self.skills.religion
 
     @property
-    def stealth(self) -> int:
+    def stealth(self: NPCProtocol) -> int:
         """Скрытность"""
         return self.skills.stealth
 
     @property
-    def streetwise(self) -> int:
+    def streetwise(self: NPCProtocol) -> int:
         """Знание_улиц"""
         return self.skills.streetwise
 
     @property
-    def thievery(self) -> int:
+    def thievery(self: NPCProtocol) -> int:
         """Воровство"""
         return self.skills.thievery
 
     @property
-    def skills_text(self) -> list[str]:
+    def skills_text(self: NPCProtocol) -> list[str]:
         result = []
         ordinary_skills = self.skill_mod_bonus + Skills.init_with_const(
             Skill.objects.all(), value=self.half_level

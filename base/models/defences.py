@@ -1,62 +1,13 @@
-from typing import TYPE_CHECKING, Optional, Protocol
-
-if TYPE_CHECKING:
-    from base.models.items import (
-        ArmsSlotItem,
-        FeetSlotItem,
-        HeadSlotItem,
-        NeckSlotItem,
-        RingsSlotItem,
-        WaistSlotItem,
-        HandsSlotItem,
-        ShieldType,
-    )
-    from base.models.models import FunctionalTemplate
-    from base.models.items import Armor
-    from base.models.klass import Class
+from typing import TYPE_CHECKING, Optional
 
 from base.constants.constants import DefenceTypeEnum, NPCClassEnum
+from base.models.npc_protocol import NPCProtocol
+
+if TYPE_CHECKING:
+    from base.models.items import ShieldType
+
 
 INITIAL_DEFENCE_VALUE = 10
-
-
-class NPCProtocol(Protocol):
-    half_level: int
-    _level_bonus: int
-    _tier: int
-    str_mod: int
-    con_mod: int
-    dex_mod: int
-    int_mod: int
-    wis_mod: int
-    cha_mod: int
-    arms_slot: "ArmsSlotItem"
-    neck_slot: "NeckSlotItem"
-    head_slot: "HeadSlotItem"
-    feet_slot: "FeetSlotItem"
-    waist_slot: "WaistSlotItem"
-    left_ring_slot: "RingsSlotItem"
-    right_ring_slot: "RingsSlotItem"
-    gloves_slot: "HandsSlotItem"
-    functional_template: "FunctionalTemplate"
-    klass: "Class"
-    armor: "Armor"
-
-    @property
-    def _defence_level_bonus(self) -> int:
-        pass
-
-    @property
-    def _shield_bonus(self) -> int:
-        pass
-
-    @property
-    def shield(self) -> Optional['ShieldType']:
-        pass
-
-    @property
-    def _necklace_defence_bonus(self) -> int:
-        pass
 
 
 class NPCDefenceMixin:
@@ -83,7 +34,7 @@ class NPCDefenceMixin:
         return self.neck_slot.defence_bonus
 
     @property
-    def _armor_class_ability_bonus(self) -> int:
+    def _armor_class_ability_bonus(self: NPCProtocol) -> int:
         result = max(self.int_mod, self.dex_mod)
         if (
             self.klass.name == NPCClassEnum.SEEKER
@@ -95,7 +46,7 @@ class NPCDefenceMixin:
         return result
 
     @property
-    def armor_class_bonus(self) -> int:
+    def armor_class_bonus(self: NPCProtocol) -> int:
         result = 0
         if self.armor:
             if self.armor.armor_type.base_armor_type in self.available_armor_types:

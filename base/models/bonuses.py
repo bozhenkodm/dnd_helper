@@ -185,8 +185,10 @@ class BonusMixin:
                 )
             ).distinct()
         )
-        bonus_types = chain(AbilityEnum, SkillEnum, DefenceTypeEnum, NPCOtherProperties)
-        for bonus_type in bonus_types:
+        all_bonus_types = chain(
+            AbilityEnum, SkillEnum, DefenceTypeEnum, NPCOtherProperties
+        )
+        for bonus_type in all_bonus_types:
             bonuses = defaultdict(list)
             for bonus in bonuses_qs.filter(bonus_type=bonus_type):
                 try:
@@ -226,7 +228,12 @@ class BonusMixin:
         cache.set(
             self._bonus_cache_key,
             self.calculate_bonuses(
-                *chain(AbilityEnum, SkillEnum, DefenceTypeEnum, NPCOtherProperties)
+                *chain(
+                    AbilityEnum,
+                    SkillEnum,
+                    DefenceTypeEnum,
+                    NPCOtherProperties,
+                )  # type: ignore
             ),
         )
 
