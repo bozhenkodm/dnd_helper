@@ -16,7 +16,6 @@ from base.models.items import (
     WeaponCategory,
     WeaponGroup,
     WeaponHandedness,
-    WeaponType,
 )
 from base.models.npc_protocol import NPCProtocol
 from base.objects.powers_output import PowerDisplay
