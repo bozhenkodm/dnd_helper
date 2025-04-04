@@ -518,7 +518,6 @@ class NPCAdmin(admin.ModelAdmin):
                 obj.experience_by_level(form.cleaned_data['level']), obj.experience
             )
         super().save_model(request, obj, form, change)
-        obj.cache_all()
 
     def save_related(self, request, form, formsets, change):
         if not change:
@@ -538,6 +537,7 @@ class NPCAdmin(admin.ModelAdmin):
                     )
         AbilityLevelBonus.objects.bulk_create(ability_bonuses)
         super().save_related(request, form, formsets, change)
+        npc.cache_all()
 
 
 class CombatantsInlineAdmin(admin.TabularInline):

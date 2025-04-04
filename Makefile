@@ -22,7 +22,7 @@ lint:
 
 
 shell:
-	poetry run python manage.py shell -i ipython
+	poetry run python manage.py shell -i ipython --verbosity=2
 
 migrations:
 	poetry run python manage.py makemigrations

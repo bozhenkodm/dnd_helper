@@ -1,7 +1,8 @@
+# flake8: noqa
 import inspect
 import os.path
 from types import FunctionType
-from typing import Any, ForwardRef, Set, Union, get_args, get_origin
+from typing import Any, ForwardRef, Union, get_args, get_origin
 
 from django.core.management import BaseCommand
 from django.db import models
@@ -30,8 +31,8 @@ class Command(BaseCommand):
 
     @staticmethod
     def create_django_protocol_code(model_cls: type, protocol_name: str) -> str:
-        imports: Set[str] = set()
-        typing_imports: Set[str] = {'TYPE_CHECKING'}
+        imports: set[str] = set()
+        typing_imports: set[str] = {'TYPE_CHECKING'}
         fields_code = []
 
         def process_annotation(annotation: Any) -> str:
