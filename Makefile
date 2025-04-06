@@ -6,10 +6,10 @@ rerun:
 	poetry run isort .
 	poetry run flake8
 	#poetry run mypy .
-	poetry run python manage.py runserver 0.0.0.0:8000
+	DJANGO_RUNSERVER_HIDE_WARNING=true poetry run python manage.py runserver 0.0.0.0:8000
 
 run:
-	poetry run python manage.py runserver 0.0.0.0:8000
+	DJANGO_RUNSERVER_HIDE_WARNING=true poetry run python manage.py runserver 0.0.0.0:8000
 
 format:
 	poetry run black -S .
