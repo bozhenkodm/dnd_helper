@@ -1,7 +1,6 @@
 from collections import defaultdict
 
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -9,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from base.constants.constants import SizeIntEnum
 from base.models.encounters import PlayerCharacter
 from base.models.models import NPC
-from printer.constants import ColorStyle, Position, PrintableObjectType, ZoneStyle
+from printer.constants import ColorStyle, Position, PrintableObjectType
 
 
 class PrintableObject(models.Model):
@@ -175,10 +174,63 @@ class Avatar(models.Model):
         )
 
 
+class MapZone(models.Model):
+    class Meta:
+        verbose_name = _('Zone')
+        verbose_name_plural = _('Zones')
+
+    map = models.ForeignKey(
+        'printer.GridMap',
+        verbose_name=_('Map'),
+        on_delete=models.CASCADE,
+        related_name='map_zones',
+    )
+    zone = models.ForeignKey(
+        'printer.Zone',
+        verbose_name=_('Zone type'),
+        on_delete=models.CASCADE,
+        related_name='map_zones',
+    )
+    top_left_x = models.PositiveSmallIntegerField(verbose_name=_('Top left x'))
+    top_left_y = models.PositiveSmallIntegerField(verbose_name=_('Top left y'))
+    color = models.CharField(
+        verbose_name=_('Color'),
+        max_length=20,
+        choices=ColorStyle.generate_choices(start_with=(ColorStyle.NONE,)),
+        null=True,
+        blank=True,
+    )
+
+
+class Zone(models.Model):
+    class Meta:
+        verbose_name = _('Zone')
+        verbose_name_plural = _('Zones')
+
+    name = models.CharField(
+        verbose_name=_('Name'), max_length=30, blank=True, null=True
+    )
+    image = models.ImageField(
+        verbose_name=_('Base image'),
+        upload_to='zone_types',
+        null=True,
+        blank=True,
+    )
+    length = models.PositiveSmallIntegerField(verbose_name=_('Length'), default=3)
+    width = models.PositiveSmallIntegerField(verbose_name=_('Width'), default=3)
+
+    def __str__(self):
+        return self.name or f'Зона {self.id}'
+
+
 class GridMap(models.Model):
     class Meta:
         verbose_name = _('Map')
         verbose_name_plural = _('Maps')
+
+    # TODO copy from another map
+    # TODO add hidden property to participant
+    # TODO add drag and drop to existing participant
 
     name = models.CharField(verbose_name=_('Title'), max_length=30, default='Карта')
     base_image = models.ImageField(
@@ -206,6 +258,7 @@ class GridMap(models.Model):
         blank=True,
         verbose_name=_('Participants'),
     )
+    zones = models.ManyToManyField(Zone, through=MapZone, verbose_name=_('Zones'))
 
     def __str__(self):
         return f'{self.name} №{self.pk}'
@@ -263,7 +316,6 @@ class GridMap(models.Model):
         """Returns a grid structure with all cell data"""
         grid = []
         participants_data = self.get_participants_data()
-        zones = self.zones.all()
 
         for row in range(1, self.rows + 1):
             current_row = []
@@ -271,25 +323,25 @@ class GridMap(models.Model):
                 # Get cell participants
                 participant = participants_data.get(row, {}).get(col, [None])[-1]
 
-                # Zone styles and colors
-                styles = []
-                border_color = None
-                for zone in zones:
+                zone_image_url = None
+                for map_zone in self.map_zones.all():
                     if (
-                        zone.top_left_x <= col <= zone.bottom_right_x
-                        and zone.top_left_y <= row <= zone.bottom_right_y
+                        map_zone.top_left_y
+                        <= row
+                        < map_zone.top_left_y + map_zone.zone.length
+                        and map_zone.top_left_x
+                        <= col
+                        < map_zone.top_left_x + map_zone.zone.width
                     ):
-                        styles.append(f'zone-{zone.style}')
-                        if zone.color != ColorStyle.NONE:
-                            border_color = zone.color
-
+                        zone_image_url = map_zone.zone.image.url
+                if zone_image_url is not None:
+                    print(zone_image_url)
                 current_row.append(
                     {
                         'row': row,
                         'col': col,
                         'participant': participant,
-                        'styles': ' '.join(styles),
-                        'border_color': border_color,
+                        'zone_image_url': zone_image_url,
                     }
                 )
             grid.append(current_row)
@@ -299,45 +351,3 @@ class GridMap(models.Model):
     def update_coords(participant_place_id, row, col):
         pp = ParticipantPlace.objects.get(id=participant_place_id)
         pp.update_coords(row, col)
-
-
-class Zone(models.Model):
-    class Meta:
-        verbose_name = _('Zone')
-        verbose_name_plural = _('Zones')
-
-    map = models.ForeignKey(
-        GridMap,
-        verbose_name=_('Map'),
-        on_delete=models.CASCADE,
-        related_name='zones',
-    )
-    name = models.CharField(
-        verbose_name=_('Name'), max_length=20, null=True, blank=True
-    )
-    top_left_x = models.PositiveSmallIntegerField(verbose_name=_('Top left x'))
-    top_left_y = models.PositiveSmallIntegerField(verbose_name=_('Top left y'))
-    bottom_right_x = models.PositiveSmallIntegerField(verbose_name=_('Bottom right x'))
-    bottom_right_y = models.PositiveSmallIntegerField(verbose_name=_('Bottom right y'))
-    style = models.CharField(
-        verbose_name=_('Style'),
-        choices=ZoneStyle.generate_choices(is_sorted=False),
-        max_length=ZoneStyle.max_length(),
-        null=True,
-        blank=True,
-    )
-    color = models.CharField(
-        verbose_name=_('Color'),
-        max_length=20,
-        choices=ColorStyle.generate_choices(start_with=(ColorStyle.NONE,)),
-        null=True,
-        blank=True,
-    )
-
-    def clean(self):
-        super().clean()
-        if (
-            self.top_left_x > self.bottom_right_x
-            or self.top_left_y > self.bottom_right_y
-        ):
-            raise ValidationError(_('Invalid zone coordinates'))

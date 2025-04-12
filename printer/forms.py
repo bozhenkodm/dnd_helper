@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from base.models.encounters import Encounter, PlayerCharacter
 from base.models.models import NPC
 from printer.constants import ColorStyle, Position, TransponseAction
-from printer.models import Avatar, EncounterIcons, GridMap, ParticipantPlace
+from printer.models import Avatar, EncounterIcons, GridMap, ParticipantPlace, Zone
 
 
 class EncounterIconForm(forms.ModelForm):
@@ -78,6 +78,16 @@ class ParticipantForm(forms.ModelForm):
             self.fields['pc'].queryset = PlayerCharacter.objects.filter(
                 Q(avatar__isnull=True) | Q(pk=self.instance.pc.id)
             )
+
+
+class ZoneForm(forms.ModelForm):
+    class Meta:
+        model = Zone
+        fields = '__all__'
+
+    upload_from_clipboard = forms.BooleanField(
+        required=False, label='Загрузить из буфера обмена'
+    )  # TODO make mixin with this field
 
 
 # ---------------------- Views forms -------------------

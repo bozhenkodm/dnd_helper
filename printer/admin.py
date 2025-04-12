@@ -8,11 +8,12 @@ from django.utils.translation import gettext_lazy as _
 from PIL import Image
 from PIL.Image import Transpose
 
-from printer.forms import EncounterIconForm, GridMapForm, ParticipantForm
+from printer.forms import EncounterIconForm, GridMapForm, ParticipantForm, ZoneForm
 from printer.models import (
     Avatar,
     EncounterIcons,
     GridMap,
+    MapZone,
     ParticipantPlace,
     PrintableObject,
     PrintableObjectItems,
@@ -81,7 +82,7 @@ class ParticipantPlaceInline(admin.TabularInline):
 
 
 class ZonesInline(admin.TabularInline):
-    model = Zone
+    model = MapZone
     extra = 0
 
 
@@ -262,7 +263,37 @@ class AvatarAdmin(admin.ModelAdmin):
             obj.save()
 
 
+class ZoneAdmin(admin.ModelAdmin):
+    fields = (
+        'name',
+        'image',
+        'upload_from_clipboard',
+        # 'image_tag',
+        'length',
+        'width',
+    )
+    readonly_fields = ('image_tag',)
+    form = ZoneForm
+
+    @admin.display(description='Картинка')
+    def image_tag(self, obj):
+        return mark_safe(f'<img src="{obj.image.url}" />')
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        # TODO make a mixin with this method
+        if form.cleaned_data['upload_from_clipboard']:
+            bashCommand = 'xclip -selection clipboard -t image/png -o'
+            process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+            output, error = process.communicate()
+
+            image_field = ImageFile(io.BytesIO(output), name=f'Icon_{obj.id}.png')
+            obj.image = image_field
+            obj.save()
+
+
 admin.site.register(PrintableObject, PrintableObjectAdmin)
 admin.site.register(EncounterIcons, EncounterIconsAdmin)
 admin.site.register(GridMap, GridMapAdmin)
 admin.site.register(Avatar, AvatarAdmin)
+admin.site.register(Zone, ZoneAdmin)

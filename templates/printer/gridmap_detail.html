@@ -94,8 +94,7 @@ img {
             <td title="{{ cell.col }}, {{ cell.row }}{% if cell.participant %}; {{ cell.participant.1 }}{% endif %}"
                 ondrop="drop(event)"
                 ondragover="allowDrop(event)"
-                class="{{ cell.styles }}"
-                style="{% if cell.border_color %}border-color: {{ cell.border_color }} !important;{% endif %}">
+                style="{% if cell.zone_image_url %}background-image: url({{ cell.zone_image_url }}); background-size: cover; opacity: 0.5;{% endif %}">
 
                 {% if cell.participant %}
                 <img id="{{ cell.participant.0 }}"

@@ -11,7 +11,7 @@ version = "1.0.0"
 [tool.poetry.dependencies]
 python = "^3.12"
 Django = "^5"
-pillow = "11.2.0"
+pillow = "11.2.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^25"
