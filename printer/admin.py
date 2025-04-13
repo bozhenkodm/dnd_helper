@@ -269,8 +269,8 @@ class ZoneAdmin(admin.ModelAdmin):
         'image',
         'upload_from_clipboard',
         # 'image_tag',
-        'length',
-        'width',
+        # 'default_length',
+        # 'default_width',
     )
     readonly_fields = ('image_tag',)
     form = ZoneForm

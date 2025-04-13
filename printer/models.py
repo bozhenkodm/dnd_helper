@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 from django.contrib.contenttypes.models import ContentType
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -193,13 +194,29 @@ class MapZone(models.Model):
     )
     top_left_x = models.PositiveSmallIntegerField(verbose_name=_('Top left x'))
     top_left_y = models.PositiveSmallIntegerField(verbose_name=_('Top left y'))
-    color = models.CharField(
-        verbose_name=_('Color'),
-        max_length=20,
-        choices=ColorStyle.generate_choices(start_with=(ColorStyle.NONE,)),
-        null=True,
-        blank=True,
+    custom_length = models.PositiveSmallIntegerField(
+        verbose_name=_('Length'), null=True, blank=True
     )
+    custom_width = models.PositiveSmallIntegerField(
+        verbose_name=_('Width'), null=True, blank=True
+    )
+    custom_opacity = models.FloatField(
+        verbose_name=_('Opacity'),
+        default=0.5,
+        validators=[MinValueValidator(0.0), MaxValueValidator(1.0)],
+    )
+
+    @property
+    def length(self):
+        return self.custom_length or self.zone.default_length
+
+    @property
+    def width(self):
+        return self.custom_width or self.zone.default1_width
+
+    @property
+    def opacity(self):
+        return self.custom_opacity or self.zone.default_opacity
 
 
 class Zone(models.Model):
@@ -216,8 +233,15 @@ class Zone(models.Model):
         null=True,
         blank=True,
     )
-    length = models.PositiveSmallIntegerField(verbose_name=_('Length'), default=3)
-    width = models.PositiveSmallIntegerField(verbose_name=_('Width'), default=3)
+    default_length = models.PositiveSmallIntegerField(
+        verbose_name=_('Length'), default=3
+    )
+    default_width = models.PositiveSmallIntegerField(verbose_name=_('Width'), default=3)
+    default_opacity = models.FloatField(
+        verbose_name=_('Opacity'),
+        default=0.5,
+        validators=[MinValueValidator(0.0), MaxValueValidator(1.0)],
+    )
 
     def __str__(self):
         return self.name or f'Зона {self.id}'
@@ -324,24 +348,30 @@ class GridMap(models.Model):
                 participant = participants_data.get(row, {}).get(col, [None])[-1]
 
                 zone_image_url = None
+                opacity = 0
                 for map_zone in self.map_zones.all():
                     if (
                         map_zone.top_left_y
                         <= row
-                        < map_zone.top_left_y + map_zone.zone.length
+                        < map_zone.top_left_y + map_zone.length
                         and map_zone.top_left_x
                         <= col
-                        < map_zone.top_left_x + map_zone.zone.width
+                        < map_zone.top_left_x + map_zone.width
                     ):
                         zone_image_url = map_zone.zone.image.url
-                if zone_image_url is not None:
-                    print(zone_image_url)
+                        opacity = map_zone.opacity
+                if zone_image_url:
+                    print(opacity)
                 current_row.append(
                     {
                         'row': row,
                         'col': col,
                         'participant': participant,
-                        'zone_image_url': zone_image_url,
+                        'zone': (
+                            {'image_url': zone_image_url, 'opacity': str(opacity)}
+                            if zone_image_url
+                            else None
+                        ),
                     }
                 )
             grid.append(current_row)
