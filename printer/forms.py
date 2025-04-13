@@ -57,6 +57,12 @@ class GridMapForm(forms.ModelForm):
         required=False,
         label=_('Encounter'),
     )
+    copy_from_map = forms.ModelChoiceField(
+        queryset=GridMap.objects.all(),
+        required=False,
+        label=_('Copy from map'),
+        help_text=_('Copy participants from another map'),
+    )
 
 
 class ParticipantForm(forms.ModelForm):

@@ -106,7 +106,10 @@ class GridMapAdmin(admin.ModelAdmin):
                         'upload_from_clipboard',
                         'action',
                     ),
-                    'encounter',
+                    (
+                        'encounter',
+                        'copy_from_map',
+                    ),
                 )
             },
         ),
@@ -170,6 +173,15 @@ class GridMapAdmin(admin.ModelAdmin):
                     )
                 )
                 col += combatant.avatar.size
+            col += 1
+        if copied_map := form.cleaned_data.get('copy_from_map'):
+            for pp in copied_map.places.all():
+                pps.append(
+                    ParticipantPlace(
+                        participant=pp.participant, map=obj, row=row, col=col
+                    )
+                )
+                col += pp.participant.size
 
         if pps:
             ParticipantPlace.objects.bulk_create(pps)
