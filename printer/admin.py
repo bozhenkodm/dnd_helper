@@ -77,7 +77,7 @@ class EncounterIconsAdmin(admin.ModelAdmin):
 
 class ParticipantPlaceInline(admin.TabularInline):
     model = ParticipantPlace
-    fields = ('participant', 'rotation', 'col', 'row')
+    fields = ('participant', 'rotation', 'opacity', 'col', 'row')
     extra = 0
 
 
@@ -269,8 +269,9 @@ class ZoneAdmin(admin.ModelAdmin):
         'image',
         'upload_from_clipboard',
         # 'image_tag',
-        # 'default_length',
-        # 'default_width',
+        'default_length',
+        'default_width',
+        'default_opacity',
     )
     readonly_fields = ('image_tag',)
     form = ZoneForm

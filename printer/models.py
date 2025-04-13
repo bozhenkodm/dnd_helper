@@ -112,6 +112,12 @@ class ParticipantPlace(models.Model):
         default=0,
         verbose_name=_('Rotation'),
     )
+    opacity = models.FloatField(
+        verbose_name=_('Opacity'),
+        default=1,
+        validators=[MinValueValidator(0.0), MaxValueValidator(1.0)],
+        choices=((0, 0), (1.0, 1.0), (0.5, 0.5)),
+    )
     is_updated = models.BooleanField(editable=False, default=False)
 
     def update_coords(self, row, col) -> None:
@@ -204,6 +210,7 @@ class MapZone(models.Model):
         verbose_name=_('Opacity'),
         default=0.5,
         validators=[MinValueValidator(0.0), MaxValueValidator(1.0)],
+        choices=((0, 0), (0.5, 0.5), (1, 1)),
     )
 
     @property
@@ -241,6 +248,7 @@ class Zone(models.Model):
         verbose_name=_('Opacity'),
         default=0.5,
         validators=[MinValueValidator(0.0), MaxValueValidator(1.0)],
+        choices=((0, 0), (0.5, 0.5), (1, 1)),
     )
 
     def __str__(self):
@@ -331,6 +339,7 @@ class GridMap(models.Model):
                             place.participant.name,
                             place.participant.base_image.url,
                             place.rotation,
+                            str(place.opacity),
                         )
                     )
         return result
@@ -360,8 +369,6 @@ class GridMap(models.Model):
                     ):
                         zone_image_url = map_zone.zone.image.url
                         opacity = map_zone.opacity
-                if zone_image_url:
-                    print(opacity)
                 current_row.append(
                     {
                         'row': row,

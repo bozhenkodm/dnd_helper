@@ -101,7 +101,9 @@ img {
                      src="{{ cell.participant.2 }}"
                      draggable="true"
                      ondragstart="drag(event)"
-                     class="rotate{{ cell.participant.3 }}">
+                     class="rotate{{ cell.participant.3 }}"
+                     style="opacity: {{ cell.participant.4 }}"
+                >
                 {% endif %}
             </td>
             {% endfor %}
