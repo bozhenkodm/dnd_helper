@@ -260,7 +260,6 @@ class GridMap(models.Model):
         verbose_name = _('Map')
         verbose_name_plural = _('Maps')
 
-    # TODO copy from another map
     # TODO add drag and drop to existing participant
 
     name = models.CharField(verbose_name=_('Title'), max_length=30, default='Карта')

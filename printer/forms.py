@@ -64,6 +64,14 @@ class GridMapForm(forms.ModelForm):
         help_text=_('Copy participants from another map'),
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance:
+            self.fields['copy_from_map'].queryset = GridMap.objects.exclude(
+                id=self.instance.id
+            )
+
+
 
 class ParticipantForm(forms.ModelForm):
     class Meta:
