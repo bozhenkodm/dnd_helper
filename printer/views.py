@@ -62,5 +62,10 @@ class GridMapUpdateCoordsView(View):
     def post(self, request, *args, **kwargs):
         body = json.loads(request.body.decode())
         grid_map = get_object_or_404(GridMap, pk=self.kwargs['pk'])
-        grid_map.update_coords(body['participant_id'], body['new_row'], body['new_col'])
-        return JsonResponse({'status': 'ok'})
+        remnants_number = grid_map.move_participant(body['participant_id'], body['new_row'], body['new_col'])
+        return JsonResponse(
+            {
+                'status': 'ok',
+                'remnants': remnants_number > 0,
+            }
+        )

@@ -72,7 +72,6 @@ class GridMapForm(forms.ModelForm):
             )
 
 
-
 class ParticipantForm(forms.ModelForm):
     class Meta:
         model = Avatar

@@ -290,29 +290,29 @@ class GridMap(models.Model):
     )
     zones = models.ManyToManyField(Zone, through=MapZone, verbose_name=_('Zones'))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{self.name} №{self.pk}'
 
     @property
-    def aspect_ratio(self):
+    def aspect_ratio(self) -> float:
         # aspect_ratio >= 1 - Landscape or square
         # aspect_ratio < 1 - Portrait
         return self.width / self.height
 
     @property
-    def cols(self):
+    def cols(self) -> int:
         if self.aspect_ratio >= 1:
             return self.cells_on_longest_side
         return round(self.cells_on_longest_side * self.aspect_ratio)
 
     @property
-    def rows(self):
+    def rows(self) -> int:
         if self.aspect_ratio >= 1:
             return round(self.cells_on_longest_side / self.aspect_ratio)
         return self.cells_on_longest_side
 
     @property
-    def cell_size(self):
+    def cell_size(self) -> int:
         return round(min(self.width / self.cols, self.height / self.rows))
 
     @property
@@ -323,7 +323,7 @@ class GridMap(models.Model):
     def edit_url(self) -> str:
         return reverse('gridmap_edit', kwargs={'pk': self.pk})
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return self.url
 
     def get_participants_data(self) -> dict[int, dict[int, list[tuple]]]:
@@ -382,7 +382,9 @@ class GridMap(models.Model):
             grid.append(current_row)
         return grid
 
-    @staticmethod
-    def update_coords(participant_place_id, row, col):
+    def move_participant(self, participant_place_id, row, col) -> int:
         pp = ParticipantPlace.objects.get(id=participant_place_id)
+        old_row, old_col = pp.row, pp.col
         pp.update_coords(row, col)
+        return ParticipantPlace.objects.filter(map=self, row=old_row, col=old_col).count()
+

@@ -125,20 +125,29 @@ function drop(event) {
     const data = event.dataTransfer.getData("text");
     const draggedElement = document.getElementById(data);
 
-    // Ensure no duplicates in the target cell
-    if (event.target.tagName === 'TD' && !event.target.querySelector('img')) {
-        event.target.appendChild(draggedElement);
+    // Get the target cell (td) even if we're dropping on an img
+    const targetCell = event.target.closest('td');
 
-        // Calculate the new row and column indices
-        const newRow = event.target.parentNode.rowIndex + 1;
-        const newCol = event.target.cellIndex + 1;
+    if (targetCell) {
+        // Remove existing participant if present (client-side only)
+        const existingImg = targetCell.querySelector('img');
+        if (existingImg) {
+            existingImg.remove();
+        }
 
-        // Send the updated position to the server
+        // Move dragged element to new cell
+        targetCell.appendChild(draggedElement);
+
+        // Calculate new coordinates based on cell position
+        const newRow = targetCell.parentNode.rowIndex + 1;
+        const newCol = targetCell.cellIndex + 1;
+
+        // Update participant's position on the server
         fetch('/printer/gridmap/{{ object.id }}/update-coords/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}' // Include the CSRF token for Django
+                'X-CSRFToken': '{{ csrf_token }}'
             },
             body: JSON.stringify({
                 participant_id: draggedElement.id,
@@ -152,7 +161,13 @@ function drop(event) {
             }
             return response.json();
         })
-        .then(data => console.log('Grid updated:', data))
+        .then(data => {
+            console.log('Grid updated:', data);
+            if (data.remnants) {
+                console.log(data.remnants);
+                location.reload();
+            }
+        })
         .catch(error => console.error('Error updating grid:', error));
     }
 }
