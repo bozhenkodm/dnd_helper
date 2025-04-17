@@ -62,7 +62,6 @@ class NPCSkillAbstract(models.Model):
                 trained_skills,
                 Skills.init_with_const(Skill.objects.all(), value=1),
             )
-
         bonus_skills = Skills(
             **{
                 k.lower(): v

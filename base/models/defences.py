@@ -85,9 +85,7 @@ class NPCDefenceMixin:
             + self.calculate_bonus(DefenceTypeEnum.FORTITUDE)
             + self.klass.fortitude
             + self._necklace_defence_bonus
-            + self.armor.armor_type.fortitude_bonus
-            if self.armor is not None
-            else 0
+            + (self.armor.armor_type.fortitude_bonus if self.armor is not None else 0)
         )
 
     @property
@@ -112,7 +110,5 @@ class NPCDefenceMixin:
             + self.calculate_bonus(DefenceTypeEnum.WILL)
             + self.klass.will
             + self._necklace_defence_bonus
-            + self.armor.armor_type.will_bonus
-            if self.armor
-            else 0
+            + (self.armor.armor_type.will_bonus if self.armor else 0)
         )

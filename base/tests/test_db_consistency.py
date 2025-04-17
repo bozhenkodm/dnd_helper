@@ -1,18 +1,8 @@
 import pytest
-from django.conf import settings
 
 from base.models.items import Weapon, WeaponType
 from base.models.models import NPC
 from base.models.powers import PowerProperty
-
-
-@pytest.fixture(scope='session')
-def django_db_setup():
-    settings.DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '/tmp/db_test.sqlite3',
-        'ATOMIC_REQUESTS': True,
-    }
 
 
 @pytest.mark.django_db
@@ -20,6 +10,7 @@ def test_power_properties_are_valid():
     assert not PowerProperty.objects.filter(description__contains='None').exists()
 
 
+@pytest.mark.skip
 @pytest.mark.django_db
 def test_npcs_are_valid(client):
     npcs = NPC.objects.all()

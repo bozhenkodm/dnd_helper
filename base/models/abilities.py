@@ -25,6 +25,9 @@ class AbilityLevelBonus(models.Model):
         choices=((i, i) for i in LEVELS_WITH_ABILITY_BONUS)
     )
 
+    def __str__(self) -> str:
+        return f'{self.npc.name} has bonus to {self.ability} on {self.level}'
+
 
 class Ability(models.Model):
     title = models.CharField(

@@ -213,7 +213,7 @@ class BonusMixin:
         cached_result = cache.get(self._bonus_cache_key, {})
         cached_result.update(result)
         cache.set(self._bonus_cache_key, cached_result)
-        return cached_result
+        return {bonus_type: cached_result[bonus_type] for bonus_type in bonus_types}
 
     def calculate_bonus(
         self: NPCProtocol,

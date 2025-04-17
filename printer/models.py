@@ -386,5 +386,6 @@ class GridMap(models.Model):
         pp = ParticipantPlace.objects.get(id=participant_place_id)
         old_row, old_col = pp.row, pp.col
         pp.update_coords(row, col)
-        return ParticipantPlace.objects.filter(map=self, row=old_row, col=old_col).count()
-
+        return ParticipantPlace.objects.filter(
+            map=self, row=old_row, col=old_col
+        ).count()
