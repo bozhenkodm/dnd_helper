@@ -118,11 +118,13 @@ class ParticipantPlace(models.Model):
         validators=[MinValueValidator(0.0), MaxValueValidator(1.0)],
         choices=((0, 0), (1.0, 1.0), (0.5, 0.5)),
     )
+    number = models.PositiveSmallIntegerField(default=1, editable=False)
     is_updated = models.BooleanField(editable=False, default=False)
 
-    def update_coords(self, row, col) -> None:
+    def update_coords(self, row: int, col: int, participants_number: int) -> None:
         self.row = row
         self.col = col
+        self.number = participants_number + 1
         self.is_updated = True
         self.save()
 
@@ -328,7 +330,7 @@ class GridMap(models.Model):
 
     def get_participants_data(self) -> dict[int, dict[int, list[tuple]]]:
         result: dict[int, dict[int, list[tuple]]] = defaultdict(dict)
-        for place in self.places.all():
+        for place in self.places.order_by('number'):
             for i in range(place.participant.size):
                 for j in range(place.participant.size):
                     result[place.row + i].setdefault(place.col + j, []).append(
@@ -385,7 +387,10 @@ class GridMap(models.Model):
     def move_participant(self, participant_place_id, row, col) -> int:
         pp = ParticipantPlace.objects.get(id=participant_place_id)
         old_row, old_col = pp.row, pp.col
-        pp.update_coords(row, col)
+        participants_number_on_new_cell = ParticipantPlace.objects.filter(
+            map=self, row=row, col=col
+        ).count()
+        pp.update_coords(row, col, participants_number_on_new_cell)
         return ParticipantPlace.objects.filter(
             map=self, row=old_row, col=old_col
         ).count()

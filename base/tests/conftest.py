@@ -37,11 +37,11 @@ def dummy_bard(db) -> NPC:
     )
     bard.save()
     albs = [
-        AbilityLevelBonus(ability_id=6, npc=bard, level=l)
-        for l in LEVELS_WITH_ABILITY_BONUS
+        AbilityLevelBonus(ability_id=6, npc=bard, level=lvl)
+        for lvl in LEVELS_WITH_ABILITY_BONUS
     ] + [
-        AbilityLevelBonus(ability_id=2, npc=bard, level=l)
-        for l in LEVELS_WITH_ABILITY_BONUS
+        AbilityLevelBonus(ability_id=2, npc=bard, level=lvl)
+        for lvl in LEVELS_WITH_ABILITY_BONUS
     ]
     AbilityLevelBonus.objects.bulk_create(albs)
     bard.trained_skills.add(*Skill.objects.filter(id__in=(1, 7, 10, 11)))
