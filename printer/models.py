@@ -210,9 +210,8 @@ class MapZone(models.Model):
     )
     custom_opacity = models.FloatField(
         verbose_name=_('Opacity'),
-        default=0.5,
         validators=[MinValueValidator(0.0), MaxValueValidator(1.0)],
-        choices=((0, 0), (0.5, 0.5), (1, 1)),
+        null=True,
     )
 
     @property
@@ -225,7 +224,9 @@ class MapZone(models.Model):
 
     @property
     def opacity(self):
-        return self.custom_opacity or self.zone.default_opacity
+        if self.custom_opacity is not None:
+            return self.custom_opacity
+        return self.zone.default_opacity
 
 
 class Zone(models.Model):

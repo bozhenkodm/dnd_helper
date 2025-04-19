@@ -44,4 +44,4 @@ messages:
 
 test:
 	cp db.sqlite3 /tmp/db_test.sqlite3
-	poetry run pytest
+	poetry run pytest -vv

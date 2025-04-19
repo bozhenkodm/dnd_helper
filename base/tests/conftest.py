@@ -20,7 +20,7 @@ def django_db_setup():
 def dummy_bard(db) -> NPC:
     bard = NPC(
         name='dummy_bard',
-        race_id=3,
+        race_id=6,
         klass_id=11,
         subclass_id=1,
         sex=SexEnum.M,
@@ -34,6 +34,7 @@ def dummy_bard(db) -> NPC:
         base_intelligence=10,
         base_wisdom=10,
         base_charisma=10,
+        var_bonus_ability_id=2,
     )
     bard.save()
     albs = [
