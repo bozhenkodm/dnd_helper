@@ -7,46 +7,19 @@
   overflow-x: auto; /* Enable horizontal scrolling */
   white-space: nowrap; /* Prevent wrapping inside the container */
 }
+
+/* Rotation classes */
 .rotate90 {
-    -webkit-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
-    -ms-transform: rotate(90deg);
     transform: rotate(90deg);
 }
 .rotate180 {
-    -webkit-transform: rotate(180deg);
-    -moz-transform: rotate(180deg);
-    -o-transform: rotate(180deg);
-    -ms-transform: rotate(180deg);
     transform: rotate(180deg);
 }
 .rotate270 {
-    -webkit-transform: rotate(270deg);
-    -moz-transform: rotate(270deg);
-    -o-transform: rotate(270deg);
-    -ms-transform: rotate(270deg);
     transform: rotate(270deg);
 }
-.zone-thick {
-    border-width: 3px !important;
-    border-color: inherit !important;
-}
-.zone-dashed {
-    border-style: dashed !important;
-    border-color: inherit !important;
-}
-.zone-dotted {
-    border-style: dotted !important;
-    border-color: inherit !important;
-}
-.zone-double {
-    border-style: double !important;
-    border-color: inherit !important;
-}
-.zone-none {
-    border: none !important;
-}
+
+/* Table styling */
 table {
     {% if object.grid_color == 'none' %}
         border: none;
@@ -62,8 +35,10 @@ table {
     margin: 0; /* Remove auto-centering to respect horizontal scrolling */
 }
 
-/* Фиксируем размеры ячеек и заголовков */
-td, th {
+/* Cell styling */
+td {
+    position: relative;
+    isolation: isolate;
     text-align: center;
     color: {{ object.grid_color }};
     vertical-align: middle;
@@ -72,7 +47,22 @@ td, th {
     height: {{ object.cell_size }}px;
     aspect-ratio: 1 / 1;
 }
-img {
+
+/* Zone background styling */
+.zone-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    background-size: cover;
+}
+
+/* Participant image styling */
+.participant-image {
+    position: relative;
+    z-index: 2;
     width: 100%;
     height: auto;
     display: block;
@@ -84,8 +74,6 @@ img {
     <title>{{ object }}</title>
 </head>
 <body>
-{% load dict_item %}
-
 <div class="container">
     <table>
         {% for row in object.grid_data %}
@@ -93,17 +81,21 @@ img {
             {% for cell in row %}
             <td title="{{ cell.col }}, {{ cell.row }}{% if cell.participant %}; {{ cell.participant.1 }}{% endif %}"
                 ondrop="drop(event)"
-                ondragover="allowDrop(event)"
-                style="{% if cell.zone %}background-image: url({{ cell.zone.image_url }}); background-size: cover; opacity: {{ cell.zone.opacity }};{% endif %}">
+                ondragover="allowDrop(event)">
+
+                {% if cell.zone %}
+                <div class="zone-background"
+                     style="background-image: url({{ cell.zone.image_url }}); opacity: {{ cell.zone.opacity }};">
+                </div>
+                {% endif %}
 
                 {% if cell.participant %}
                 <img id="{{ cell.participant.0 }}"
+                     class="participant-image rotate{{ cell.participant.3 }}"
                      src="{{ cell.participant.2 }}"
                      draggable="true"
                      ondragstart="drag(event)"
-                     class="rotate{{ cell.participant.3 }}"
-                     style="opacity: {{ cell.participant.4 }}"
-                >
+                     style="opacity: {{ cell.participant.4 }}">
                 {% endif %}
             </td>
             {% endfor %}
@@ -131,9 +123,7 @@ function drop(event) {
     if (targetCell) {
         // Remove existing participant if present (client-side only)
         const existingImg = targetCell.querySelector('img');
-        if (existingImg) {
-            existingImg.remove();
-        }
+        if (existingImg) existingImg.remove();
 
         // Move dragged element to new cell
         targetCell.appendChild(draggedElement);
