@@ -38,7 +38,22 @@ class PrintableObjectAdmin(admin.ModelAdmin):
         return mark_safe(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
 
 
-class EncounterIconsAdmin(admin.ModelAdmin):
+class UploadFromClipboardModelAdmin(admin.ModelAdmin):
+    IMAGE_FIELD_NAME = 'base_image'
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if form.cleaned_data['upload_from_clipboard']:
+            bashCommand = 'xclip -selection clipboard -t image/png -o'
+            process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+            output, error = process.communicate()
+
+            image_field = ImageFile(io.BytesIO(output), name=f'Icon_{obj.id}.png')
+            setattr(obj, self.IMAGE_FIELD_NAME, image_field)
+            obj.save()
+
+
+class EncounterIconsAdmin(UploadFromClipboardModelAdmin):
     fields = (
         'name',
         'link',
@@ -55,18 +70,6 @@ class EncounterIconsAdmin(admin.ModelAdmin):
     @admin.display(description='Картинка')
     def image_tag(self, obj):
         return mark_safe(f'<img src="{obj.base_image.url}" />')
-
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-        # TODO make a mixin with this method
-        if form.cleaned_data['upload_from_clipboard']:
-            bashCommand = 'xclip -selection clipboard -t image/png -o'
-            process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
-            output, error = process.communicate()
-
-            image_field = ImageFile(io.BytesIO(output), name=f'Icon_{obj.id}.png')
-            obj.base_image = image_field
-            obj.save()
 
     @admin.display(description='Иконки с цифрами', ordering='id')
     def link(self, obj):
@@ -86,7 +89,7 @@ class ZonesInline(admin.TabularInline):
     extra = 0
 
 
-class GridMapAdmin(admin.ModelAdmin):
+class GridMapAdmin(UploadFromClipboardModelAdmin):
     inlines = (
         ParticipantPlaceInline,
         ZonesInline,
@@ -186,16 +189,6 @@ class GridMapAdmin(admin.ModelAdmin):
         if pps:
             ParticipantPlace.objects.bulk_create(pps)
 
-        # TODO make a mixin with this method
-        if form.cleaned_data['upload_from_clipboard']:
-            bashCommand = 'xclip -selection clipboard -t image/png -o'
-            process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
-            output, error = process.communicate()
-
-            image_field = ImageFile(io.BytesIO(output), name=f'Icon_{obj.id}.png')
-            obj.base_image = image_field
-            obj.save()
-
         if form.cleaned_data.get('action') in Transpose and obj.base_image is not None:
             image = Image.open(obj.base_image.path)
             image = image.transpose(form.cleaned_data['action'])
@@ -240,7 +233,7 @@ class GridMapAdmin(admin.ModelAdmin):
             super().save_formset(request, form, formset, change)
 
 
-class AvatarAdmin(admin.ModelAdmin):
+class AvatarAdmin(UploadFromClipboardModelAdmin):
     fields = (
         'name',
         ('pc', 'npc'),
@@ -264,18 +257,9 @@ class AvatarAdmin(admin.ModelAdmin):
             elif obj.npc:
                 obj.name = obj.npc.name
         super().save_model(request, obj, form, change)
-        # TODO make a mixin with this method
-        if form.cleaned_data['upload_from_clipboard']:
-            bashCommand = 'xclip -selection clipboard -t image/png -o'
-            process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
-            output, error = process.communicate()
-
-            image_field = ImageFile(io.BytesIO(output), name=f'Icon_{obj.id}.png')
-            obj.base_image = image_field
-            obj.save()
 
 
-class ZoneAdmin(admin.ModelAdmin):
+class ZoneAdmin(UploadFromClipboardModelAdmin):
     fields = (
         'name',
         'image',
@@ -287,22 +271,11 @@ class ZoneAdmin(admin.ModelAdmin):
     )
     readonly_fields = ('image_tag',)
     form = ZoneForm
+    IMAGE_FIELD_NAME = 'image'
 
     @admin.display(description='Картинка')
     def image_tag(self, obj):
         return mark_safe(f'<img width=80px; height=auto; src="{obj.image.url}" />')
-
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-        # TODO make a mixin with this method
-        if form.cleaned_data['upload_from_clipboard']:
-            bashCommand = 'xclip -selection clipboard -t image/png -o'
-            process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
-            output, error = process.communicate()
-
-            image_field = ImageFile(io.BytesIO(output), name=f'Icon_{obj.id}.png')
-            obj.image = image_field
-            obj.save()
 
 
 admin.site.register(PrintableObject, PrintableObjectAdmin)

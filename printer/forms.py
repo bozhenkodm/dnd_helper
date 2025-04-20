@@ -8,14 +8,16 @@ from printer.constants import ColorStyle, Position, TransponseAction
 from printer.models import Avatar, EncounterIcons, GridMap, ParticipantPlace, Zone
 
 
-class EncounterIconForm(forms.ModelForm):
+class UploadFromClipboardForm(forms.ModelForm):
+    upload_from_clipboard = forms.BooleanField(
+        required=False, label='Загрузить из буфера обмена'
+    )
+
+
+class EncounterIconForm(UploadFromClipboardForm):
     class Meta:
         model = EncounterIcons
         fields = '__all__'
-
-    upload_from_clipboard = forms.BooleanField(
-        required=False, label='Загрузить из буфера обмена'
-    )  # TODO make mixin with this field
 
     number_color = forms.ChoiceField(
         label='Цвет номера',
@@ -31,14 +33,11 @@ class EncounterIconForm(forms.ModelForm):
     )
 
 
-class GridMapForm(forms.ModelForm):
+class GridMapForm(UploadFromClipboardForm):
     class Meta:
         model = GridMap
         fields = '__all__'
 
-    upload_from_clipboard = forms.BooleanField(
-        required=False, label='Загрузить из буфера обмена'
-    )  # TODO make mixin with this field
     action = forms.TypedChoiceField(
         choices=TransponseAction.generate_choices(),
         label='Действие',
@@ -72,14 +71,10 @@ class GridMapForm(forms.ModelForm):
             )
 
 
-class ParticipantForm(forms.ModelForm):
+class ParticipantForm(UploadFromClipboardForm):
     class Meta:
         model = Avatar
         fields = '__all__'
-
-    upload_from_clipboard = forms.BooleanField(
-        required=False, label='Загрузить из буфера обмена'
-    )  # TODO make mixin with this field
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -93,14 +88,10 @@ class ParticipantForm(forms.ModelForm):
             )
 
 
-class ZoneForm(forms.ModelForm):
+class ZoneForm(UploadFromClipboardForm):
     class Meta:
         model = Zone
         fields = '__all__'
-
-    upload_from_clipboard = forms.BooleanField(
-        required=False, label='Загрузить из буфера обмена'
-    )  # TODO make mixin with this field
 
 
 # ---------------------- Views forms -------------------
