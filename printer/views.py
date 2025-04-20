@@ -8,15 +8,11 @@ from django.views import View
 from django.views.generic import DetailView, ListView
 
 from printer.forms import ParticipantPlaceForm
-from printer.models import EncounterIcons, GridMap, ParticipantPlace, PrintableObject
+from printer.models import GridMap, ParticipantPlace, PrintableObject
 
 
 class PrintableObjectView(DetailView):
     model = PrintableObject
-
-
-class EncounterIconsView(DetailView):
-    model = EncounterIcons
 
 
 class GridMapListView(ListView):

@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from base.constants.constants import SizeIntEnum
 from base.models.encounters import PlayerCharacter
 from base.models.models import NPC
-from printer.constants import ColorStyle, Position, PrintableObjectType
+from printer.constants import ColorStyle, PrintableObjectType
 
 
 class PrintableObject(models.Model):
@@ -50,45 +50,6 @@ class PrintableObjectItems(models.Model):
         on_delete=models.CASCADE,
         related_name='items',
     )
-
-
-class EncounterIcons(models.Model):
-    class Meta:
-        verbose_name = _('Icon')
-        verbose_name_plural = _('Icons')
-
-    name = models.CharField(verbose_name=_('Title'), max_length=30)
-    base_image = models.ImageField(
-        verbose_name=_('Base image'),
-        upload_to='encounter_icons',
-        null=True,
-        blank=True,
-    )
-    number = models.PositiveSmallIntegerField(verbose_name='Количество однотипных')
-    number_color = models.CharField(
-        verbose_name=_('Number color'),
-        default=ColorStyle.RED.value,
-        max_length=ColorStyle.max_length(),
-        choices=ColorStyle.generate_choices(),
-    )
-    width = models.PositiveSmallIntegerField(verbose_name=_('Width'), default=200)
-    number_position = models.CharField(
-        verbose_name=_('Number position'),
-        choices=Position.generate_choices(),
-        max_length=Position.max_length(),
-        default=Position.TOP_LEFT,
-    )
-
-    def __str__(self) -> str:
-        return self.name
-
-    @property
-    def url(self) -> str:
-        return reverse('encounter_icon', kwargs={'pk': self.pk})
-
-    @property
-    def font_size(self) -> int:
-        return self.width // 4
 
 
 class ParticipantPlace(models.Model):
@@ -282,7 +243,7 @@ class GridMap(models.Model):
     )
     grid_color = models.CharField(
         verbose_name=_('Grid color'),
-        default=ColorStyle.NONE,
+        default=ColorStyle.NONE.value,
         max_length=ColorStyle.max_length(),
         choices=ColorStyle.generate_choices(start_with=(ColorStyle.NONE,)),
     )

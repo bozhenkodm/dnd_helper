@@ -3,7 +3,7 @@ import os.path
 from django.conf import settings
 from django.core.management import BaseCommand
 
-from printer.models import Avatar, EncounterIcons, GridMap, Zone
+from printer.models import Avatar, GridMap, Zone
 
 
 class Command(BaseCommand):
@@ -11,7 +11,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         models = (
-            (EncounterIcons, 'base_image'),
             (Avatar, 'base_image'),
             (Zone, 'image'),
             (GridMap, 'base_image'),

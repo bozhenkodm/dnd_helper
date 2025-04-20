@@ -4,32 +4,13 @@ from django.utils.translation import gettext_lazy as _
 
 from base.models.encounters import Encounter, PlayerCharacter
 from base.models.models import NPC
-from printer.constants import ColorStyle, Position, TransponseAction
-from printer.models import Avatar, EncounterIcons, GridMap, ParticipantPlace, Zone
+from printer.constants import ColorStyle, TransponseAction
+from printer.models import Avatar, GridMap, ParticipantPlace, Zone
 
 
 class UploadFromClipboardForm(forms.ModelForm):
     upload_from_clipboard = forms.BooleanField(
         required=False, label='Загрузить из буфера обмена'
-    )
-
-
-class EncounterIconForm(UploadFromClipboardForm):
-    class Meta:
-        model = EncounterIcons
-        fields = '__all__'
-
-    number_color = forms.ChoiceField(
-        label='Цвет номера',
-        choices=ColorStyle.generate_choices(),
-        widget=forms.RadioSelect,
-        initial=ColorStyle.RED,
-    )
-    number_position = forms.ChoiceField(
-        label='Класс позиции номера на картинке',
-        choices=Position.generate_choices(),
-        widget=forms.RadioSelect,
-        initial=Position.TOP_LEFT,
     )
 
 

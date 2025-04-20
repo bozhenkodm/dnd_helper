@@ -19,14 +19,6 @@ class ColorStyle(BaseNameValueDescriptionEnum):
     GRAY = 'gray', 'Серый'
 
 
-class Position(BaseNameValueDescriptionEnum):
-    BOTTOM_LEFT = 'bottom-left', 'Внизу слева'
-    TOP_LEFT = 'top-left', 'Вверху слева'
-    BOTTOM_RIGHT = 'bottom-right', 'Внизу справа'
-    TOP_RIGHT = 'top-right', 'Вверху справа'
-    CENTER = 'center', 'По центру'
-
-
 class TransponseAction(IntDescriptionEnum):
     FLIP_LEFT_RIGHT = Transpose.FLIP_LEFT_RIGHT, 'Развернуть слева направо'
     FLIP_TOP_BOTTOM = Transpose.FLIP_TOP_BOTTOM, 'Развернуть сверху вниз'

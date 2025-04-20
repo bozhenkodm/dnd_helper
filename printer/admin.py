@@ -8,10 +8,9 @@ from django.utils.translation import gettext_lazy as _
 from PIL import Image
 from PIL.Image import Transpose
 
-from printer.forms import EncounterIconForm, GridMapForm, ParticipantForm, ZoneForm
+from printer.forms import GridMapForm, ParticipantForm, ZoneForm
 from printer.models import (
     Avatar,
-    EncounterIcons,
     GridMap,
     MapZone,
     ParticipantPlace,
@@ -51,31 +50,6 @@ class UploadFromClipboardModelAdmin(admin.ModelAdmin):
             image_field = ImageFile(io.BytesIO(output), name=f'Icon_{obj.id}.png')
             setattr(obj, self.IMAGE_FIELD_NAME, image_field)
             obj.save()
-
-
-class EncounterIconsAdmin(UploadFromClipboardModelAdmin):
-    fields = (
-        'name',
-        'link',
-        'base_image',
-        'upload_from_clipboard',
-        'image_tag',
-        'number',
-        'number_color',
-        'number_position',
-    )
-    readonly_fields = ('image_tag', 'link')
-    form = EncounterIconForm
-
-    @admin.display(description='Картинка')
-    def image_tag(self, obj):
-        return mark_safe(f'<img src="{obj.base_image.url}" />')
-
-    @admin.display(description='Иконки с цифрами', ordering='id')
-    def link(self, obj):
-        if not obj or not obj.id:
-            return '-'
-        return mark_safe(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
 
 
 class ParticipantPlaceInline(admin.TabularInline):
@@ -177,6 +151,7 @@ class GridMapAdmin(UploadFromClipboardModelAdmin):
                             map=obj,
                             row=row,
                             col=col,
+                            # number 1 is not displayed
                             displayed_number=number if number > 1 else 0,
                         )
                     )
@@ -288,7 +263,6 @@ class ZoneAdmin(UploadFromClipboardModelAdmin):
 
 
 admin.site.register(PrintableObject, PrintableObjectAdmin)
-admin.site.register(EncounterIcons, EncounterIconsAdmin)
 admin.site.register(GridMap, GridMapAdmin)
 admin.site.register(Avatar, AvatarAdmin)
 admin.site.register(Zone, ZoneAdmin)

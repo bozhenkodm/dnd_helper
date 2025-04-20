@@ -4,8 +4,6 @@ import django.core.validators
 import django.db.models.deletion
 from django.db import migrations, models
 
-import printer.constants
-
 
 class Migration(migrations.Migration):
 
@@ -74,7 +72,7 @@ class Migration(migrations.Migration):
                             ('bottom-right', 'Внизу справа'),
                             ('center', 'По центру'),
                         ],
-                        default=printer.constants.Position['TOP_LEFT'],
+                        default='TOP_LEFT',
                         max_length=12,
                         verbose_name='Number position',
                     ),
@@ -139,7 +137,7 @@ class Migration(migrations.Migration):
                             ('gray', 'Серый'),
                             ('black', 'Чёрный'),
                         ],
-                        default=printer.constants.ColorStyle['NONE'],
+                        default='NONE',
                         max_length=5,
                         verbose_name='Grid color',
                     ),
