@@ -280,7 +280,7 @@ class ZoneAdmin(admin.ModelAdmin):
         'name',
         'image',
         'upload_from_clipboard',
-        # 'image_tag',
+        'image_tag',
         'default_length',
         'default_width',
         'default_opacity',
@@ -290,7 +290,7 @@ class ZoneAdmin(admin.ModelAdmin):
 
     @admin.display(description='Картинка')
     def image_tag(self, obj):
-        return mark_safe(f'<img src="{obj.image.url}" />')
+        return mark_safe(f'<img width=80px; height=auto; src="{obj.image.url}" />')
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
