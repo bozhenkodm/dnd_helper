@@ -12,8 +12,8 @@ import pytest
         ('charisma', 20),
     ),
 )
-def test_dummy_abilities(dummy_bard, ability, expected_value):
-    assert getattr(dummy_bard, ability) == expected_value
+def test_dummy_abilities(dummy_tiefling_bard, ability, expected_value):
+    assert getattr(dummy_tiefling_bard, ability) == expected_value
 
 
 @pytest.mark.parametrize(
@@ -38,8 +38,8 @@ def test_dummy_abilities(dummy_bard, ability, expected_value):
         ('heal', 17),
     ),
 )
-def test_dummy_skills(dummy_bard, skill, expected_value):
-    assert getattr(dummy_bard, skill) == expected_value
+def test_dummy_skills(dummy_tiefling_bard, skill, expected_value):
+    assert getattr(dummy_tiefling_bard, skill) == expected_value
 
 
 @pytest.mark.parametrize(
@@ -51,12 +51,12 @@ def test_dummy_skills(dummy_bard, skill, expected_value):
         ('will', 31),
     ),
 )
-def test_dummy_defences(dummy_bard, defence, expected_value):
-    assert getattr(dummy_bard, defence) == expected_value
+def test_dummy_defences(dummy_tiefling_bard, defence, expected_value):
+    assert getattr(dummy_tiefling_bard, defence) == expected_value
 
 
 @pytest.mark.parametrize(
-    ('property', 'expected_value'),
+    ('attr', 'expected_value'),
     (
         ('max_hit_points', 170),
         ('surges', 12),
@@ -65,5 +65,5 @@ def test_dummy_defences(dummy_bard, defence, expected_value):
         ('_tier', 2),
     ),
 )
-def test_dummy_properties(dummy_bard, property, expected_value):
-    assert getattr(dummy_bard, property) == expected_value
+def test_dummy_properties(dummy_tiefling_bard, attr, expected_value):
+    assert getattr(dummy_tiefling_bard, attr) == expected_value

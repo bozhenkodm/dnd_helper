@@ -17,7 +17,7 @@ def django_db_setup():
 
 
 @pytest.fixture(scope='function')
-def dummy_bard(db) -> NPC:
+def dummy_tiefling_bard(db) -> NPC:
     bard = NPC(
         name='dummy_bard',
         race_id=6,
