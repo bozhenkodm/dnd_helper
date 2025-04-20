@@ -80,7 +80,7 @@ class EncounterIconsAdmin(UploadFromClipboardModelAdmin):
 
 class ParticipantPlaceInline(admin.TabularInline):
     model = ParticipantPlace
-    fields = ('participant', 'rotation', 'opacity', 'col', 'row')
+    fields = ('participant', 'displayed_number', 'rotation', 'opacity', 'col', 'row')
     extra = 0
 
 
@@ -170,18 +170,27 @@ class GridMapAdmin(UploadFromClipboardModelAdmin):
                     )
                     col += npc.avatar.size
             for combatant in encounter.combatants.filter(avatar__isnull=False):
-                pps.append(
-                    ParticipantPlace(
-                        participant=combatant.avatar, map=obj, row=row, col=col
+                for number in range(1, combatant.number + 1):
+                    pps.append(
+                        ParticipantPlace(
+                            participant=combatant.avatar,
+                            map=obj,
+                            row=row,
+                            col=col,
+                            displayed_number=number if number > 1 else 0,
+                        )
                     )
-                )
-                col += combatant.avatar.size
+                    col += combatant.avatar.size
             col += 1
         if copied_map := form.cleaned_data.get('copy_from_map'):
             for pp in copied_map.places.all():
                 pps.append(
                     ParticipantPlace(
-                        participant=pp.participant, map=obj, row=row, col=col
+                        participant=pp.participant,
+                        map=obj,
+                        row=row,
+                        col=col,
+                        displayed_number=pp.displayed_number,
                     )
                 )
                 col += pp.participant.size

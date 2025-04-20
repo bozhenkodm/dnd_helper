@@ -118,13 +118,16 @@ class ParticipantPlace(models.Model):
         validators=[MinValueValidator(0.0), MaxValueValidator(1.0)],
         choices=((0, 0), (1.0, 1.0), (0.5, 0.5)),
     )
-    number = models.PositiveSmallIntegerField(default=1, editable=False)
+    displayed_number = models.PositiveSmallIntegerField(
+        default=0, verbose_name=_('Number')
+    )
+    number_in_cell = models.PositiveSmallIntegerField(default=1, editable=False)
     is_updated = models.BooleanField(editable=False, default=False)
 
     def update_coords(self, row: int, col: int, participants_number: int) -> None:
         self.row = row
         self.col = col
-        self.number = participants_number + 1
+        self.number_in_cell = participants_number + 1
         self.is_updated = True
         self.save()
 
@@ -263,8 +266,6 @@ class GridMap(models.Model):
         verbose_name = _('Map')
         verbose_name_plural = _('Maps')
 
-    # TODO add drag and drop to existing participant
-
     name = models.CharField(verbose_name=_('Title'), max_length=30, default='Карта')
     base_image = models.ImageField(
         verbose_name=_('Base image'),
@@ -331,7 +332,7 @@ class GridMap(models.Model):
 
     def get_participants_data(self) -> dict[int, dict[int, list[tuple]]]:
         result: dict[int, dict[int, list[tuple]]] = defaultdict(dict)
-        for place in self.places.order_by('number'):
+        for place in self.places.order_by('number_in_cell'):
             for i in range(place.participant.size):
                 for j in range(place.participant.size):
                     result[place.row + i].setdefault(place.col + j, []).append(
@@ -341,6 +342,7 @@ class GridMap(models.Model):
                             place.participant.base_image.url,
                             place.rotation,
                             str(place.opacity),
+                            place.displayed_number,
                         )
                     )
         return result
