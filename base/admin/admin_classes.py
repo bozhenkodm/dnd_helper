@@ -1082,6 +1082,9 @@ class PowerChildAdminBase(PowerAdminBase):
 class ClassPowerAdmin(PowerChildAdminBase):
     BELONGS_TO = 'klass'
 
+    def get_search_fields(self, request):
+        return 'name', f'{self.BELONGS_TO}__name_display'
+
 
 class SubclassPowerAdmin(PowerChildAdminBase):
     BELONGS_TO = 'subclass'
@@ -1092,6 +1095,9 @@ class SubclassPowerAdmin(PowerChildAdminBase):
 
 class RacePowerAdmin(PowerChildAdminBase):
     BELONGS_TO = 'race'
+
+    def get_search_fields(self, request):
+        return 'name', f'{self.BELONGS_TO}__name_display'
 
 
 class FunctionalTemplatePowerAdmin(PowerChildAdminBase):
