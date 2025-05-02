@@ -65,8 +65,7 @@ from base.models.items import (
     Weapon,
     WeaponType,
 )
-from base.models.klass import Class
-from base.models.models import NPC, Race
+from base.models.models import NPC
 from base.models.powers import Power, PowerProperty
 
 
@@ -865,41 +864,12 @@ class PowerPropertyInline(admin.TabularInline):
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
 
-class PowerAdmin(admin.ModelAdmin):
-    fields = [
-        'name',
-        'description',
-        'level',
-        ('frequency', 'action_type'),
-        ('attack_ability', 'defence', 'attack_bonus'),
-        ('effects', 'damage_types'),
-        ('dice_number', 'damage_dice'),
-        ('accessory_type', 'weapon_types'),
-        ('range_type', 'range', 'burst'),
-        'syntax',
-    ]
-    list_filter = (
-        'frequency',
-        ('klass', admin.RelatedOnlyFieldListFilter),
-        ('race', admin.RelatedOnlyFieldListFilter),
-        ('functional_template', admin.RelatedOnlyFieldListFilter),
-        ('paragon_path', admin.RelatedOnlyFieldListFilter),
-        ('magic_item_type', admin.RelatedOnlyFieldListFilter),
-        ('skill', admin.RelatedOnlyFieldListFilter),
-    )
+class PowerAdminBase(admin.ModelAdmin):
+    BELONGS_TO = ''
+
     inlines = (PowerPropertyInline,)
     readonly_fields = ('syntax',)
-    ordering = ('klass', 'level', 'frequency')
     autocomplete_fields = ('weapon_types',)
-    search_fields = (
-        'name',
-        'klass__name_display',
-        'race__name_display',
-        'functional_template__title',
-        'paragon_path__title',
-        'magic_item_type__name',
-        'skill__title',
-    )
     radio_fields = {
         'frequency': admin.VERTICAL,
         'action_type': admin.VERTICAL,
@@ -948,37 +918,40 @@ class PowerAdmin(admin.ModelAdmin):
             '''
         )
 
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == 'race':
-            kwargs['queryset'] = Race.objects.order_by('name_display')
-        if db_field.name == 'klass':
-            kwargs['queryset'] = Class.objects.order_by('name_display')
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
     def get_fields(self, request, obj=None):
         if not obj or obj.frequency == PowerFrequencyIntEnum.PASSIVE:
             return (
                 'name',
                 'description',
                 'level',
-                'race',
-                ('klass', 'subclass'),
-                'functional_template',
-                'paragon_path',
-                'magic_item_type',
-                'skill',
+                self.BELONGS_TO,
                 ('frequency', 'action_type'),
             )
-        result = super().get_fields(request, obj)[:]
-        if obj.klass:
-            result.insert(3, ('klass', 'subclass'))
-        if obj.race:
-            result.insert(3, 'race')
-        if obj.functional_template:
-            result.insert(3, 'functional_template')
-        if obj.magic_item_type:
-            result.insert(3, 'magic_item_type')
-        return result
+        return [
+            'name',
+            'description',
+            'level',
+            self.BELONGS_TO,
+            ('frequency', 'action_type'),
+            ('attack_ability', 'defence', 'attack_bonus'),
+            ('effects', 'damage_types'),
+            ('dice_number', 'damage_dice'),
+            ('accessory_type', 'weapon_types'),
+            ('range_type', 'range', 'burst'),
+            'syntax',
+        ]
+
+    def get_list_filter(self, request):
+        return 'frequency', self.BELONGS_TO
+
+    def get_ordering(self, request):
+        return 'level', 'frequency', 'name', self.BELONGS_TO
+
+    def get_list_display(self, request):
+        return 'name', self.BELONGS_TO, 'level', 'frequency'
+
+    def get_search_fields(self, request):
+        return 'name', self.BELONGS_TO
 
     def get_inlines(self, request, obj):
         if obj:
@@ -986,7 +959,7 @@ class PowerAdmin(admin.ModelAdmin):
         return ()
 
     def save_related(self, request, form, formsets, change):
-        super(PowerAdmin, self).save_related(request, form, formsets, change)
+        super().save_related(request, form, formsets, change)
         obj = form.instance
         if not obj.attack_ability:
             return
@@ -1036,6 +1009,105 @@ class PowerAdmin(admin.ModelAdmin):
             if not property.description:
                 property.description = 'Половина урона'
                 property.save()
+
+
+class PowerAdmin(PowerAdminBase):
+    BELONGS_TO = 'belongs_to'
+
+    list_filter = (
+        'frequency',
+        ('klass', admin.RelatedOnlyFieldListFilter),
+        ('race', admin.RelatedOnlyFieldListFilter),
+        ('functional_template', admin.RelatedOnlyFieldListFilter),
+        ('paragon_path', admin.RelatedOnlyFieldListFilter),
+        ('magic_item_type', admin.RelatedOnlyFieldListFilter),
+        ('skill', admin.RelatedOnlyFieldListFilter),
+    )
+    search_fields = (
+        'name',
+        'klass__name_display',
+        'race__name_display',
+        'functional_template__title',
+        'paragon_path__title',
+        'magic_item_type__name',
+        'skill__title',
+    )
+
+    @admin.display(description='Принадлежит')
+    def belongs_to(self, obj) -> str:
+        if obj.subclass:
+            return obj.subclass
+        if obj.klass:
+            return obj.klass
+        if obj.race:
+            return obj.race
+        if obj.functional_template:
+            return obj.functional_template
+        if obj.paragon_path:
+            return obj.paragon_path
+        if obj.magic_item_type:
+            return obj.magic_item_type
+        if obj.skill:
+            return obj.skill
+        return ''
+
+    def has_add_permission(self, request):
+        return False
+
+    def get_readonly_fields(self, request, obj=None):
+        return 'syntax', self.BELONGS_TO
+
+    def get_ordering(self, request):
+        return 'level', 'frequency', 'name'
+
+    def get_list_filter(self, request):
+        return ('frequency',)
+
+    def get_list_display(self, request):
+        return 'name', self.BELONGS_TO, 'level', 'frequency'
+
+    def get_search_fields(self, request):
+        return ('name',)
+
+
+class PowerChildAdminBase(PowerAdminBase):
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .filter(**{f'{self.BELONGS_TO}__isnull': False})
+        )
+
+
+class ClassPowerAdmin(PowerChildAdminBase):
+    BELONGS_TO = 'klass'
+
+
+class SubclassPowerAdmin(PowerChildAdminBase):
+    BELONGS_TO = 'subclass'
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(subclass__subclass_id__gt=0)
+
+
+class RacePowerAdmin(PowerChildAdminBase):
+    BELONGS_TO = 'race'
+
+
+class FunctionalTemplatePowerAdmin(PowerChildAdminBase):
+    BELONGS_TO = 'functional_template'
+
+
+class ParagonPathPowerAdmin(PowerChildAdminBase):
+    BELONGS_TO = 'paragon_path'
+
+
+class MagicItemTypePowerAdmin(PowerChildAdminBase):
+    BELONGS_TO = 'magic_item_type'
+
+
+class SkillPowerAdmin(PowerChildAdminBase):
+    BELONGS_TO = 'skill'
 
 
 class FunctionalTemplateAdmin(admin.ModelAdmin):

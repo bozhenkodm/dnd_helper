@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-19 20:20+0000\n"
+"POT-Creation-Date: 2025-05-02 17:42+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,7 +59,7 @@ msgid "Subclass"
 msgstr "Подкласс"
 
 #: base/admin/forms.py:520 base/models/bonuses.py:39 base/models/feats.py:26
-#: features/models.py:16
+#: features/models.py:65
 msgid "Feat"
 msgstr "Черта"
 
@@ -154,7 +154,7 @@ msgstr "Бонусы"
 #: base/models/items.py:305 base/models/klass.py:26 base/models/models.py:47
 #: base/models/models.py:53 base/models/models.py:104 base/models/models.py:144
 #: base/models/powers.py:66 printer/models.py:20 printer/models.py:44
-#: printer/models.py:60 printer/models.py:268
+#: printer/models.py:230
 msgid "Title"
 msgstr "Название"
 
@@ -203,7 +203,7 @@ msgstr "Книги"
 #: base/models/encounters.py:39 base/models/feats.py:29 base/models/items.py:27
 #: base/models/items.py:141 base/models/klass.py:80 base/models/models.py:185
 #: base/models/powers.py:39 generator/models.py:13 generator/models.py:23
-#: generator/models.py:90 printer/models.py:139 printer/models.py:238
+#: generator/models.py:90 printer/models.py:103 printer/models.py:202
 msgid "Name"
 msgstr "Имя"
 
@@ -247,7 +247,7 @@ msgstr "Тип свойства"
 msgid "Property value"
 msgstr "Значение свойства"
 
-#: base/models/encounters.py:13 encounters/models.py:27 printer/models.py:153
+#: base/models/encounters.py:13 encounters/models.py:27 printer/models.py:117
 msgid "Player character"
 msgstr "Игровой персонаж"
 
@@ -269,7 +269,7 @@ msgstr "Партии"
 msgid "Non player characters"
 msgstr "Неигровоые персонажи"
 
-#: base/models/encounters.py:68 encounters/models.py:13 printer/forms.py:58
+#: base/models/encounters.py:68 encounters/models.py:13 printer/forms.py:38
 msgid "Encounter"
 msgstr "Сцена"
 
@@ -287,7 +287,7 @@ msgstr "Краткое описание"
 msgid "Description"
 msgstr "Описание"
 
-#: base/models/encounters.py:256 encounters/models.py:34 printer/models.py:134
+#: base/models/encounters.py:256 encounters/models.py:34 printer/models.py:98
 msgid "Avatar"
 msgstr "Аватар"
 
@@ -295,7 +295,7 @@ msgstr "Аватар"
 msgid "Experience"
 msgstr "Опыт"
 
-#: base/models/feats.py:27 base/models/feats.py:226 features/models.py:17
+#: base/models/feats.py:27 base/models/feats.py:226 features/models.py:66
 msgid "Feats"
 msgstr "Черты"
 
@@ -641,7 +641,7 @@ msgstr "Скорость"
 msgid "Vision"
 msgstr "Зрение"
 
-#: base/models/models.py:73 printer/models.py:147
+#: base/models/models.py:73 printer/models.py:111
 msgid "Size"
 msgstr "Размер"
 
@@ -789,22 +789,78 @@ msgstr "Этот талант используется без оружия"
 msgid "This power doesn't use magic item"
 msgstr "Этот талант не используется магическим предметом"
 
-#: encounters/models.py:35 printer/models.py:135
+#: encounters/models.py:35 printer/models.py:99
 msgid "Avatars"
 msgstr "Аватары"
 
-#: encounters/models.py:41 printer/models.py:104 printer/models.py:193
-#: printer/models.py:263
+#: encounters/models.py:41 printer/models.py:65 printer/models.py:157
+#: printer/models.py:227
 msgid "Map"
 msgstr "Карта"
 
-#: encounters/models.py:42 printer/models.py:264
+#: encounters/models.py:42 printer/models.py:228
 msgid "Maps"
 msgstr "Карты"
 
 #: features/apps.py:8
 msgid "Features"
 msgstr "Умения"
+
+#: features/models.py:16
+msgid "Class power"
+msgstr "Талант класса"
+
+#: features/models.py:17
+msgid "Class powers"
+msgstr "Таланты класса"
+
+#: features/models.py:23
+msgid "Subclass power"
+msgstr "Талант подкласса"
+
+#: features/models.py:24
+msgid "Subclass powers"
+msgstr "Таланты подкласса"
+
+#: features/models.py:30
+msgid "Race power"
+msgstr "Расовый талант"
+
+#: features/models.py:31
+msgid "Race powers"
+msgstr "Расовые таланты"
+
+#: features/models.py:37
+msgid "Functional template power"
+msgstr "Талант функционального шаблона"
+
+#: features/models.py:38
+msgid "Functional template powers"
+msgstr "Таланты функционального шаблона"
+
+#: features/models.py:44
+msgid "Paragon path power"
+msgstr "Талант пути совершенства"
+
+#: features/models.py:45
+msgid "Paragon path powers"
+msgstr "Таланты пути совершенства"
+
+#: features/models.py:51
+msgid "Magic item type power"
+msgstr "Талант магического предмета"
+
+#: features/models.py:52
+msgid "Magic item type powers"
+msgstr "Таланты магических предметов"
+
+#: features/models.py:58
+msgid "Skill power"
+msgstr "Талант навыков"
+
+#: features/models.py:59
+msgid "Skill powers"
+msgstr "Таланты навыков"
 
 #: generator/apps.py:7
 msgid "Generator"
@@ -830,7 +886,7 @@ msgstr "Запрещённые имена"
 msgid "Items"
 msgstr "Предметы"
 
-#: printer/admin.py:235
+#: printer/admin.py:212
 msgid "Some participants were moved on gridmap. Check coords and save again."
 msgstr ""
 "Некоторые участники сцены были перемещены на карте. Проверьте координаты и "
@@ -840,11 +896,11 @@ msgstr ""
 msgid "Printer"
 msgstr "Принтер"
 
-#: printer/forms.py:63
+#: printer/forms.py:43
 msgid "Copy from map"
 msgstr "Скопировать с карты"
 
-#: printer/forms.py:64
+#: printer/forms.py:44
 msgid "Copy participants from another map"
 msgstr "Скопировать участников с другой карты"
 
@@ -868,95 +924,90 @@ msgstr "Аттрибут"
 msgid "Attributes"
 msgstr "Аттрибуты"
 
-#: printer/models.py:57
-msgid "Icon"
-msgstr "Иконка"
-
-#: printer/models.py:58
-msgid "Icons"
-msgstr "Иконки"
-
-#: printer/models.py:62 printer/models.py:141 printer/models.py:241
-#: printer/models.py:270
-msgid "Base image"
-msgstr "Базовая картинка"
-
-#: printer/models.py:69
-msgid "Number color"
-msgstr "Цвет номера"
-
-#: printer/models.py:74 printer/models.py:209 printer/models.py:249
-#: printer/models.py:278
-msgid "Width"
-msgstr "Ширина"
-
-#: printer/models.py:76
-msgid "Number position"
-msgstr "Позиция номера"
-
-#: printer/models.py:98
+#: printer/models.py:59
 msgid "Participant"
 msgstr "Участник"
 
-#: printer/models.py:108
+#: printer/models.py:69
 msgid "Row"
 msgstr "Строка"
 
-#: printer/models.py:109
+#: printer/models.py:70
 msgid "Column"
 msgstr "Столбец"
 
-#: printer/models.py:113
+#: printer/models.py:74
 msgid "Rotation"
 msgstr "Поворот"
 
-#: printer/models.py:116 printer/models.py:212 printer/models.py:251
+#: printer/models.py:77 printer/models.py:176 printer/models.py:215
 msgid "Opacity"
 msgstr "Прозрачность"
 
-#: printer/models.py:162
+#: printer/models.py:83
+msgid "Number"
+msgstr "Номер"
+
+#: printer/models.py:105 printer/models.py:205 printer/models.py:232
+msgid "Base image"
+msgstr "Базовая картинка"
+
+#: printer/models.py:126
 msgid "Non player character"
 msgstr "Неигровой персонаж"
 
-#: printer/models.py:188 printer/models.py:234
+#: printer/models.py:152 printer/models.py:198
 msgid "Zone"
 msgstr "Зона"
 
-#: printer/models.py:189 printer/models.py:235 printer/models.py:294
+#: printer/models.py:153 printer/models.py:199 printer/models.py:256
 msgid "Zones"
 msgstr "Зоны"
 
-#: printer/models.py:199
+#: printer/models.py:163
 msgid "Zone type"
 msgstr "Тип зоны"
 
-#: printer/models.py:203
+#: printer/models.py:167
 msgid "Top left x"
 msgstr "X верней левой клетки"
 
-#: printer/models.py:204
+#: printer/models.py:168
 msgid "Top left y"
 msgstr "Y верней левой клетки"
 
-#: printer/models.py:206 printer/models.py:247
+#: printer/models.py:170 printer/models.py:211
 msgid "Length"
 msgstr "Длина"
 
-#: printer/models.py:277
+#: printer/models.py:173 printer/models.py:213 printer/models.py:240
+msgid "Width"
+msgstr "Ширина"
+
+#: printer/models.py:239
 msgid "Height"
 msgstr "Высота"
 
-#: printer/models.py:280
+#: printer/models.py:242
 msgid "Cells on longest side"
 msgstr "Количество ячеек на длинной стороне"
 
-#: printer/models.py:283
+#: printer/models.py:245
 msgid "Grid color"
 msgstr "Цвет грида"
 
-#: printer/models.py:292
+#: printer/models.py:254
 msgid "Participants"
 msgstr "Участники"
+
+#~ msgid "Icon"
+#~ msgstr "Иконка"
+
+#~ msgid "Icons"
+#~ msgstr "Иконки"
+
+#~ msgid "Number position"
+#~ msgstr "Позиция номера"
 
 #~ msgid "Color"
 #~ msgstr "Цвет"

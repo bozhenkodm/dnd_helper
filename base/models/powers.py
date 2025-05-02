@@ -122,7 +122,7 @@ class Power(models.Model):
         related_name='powers',
     )
     magic_item_type = models.ForeignKey(
-        'MagicItemType',
+        'base.MagicItemType',
         verbose_name=_('Magic item type'),
         on_delete=models.CASCADE,
         null=True,
