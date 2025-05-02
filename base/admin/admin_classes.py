@@ -951,7 +951,7 @@ class PowerAdminBase(admin.ModelAdmin):
         return 'name', self.BELONGS_TO, 'level', 'frequency'
 
     def get_search_fields(self, request):
-        return 'name', self.BELONGS_TO
+        return 'name', f'{self.BELONGS_TO}__name'
 
     def get_inlines(self, request, obj):
         if obj:
@@ -1097,9 +1097,15 @@ class RacePowerAdmin(PowerChildAdminBase):
 class FunctionalTemplatePowerAdmin(PowerChildAdminBase):
     BELONGS_TO = 'functional_template'
 
+    def get_search_fields(self, request):
+        return 'name', f'{self.BELONGS_TO}__title'
+
 
 class ParagonPathPowerAdmin(PowerChildAdminBase):
     BELONGS_TO = 'paragon_path'
+
+    def get_search_fields(self, request):
+        return 'name', f'{self.BELONGS_TO}__title'
 
 
 class MagicItemTypePowerAdmin(PowerChildAdminBase):
@@ -1108,6 +1114,9 @@ class MagicItemTypePowerAdmin(PowerChildAdminBase):
 
 class SkillPowerAdmin(PowerChildAdminBase):
     BELONGS_TO = 'skill'
+
+    def get_search_fields(self, request):
+        return 'name', f'{self.BELONGS_TO}__title'
 
 
 class FunctionalTemplateAdmin(admin.ModelAdmin):
