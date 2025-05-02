@@ -345,6 +345,10 @@ class Power(models.Model):
     def keywords(self, weapons: Sequence["Weapon"] = ()) -> str:
         if self.frequency == PowerFrequencyIntEnum.PASSIVE:
             return ''
+        if weapons:
+            range_type = tuple(self.attack_type(weapon) for weapon in weapons if weapon)
+        else:
+            range_type = (self.attack_type(),)
         return ', '.join(
             filter(
                 None,
@@ -353,7 +357,7 @@ class Power(models.Model):
                     self.get_accessory_type_display() if self.accessory_type else '',
                     self.get_frequency_display(),
                 )
-                + tuple(self.attack_type(weapon) for weapon in weapons if weapon)
+                + range_type
                 + tuple(
                     str(damage_type)
                     for damage_type in self.damage_types.exclude(
