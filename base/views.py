@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.generic import DetailView, FormView, ListView, TemplateView
 
@@ -17,6 +18,22 @@ class NPCListView(ListView):
 
 class NPCDetailView(DetailView):
     model = NPC
+
+
+class NPCPowerDetailView(DetailView):
+    model = NPC
+    template_name = 'base/npc_power_detail.html'
+
+    def get_context_data(self, **kwargs):
+        # Get the NPC object first (via DetailView's default logic)
+        context = super().get_context_data(**kwargs)
+        npc = self.object  # Already fetched NPC from URL's <pk>
+
+        power_pk = self.kwargs['power_pk']
+        power = get_object_or_404(npc.all_powers_qs(), pk=power_pk)
+        # Add the Power to the template context
+        context['powers'] = npc.powers_calculate((power,))
+        return context
 
 
 class EncounterDetailView(DetailView):

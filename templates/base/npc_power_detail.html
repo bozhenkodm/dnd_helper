@@ -48,22 +48,14 @@
         <div><span>Инициатива +{{ object.initiative }}; Внимательность +{{ object.perception }}; {{ object.race.get_vision_display }} зрение</span></div>
         <div><span>Скорость {{ object.speed }}</span></div>
     </div>
-    {% for feat in object.feats_calculated %}
-        <div class="npc-line passive" title="{{feat.description}}">
-            <span><b>{{ feat.name }} ({{ feat.category }})</b></span>
-        </div>
-    {% endfor %}
-    {% for power in object.powers_calculated %}
-        <div class="npc-line {{ power.frequency_css_class }}" {% if power.description %}title="{{power.description}}"{% endif %}>
-            {% if power.id %}
-            <a href="{% url 'npc_power' pk=object.pk power_pk=power.id %}" style="text-decoration:none; color:inherit">
-            {% endif %}
-            <span><b>{{ power.name }} ({{ power.category }})</b> {{ power.keywords }}</span>
-            {% if power.id %}</a>{% endif %}
+    {% for power in powers %}
+        <div class="npc-line {{ power.frequency_css_class }}">
+            <span><b>{{ power.name }} ({{ power.category }})</b> {{ power.keywords }}<br></span>
+            {% if power.description %}<span><i>{{power.description}}</i></span>{% endif %}
         </div>
         {% for property in power.properties %}
         <div><i>{{property.title}}</i>: {{property.description|linebreaksbr}}</div>
-<!--    <div>{{property.debug}}</div>-->
+    <!--    <div>{{property.debug}}</div>-->
         {% endfor %}
     {% endfor %}
     <div class="npc-line attr-header"><span><b>Навыки:</b> {{ object.skills_text|join:"; " }}</span></div>

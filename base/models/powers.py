@@ -771,6 +771,7 @@ class PowerMixin:
         item: ItemAbstract | None = None,
     ) -> dict[str, str]:
         return PowerDisplay(
+            id=power.pk,
             name=power.name,
             keywords=power.keywords(weapons),
             category=power.category(weapons),

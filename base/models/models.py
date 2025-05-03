@@ -466,10 +466,7 @@ class NPC(
     def inventory_text(self) -> Iterable[str]:
         return map(str, self.items)
 
-    def powers_calculate(self) -> Sequence[dict]:
-        """
-        calculated powers for npc html page
-        """
+    def all_powers_qs(self) -> models.QuerySet[Power]:
         query = (
             models.Q(race=self.race, level=0)
             | models.Q(npcs=self)
@@ -484,7 +481,15 @@ class NPC(
         if self.paragon_path:
             query |= models.Q(paragon_path=self.paragon_path)
         # TODO get rid of distinct
-        powers_qs = Power.objects.filter(query).distinct().order_by('frequency', 'name')
+        return Power.objects.filter(query).distinct().order_by('frequency', 'name')
+
+    def powers_calculate(
+        self, powers_qs: Sequence[Power] | None = None
+    ) -> Sequence[dict]:
+        """
+        calculated powers for npc html page
+        """
+        powers_qs = powers_qs or self.all_powers_qs()
         powers: list[dict] = []
         for power in powers_qs:
             if not power.magic_item_type:

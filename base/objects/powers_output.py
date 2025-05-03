@@ -18,6 +18,7 @@ class PowerDisplay:
     frequency_css_class: str
     frequency: str
     properties: list[PowerPropertyDisplay]
+    id: int | None = None
 
     def asdict(self) -> dict:
         return asdict(self)
