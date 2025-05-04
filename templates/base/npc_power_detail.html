@@ -1,82 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<style>
-@media print {
-.pagebreak { page-break-before: always; } /* page-break-after works, as well */
-.pagenotbreak {page-break-inside: avoid}
-}
-.npc-line {
-    width: 100%; clear: both;
-}
-.npc-header {
-    background-color: black; color: white; -webkit-print-color-adjust: exact;
-}
-.attr-header {
-    background-color: lightgray; -webkit-print-color-adjust: exact;
-}
-.passive {
-    background-color: lightgray; -webkit-print-color-adjust: exact;
-}
-.at_will {
-    background-color: green; color: white; -webkit-print-color-adjust: exact;
-}
-.encounter {
-    background-color: red; color: white; -webkit-print-color-adjust: exact;
-}
-.daily {
-    background-color: black; color: white; -webkit-print-color-adjust: exact;
-}
-</style>
-<head>
-    <meta charset="UTF-8">
-    <title>{{ object.name }} (NPC)</title>
-</head>
-<body>
-<div class="pagenotbreak" style="width: 800px; font-size: large">
-<div class="npc-line">
-    <div class="npc-header" style="float: left; width: 50%"><span><b>{{ object.name }} ({{ object.get_sex_display }})</b></span></div>
-    <div class="npc-header" style="float: right; width: 50%"><span style="float: right">{{ object.race }} {{ object.klass }} {{ object.level }} уровня</span></div>
-    {% if not object.is_bonus_applied %}
-        <div class="npc-line"><span>Опыт: {{ object.experience }}; Черты: {{ object.feats_count }}/{{ object.max_feats_number }}</span></div>
-    {% endif %}
-    </div>
-    <div class="npc-line">
-        <div><span>Хиты {{ object.max_hit_points }}; Ранен {{ object.bloodied }}; Исцеление {{ object.surge }}; Исцелений {{ object.surges }}</span></div>
-        <div><span>КД {{ object.armor_class }}; Стойкость {{ object.fortitude }}; Реакция {{ object.reflex }}; Воля {{ object.will }}</span></div>
-    </div>
-    <div class="npc-line">
-        <div><span>Инициатива +{{ object.initiative }}; Внимательность +{{ object.perception }}; {{ object.race.get_vision_display }} зрение</span></div>
-        <div><span>Скорость {{ object.speed }}</span></div>
-    </div>
+{% extends "base/npc_base.html" %}
+
+{% block powers_section %}
     {% for power in powers %}
-        <div class="npc-line {{ power.frequency_css_class }}">
-            <span><b>{{ power.name }} ({{ power.category }})</b> {{ power.keywords }}<br></span>
-            {% if power.description %}<span><i>{{power.description}}</i></span>{% endif %}
-        </div>
-        {% for property in power.properties %}
-        <div><i>{{property.title}}</i>: {{property.description|linebreaksbr}}</div>
-    <!--    <div>{{property.debug}}</div>-->
-        {% endfor %}
-    {% endfor %}
-    <div class="npc-line attr-header"><span><b>Навыки:</b> {{ object.skills_text|join:"; " }}</span></div>
-    <div class="npc-line attr-header"><span><b>Примечания:</b></span></div>
-    <div class="npc-line"><span>{{ object.description|linebreaksbr }}</span></div>
-    <div class="npc-line" >
-        <table style="width: 100%">
-            <tr>
-                <td style="width: 33%">{{ object.abilities_texts.0 }}</td>
-                <td style="width: 33%">{{ object.abilities_texts.2 }}</td>
-                <td style="width: 33%">{{ object.abilities_texts.4 }}</td>
-            </tr>
-            <tr>
-                <td style="width: 33%">{{ object.abilities_texts.1 }}</td>
-                <td style="width: 33%">{{ object.abilities_texts.3 }}</td>
-                <td style="width: 33%">{{ object.abilities_texts.5 }}</td>
-            </tr>
-        </table>
+    <div class="npc-line {{ power.frequency_css_class }}">
+        <span><b>{{ power.name }} ({{ power.category }})</b> {{ power.keywords }}<br></span>
+        {% if power.description %}<span><i>{{ power.description }}</i></span>{% endif %}
     </div>
-    <div class="npc-line attr-header"><b>Снаряжение:</b> {{ object.inventory_text|join:"; " }}</div>
-    <br><hr></div>
-</div>
-</body>
-</html>
+    {% for property in power.properties %}
+    <div><i>{{ property.title }}</i>: {{ property.description|linebreaksbr }}</div>
+    {% endfor %}
+    {% endfor %}
+{% endblock %}
