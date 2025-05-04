@@ -576,3 +576,10 @@ class PowerForm(forms.ModelForm):
         widget=forms.CheckboxSelectMultiple,
         label=_('Damage type'),
     )
+
+
+class ParagonPathPowerForm(PowerForm):
+    level = forms.ChoiceField(
+        choices=((11, 11), (12, 12), (16, 16), (20, 20)),
+        label=_('Level'),
+    )

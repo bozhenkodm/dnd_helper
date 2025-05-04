@@ -96,6 +96,7 @@ class Power(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
+        limit_choices_to={'subclass_id__gt': 0},
     )
     race = models.ForeignKey(
         'base.Race',

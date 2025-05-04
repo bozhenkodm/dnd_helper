@@ -301,6 +301,7 @@ class MagicItemType(models.Model):
     class Meta:
         verbose_name = _('Magic item type')
         verbose_name_plural = _('Magic item types')
+        ordering = ('name',)
 
     name = models.CharField(verbose_name=_('Title'), max_length=100)
     min_level = models.PositiveSmallIntegerField(

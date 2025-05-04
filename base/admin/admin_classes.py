@@ -28,6 +28,7 @@ from base.admin.forms import (
     MagicWeaponTypeForm,
     NPCModelForm,
     ParagonPathForm,
+    ParagonPathPowerForm,
     PowerForm,
     PropertiesConditionForm,
     SubclassForm,
@@ -1106,9 +1107,16 @@ class FunctionalTemplatePowerAdmin(PowerChildAdminBase):
     def get_search_fields(self, request):
         return 'name', f'{self.BELONGS_TO}__title'
 
+    def get_list_display(self, request):
+        return 'name', self.BELONGS_TO, 'frequency'
+
+    def get_ordering(self, request):
+        return 'name', self.BELONGS_TO, 'frequency'
+
 
 class ParagonPathPowerAdmin(PowerChildAdminBase):
     BELONGS_TO = 'paragon_path'
+    form = ParagonPathPowerForm
 
     def get_search_fields(self, request):
         return 'name', f'{self.BELONGS_TO}__title'
@@ -1116,6 +1124,12 @@ class ParagonPathPowerAdmin(PowerChildAdminBase):
 
 class MagicItemTypePowerAdmin(PowerChildAdminBase):
     BELONGS_TO = 'magic_item_type'
+
+    def get_list_display(self, request):
+        return 'name', self.BELONGS_TO, 'frequency'
+
+    def get_ordering(self, request):
+        return self.BELONGS_TO, 'frequency', 'name'
 
 
 class SkillPowerAdmin(PowerChildAdminBase):

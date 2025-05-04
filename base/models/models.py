@@ -138,6 +138,7 @@ class ParagonPath(ConstraintAbstract):
     class Meta:
         verbose_name = _('Paragon path')
         verbose_name_plural = _('Paragon paths')
+        ordering = ('title',)
 
     MIN_LEVEL = 11
 

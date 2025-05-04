@@ -16,6 +16,7 @@
     </div>
     {% for property in power.properties %}
     <div><i>{{ property.title }}</i>: {{ property.description|linebreaksbr }}</div>
+<!--    <div>{{property.debug}}</div>-->
     {% endfor %}
     {% endfor %}
 {% endblock %}
