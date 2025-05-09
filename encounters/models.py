@@ -34,6 +34,7 @@ class Monster(BaseMonster):
     class Meta:
         verbose_name = _('Monster')
         verbose_name_plural = _('Monsters')
+        proxy = True
 
 
 class Avatar(BaseAvatar):
