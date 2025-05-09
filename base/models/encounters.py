@@ -3,8 +3,9 @@ from django.db.transaction import atomic
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from base.constants.constants import DiceIntEnum
+from base.constants.constants import DiceIntEnum, SizeIntEnum
 from base.managers import EncounterParticipantsQuerySet
+from base.models.books import BookSource
 from base.models.models import NPC
 
 
@@ -28,6 +29,51 @@ class PlayerCharacter(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+
+class Monster(models.Model):
+    name = models.CharField(
+        verbose_name=_('Name'), max_length=50, null=True, blank=True
+    )
+    level = models.PositiveSmallIntegerField(verbose_name=_('Level'), default=1)
+    role = models.CharField(verbose_name=_('Role'), default='Солдат', max_length=20)
+    size = models.SmallIntegerField(
+        verbose_name=_('Size'),
+        choices=SizeIntEnum.generate_choices(),
+        default=SizeIntEnum.MEDIUM.value,
+    )
+    armor_class = models.PositiveSmallIntegerField(
+        verbose_name=_('Armor class'), default=10
+    )
+    fortitude = models.PositiveSmallIntegerField(
+        verbose_name=_('Fortitude'), default=10
+    )
+    reflex = models.PositiveSmallIntegerField(verbose_name=_('Reflex'), default=10)
+    will = models.PositiveSmallIntegerField(verbose_name=_('Will'), default=10)
+    hit_points = models.PositiveSmallIntegerField(
+        verbose_name=_('Hit points'), default=10
+    )
+    speed = models.PositiveSmallIntegerField(verbose_name=_('Speed'), default=6)
+    initiative = models.SmallIntegerField(verbose_name=_('Initiative'), default=0)
+
+    avatar = models.ForeignKey(
+        'printer.Avatar',
+        verbose_name=_('Avatar'),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        limit_choices_to={'pc__isnull': True, 'npc__isnull': True},
+    )
+    source = models.ForeignKey(
+        BookSource,
+        verbose_name=_('Source'),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+
+    def __str__(self):
+        return self.name or ''
 
 
 class Party(models.Model):
@@ -83,6 +129,15 @@ class Encounter(models.Model):
         blank=True,
     )
     npcs = models.ManyToManyField(NPC, verbose_name='Мастерские персонажи', blank=True)
+    pcs = models.ManyToManyField(
+        PlayerCharacter,
+        verbose_name=_('Player characters'),
+        blank=True,
+        through='base.CombatantPC',
+    )
+    monsters = models.ManyToManyField(
+        Monster, verbose_name=_('Monsters'), blank=True, through='base.CombatantMonster'
+    )
     turn_number = models.PositiveSmallIntegerField(verbose_name='Номер хода', default=1)
     is_passed = models.BooleanField(verbose_name='Сцена сыграна', default=False)
 
@@ -132,7 +187,7 @@ class Encounter(models.Model):
             for pc in self.party.members.all():
                 if self.combatants_pcs.filter(pc=pc).count():
                     continue
-                cpc = CombatantsPC(pc=pc, encounter=self)
+                cpc = CombatantPC(pc=pc, encounter=self)
                 cpc.save()
                 self.combatants_pcs.add(cpc)
             self.npcs.add(*self.party.npc_members.all())
@@ -169,18 +224,18 @@ class Encounter(models.Model):
                     number=0,
                 )
             )
-        for combatant in self.combatants.all():
-            initiative = combatant.initiative + DiceIntEnum.D20.roll()
+        for combatant in self.combatants_monsters.all():
+            initiative = combatant.monster.initiative + DiceIntEnum.D20.roll()
             for i in range(combatant.number):
                 participants.append(
                     EncounterParticipants(
                         encounter=self,
-                        name=combatant.name,
+                        name=combatant.monster.name,
                         initiative=initiative,
-                        ac=combatant.armor_class,
-                        fortitude=combatant.fortitude,
-                        reflex=combatant.reflex,
-                        will=combatant.will,
+                        ac=combatant.monster.armor_class,
+                        fortitude=combatant.monster.fortitude,
+                        reflex=combatant.monster.reflex,
+                        will=combatant.monster.will,
                         number=i + 1 if combatant.number > 1 else None,
                     )
                 )
@@ -230,41 +285,34 @@ class EncounterParticipants(models.Model):
             combatant.save()
 
 
-class Combatants(models.Model):
+class CombatantMonster(models.Model):
     class Meta:
         verbose_name = 'Участник сцены (Монстрятник)'
         verbose_name_plural = 'Участники сцены (Монстрятник)'
 
-    name = models.CharField(verbose_name='Участник сцены', max_length=50, null=False)
     encounter = models.ForeignKey(
         Encounter,
         verbose_name='Сцена',
         on_delete=models.CASCADE,
         null=True,
-        related_name='combatants',
+        related_name='combatants_monsters',
     )
-    armor_class = models.PositiveSmallIntegerField(verbose_name='КД', default=0)
-    fortitude = models.PositiveSmallIntegerField(verbose_name='Стойкость', default=0)
-    reflex = models.PositiveSmallIntegerField(verbose_name='Реакция', default=0)
-    will = models.PositiveSmallIntegerField(verbose_name='Воля', default=0)
-    initiative = models.PositiveSmallIntegerField(verbose_name='Инициатива', default=0)
+    monster = models.ForeignKey(
+        Monster,
+        verbose_name=_('Monster'),
+        on_delete=models.CASCADE,
+        related_name='combatants_monsters',
+        null=True,
+    )
     number = models.PositiveSmallIntegerField(
         verbose_name='Количество однотипных', default=1
     )
-    avatar = models.ForeignKey(
-        'printer.Avatar',
-        verbose_name=_('Avatar'),
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        limit_choices_to={'pc__isnull': True, 'npc__isnull': True},
-    )
 
     def __str__(self):
-        return self.name
+        return self.monster.name
 
 
-class CombatantsPC(models.Model):
+class CombatantPC(models.Model):
     class Meta:
         verbose_name = 'Участник сцены (ИП)'
         verbose_name_plural = 'Участники сцены (ИП)'

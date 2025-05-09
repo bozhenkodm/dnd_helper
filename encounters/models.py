@@ -2,6 +2,7 @@ from django.utils.translation import gettext_lazy as _
 
 from base.models.encounters import (
     Encounter as BaseEncounter,
+    Monster as BaseMonster,
     Party as BaseParty,
     PlayerCharacter as BasePlayerCharacter,
 )
@@ -27,6 +28,12 @@ class PlayerCharacter(BasePlayerCharacter):
         verbose_name = _('Player character')
         verbose_name_plural = _('Player characters')
         proxy = True
+
+
+class Monster(BaseMonster):
+    class Meta:
+        verbose_name = _('Monster')
+        verbose_name_plural = _('Monsters')
 
 
 class Avatar(BaseAvatar):

@@ -17,6 +17,7 @@ from base.constants.constants import (
 )
 from base.models.abilities import Ability
 from base.models.condition import Condition, Constraint, PropertiesCondition
+from base.models.encounters import Monster
 from base.models.feats import Feat
 from base.models.items import (
     Armor,
@@ -583,3 +584,14 @@ class ParagonPathPowerForm(PowerForm):
         choices=((11, 11), (12, 12), (16, 16), (20, 20)),
         label=_('Level'),
     )
+
+
+class MonsterForm(forms.ModelForm):
+    class Meta:
+        model = Monster
+        fields = '__all__'
+
+    upload_from_clipboard = forms.BooleanField(
+        required=False, label='Загрузить картинку из буфера обмена', initial=False
+    )
+    from_image = forms.ImageField(required=False, label='Распарсить из картинки')

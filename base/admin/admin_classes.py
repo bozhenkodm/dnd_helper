@@ -1,4 +1,5 @@
 import io
+import re
 import subprocess
 import textwrap
 import typing
@@ -9,11 +10,14 @@ from django import forms
 from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.core.files.images import ImageFile
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from django.db.transaction import atomic
 from django.forms import CheckboxSelectMultiple
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
+from PIL import Image
+from pytesseract import image_to_string
 
 from base.admin.forms import (
     ArmsSlotItemForm,
@@ -26,6 +30,7 @@ from base.admin.forms import (
     MagicItemForm,
     MagicItemTypeForm,
     MagicWeaponTypeForm,
+    MonsterForm,
     NPCModelForm,
     ParagonPathForm,
     ParagonPathPowerForm,
@@ -42,6 +47,7 @@ from base.constants.constants import (
     MagicItemSlot,
     PowerFrequencyIntEnum,
     PowerPropertyTitle,
+    SizeIntEnum,
     WeaponGroupEnum,
 )
 from base.models.abilities import AbilityLevelBonus
@@ -52,7 +58,7 @@ from base.models.condition import (
     Constraint,
     PropertiesCondition,
 )
-from base.models.encounters import Combatants, CombatantsPC
+from base.models.encounters import CombatantMonster, CombatantPC
 from base.models.feats import ItemState
 from base.models.items import (
     Armor,
@@ -540,8 +546,8 @@ class NPCAdmin(admin.ModelAdmin):
         npc.cache_all()
 
 
-class CombatantsInlineAdmin(admin.TabularInline):
-    model = Combatants
+class CombatantsMonsterInlineAdmin(admin.TabularInline):
+    model = CombatantMonster
 
     def get_extra(self, request, obj=None, **kwargs):
         if not obj:
@@ -550,7 +556,7 @@ class CombatantsInlineAdmin(admin.TabularInline):
 
 
 class CombatantsPCSInlineAdmin(admin.TabularInline):
-    model = CombatantsPC
+    model = CombatantPC
 
     def get_extra(self, request, obj=None, **kwargs):
         if not obj:
@@ -575,7 +581,7 @@ class EncounterAdmin(admin.ModelAdmin):
     readonly_fields = ('encounter_link', 'npc_links')
     inlines = (
         CombatantsPCSInlineAdmin,
-        CombatantsInlineAdmin,
+        CombatantsMonsterInlineAdmin,
     )
     autocomplete_fields = ('npcs',)
     list_filter = ('is_passed',)
@@ -1169,6 +1175,133 @@ class PlayerCharactersAdmin(admin.ModelAdmin):
     )
     list_editable = list_display[1:]
     ordering = ('name',)
+
+
+class MonsterAdmin(admin.ModelAdmin):
+    fields = (
+        ('upload_from_clipboard', 'from_image'),
+        ('name', 'role', 'level', 'size'),
+        ('armor_class', 'fortitude', 'reflex', 'will'),
+        (
+            'hit_points',
+            'speed',
+            'initiative',
+        ),
+        'avatar',
+        'source',
+    )
+    list_display = ('name', 'role', 'level')
+    form = MonsterForm
+
+    def _apply_parsed_data(self, text, obj):
+        lines = [line.strip() for line in text.split('\n') if line.strip()]
+
+        # Имя и Тип
+        if lines:
+            types = r"(Миньон|Артиллерия|Громила|Контроллер|Налётчик|Соглядатай|Солдат)"
+            name_type_match = re.match(rf"(.+?)\s+{types}\s+(\d+) уровня", lines[0])
+            if name_type_match:
+                obj.name = name_type_match.group(1).strip()
+                obj.role = name_type_match.group(2)
+                obj.level = int(name_type_match.group(3))
+
+        size_pattern = r"(Крошечный|Средний|Маленький|Большой|Огромный|Гигантский)"
+        for line in lines:
+            if re.search(size_pattern, line):
+                obj.size = SizeIntEnum.get_by_description(
+                    re.search(size_pattern, line).group(1)
+                )
+                break
+
+        # Инициатива и Внимательность
+        for line in lines:
+            initiative_match = re.search(r"Инициатива\s*([+-]\d+)", line)
+            # perception_match = re.search(r"Внимательность\s*([+-]\d+)", line)
+            hit_points_match = re.search(r'Хиты\s*(\d+)', line)
+
+            if initiative_match:
+                obj.initiative = int(initiative_match.group(1))
+            # if perception_match:
+            #     form.cleaned_data["Внимательность"] = int(perception_match.group(1))
+            if hit_points_match:
+                obj.hit_points = int(hit_points_match.group(1))
+
+        # Защиты
+        defenses = {
+            'armor_class': r"КД\s*(\d+)",
+            'fortitude': r"Стойкость\s*(\d+)",
+            'reflex': r"Реакция\s*(\d+)",
+            'will': r"Воля\s*(\d+)",
+        }
+
+        for key, pattern in defenses.items():
+            match = re.search(pattern, text, re.IGNORECASE)
+            if match:
+                setattr(obj, key, int(match.group(1)))
+
+        hp_match = re.search(r"Хиты\s*(\d+)", text)
+        if hp_match:
+            obj.hip_points = int(hp_match.group(1))
+
+        speed_match = re.search(r"Скорость\s*(\d+)", text)
+        if speed_match:
+            obj.speed = int(speed_match.group(1))
+
+        # abilities_pattern = r"(Сил|Лов|Мдр|Тел|Инт|Хар)\s+(\d+)"
+        # matches = re.findall(abilities_pattern, text)
+        #
+        # for ability, value in matches:
+        #     setattr(obj, ability, int(value))
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if (
+            not form.cleaned_data.get('upload_from_clipboard')
+            and 'from_image' not in form.files
+        ):
+            return
+        # Обработка изображения из буфера обмена
+        if form.cleaned_data.get('upload_from_clipboard'):
+            try:
+                # Получаем изображение из буфера обмена (Linux)
+                bash_command = 'xclip -selection clipboard -t image/png -o'
+                process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+                output, error = process.communicate()
+
+                if error:
+                    raise Exception(f"Ошибка получения из буфера: {error.decode()}")
+
+                # Сохраняем изображение
+                image_field = ImageFile(
+                    io.BytesIO(output), name=f'Monster_{obj.id}.png'
+                )
+                obj.picture = image_field
+
+                img = Image.open(io.BytesIO(output))
+
+                self._apply_parsed_data(image_to_string(img, lang='rus'), obj)
+
+            except Exception as e:
+                self.message_user(
+                    request, f"Ошибка обработки изображения: {str(e)}", level='ERROR'
+                )
+
+        # Обработка загруженного через форму изображения
+        elif 'from_image' in form.files:
+            uploaded_file = form.cleaned_data['picture']
+            try:
+                # Для InMemoryUploadedFile
+                if isinstance(uploaded_file, InMemoryUploadedFile):
+                    image_data = uploaded_file.read()
+                    img = Image.open(io.BytesIO(image_data))
+
+                    self._apply_parsed_data(image_to_string(img, lang='rus'), obj)
+
+            except Exception as e:
+                self.message_user(
+                    request, f"Ошибка распознавания текста: {str(e)}", level='ERROR'
+                )
+        super().save_model(request, obj, form, change)
 
 
 class MagicItemTypeAdminBase(admin.ModelAdmin):

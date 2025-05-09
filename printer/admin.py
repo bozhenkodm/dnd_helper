@@ -143,11 +143,13 @@ class GridMapAdmin(UploadFromClipboardModelAdmin):
                         )
                     )
                     col += npc.avatar.size
-            for combatant in encounter.combatants.filter(avatar__isnull=False):
+            for combatant in encounter.combatants_monsters.filter(
+                monster__avatar__isnull=False
+            ):
                 for number in range(1, combatant.number + 1):
                     pps.append(
                         ParticipantPlace(
-                            participant=combatant.avatar,
+                            participant=combatant.monster.avatar,
                             map=obj,
                             row=row,
                             col=col,
@@ -155,7 +157,7 @@ class GridMapAdmin(UploadFromClipboardModelAdmin):
                             displayed_number=number if number > 1 else 0,
                         )
                     )
-                    col += combatant.avatar.size
+                    col += combatant.monster.avatar.size
             col += 1
         if copied_map := form.cleaned_data.get('copy_from_map'):
             for pp in copied_map.places.all():

@@ -12,6 +12,7 @@ version = "1.0.0"
 python = "^3.12"
 Django = "^5"
 pillow = "11.2.1"
+pytesseract = "^0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^25"

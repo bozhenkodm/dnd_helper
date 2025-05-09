@@ -95,6 +95,13 @@ class IntDescriptionEnum(IntEnum):
         return obj
 
     @classmethod
+    def get_by_description(cls, description):
+        for member in cls:
+            if member.description == description:
+                return member
+        raise ValueError(f"Нет элемента с описанием '{description}'")
+
+    @classmethod
     def generate_choices(
         cls,
         condition: Callable[['IntDescriptionEnum'], bool] = lambda x: True,
