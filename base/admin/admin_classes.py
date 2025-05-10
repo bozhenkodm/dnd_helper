@@ -10,15 +10,13 @@ from django import forms
 from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.core.files.images import ImageFile
-from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from django.db.transaction import atomic
 from django.forms import CheckboxSelectMultiple
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
-from PIL import Image
-from pytesseract import image_to_string
 
+from base.admin.base_admin_classes import TextFromImage
 from base.admin.forms import (
     ArmsSlotItemForm,
     ClassForm,
@@ -871,7 +869,7 @@ class PowerPropertyInline(admin.TabularInline):
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
 
-class PowerAdminBase(admin.ModelAdmin):
+class PowerAdminBase(TextFromImage):
     BELONGS_TO = ''
 
     inlines = (PowerPropertyInline,)
@@ -928,6 +926,7 @@ class PowerAdminBase(admin.ModelAdmin):
     def get_fields(self, request, obj=None):
         if not obj or obj.frequency == PowerFrequencyIntEnum.PASSIVE:
             return (
+                ('upload_from_clipboard', 'from_image'),
                 'name',
                 'description',
                 'level',
@@ -1016,6 +1015,10 @@ class PowerAdminBase(admin.ModelAdmin):
             if not property.description:
                 property.description = 'Половина урона'
                 property.save()
+
+    def _apply_parsed_data(self, text, obj):
+        print(text)
+        # TODO finish it up
 
 
 class PowerAdmin(PowerAdminBase):
@@ -1177,7 +1180,7 @@ class PlayerCharactersAdmin(admin.ModelAdmin):
     ordering = ('name',)
 
 
-class MonsterAdmin(admin.ModelAdmin):
+class MonsterAdmin(TextFromImage):
     fields = (
         ('upload_from_clipboard', 'from_image'),
         ('name', 'role', 'level', 'size'),
@@ -1252,56 +1255,6 @@ class MonsterAdmin(admin.ModelAdmin):
         #
         # for ability, value in matches:
         #     setattr(obj, ability, int(value))
-
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-        if (
-            not form.cleaned_data.get('upload_from_clipboard')
-            and 'from_image' not in form.files
-        ):
-            return
-        # Обработка изображения из буфера обмена
-        if form.cleaned_data.get('upload_from_clipboard'):
-            try:
-                # Получаем изображение из буфера обмена (Linux)
-                bash_command = 'xclip -selection clipboard -t image/png -o'
-                process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
-                output, error = process.communicate()
-
-                if error:
-                    raise Exception(f"Ошибка получения из буфера: {error.decode()}")
-
-                # Сохраняем изображение
-                image_field = ImageFile(
-                    io.BytesIO(output), name=f'Monster_{obj.id}.png'
-                )
-                obj.picture = image_field
-
-                img = Image.open(io.BytesIO(output))
-
-                self._apply_parsed_data(image_to_string(img, lang='rus'), obj)
-
-            except Exception as e:
-                self.message_user(
-                    request, f"Ошибка обработки изображения: {str(e)}", level='ERROR'
-                )
-
-        # Обработка загруженного через форму изображения
-        elif 'from_image' in form.files:
-            uploaded_file = form.cleaned_data['picture']
-            try:
-                # Для InMemoryUploadedFile
-                if isinstance(uploaded_file, InMemoryUploadedFile):
-                    image_data = uploaded_file.read()
-                    img = Image.open(io.BytesIO(image_data))
-
-                    self._apply_parsed_data(image_to_string(img, lang='rus'), obj)
-
-            except Exception as e:
-                self.message_user(
-                    request, f"Ошибка распознавания текста: {str(e)}", level='ERROR'
-                )
-        super().save_model(request, obj, form, change)
 
 
 class MagicItemTypeAdminBase(admin.ModelAdmin):

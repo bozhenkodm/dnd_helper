@@ -578,6 +578,11 @@ class PowerForm(forms.ModelForm):
         label=_('Damage type'),
     )
 
+    upload_from_clipboard = forms.BooleanField(
+        required=False, label='Загрузить картинку из буфера обмена', initial=False
+    )
+    from_image = forms.ImageField(required=False, label='Распарсить из картинки')
+
 
 class ParagonPathPowerForm(PowerForm):
     level = forms.ChoiceField(
