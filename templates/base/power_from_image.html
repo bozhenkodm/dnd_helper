@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Power from Image</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .form-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h2 {
+            margin-bottom: 1.5rem;
+            color: #333;
+            text-align: center;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            margin: 1rem 0;
+            display: none;
+            border-radius: 8px;
+            border: 2px dashed #ddd;
+        }
+
+        .upload-area {
+            border: 2px dashed #ced4da;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin: 1rem 0;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            background-color: #f8f9fa;
+        }
+
+        .hidden-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Create Power from Image</h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Image preview container -->
+            <img id="imagePreview" class="image-preview" alt="Preview">
+
+            <!-- Upload area that triggers file input -->
+            <div class="upload-area" onclick="document.getElementById('{{ form.from_image.id_for_label }}').click()">
+                <p class="text-muted">Click to upload or paste image from clipboard</p>
+                <small class="text-muted">(Supported formats: PNG, JPG, JPEG)</small>
+            </div>
+
+            <!-- Hidden file input -->
+            <div class="form-group">
+                {{ form.from_image }}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Process Image</button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('{{ form.from_image.id_for_label }}');
+            const previewImage = document.getElementById('imagePreview');
+
+            // Handle file selection
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    previewFile(file);
+                }
+            });
+
+            // Handle paste from clipboard
+            document.addEventListener('paste', async (e) => {
+                const items = e.clipboardData.items;
+                for (const item of items) {
+                    if (item.type.indexOf('image') !== -1) {
+                        const blob = item.getAsFile();
+                        previewFile(blob);
+
+                        // Create a new FileList and assign it to the input
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(blob);
+                        fileInput.files = dataTransfer.files;
+                    }
+                }
+            });
+
+            function previewFile(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.style.display = 'block';
+                    previewImage.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>
