@@ -358,3 +358,14 @@ class GridMap(models.Model):
         return ParticipantPlace.objects.filter(
             map=self, row=old_row, col=old_col
         ).count()
+
+
+class Song(models.Model):
+    title = models.CharField(max_length=200)
+    lyrics = models.TextField()
+
+    def __str__(self):
+        return self.title
+
+    def get_absolute_url(self):
+        return reverse('song-detail', kwargs={'song_id': self.pk})

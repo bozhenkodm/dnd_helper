@@ -8,7 +8,7 @@ from django.views import View
 from django.views.generic import DetailView, ListView
 
 from printer.forms import ParticipantPlaceForm
-from printer.models import GridMap, ParticipantPlace, PrintableObject
+from printer.models import GridMap, ParticipantPlace, PrintableObject, Song
 
 
 class PrintableObjectView(DetailView):
@@ -67,3 +67,25 @@ class GridMapUpdateCoordsView(View):
                 'remnants': remnants_number > 0,
             }
         )
+
+
+class SongView(View):
+
+    def get(self, request, song_id):
+        song = get_object_or_404(Song, pk=song_id)
+        lines = []
+
+        for line in song.lyrics.split('\n'):
+            line = line.strip()
+            if not line:
+                continue
+            # Разделяем строку на текст и задержку
+            parts = line.rsplit('|', 1)
+            text = parts[0].strip()
+            delay = int(parts[1]) if len(parts) > 1 else 1000  # Значение по умолчанию 1 сек
+            lines.append({'text': text, 'delay': delay})
+
+        return render(request, 'printer/song.html', {
+            'song': song,
+            'lines': lines
+        })

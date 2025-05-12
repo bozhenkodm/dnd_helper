@@ -16,6 +16,7 @@ from printer.models import (
     ParticipantPlace,
     PrintableObject,
     PrintableObjectItems,
+    Song,
     Zone,
 )
 
@@ -268,3 +269,4 @@ admin.site.register(PrintableObject, PrintableObjectAdmin)
 admin.site.register(GridMap, GridMapAdmin)
 admin.site.register(Avatar, AvatarAdmin)
 admin.site.register(Zone, ZoneAdmin)
+admin.site.register(Song)

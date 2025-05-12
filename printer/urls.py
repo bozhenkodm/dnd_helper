@@ -6,6 +6,7 @@ from printer.views import (
     GridMapUpdateCoordsView,
     GridMapView,
     PrintableObjectView,
+    SongView,
 )
 
 urlpatterns = [
@@ -22,4 +23,5 @@ urlpatterns = [
         GridMapUpdateCoordsView.as_view(),
         name='gridmap_update_coords',
     ),
+    path('song/<int:song_id>/', SongView.as_view(), name='song-detail'),
 ]

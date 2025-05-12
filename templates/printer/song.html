@@ -1,0 +1,59 @@
+<!-- templates/song.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ song.title }}</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            font-size: 2em;
+        }
+
+        .lyric-line {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            text-align: center;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+<!--    <h1 style="position: absolute; top: 20px; left: 20px;">{{ song.title }}</h1>-->
+    <div class="lyrics">
+        {% for line in lines %}
+            <div class="lyric-line" data-delay="{{ line.delay }}">
+                {{ line.text }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const lines = document.querySelectorAll('.lyric-line');
+            let totalDelay = 0;
+
+            lines.forEach((line, index) => {
+                const delay = parseInt(line.dataset.delay) || 1000;
+
+                setTimeout(() => {
+                    // Скрываем все предыдущие строки
+                    lines.forEach(l => l.style.opacity = 0);
+                    // Показываем текущую строку
+                    line.style.opacity = 1;
+                }, totalDelay);
+
+                // Увеличиваем общую задержку для следующей строки
+                totalDelay += delay;
+            });
+        });
+    </script>
+</body>
+</html>
