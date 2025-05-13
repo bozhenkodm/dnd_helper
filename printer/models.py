@@ -372,3 +372,7 @@ class Song(models.Model):
 
     def get_absolute_url(self):
         return reverse('song-detail', kwargs={'song_id': self.pk})
+
+    @property
+    def manual_mode(self):
+        return not self.auto_mode

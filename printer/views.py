@@ -74,6 +74,8 @@ class SongView(View):
     def get(self, request, song_id):
         song = get_object_or_404(Song, pk=song_id)
         lines = []
+        if song.manual_mode:
+            lines.append({'text': '', 'delay': 0})
 
         for line in song.lyrics.split('\n'):
             line = line.strip()
@@ -81,7 +83,7 @@ class SongView(View):
                 continue
             parts = line.rsplit('|', 1)
             text = parts[0].strip()
-            if not text and not song.auto_mode:
+            if not text and song.manual_mode:
                 continue
             delay = int(parts[1]) if len(parts) > 1 else 1000
             lines.append({'text': text, 'delay': delay})
