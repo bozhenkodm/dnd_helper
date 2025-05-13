@@ -11,6 +11,7 @@
             color: #fff;
             font-family: Arial, sans-serif;
             font-size: 2em;
+            user-select: none;
         }
 
         .lyric-line {
@@ -19,14 +20,27 @@
             left: 50%;
             transform: translate(-50%, -50%);
             opacity: 0;
-            transition: opacity 1s ease-in-out;
+            transition: opacity 2s ease-in-out;
             text-align: center;
             white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .mode-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 0.5em;
+            opacity: 0.7;
         }
     </style>
 </head>
 <body>
-<!--    <h1 style="position: absolute; top: 20px; left: 20px;">{{ song.title }}</h1>-->
+<!--    <h1>{{ song.title }}</h1>-->
+<!--    <div class="mode-indicator">-->
+<!--        Режим: {{ song.auto_mode|yesno:"Автоматический,Ручной" }}-->
+<!--    </div>-->
+
     <div class="lyrics">
         {% for line in lines %}
             <div class="lyric-line" data-delay="{{ line.delay }}">
@@ -38,21 +52,39 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const lines = document.querySelectorAll('.lyric-line');
-            let totalDelay = 0;
+            let currentIndex = 0;
 
-            lines.forEach((line, index) => {
-                const delay = parseInt(line.dataset.delay) || 1000;
+            // Показываем первую строку сразу
+            if(lines.length > 0) {
+                lines[0].style.opacity = 1;
+            }
 
-                setTimeout(() => {
-                    // Скрываем все предыдущие строки
-                    lines.forEach(l => l.style.opacity = 0);
-                    // Показываем текущую строку
-                    line.style.opacity = 1;
-                }, totalDelay);
+            {% if auto_mode %}
+                // Автоматический режим
+                let totalDelay = 0;
+                lines.forEach((line, index) => {
+                    const delay = parseInt(line.dataset.delay) || 1000;
 
-                // Увеличиваем общую задержку для следующей строки
-                totalDelay += delay;
-            });
+                    setTimeout(() => {
+                        lines.forEach(l => l.style.opacity = 0);
+                        line.style.opacity = 1;
+                    }, totalDelay);
+
+                    totalDelay += delay;
+                });
+            {% else %}
+                // Ручной режим (управление пробелом)
+                document.addEventListener('keydown', (e) => {
+                    if(e.code === 'Space') {
+                        e.preventDefault();
+                        lines[currentIndex].style.opacity = 0;
+
+                        currentIndex = (currentIndex + 1) % lines.length;
+
+                        lines[currentIndex].style.opacity = 1;
+                    }
+                });
+            {% endif %}
         });
     </script>
 </body>

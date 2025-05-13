@@ -363,6 +363,9 @@ class GridMap(models.Model):
 class Song(models.Model):
     title = models.CharField(max_length=200)
     lyrics = models.TextField()
+    auto_mode = models.BooleanField(
+        default=True,
+    )
 
     def __str__(self):
         return self.title

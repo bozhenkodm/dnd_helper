@@ -79,13 +79,15 @@ class SongView(View):
             line = line.strip()
             if not line:
                 continue
-            # Разделяем строку на текст и задержку
             parts = line.rsplit('|', 1)
             text = parts[0].strip()
-            delay = int(parts[1]) if len(parts) > 1 else 1000  # Значение по умолчанию 1 сек
+            if not text and not song.auto_mode:
+                continue
+            delay = int(parts[1]) if len(parts) > 1 else 1000
             lines.append({'text': text, 'delay': delay})
 
-        return render(request, 'printer/song.html', {
-            'song': song,
-            'lines': lines
-        })
+        return render(
+            request,
+            'printer/song.html',
+            {'song': song, 'lines': lines, 'auto_mode': song.auto_mode},
+        )
