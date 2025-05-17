@@ -398,145 +398,181 @@ class Power(models.Model):
     def parse_power_text(cls, text: str) -> dict:
         lines = [line.strip() for line in text.split('\n') if line.strip()]
 
-        # --- First line parsing ---
-        first_line = lines[0]
-        first_line_pattern = re.compile(r"^(.*?) (Атака|Приём|Умение) ([\w\-]+) (\d+)$")
-        match = first_line_pattern.match(first_line)
-        if not match:
-            raise ValueError(f"Неверный формат первой строки: {first_line}")
-
-        name, _, class_genitive, level = match.groups()
-
-        # Преобразование класса в именительный падеж
-        class_nominative = (
-            class_genitive.rstrip("ая").replace("я", "ь")
-            if class_genitive.endswith(("а", "я"))
-            else class_genitive
-        )
-
-        # --- Description extraction ---
-        description_lines = []
-        current_line = 1
-        while current_line < len(lines) and not any(
-            lines[current_line].lower().startswith(keyword)
-            for keyword in ["на сцену", "на день", "неограниченный"]
-        ):
-            description_lines.append(lines[current_line])
-            current_line += 1
-        description = " ".join(description_lines)
-
-        frequency = None
-        action_type = None
-        weapon_types = []
-        range_info = None
-        properties = {}
-
-        RANGE_PATTERNS = [
-            (
-                re.compile(r'рукопашное или дальнобойное оружие', re.I),
-                {'type': 'Рукопашное или дальнобойное оружие'},
-            ),
-            (
-                re.compile(r'зональная вспышка (\d+) в пределах (\d+) клеток', re.I),
-                {'type': 'Зональная вспышка', 'area': int, 'cells': int},
-            ),
-            (
-                re.compile(r'зональная стена (\d+) в пределах (\d+) клеток', re.I),
-                {'type': 'Зональная стена', 'area': int, 'cells': int},
-            ),
-            (
-                re.compile(r'ближняя вспышка (\d+)', re.I),
-                {'type': 'Ближняя вспышка', 'radius': int},
-            ),
-            (
-                re.compile(r'ближняя волна (\d+)', re.I),
-                {'type': 'Ближняя волна', 'radius': int},
-            ),
-            (
-                re.compile(r'рукопашное (\d+)', re.I),
-                {'type': 'Рукопашное', 'range': int},
-            ),
-            (
-                re.compile(r'дальнобойный (\d+)', re.I),
-                {'type': 'Дальнобойный', 'range': int},
-            ),
-            (re.compile(r'рукопашное оружие', re.I), {'type': 'Рукопашное оружие'}),
-            (re.compile(r'рукопашное касание', re.I), {'type': 'Рукопашное касание'}),
-            (re.compile(r'дальнобойное оружие', re.I), {'type': 'Дальнобойное оружие'}),
-            (
-                re.compile(r'дальнобойный видимость', re.I),
-                {'type': 'Дальнобойный видимость'},
-            ),
-            (re.compile(r'персональный', re.I), {'type': 'Персональный'}),
-        ]
-
-        ACTION_TYPES = [
-            'Стандартное действие',
-            'Малое действие',
-            'Свободное действие',
-            'Действие движения',
-            'Провоцированное действие',
-            'Немедленное прерывание',
-            'Немедленный ответ',
-            'Нет действия',
-        ]
-
-        # --- Handling the rest of the lines ---
-        for i in range(current_line, len(lines)):
-            line = lines[i]
-
-            if not frequency:
-                freq_match = re.search(
-                    r'(на\s*[сc]цену|на\s*день|неограниченный)', line, re.I
-                )
-                if freq_match:
-                    frequency = freq_match.group(0).capitalize()
-
-            if not action_type:
-                for action in ACTION_TYPES:
-                    if re.search(rf'^{re.escape(action)}', line, re.I):
-                        action_type = action
-                        break
-
-            weapon_match = re.findall(r'(оружие|инструмент)', line, re.I)
-            if weapon_match:
-                weapon_types.extend([w.capitalize() for w in weapon_match])
-
-            if not range_info:
-                for pattern, template in RANGE_PATTERNS:
-                    match = pattern.search(line)
-                    if match:
-                        range_data = {'type': template['type']}
-                        for key in template:
-                            if key == 'type':
-                                continue
-                            group_idx = list(template.keys()).index(key) - 1
-                            range_data[key] = template[key](match.group(group_idx))
-                        range_info = range_data
-                        break
-
-            prop_match = re.match(r'^([А-Яа-яЁё\s]+?):\s*(.+)$', line)
-            if prop_match:
-                key = prop_match.group(1).strip().lower().replace(' ', '_').capitalize()
-                value = prop_match.group(2).strip()
-                properties[key] = value
-
-        if not frequency:
-            raise ValueError("Не указана частота использования")
-        if not action_type:
-            raise ValueError("Не указан тип действия")
-
-        return {
-            'name': name.strip().capitalize(),
-            'class': Class.objects.get(name_display=class_nominative.capitalize()),
-            'level': int(level),
-            'description': description,
-            'frequency': frequency,
-            'action_type': action_type,
-            'weapon_type': list(set(weapon_types)) if weapon_types else None,
-            'range': range_info,
-            'properties': properties,
+        result = {
+            'name': None,
+            'class': None,
+            'level': None,
+            'description': None,
+            'frequency': None,
+            'action_type': None,
+            'weapon_type': None,
+            'range': None,
+            'properties': {},
         }
+
+        try:
+            if not lines:
+                return result
+
+            first_line = lines[0]
+            first_line_pattern = re.compile(
+                r"^(.*?) (Атака|Приём|Умение) ([\w\-]+) (\d+)$"
+            )
+            match = first_line_pattern.match(first_line)
+
+            if match:
+                name, _, class_genitive, level = match.groups()
+                result['name'] = name.strip().capitalize()
+
+                # Преобразование класса в именительный падеж
+                class_nominative = (
+                    class_genitive.rstrip("ая").replace("я", "ь")
+                    if class_genitive.endswith(("а", "я"))
+                    else class_genitive
+                ).capitalize()
+
+                # Здесь должна быть логика получения класса из БД
+                result['class'] = Class.objects.get(name_display=class_nominative)
+
+                try:
+                    result['level'] = int(level)
+                except ValueError:
+                    pass
+
+            description_lines = []
+            current_line = 1
+            while current_line < len(lines) and not any(
+                lines[current_line].lower().startswith(keyword)
+                for keyword in ["на сцену", "на день", "неограниченный"]
+            ):
+                description_lines.append(lines[current_line])
+                current_line += 1
+            result['description'] = (
+                " ".join(description_lines) if description_lines else None
+            )
+
+            RANGE_PATTERNS = [
+                (
+                    re.compile(r'рукопашное или дальнобойное оружие', re.I),
+                    {'type': 'Рукопашное или дальнобойное оружие'},
+                ),
+                (
+                    re.compile(
+                        r'зональная вспышка (\d+) в пределах (\d+) клеток', re.I
+                    ),
+                    {'type': 'Зональная вспышка', 'area': int, 'cells': int},
+                ),
+                (
+                    re.compile(r'зональная стена (\d+) в пределах (\d+) клеток', re.I),
+                    {'type': 'Зональная стена', 'area': int, 'cells': int},
+                ),
+                (
+                    re.compile(r'ближняя вспышка (\d+)', re.I),
+                    {'type': 'Ближняя вспышка', 'radius': int},
+                ),
+                (
+                    re.compile(r'ближняя волна (\d+)', re.I),
+                    {'type': 'Ближняя волна', 'radius': int},
+                ),
+                (
+                    re.compile(r'рукопашное (\d+)', re.I),
+                    {'type': 'Рукопашное', 'range': int},
+                ),
+                (
+                    re.compile(r'дальнобойный (\d+)', re.I),
+                    {'type': 'Дальнобойный', 'range': int},
+                ),
+                (re.compile(r'рукопашное оружие', re.I), {'type': 'Рукопашное оружие'}),
+                (
+                    re.compile(r'рукопашное касание', re.I),
+                    {'type': 'Рукопашное касание'},
+                ),
+                (
+                    re.compile(r'дальнобойное оружие', re.I),
+                    {'type': 'Дальнобойное оружие'},
+                ),
+                (
+                    re.compile(r'дальнобойный видимость', re.I),
+                    {'type': 'Дальнобойный видимость'},
+                ),
+                (re.compile(r'персональный', re.I), {'type': 'Персональный'}),
+            ]
+
+            ACTION_TYPES = [
+                'Стандартное действие',
+                'Малое действие',
+                'Свободное действие',
+                'Действие движения',
+                'Провоцированное действие',
+                'Немедленное прерывание',
+                'Немедленный ответ',
+                'Нет действия',
+            ]
+
+            # === Обработка остальных параметров ===
+            current_prop = None
+            in_property = False
+
+            for i in range(current_line, len(lines)):
+                line = lines[i]
+
+                # Обработка многострочных свойств
+                prop_match = re.match(r'^([А-Яа-яЁё\s]+?):\s*(.*)', line)
+                if prop_match:
+                    key = prop_match.group(1).strip().lower().replace(' ', '_')
+                    value = prop_match.group(2).strip()
+                    result['properties'][key] = value
+                    current_prop = key
+                    in_property = True
+                    continue
+                elif in_property and current_prop:
+                    result['properties'][current_prop] += ' ' + line
+                    continue
+
+                # Поиск частоты использования
+                if not result['frequency']:
+                    freq_match = re.search(
+                        r'(на\s*[сc]цену|на\s*день|неограниченный)', line, re.I
+                    )
+                    if freq_match:
+                        result['frequency'] = freq_match.group(0).capitalize()
+
+                # Поиск типа действия
+                if not result['action_type']:
+                    for action in PowerActionTypeEnum:
+                        if re.search(rf'^{re.escape(action.description)}', line, re.I):
+                            result['action_type'] = action.value
+                            break
+
+                if not result['weapon_type']:
+                    weapon_match = re.findall(r'(оружие|инструмент)', line, re.I)
+                    if weapon_match:
+                        result['weapon_type'] = list(
+                            set([w.capitalize() for w in weapon_match])
+                        )
+
+                if not result['range']:
+                    for pattern, template in RANGE_PATTERNS:
+                        match = pattern.search(line)
+                        if match:
+                            range_data = {'type': template['type']}
+                            for key in template:
+                                if key == 'type':
+                                    continue
+                                group_idx = list(template.keys()).index(key) - 1
+                                try:
+                                    range_data[key] = template[key](
+                                        match.group(group_idx)
+                                    )
+                                except (IndexError, ValueError):
+                                    pass
+                            result['range'] = range_data
+                            break
+
+        except (ValueError, IndexError, AttributeError) as e:
+            print(f"Ошибка парсинга: {str(e)}")
+
+        return result
 
 
 class PowerProperty(models.Model):
