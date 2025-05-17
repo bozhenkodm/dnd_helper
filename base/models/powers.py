@@ -387,12 +387,11 @@ class Power(models.Model):
         return '\n'.join(result)
 
     @classmethod
-    def create_from_image(cls, img_file):
+    def parse_from_image(cls, img_file) -> dict:
         img = Image.open(img_file)
         text = image_to_string(img, lang='rus')
         # return Power.objects.create(**cls.parse_power_text(text))
-        print(text)
-        print(cls.parse_power_text(text))
+        return cls.parse_power_text(text)
 
     @classmethod
     def parse_power_text(cls, text: str) -> dict:
@@ -400,9 +399,9 @@ class Power(models.Model):
 
         result = {
             'name': None,
-            'class': None,
-            'level': None,
-            'description': None,
+            'klass': None,
+            'level': 0,
+            'description': '',
             'frequency': None,
             'action_type': None,
             'weapon_type': None,
@@ -432,7 +431,7 @@ class Power(models.Model):
                 ).capitalize()
 
                 # Здесь должна быть логика получения класса из БД
-                result['class'] = Class.objects.get(name_display=class_nominative)
+                result['klass'] = Class.objects.get(name_display=class_nominative).pk
 
                 try:
                     result['level'] = int(level)

@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
+from django.utils.http import urlencode
 from django.views.generic import DetailView, FormView, ListView, TemplateView
 
 from base.forms.npc import NPCModelForm
@@ -79,11 +80,21 @@ class PCPartyView(DetailView):
 class PowerCreateFromImage(FormView):
     form_class = FromImageForm
     template_name = 'base/power_from_image.html'
-    success_url = reverse_lazy('power_from_image')
+    success_url = reverse_lazy('admin:features_classpower_add')
 
     def form_valid(self, form):
-        Power.create_from_image(form.cleaned_data['from_image'])
+        self.json_data = Power.parse_from_image(form.cleaned_data['from_image'])
         return super().form_valid(form)
+
+    def get_success_url(self):
+        base_url = super().get_success_url()
+
+        if hasattr(self, 'json_data') and isinstance(self.json_data, dict):
+            # Преобразуем данные в query string
+            params = urlencode(self.json_data, doseq=True)
+            return f"{base_url}?{params}"
+
+        return base_url
 
 
 class MainView(TemplateView):

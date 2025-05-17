@@ -1088,6 +1088,24 @@ class PowerChildAdminBase(PowerAdminBase):
             .filter(**{f'{self.BELONGS_TO}__isnull': False})
         )
 
+    def get_fields(self, request, obj=None):
+        return [
+            'name',
+            'description',
+            'level',
+            self.BELONGS_TO,
+            ('frequency', 'action_type'),
+            ('attack_ability', 'defence', 'attack_bonus'),
+            ('effects', 'damage_types'),
+            ('dice_number', 'damage_dice'),
+            ('accessory_type', 'weapon_types'),
+            ('range_type', 'range', 'burst'),
+            'syntax',
+        ]
+
+    def get_inlines(self, request, obj):
+        return self.inlines
+
 
 class ClassPowerAdmin(PowerChildAdminBase):
     BELONGS_TO = 'klass'
