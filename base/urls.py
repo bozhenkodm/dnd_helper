@@ -8,6 +8,7 @@ from base.views import (
     NPCListView,
     NPCPowerDetailView,
     PCPartyView,
+    PowerCreateFromImage,
 )
 
 urlpatterns = [
@@ -20,6 +21,11 @@ urlpatterns = [
         name='npc_power',
     ),
     path('encounter/detail/<pk>', EncounterDetailView.as_view(), name='encounter'),
+    path(
+        'power/create/from-image',
+        PowerCreateFromImage.as_view(),
+        name='power_from_image',
+    ),
     path('party/detail/<pk>', PCPartyView.as_view(), name='party'),
     path('', MainView.as_view(), name='main_view'),
 ]

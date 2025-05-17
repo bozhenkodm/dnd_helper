@@ -6,6 +6,8 @@ from typing import Sequence
 from django.core.cache import cache
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from PIL import Image
+from pytesseract import image_to_string
 
 from base.constants.constants import (
     AccessoryTypeEnum,
@@ -25,6 +27,7 @@ from base.exceptions import PowerInconsistent
 from base.models.abilities import Ability
 from base.models.books import BookSource
 from base.models.items import ItemAbstract, Weapon
+from base.models.klass import Class
 from base.models.npc_protocol import NPCProtocol
 from base.objects.dice import DiceRoll
 from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
@@ -382,6 +385,158 @@ class Power(models.Model):
                 description = prop.description
             result.append(f'{title}: {description}')
         return '\n'.join(result)
+
+    @classmethod
+    def create_from_image(cls, img_file):
+        img = Image.open(img_file)
+        text = image_to_string(img, lang='rus')
+        # return Power.objects.create(**cls.parse_power_text(text))
+        print(text)
+        print(cls.parse_power_text(text))
+
+    @classmethod
+    def parse_power_text(cls, text: str) -> dict:
+        lines = [line.strip() for line in text.split('\n') if line.strip()]
+
+        # --- First line parsing ---
+        first_line = lines[0]
+        first_line_pattern = re.compile(r"^(.*?) (Атака|Приём|Умение) ([\w\-]+) (\d+)$")
+        match = first_line_pattern.match(first_line)
+        if not match:
+            raise ValueError(f"Неверный формат первой строки: {first_line}")
+
+        name, _, class_genitive, level = match.groups()
+
+        # Преобразование класса в именительный падеж
+        class_nominative = (
+            class_genitive.rstrip("ая").replace("я", "ь")
+            if class_genitive.endswith(("а", "я"))
+            else class_genitive
+        )
+
+        # --- Description extraction ---
+        description_lines = []
+        current_line = 1
+        while current_line < len(lines) and not any(
+            lines[current_line].lower().startswith(keyword)
+            for keyword in ["на сцену", "на день", "неограниченный"]
+        ):
+            description_lines.append(lines[current_line])
+            current_line += 1
+        description = " ".join(description_lines)
+
+        frequency = None
+        action_type = None
+        weapon_types = []
+        range_info = None
+        properties = {}
+
+        RANGE_PATTERNS = [
+            (
+                re.compile(r'рукопашное или дальнобойное оружие', re.I),
+                {'type': 'Рукопашное или дальнобойное оружие'},
+            ),
+            (
+                re.compile(r'зональная вспышка (\d+) в пределах (\d+) клеток', re.I),
+                {'type': 'Зональная вспышка', 'area': int, 'cells': int},
+            ),
+            (
+                re.compile(r'зональная стена (\d+) в пределах (\d+) клеток', re.I),
+                {'type': 'Зональная стена', 'area': int, 'cells': int},
+            ),
+            (
+                re.compile(r'ближняя вспышка (\d+)', re.I),
+                {'type': 'Ближняя вспышка', 'radius': int},
+            ),
+            (
+                re.compile(r'ближняя волна (\d+)', re.I),
+                {'type': 'Ближняя волна', 'radius': int},
+            ),
+            (
+                re.compile(r'рукопашное (\d+)', re.I),
+                {'type': 'Рукопашное', 'range': int},
+            ),
+            (
+                re.compile(r'дальнобойный (\d+)', re.I),
+                {'type': 'Дальнобойный', 'range': int},
+            ),
+            (re.compile(r'рукопашное оружие', re.I), {'type': 'Рукопашное оружие'}),
+            (re.compile(r'рукопашное касание', re.I), {'type': 'Рукопашное касание'}),
+            (re.compile(r'дальнобойное оружие', re.I), {'type': 'Дальнобойное оружие'}),
+            (
+                re.compile(r'дальнобойный видимость', re.I),
+                {'type': 'Дальнобойный видимость'},
+            ),
+            (re.compile(r'персональный', re.I), {'type': 'Персональный'}),
+        ]
+
+        ACTION_TYPES = [
+            'Стандартное действие',
+            'Малое действие',
+            'Свободное действие',
+            'Действие движения',
+            'Провоцированное действие',
+            'Немедленное прерывание',
+            'Немедленный ответ',
+            'Нет действия',
+        ]
+
+        # --- Handling the rest of the lines ---
+        for i in range(current_line, len(lines)):
+            line = lines[i]
+
+            if not frequency:
+                freq_match = re.search(
+                    r'(на\s*[сc]цену|на\s*день|неограниченный)', line, re.I
+                )
+                if freq_match:
+                    frequency = freq_match.group(0).capitalize()
+
+            if not action_type:
+                for action in ACTION_TYPES:
+                    if re.search(rf'^{re.escape(action)}', line, re.I):
+                        action_type = action
+                        break
+
+            weapon_match = re.findall(r'(оружие|инструмент)', line, re.I)
+            if weapon_match:
+                weapon_types.extend([w.capitalize() for w in weapon_match])
+
+            if not range_info:
+                for pattern, template in RANGE_PATTERNS:
+                    match = pattern.search(line)
+                    if match:
+                        range_data = {'type': template['type']}
+                        for key in template:
+                            if key == 'type':
+                                continue
+                            group_idx = list(template.keys()).index(key) - 1
+                            range_data[key] = template[key](match.group(group_idx))
+                        range_info = range_data
+                        break
+
+            prop_match = re.match(r'^([А-Яа-яЁё\s]+?):\s*(.+)$', line)
+            if prop_match:
+                key = prop_match.group(1).strip().lower().replace(' ', '_').capitalize()
+                value = prop_match.group(2).strip()
+                properties[key] = value
+
+        if not frequency:
+            raise ValueError("Не указана частота использования")
+        if not action_type:
+            raise ValueError("Не указан тип действия")
+
+        return {
+            'name': name.strip().capitalize(),
+            'class': Class.objects.get(name_display=class_nominative.capitalize()),
+            'level': int(level),
+            'description': description,
+            'frequency': frequency,
+            'action_type': action_type,
+            'weapon_type': list(set(weapon_types)) if weapon_types else None,
+            'range': range_info,
+            'properties': properties,
+        }
 
 
 class PowerProperty(models.Model):

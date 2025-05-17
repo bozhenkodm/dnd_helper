@@ -1,10 +1,12 @@
 from django.shortcuts import get_object_or_404
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.views.generic import DetailView, FormView, ListView, TemplateView
 
 from base.forms.npc import NPCModelForm
+from base.forms.power import FromImageForm
 from base.models.encounters import Encounter, EncounterParticipants, Party
 from base.models.models import NPC
+from base.models.powers import Power
 
 
 class NPCFormView(FormView):
@@ -74,6 +76,16 @@ class PCPartyView(DetailView):
     model = Party
 
 
+class PowerCreateFromImage(FormView):
+    form_class = FromImageForm
+    template_name = 'base/power_from_image.html'
+    success_url = reverse_lazy('power_from_image')
+
+    def form_valid(self, form):
+        Power.create_from_image(form.cleaned_data['from_image'])
+        return super().form_valid(form)
+
+
 class MainView(TemplateView):
     template_name = 'base/main.html'
 
@@ -81,6 +93,6 @@ class MainView(TemplateView):
         context = super().get_context_data()
         context['links'] = (
             ('Генератор', reverse('generator_main')),
-            ('Карты', reverse('gridmap_list')),
+            ('Парсинг талантов', reverse('power_from_image')),
         )
         return context

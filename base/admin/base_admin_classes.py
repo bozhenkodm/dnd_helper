@@ -3,7 +3,6 @@ import subprocess
 from abc import abstractmethod
 
 from django.contrib import admin
-from django.core.files.images import ImageFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from PIL import Image
 from pytesseract import image_to_string
@@ -32,12 +31,6 @@ class TextFromImage(admin.ModelAdmin):
 
                 if error:
                     raise Exception(f"Ошибка получения из буфера: {error.decode()}")
-
-                # Сохраняем изображение
-                image_field = ImageFile(
-                    io.BytesIO(output), name=f'Monster_{obj.id}.png'
-                )
-                obj.picture = image_field
 
                 img = Image.open(io.BytesIO(output))
 
