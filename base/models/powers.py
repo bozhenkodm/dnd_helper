@@ -405,7 +405,9 @@ class Power(models.Model):
             'frequency': '',
             'action_type': '',
             'accessory_type': '',
-            'range': '',
+            'range_type': '',
+            'range': 0,
+            'burst': 0,
             'properties': {},
         }
 
@@ -452,49 +454,51 @@ class Power(models.Model):
 
             RANGE_PATTERNS = [
                 (
-                    re.compile(r'рукопашное или дальнобойное оружие', re.I),
-                    {'type': 'Рукопашное или дальнобойное оружие'},
+                    re.compile(r'Рукопашное оружие', re.I),
+                    {'range_type': 'Рукопашное оружие', 'range': 0, 'area': 0},
+                ),
+                (
+                    re.compile(r'Рукопашное (\d+)', re.I),
+                    {'range_type': 'Рукопашное', 'range': 1, 'area': 0},
+                ),
+                (
+                    re.compile(r'Рукопашное касание', re.I),
+                    {'range_type': 'Рукопашное касание', 'range': 0, 'area': 0},
+                ),
+                (
+                    re.compile(r'Дальнобойное оружие', re.I),
+                    {'range_type': 'Дальнобойное оружие', 'range': 0, 'area': 0},
+                ),
+                (
+                    re.compile(r'Дальнобойный (\d+)', re.I),
+                    {'range_type': 'Дальнобойный', 'range': 1, 'area': 0},
+                ),
+                (
+                    re.compile(r'Дальнобойный видимость', re.I),
+                    {'range_type': 'Дальнобойный видимость', 'range': 0, 'area': 0},
+                ),
+                (
+                    re.compile(r'Ближняя вспышка (\d+)', re.I),
+                    {'range_type': 'Вспышка', 'range': 0, 'area': 1},
+                ),
+                (
+                    re.compile(r'Ближняя волна (\d+)', re.I),
+                    {'range_type': 'Волна', 'range': 0, 'area': 1},
                 ),
                 (
                     re.compile(
-                        r'зональная вспышка (\d+) в пределах (\d+) клеток', re.I
+                        r'Зональная вспышка (\d+) в пределах (\d+) клеток', re.I
                     ),
-                    {'type': 'Зональная вспышка', 'burst': int, 'range': int},
+                    {'range_type': 'Вспышка', 'range': 2, 'area': 1},
                 ),
                 (
-                    re.compile(r'зональная стена (\d+) в пределах (\d+) клеток', re.I),
-                    {'type': 'Зональная стена', 'burst': int, 'range': int},
+                    re.compile(r'Зональная стена (\d+) в пределах (\d+) клеток', re.I),
+                    {'range_type': 'Стена', 'range': 2, 'area': 1},
                 ),
                 (
-                    re.compile(r'ближняя вспышка (\d+)', re.I),
-                    {'type': 'Ближняя вспышка', 'burst': int},
+                    re.compile(r'Персональный', re.I),
+                    {'range_type': 'Персональный', 'range': 0, 'area': 0},
                 ),
-                (
-                    re.compile(r'ближняя волна (\d+)', re.I),
-                    {'type': 'Ближняя волна', 'range': int},
-                ),
-                (
-                    re.compile(r'рукопашное (\d+)', re.I),
-                    {'type': 'Рукопашное', 'range': int},
-                ),
-                (
-                    re.compile(r'дальнобойный (\d+)', re.I),
-                    {'type': 'Дальнобойный', 'range': int},
-                ),
-                (re.compile(r'рукопашное оружие', re.I), {'type': 'Рукопашное оружие'}),
-                (
-                    re.compile(r'рукопашное касание', re.I),
-                    {'type': 'Рукопашное касание'},
-                ),
-                (
-                    re.compile(r'дальнобойное оружие', re.I),
-                    {'type': 'Дальнобойное оружие'},
-                ),
-                (
-                    re.compile(r'дальнобойный видимость', re.I),
-                    {'type': 'Дальнобойный видимость'},
-                ),
-                (re.compile(r'персональный', re.I), {'type': 'Персональный'}),
             ]
 
             # === Обработка остальных параметров ===
@@ -548,28 +552,24 @@ class Power(models.Model):
                             )
                         )
 
-                if not result['range']:
-                    for pattern, template in RANGE_PATTERNS:
+                if not result['range_type']:
+                    for pattern, params in RANGE_PATTERNS:
                         match = pattern.search(line)
                         if match:
-                            # range_data = {'range_type': template['type']}
-                            range_data = {
-                                'range_type': PowerRangeTypeEnum.get_by_description(
-                                    template['type']
+                            result['range_type'] = (
+                                PowerRangeTypeEnum.get_by_description(
+                                    params['range_type']
                                 ).value
-                            }
-                            for key in template:
-                                if key == 'type':
-                                    continue
-                                group_idx = list(template.keys()).index(key)
-                                try:
-                                    range_data[key] = template[key](
-                                        match.group(group_idx)
-                                    )
-                                except (IndexError, ValueError):
-                                    pass
-                            # result['range'] = range_data
-                            result.update(range_data)
+                            )
+
+                            # Обработка числовых параметров
+                            if 'range' in params:
+                                if params['range'] != 0:
+                                    result['range'] = int(match.group(params['range']))
+
+                            if 'area' in params:
+                                if params['area'] != 0:
+                                    result['area'] = int(match.group(params['area']))
                             break
 
         except (ValueError, IndexError, AttributeError) as e:
