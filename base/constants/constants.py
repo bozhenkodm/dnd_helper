@@ -302,7 +302,7 @@ class DefenceTypeEnum(BaseNameValueDescriptionEnum):
 class PowerRangeTypeEnum(BaseNameValueDescriptionEnum):
     MELEE_WEAPON = auto(), 'Рукопашное оружие'
     MELEE = auto(), 'Рукопашное'
-    RANGED = auto(), 'Дальнобойное'
+    RANGED = auto(), 'Дальнобойный'
     MELEE_RANGED_WEAPON = auto(), 'Рукопашное или дальнобойное оружие'
     RANGED_WEAPON = auto(), 'Дальнобойное оружие'
     BURST = auto(), 'Вспышка'

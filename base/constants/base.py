@@ -84,6 +84,13 @@ class BaseNameValueDescriptionEnum(str, Enum):
     def lvalue(self) -> str:
         return self.value.lower()
 
+    @classmethod
+    def get_by_description(cls, description):
+        for member in cls:
+            if member.description == description:
+                return member
+        raise ValueError(f"Нет элемента с описанием '{description}'")
+
 
 class IntDescriptionEnum(IntEnum):
     description: str

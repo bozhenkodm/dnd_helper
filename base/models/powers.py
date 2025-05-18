@@ -398,14 +398,14 @@ class Power(models.Model):
         lines = [line.strip() for line in text.split('\n') if line.strip()]
 
         result = {
-            'name': None,
+            'name': '',
             'klass': None,
             'level': 0,
             'description': '',
-            'frequency': None,
-            'action_type': None,
-            'weapon_type': None,
-            'range': None,
+            'frequency': '',
+            'action_type': '',
+            'accessory_type': '',
+            'range': '',
             'properties': {},
         }
 
@@ -459,19 +459,19 @@ class Power(models.Model):
                     re.compile(
                         r'зональная вспышка (\d+) в пределах (\d+) клеток', re.I
                     ),
-                    {'type': 'Зональная вспышка', 'area': int, 'cells': int},
+                    {'type': 'Зональная вспышка', 'burst': int, 'range': int},
                 ),
                 (
                     re.compile(r'зональная стена (\d+) в пределах (\d+) клеток', re.I),
-                    {'type': 'Зональная стена', 'area': int, 'cells': int},
+                    {'type': 'Зональная стена', 'burst': int, 'range': int},
                 ),
                 (
                     re.compile(r'ближняя вспышка (\d+)', re.I),
-                    {'type': 'Ближняя вспышка', 'radius': int},
+                    {'type': 'Ближняя вспышка', 'burst': int},
                 ),
                 (
                     re.compile(r'ближняя волна (\d+)', re.I),
-                    {'type': 'Ближняя волна', 'radius': int},
+                    {'type': 'Ближняя волна', 'range': int},
                 ),
                 (
                     re.compile(r'рукопашное (\d+)', re.I),
@@ -523,7 +523,9 @@ class Power(models.Model):
                         r'(на\s*[сc]цену|на\s*день|неограниченный)', line, re.I
                     )
                     if freq_match:
-                        result['frequency'] = freq_match.group(0).capitalize()
+                        result['frequency'] = PowerFrequencyIntEnum.get_by_description(
+                            freq_match.group(0).capitalize()
+                        )
 
                 # Поиск типа действия
                 if not result['action_type']:
@@ -532,34 +534,46 @@ class Power(models.Model):
                             result['action_type'] = action.value
                             break
 
-                if not result['weapon_type']:
-                    weapon_match = re.findall(r'(оружие|инструмент)', line, re.I)
-                    if weapon_match:
-                        result['weapon_type'] = list(
-                            set([w.capitalize() for w in weapon_match])
+                if not result['accessory_type']:
+                    accessory_match = re.findall(r'(оружие|инструмент)', line, re.I)
+                    if accessory_match:
+                        result['accessory_type'] = list(
+                            set(
+                                [
+                                    AccessoryTypeEnum.get_by_description(
+                                        a.capitalize()
+                                    ).value
+                                    for a in accessory_match
+                                ]
+                            )
                         )
 
                 if not result['range']:
                     for pattern, template in RANGE_PATTERNS:
                         match = pattern.search(line)
                         if match:
-                            range_data = {'type': template['type']}
+                            # range_data = {'range_type': template['type']}
+                            range_data = {
+                                'range_type': PowerRangeTypeEnum.get_by_description(
+                                    template['type']
+                                ).value
+                            }
                             for key in template:
                                 if key == 'type':
                                     continue
-                                group_idx = list(template.keys()).index(key) - 1
+                                group_idx = list(template.keys()).index(key)
                                 try:
                                     range_data[key] = template[key](
                                         match.group(group_idx)
                                     )
                                 except (IndexError, ValueError):
                                     pass
-                            result['range'] = range_data
+                            # result['range'] = range_data
+                            result.update(range_data)
                             break
 
         except (ValueError, IndexError, AttributeError) as e:
             print(f"Ошибка парсинга: {str(e)}")
-
         return result
 
 
