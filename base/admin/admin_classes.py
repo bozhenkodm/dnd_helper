@@ -856,6 +856,13 @@ class PowerPropertyInline(admin.TabularInline):
         models.TextField: {'widget': forms.Textarea(attrs={'rows': 4, 'cols': 60})},
     }
 
+    def get_extra(self, request, obj=None, **kwargs):
+        querystring_extra = (
+            len([key for key in request.GET.keys() if key.startswith('properties')])
+            // 2
+        )
+        return querystring_extra or super().get_extra(request, obj, **kwargs)
+
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name == 'subclass':
             object_id = request.resolver_match.kwargs.get('object_id', 0)
@@ -867,6 +874,41 @@ class PowerPropertyInline(admin.TabularInline):
                 db_field.choices = instance.klass.subclasses.generate_choices()
 
         return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def get_formset(self, request, obj=None, **kwargs):
+        FormSet = super().get_formset(request, obj, **kwargs)
+
+        if obj:
+            return FormSet
+
+        # Собираем initial данные из GET-параметров
+        initial = []
+        max_index = -1
+
+        # Находим максимальный индекс из параметров
+        for key in request.GET:
+            if key.startswith('properties-'):
+                parts = key.split('-')
+                if len(parts) == 3:
+                    index = int(parts[1])
+                    max_index = max(max_index, index)
+
+        if max_index >= 0:
+            initial = [{} for _ in range(max_index + 1)]
+            for key, value in request.GET.items():
+                if key.startswith('properties-'):
+                    parts = key.split('-')
+                    if len(parts) == 3:
+                        index = int(parts[1])
+                        field = parts[2]
+                        initial[index][field] = value
+
+        class CustomFormSet(FormSet):
+            def __init__(self, *args, **kwargs):
+                kwargs['initial'] = initial
+                super().__init__(*args, **kwargs)
+
+        return CustomFormSet
 
 
 class PowerAdminBase(TextFromImage):

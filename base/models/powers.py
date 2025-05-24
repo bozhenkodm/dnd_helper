@@ -408,17 +408,22 @@ class Power(models.Model):
             'range_type': '',
             'range': 0,
             'burst': 0,
-            'properties': {},
         }
-
+        properties = {}
+        current_line = 0
         try:
             if not lines:
                 return result
 
-            first_line = lines[0]
-            first_line_pattern = re.compile(
-                r"^(.*?) (Атака|Приём|Умение) ([\w\-]+) (\d+)$"
-            )
+            first_line = []
+            for line in lines:
+                first_line.append(line)
+                current_line += 1
+                if line.rstrip()[-1].isdigit():
+                    break
+
+            first_line = ' '.join(first_line)
+            first_line_pattern = re.compile(r"^(.*?) (\S+) ([\w\-]+) (\d+)$")
             match = first_line_pattern.match(first_line)
 
             if match:
@@ -441,7 +446,6 @@ class Power(models.Model):
                     pass
 
             description_lines = []
-            current_line = 1
             while current_line < len(lines) and not any(
                 lines[current_line].lower().startswith(keyword)
                 for keyword in ["на сцену", "на день", "неограниченный"]
@@ -511,14 +515,19 @@ class Power(models.Model):
                 # Обработка многострочных свойств
                 prop_match = re.match(r'^([А-Яа-яЁё\s]+?):\s*(.*)', line)
                 if prop_match:
-                    key = prop_match.group(1).strip().lower().replace(' ', '_')
+                    key = prop_match.group(1).strip().capitalize().replace(' ', '_')
+                    key = PowerPropertyTitle.get_by_description(
+                        key, default=PowerPropertyTitle.OTHER
+                    ).value
                     value = prop_match.group(2).strip()
-                    result['properties'][key] = value
+                    if key == PowerPropertyTitle.OTHER:
+                        value = f'{key}: {value}'
+                    properties[key] = value
                     current_prop = key
                     in_property = True
                     continue
                 elif in_property and current_prop:
-                    result['properties'][current_prop] += ' ' + line
+                    properties[current_prop] += ' ' + line
                     continue
 
                 # Поиск частоты использования
@@ -574,6 +583,13 @@ class Power(models.Model):
 
         except (ValueError, IndexError, AttributeError) as e:
             print(f"Ошибка парсинга: {str(e)}")
+
+        i = 0
+        for key, value in properties.items():
+            result[f'properties-{i}-title'] = key
+            result[f'properties-{i}-description'] = value
+            result[f'properties-{i}-order'] = i
+            i += 1
         return result
 
 
@@ -590,6 +606,7 @@ class PowerProperty(models.Model):
         related_name='properties',
     )
     title = models.CharField(
+        verbose_name=_('Title'),
         choices=PowerPropertyTitle.generate_choices(),
         null=True,
         blank=True,

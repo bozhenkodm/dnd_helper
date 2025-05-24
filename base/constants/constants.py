@@ -322,6 +322,9 @@ class PowerPropertyTitle(BaseNameValueDescriptionEnum):
     TARGET = auto(), 'Цель'
     OTHER = auto(), 'Другое'
 
+    def __missing__(self, key):
+        return self.OTHER
+
 
 class MagicItemCategory(BaseNameValueDescriptionEnum):
     COMMON = auto(), 'Обычный'
