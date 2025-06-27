@@ -17,7 +17,9 @@ class DiceRoll:
 
     def __add__(self, other) -> 'DiceRoll':
         if not isinstance(other, int):
-            raise TypeError('should add only ints to dice rolls')
+            raise TypeError(
+                f'should add only ints to dice rolls: {other}: {type(other)}'
+            )
         return DiceRoll(
             rolls=self.rolls, dice=self.dice, addendant=self.addendant + other
         )
@@ -61,4 +63,4 @@ class DiceRoll:
                 rolls=int(rolls) if rolls else 0,
                 addendant=int(addendant),
             )
-        raise ValueError('Not valid DiceRoll')
+        raise ValueError(f'Not valid DiceRoll: {string}')

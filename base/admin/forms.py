@@ -583,6 +583,20 @@ class PowerForm(forms.ModelForm):
     )
     from_image = forms.ImageField(required=False, label='Распарсить из картинки')
 
+    def clean(self):
+        cleaned_data = super().clean()
+        name = cleaned_data.get('name')
+
+        if name:
+            duplicates = Power.objects.filter(name=name)
+            if self.instance.pk:
+                duplicates = duplicates.exclude(pk=self.instance.pk)
+
+            if duplicates.exists():
+                self.add_error('name', 'Запись с таким именем уже существует!')
+                self.show_duplicate_warning = True
+        return cleaned_data
+
 
 class ParagonPathPowerForm(PowerForm):
     level = forms.ChoiceField(

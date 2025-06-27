@@ -431,13 +431,17 @@ class Power(models.Model):
                 result['name'] = name.strip().capitalize()
 
                 # Преобразование класса в именительный падеж
-                class_nominative = (
-                    class_genitive.rstrip("ая").replace("я", "ь")
-                    if class_genitive.endswith(("а", "я"))
-                    else class_genitive
-                ).capitalize()
+                match class_genitive:
+                    case s if s.endswith("а"):
+                        class_nominative = s.rstrip("а")
+                    case s if s.endswith('ея'):
+                        class_nominative = s.rstrip("я") + "й"
+                    case s if s.endswith("я"):
+                        class_nominative = s.rstrip("я") + "ь"
+                    case _:
+                        class_nominative = class_genitive
+                class_nominative = class_nominative.capitalize()
 
-                # Здесь должна быть логика получения класса из БД
                 result['klass'] = Class.objects.get(name_display=class_nominative).pk
 
                 try:
@@ -515,13 +519,13 @@ class Power(models.Model):
                 # Обработка многострочных свойств
                 prop_match = re.match(r'^([А-Яа-яЁё\s]+?):\s*(.*)', line)
                 if prop_match:
-                    key = prop_match.group(1).strip().capitalize().replace(' ', '_')
+                    raw_key = prop_match.group(1).strip().capitalize()
                     key = PowerPropertyTitle.get_by_description(
-                        key, default=PowerPropertyTitle.OTHER
+                        raw_key, default=PowerPropertyTitle.OTHER
                     ).value
                     value = prop_match.group(2).strip()
                     if key == PowerPropertyTitle.OTHER:
-                        value = f'{key}: {value}'
+                        value = f'{raw_key}: {value}'
                     properties[key] = value
                     current_prop = key
                     in_property = True
@@ -584,8 +588,61 @@ class Power(models.Model):
         except (ValueError, IndexError, AttributeError) as e:
             print(f"Ошибка парсинга: {str(e)}")
 
+        ATTRIBUTE_ATTACK_MAP = {
+            "Сила": "str",
+            "Харизма": "cha",
+            "Мудрость": "wis",
+            "Ловкость": "dex",
+            "Телосложение": "con",
+            "Интеллект": "int",
+        }
+
+        ATTRIBUTE_MAP = {
+            "Силы": "str",
+            "Харизмы": "cha",
+            "Мудрости": "wis",
+            "Ловкости": "dex",
+            "Телосложения": "con",
+            "Интеллекта": "int",
+        }
+
         i = 0
         for key, value in properties.items():
+            if (
+                key == PowerPropertyTitle.ATTACK
+                or PowerPropertyTitle.ATTACK.lower() in value.split(':')[0].lower()
+            ):
+                match = re.match(
+                    r"([а-яё]+)(?:\s*\+\s*(\d+))?\s+против\s+([а-яё]+)", value, re.I
+                )
+                if match:
+                    attr, bonus, defense = match.groups()
+                    attr_code = ATTRIBUTE_ATTACK_MAP.get(
+                        attr.capitalize(), attr.lower()
+                    )
+                    new_value = f"${attr_code}+atk"
+
+                    if bonus:
+                        new_value += f"+{bonus}"
+
+                    value = f"{new_value} против {defense}"
+            else:
+                # replace [Ор] to wpn+dmg
+                value = re.sub(r'(\d+)\[Ор\.?\]', r'\1*wpn+dmg', value)
+
+                # replace modifier titles to variables
+                value = re.sub(
+                    r'(?:ваш\s+)?модификатор\s+([а-яё]+)',
+                    lambda m: ATTRIBUTE_MAP.get(
+                        m.group(1).capitalize(), m.group(1).lower()
+                    ),
+                    value,
+                    flags=re.I,
+                )
+
+                # remove spaces around +
+                value = re.sub(r'\s*\+\s*', '+', value)
+
             result[f'properties-{i}-title'] = key
             result[f'properties-{i}-description'] = value
             result[f'properties-{i}-order'] = i

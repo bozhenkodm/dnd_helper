@@ -7,7 +7,7 @@ import urllib.parse
 from functools import reduce
 
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.core.files.images import ImageFile
 from django.db import models
@@ -1005,6 +1005,12 @@ class PowerAdminBase(TextFromImage):
         if obj:
             return super().get_inlines(request, obj)
         return ()
+
+    def save_model(self, request, obj, form, change):
+        if getattr(form, 'show_duplicate_warning', False):
+            messages.warning(request, '⚠️ Запись с таким именем уже существует!')
+
+        super().save_model(request, obj, form, change)
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
