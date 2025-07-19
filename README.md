@@ -15,6 +15,7 @@ A Django-based application designed to assist Dungeon Masters in creating and ma
 
 - Python 3.12+
 - Django 5.x
+- Gunicorn (production server)
 - SQLite (default database)
 
 ## Installation
@@ -45,9 +46,16 @@ poetry run python manage.py createsuperuser
 make load_data
 ```
 
-6. Start the development server:
+6. Start the server:
 ```bash
+# Development with Django's built-in server
 make run
+
+# Development with Gunicorn (recommended)
+make serve-dev
+
+# Production with Gunicorn
+make serve
 ```
 
 ## Usage
@@ -64,7 +72,9 @@ Visit `http://127.0.0.1:8000/admin/` to access the Django admin interface for ma
 
 The project includes a Makefile with convenient commands:
 
-- `make run`: Start the development server
+- `make run`: Start the Django development server
+- `make serve`: Start production server with Gunicorn (4 workers)
+- `make serve-dev`: Start development server with Gunicorn (2 workers, auto-reload)
 - `make rerun`: Full development cycle (migrations, static files, formatting, linting, and server start)
 - `make format`: Format code using Black and isort
 - `make lint`: Run linting with Flake8 and MyPy

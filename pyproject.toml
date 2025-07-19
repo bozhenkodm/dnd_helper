@@ -13,6 +13,7 @@ python = "^3.12"
 Django = "^5"
 pillow = "11.3.0"
 pytesseract = "^0"
+gunicorn = "^23"
 
 [tool.poetry.group.dev.dependencies]
 black = "^25"
