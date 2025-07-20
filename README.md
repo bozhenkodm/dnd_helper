@@ -66,6 +66,8 @@ Access the application at `http://127.0.0.1:8000/` after starting the developmen
 
 Visit `http://127.0.0.1:8000/admin/` to access the Django admin interface for managing data.
 
+For detailed information on using the admin interface and creating NPCs, see the [Admin Site and NPC Guide](docs/ADMIN_NPC_GUIDE.md).
+
 ## Development
 
 ### Make Commands
