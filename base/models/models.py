@@ -52,11 +52,14 @@ class Race(models.Model):
     name_display = models.CharField(
         verbose_name=_('Title'), max_length=NPCRaceEnum.max_description_length()
     )
+    # Fixed racial bonuses applied automatically (e.g., Dwarf gets +2 CON, +2 WIS)
     const_ability_bonus = models.ManyToManyField(
         Ability,
         related_name='races_with_const_ability',
         verbose_name=_('Constant ability bonuses'),
     )
+    # Player can choose which ability gets the bonus
+    # (e.g., Human gets +2 to any one ability)
     var_ability_bonus = models.ManyToManyField(
         Ability,
         related_name='races',
@@ -78,6 +81,8 @@ class Race(models.Model):
         WeaponType,
         verbose_name=_('Available weapon types'),
     )
+    # Controls whether this race appears in random NPC generation
+    # Non-social races might be monsters or special creatures
     is_social = models.BooleanField(
         verbose_name=_('Is race social?'),
         default=True,
@@ -102,6 +107,7 @@ class FunctionalTemplate(models.Model):
         ordering = ('title',)
 
     title = models.CharField(max_length=50, null=False, verbose_name=_('Title'))
+    # Templates are tier-based: Heroic (1), Paragon (11), Epic (21)
     min_level = models.SmallIntegerField(
         verbose_name=_('Minimal level'), default=1, choices=((1, 1), (11, 11), (21, 21))
     )
@@ -113,9 +119,11 @@ class FunctionalTemplate(models.Model):
     )
     reflex_bonus = models.SmallIntegerField(verbose_name=_('Reflex bonus'), default=0)
     will_bonus = models.SmallIntegerField(verbose_name=_('Will bonus'), default=0)
+    # Standard template bonus for death saves and other saving throws
     save_bonus = models.SmallIntegerField(
         verbose_name=_('Saving throws bonus'), default=2
     )
+    # Extra action points per encounter
     action_points_bonus = models.SmallIntegerField(
         verbose_name=_('Action points'), default=1
     )
@@ -167,20 +175,31 @@ class ParagonPath(ConstraintAbstract):
 
 
 class NPC(
-    NPCClassAbstract,
-    NPCDefenceMixin,
-    NPCExperienceAbstract,
-    NPCAbilityAbstract,
-    NPCSkillAbstract,
-    PowerMixin,
-    NPCMagicItemAbstract,
-    BonusMixin,
-    NPCFeatAbstract,
+    NPCClassAbstract,  # Class/subclass relationships and class features
+    NPCDefenceMixin,  # AC, Fortitude, Reflex, Will calculations
+    NPCExperienceAbstract,  # Experience points and level progression
+    NPCAbilityAbstract,  # Ability scores and modifiers (STR, DEX, etc.)
+    NPCSkillAbstract,  # Skill training and bonus calculations
+    PowerMixin,  # Power expression evaluation and display
+    NPCMagicItemAbstract,  # Magic item slot management
+    BonusMixin,  # Comprehensive bonus calculation system
+    NPCFeatAbstract,  # Feat management and bonuses
 ):
+    """Complete D&D 4e NPC implementation
+    using multiple mixins for modular functionality.
+
+    This model combines various abstract classes to create a fully-featured NPC with:
+    - Character basics (name, race, level, equipment)
+    - Game mechanics (abilities, defenses, skills, powers)
+    - Equipment management (weapons, armor, magic items)
+    - Advanced features (bonuses, caching, user ownership)
+    """
+
     class Meta:
         verbose_name = 'NPC'
         verbose_name_plural = 'NPCS'
 
+    # User ownership for privacy - users can only see their own NPCs
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     name = models.CharField(verbose_name=_('Name'), max_length=50)
@@ -206,6 +225,8 @@ class NPC(
         verbose_name=_('Sex'),
     )
     level = models.PositiveSmallIntegerField(verbose_name=_('Level'), default=1)
+    # Toggle between PC-like stats (False) and NPC/Monster stats (True)
+    # When True: higher bonuses, fewer healing surges, level-based magic thresholds
     is_bonus_applied = models.BooleanField(
         verbose_name='Применять бонус за уровень?',
         help_text='Бонус за уровень уменьшает количество исцелений',
@@ -220,6 +241,8 @@ class NPC(
         # limit_choices_to=models.Q(armor_type__base_armor_type__in=models.F('npc__klass__armor_types'))
         # | models.Q(armor_type_base_armor_type__in=models.F('subclass__armor_types')),
     )
+    # === WEAPON SLOT SYSTEM ===
+    # Primary hand: main weapon
     primary_hand = models.ForeignKey(
         Weapon,
         verbose_name=_('Primary hand'),
@@ -229,6 +252,7 @@ class NPC(
         related_name='in_primary_hands',
         limit_choices_to=~models.Q(weapon_type__handedness__is_one_handed__isnull=True),
     )
+    # Secondary hand: off-hand weapon, shield, or second weapon for two-weapon fighting
     secondary_hand = models.ForeignKey(
         Weapon,
         verbose_name=_('Secondary hand'),
@@ -238,6 +262,7 @@ class NPC(
         related_name='in_secondary_hands',
         limit_choices_to=~models.Q(weapon_type__handedness__is_one_handed__isnull=True),
     )
+    # No-hand slot: implements that don't require hands
     no_hand = models.ForeignKey(
         Weapon,
         verbose_name=_('No hand implement'),
@@ -278,7 +303,16 @@ class NPC(
 
     @property
     def _magic_threshold(self) -> int:
-        """Maximum magic item bonus"""
+        """Magic item enhancement limit based on character level.
+
+        D&D 4e limits magic item bonuses by level tiers:
+        - Levels 1-5: +1 items maximum
+        - Levels 6-10: +2 items maximum
+        - Levels 11-15: +3 items maximum
+        - etc.
+
+        This prevents low-level characters from using overpowered items.
+        """
         if self.is_bonus_applied:
             return (self.level - 1) // 5
         return 0
@@ -289,23 +323,42 @@ class NPC(
 
     @property
     def _level_bonus(self) -> int:
-        """NPC bonus to attacks, defences and damage"""
+        """NPC/Monster level bonus for enhanced combat effectiveness.
+
+        This bonus scales with level tiers
+        and is added to attacks, defenses, and damage.
+        Formula: (magic_threshold * 2) + 1
+        - Levels 1-5: +1 bonus
+        - Levels 6-10: +3 bonus
+        - Levels 11-15: +5 bonus
+        - etc.
+
+        Only applied when is_bonus_applied=True (NPCs/monsters, not PCs).
+        """
         if self.is_bonus_applied:
             return self._magic_threshold * 2 + 1
         return 0
 
     @property
     def max_hit_points(self) -> int:
+        """Calculate maximum hit points based on class, level, and bonuses.
+
+        Formula: (HP per level × level) + CON score + bonuses
+        - NPCs use higher HP per level than PCs (controlled by is_bonus_applied)
+        - Functional templates add additional HP scaling
+        - CON score (not modifier) is added for extra survivability
+        """
         if self.is_bonus_applied:
             hit_points_per_level = self.klass.hit_points_per_level_npc
         else:
             hit_points_per_level = self.klass.hit_points_per_level
         result = (
             hit_points_per_level * self.level
-            + self.constitution
+            + self.constitution  # Full CON score, not just modifier
             + self.calculate_bonus(NPCOtherProperties.HIT_POINTS)
         )
         if self.functional_template:
+            # Templates provide additional HP scaling for specialized roles
             result += (
                 self.functional_template.hit_points_per_level * self.level
                 + self.constitution
@@ -343,22 +396,30 @@ class NPC(
 
     @property
     def damage_bonus(self) -> int:
+        """Calculate damage bonus including special Hexblade pact mechanics.
+
+        Most classes just get the standard level bonus.
+        Hexblades get additional damage based on their pact type:
+        - Fey/Gloom Pact: uses DEX modifier
+        - Infernal/Elemental Pact: uses CON modifier
+        - Star Pact: uses INT modifier
+
+        Hexblade formula: level_bonus + pact_bonus + scaling_bonus
+        """
         base_bonus = self._level_bonus
         if self.klass.name != NPCClassEnum.HEXBLADE:
             return base_bonus
+
+        # Hexblade pact-specific damage bonuses
         damage_modifier = 0
-        if self.subclass.slug in (
-            'FEY_PACT',
-            'GLOOM_PACT',
-        ):
+        if self.subclass.slug in ('FEY_PACT', 'GLOOM_PACT'):
             damage_modifier = self.dex_mod
-        if self.subclass.slug in (
-            'INFERNAL_PACT',
-            'ELEMENTAL_PACT',
-        ):
+        if self.subclass.slug in ('INFERNAL_PACT', 'ELEMENTAL_PACT'):
             damage_modifier = self.con_mod
         if self.subclass.slug == 'STAR_PACT':
             damage_modifier = self.int_mod
+
+        # Additional scaling for higher levels: +2 every 10 levels after 5th
         return base_bonus + ((self.level - 5) // 10 * 2 + 2 + damage_modifier)
 
     @property
@@ -371,9 +432,18 @@ class NPC(
 
     @property
     def speed(self) -> int:
+        """Calculate movement speed considering armor penalties and racial traits.
+
+        Base speed comes from race, modified by:
+        - Armor speed penalties (heavy armor slows you down)
+        - Dwarves ignore armor speed penalties (racial trait)
+        - Various magical/feat bonuses
+        """
         bonus_speed = self.calculate_bonus(NPCOtherProperties.SPEED)
         if self.armor and self.race.name != NPCRaceEnum.DWARF:
+            # Most races are slowed by heavy armor
             return self.race.speed + self.armor.speed_penalty + bonus_speed
+        # Dwarves maintain full speed in armor
         return self.race.speed + bonus_speed
 
     @property
@@ -433,6 +503,16 @@ class NPC(
         return weapon.weapon_type in power.weapon_types.all()
 
     def proper_weapons_for_power(self, power: Power) -> Sequence[tuple[Weapon, ...]]:
+        """Find valid weapon combinations for a given power.
+
+        Different powers require different weapon setups:
+        - WEAPON: any single proficient weapon in primary/secondary hand
+        - IMPLEMENT: any implement the character can use (wizards need wands, etc.)
+        - TWO_WEAPONS: both hands must have proficient weapons for two-weapon fighting
+        - None: no weapons required (e.g., racial powers)
+
+        Returns list of weapon tuples that can be used with this power.
+        """
         result: list[tuple[Weapon, ...]] = []
         match power.accessory_type:
             case None:
@@ -468,20 +548,31 @@ class NPC(
         return map(str, self.items)
 
     def all_powers_qs(self) -> models.QuerySet[Power]:
+        """Get all powers this NPC has access to from various sources.
+
+        Powers can come from:
+        - Race (level 0 racial powers)
+        - Manually assigned powers (npcs=self)
+        - Class powers (up to current level)
+        - Subclass powers (up to current level)
+        - Magic items currently equipped
+        - Functional template (if assigned)
+        - Paragon path (if level 11+)
+
+        Uses distinct() to avoid duplicates from overlapping sources.
+        """
         query = (
-            models.Q(race=self.race, level=0)
-            | models.Q(npcs=self)
-            | models.Q(classes=self.klass, level__lte=self.level)
-            | models.Q(subclasses=self.subclass, level__lte=self.level)
-            | models.Q(magic_item_type__in=self.magic_item_types)
+            models.Q(race=self.race, level=0)  # Racial powers
+            | models.Q(npcs=self)  # Manually assigned
+            | models.Q(klass=self.klass, level__lte=self.level)  # Class powers
+            | models.Q(subclass=self.subclass, level__lte=self.level)  # Subclass powers
+            | models.Q(magic_item_type__in=self.magic_item_types)  # Magic item powers
         )
         if self.functional_template:
-            query |= models.Q(
-                functional_template=self.functional_template,
-            )
+            query |= models.Q(functional_template=self.functional_template)
         if self.paragon_path:
             query |= models.Q(paragon_path=self.paragon_path)
-        # TODO get rid of distinct
+        # TODO get rid of distinct - consider using .union() for better performance
         return Power.objects.filter(query).distinct().order_by('frequency', 'name')
 
     def powers_calculate(
