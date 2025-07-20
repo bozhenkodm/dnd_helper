@@ -34,10 +34,18 @@ from base.objects.powers_output import PowerDisplay, PowerPropertyDisplay
 
 
 class Effect(models.Model):
+    """Represents special effects and damage types that can be applied to powers.
+
+    Effects can be either damage types (fire, cold, necrotic, etc.) or
+    special conditions (prone, dazed, stunned, etc.) that powers can inflict.
+    Used to categorize and filter power effects in the admin interface.
+    """
+
     class Meta:
         verbose_name = _('Effect type')
         verbose_name_plural = _('Effect types')
 
+    # Combined choices from damage types and effect types (excluding NONE)
     name = models.CharField(
         verbose_name=_('Name'),
         choices=chain(
@@ -51,6 +59,7 @@ class Effect(models.Model):
         ),
         unique=True,
     )
+    # Flag to distinguish between damage types and condition effects
     is_damage = models.BooleanField(
         verbose_name=_('Is damage?'),
         help_text=_('Shows if damage can have this effect'),
@@ -62,6 +71,16 @@ class Effect(models.Model):
 
 
 class Power(models.Model):
+    """Represents a D&D 4th Edition power (spell, ability, or special action).
+
+    Powers can belong to classes, races,
+    paragon paths, magic items, or functional templates.
+    Each power has usage frequency, action type, range, damage, and special properties.
+    Powers use a sophisticated expression system
+    for dynamic calculation of attack rolls,
+    damage rolls, and other numeric values based on character statistics.
+    """
+
     class Meta:
         verbose_name = _('Power')
         verbose_name_plural = _('Powers')
@@ -70,6 +89,8 @@ class Power(models.Model):
     description = models.TextField(
         verbose_name=_('Description'), default='', blank=True
     )
+
+    # How often the power can be used (at-will, encounter, daily, passive)
     frequency = models.PositiveSmallIntegerField(
         verbose_name=_('Usage frequency'),
         choices=PowerFrequencyIntEnum.generate_choices(),
@@ -84,6 +105,10 @@ class Power(models.Model):
         blank=False,
         help_text=_('Choose, if power frequency is not passive'),
     )
+    # === POWER SOURCE RELATIONSHIPS ===
+    # Only one of these should be set per power to indicate the source
+
+    # Class-based power (e.g., Fighter, Wizard powers)
     klass = models.ForeignKey(
         'base.Class',
         related_name='powers',
@@ -92,6 +117,7 @@ class Power(models.Model):
         null=True,
         blank=True,
     )
+    # Subclass-specific power (e.g., Guardian Fighter, Great Weapon Fighter)
     subclass = models.ForeignKey(
         'base.Subclass',
         related_name='powers',
@@ -101,6 +127,7 @@ class Power(models.Model):
         blank=True,
         limit_choices_to={'subclass_id__gt': 0},
     )
+    # Racial power (e.g., Dragonborn Breath, Dwarf Second Wind)
     race = models.ForeignKey(
         'base.Race',
         verbose_name=_('Race'),
@@ -109,6 +136,7 @@ class Power(models.Model):
         blank=True,
         related_name='powers',
     )
+    # Functional template power (e.g., Lurker, Soldier template abilities)
     functional_template = models.ForeignKey(
         'base.FunctionalTemplate',
         verbose_name=_('Functional template'),
@@ -117,6 +145,7 @@ class Power(models.Model):
         null=True,
         related_name='powers',
     )
+    # Paragon path power (level 11+ advancement path)
     paragon_path = models.ForeignKey(
         'base.ParagonPath',
         verbose_name=_('Paragon path'),
@@ -125,6 +154,7 @@ class Power(models.Model):
         blank=True,
         related_name='powers',
     )
+    # Magic item power (granted by equipped magical items)
     magic_item_type = models.ForeignKey(
         'base.MagicItemType',
         verbose_name=_('Magic item type'),
@@ -133,6 +163,7 @@ class Power(models.Model):
         blank=True,
         related_name='powers',
     )
+    # Skill-based power (utility powers based on trained skills)
     skill = models.ForeignKey(
         'base.Skill',
         verbose_name=_('Skill'),
@@ -141,7 +172,10 @@ class Power(models.Model):
         blank=True,
         related_name='powers',
     )
+
+    # Minimum level required to use this power
     level = models.SmallIntegerField(verbose_name=_('Level'), default=0)
+    # Which ability modifier is used for attack rolls (STR, DEX, etc.)
     attack_ability = models.ForeignKey(
         Ability,
         verbose_name=_('Attack ability'),
@@ -149,7 +183,9 @@ class Power(models.Model):
         null=True,
         blank=True,
     )
+    # Fixed bonus added to attack rolls
     attack_bonus = models.SmallIntegerField(verbose_name=_('Attack bonus'), default=0)
+    # Which defense the attack targets (AC, Fortitude, Reflex, Will)
     defence = models.CharField(
         verbose_name=_('against'),
         choices=DefenceTypeEnum.generate_choices(is_sorted=False),
@@ -158,6 +194,8 @@ class Power(models.Model):
         null=True,
         blank=True,
     )
+
+    # Types of damage this power deals (fire, cold, necrotic, etc.)
     damage_types = models.ManyToManyField(
         Effect,
         verbose_name=_('Damage type'),
@@ -165,19 +203,25 @@ class Power(models.Model):
         limit_choices_to={'is_damage': True},
         related_name='powers',
     )
+    # Special effects this power can inflict (prone, dazed, etc.)
     effects = models.ManyToManyField(
         Effect,
         verbose_name=_('Effects'),
         blank=True,
         limit_choices_to={'is_damage': False},
     )
+
+    # Number of dice to roll (e.g., 2 in "2d6")
     dice_number = models.SmallIntegerField(verbose_name=_('Dice number'), default=1)
+    # Type of dice to roll (e.g., 6 in "2d6")
     damage_dice = models.SmallIntegerField(
         verbose_name=_('Damage dice'),
         choices=DiceIntEnum.generate_choices(),
         null=True,
         blank=True,
     )
+
+    # What type of equipment is required (weapon, implement, two weapons)
     accessory_type = models.CharField(
         verbose_name=_('Accessory type'),
         choices=AccessoryTypeEnum.generate_choices(),
@@ -185,20 +229,27 @@ class Power(models.Model):
         null=True,
         blank=True,
     )
+    # Specific weapon types required for this power
     weapon_types = models.ManyToManyField(
         'base.WeaponType',
         verbose_name=_('Weapon requirement'),
         help_text=_('for powers with weapons'),
         blank=True,
     )
+
+    # Type of attack range (melee, ranged, burst, blast, etc.)
     range_type = models.CharField(
         verbose_name=_('Range type'),
         choices=PowerRangeTypeEnum.generate_choices(is_sorted=False),
         max_length=PowerRangeTypeEnum.max_length(),
         default=PowerRangeTypeEnum.PERSONAL.value,
     )
+    # Maximum range in squares (0 for touch/weapon reach)
     range = models.SmallIntegerField(verbose_name=_('Distance'), default=0)
+    # Size of area effect (burst/blast radius)
     burst = models.SmallIntegerField(verbose_name=_('Area'), default=0)
+
+    # Reference to the D&D sourcebook where this power is defined
     book_source = models.ForeignKey(
         BookSource,
         verbose_name=_('Source'),
@@ -694,17 +745,32 @@ class PowerProperty(models.Model):
 
 
 class PowerMixin:
+    """Mixin providing power calculation and expression evaluation capabilities.
+
+    This mixin handles:
+    - Expression parsing using Reverse Polish Notation for complex calculations
+    - Dynamic power property evaluation based on character stats and equipment
+    - Attack and damage bonus calculations
+    - Weapon-specific power variations
+    - Caching of calculated power displays for performance
+
+    Used by NPC models to provide sophisticated power mechanics that adapt
+    to character equipment, level, and abilities.
+    """
+
+    # Operator definitions for expression evaluation (function, precedence)
     OPERATORS = {
-        '+': (operator.add, 0),
-        '-': (operator.sub, 0),
-        '*': (operator.mul, 1),
-        '/': (operator.floordiv, 1),
-        '^': (max, 2),
-        '_': (min, 2),
+        '+': (operator.add, 0),  # Addition
+        '-': (operator.sub, 0),  # Subtraction
+        '*': (operator.mul, 1),  # Multiplication
+        '/': (operator.floordiv, 1),  # Integer division
+        '^': (max, 2),  # Maximum function
+        '_': (min, 2),  # Minimum function
     }
 
     @property
     def _power_attrs(self: NPCProtocol) -> dict[PowerVariables | str, int]:
+        """Dictionary mapping power variables to character attribute values."""
         return {
             PowerVariables.STR: self.str_mod,
             PowerVariables.CON: self.con_mod,
@@ -869,12 +935,23 @@ class PowerMixin:
         secondary_weapon=None,
         item=None,
     ):
-        """
-        Проходим постфиксную запись;
-        При нахождении числа, парсим его и заносим в стек;
-        При нахождении бинарного оператора,
-        берём два последних значения из стека в обратном порядке;
-        Последнее значение, после отработки алгоритма, является решением выражения.
+        """Evaluate expression in Reverse Polish Notation (RPN).
+
+        Algorithm:
+        1. Process tokens from left to right
+        2. If token is a number/variable, parse it and push to stack
+        3. If token is an operator, pop two values from stack and apply operation
+        4. The final value in stack is the result
+
+        Args:
+            expression: RPN expression string (e.g., "str 3 + wpn +")
+            accessory_type: Type of accessory being used
+            weapon: Primary weapon for calculations
+            secondary_weapon: Secondary weapon for calculations
+            item: Magic item for calculations
+
+        Returns:
+            Calculated result as int or DiceRoll object
         """
         stack: list[str | int | DiceRoll] = []
         for token in expression.split():
