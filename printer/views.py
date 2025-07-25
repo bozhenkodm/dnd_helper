@@ -79,12 +79,8 @@ class SongView(View):
 
         for line in song.lyrics.split('\n'):
             line = line.strip()
-            if not line:
-                continue
             parts = line.rsplit('|', 1)
             text = parts[0].strip()
-            if not text and song.manual_mode:
-                continue
             delay = int(parts[1]) if len(parts) > 1 else 1000
             lines.append({'text': text, 'delay': delay})
 
