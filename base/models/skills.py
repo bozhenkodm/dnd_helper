@@ -9,30 +9,48 @@ from base.objects.skills import Skills
 
 
 class Skill(models.Model):
+    """
+    Represents a D&D skill.
+    Each skill is based on a specific ability
+    and may have armor penalty applied.
+    """
+
     objects = SkillQuerySet.as_manager()
 
+    # Skill name from SkillEnum (e.g., 'ACROBATICS', 'ATHLETICS')
     title = models.CharField(
         choices=SkillEnum.generate_choices(),
         max_length=SkillEnum.max_length(),
         unique=True,
     )
+    # The base ability this skill is derived from (STR, DEX, CON, etc.)
     based_on = models.ForeignKey(Ability, on_delete=models.CASCADE)
+    # Whether this skill is affected by armor check penalty
     is_penalty_applied = models.BooleanField(default=False)
 
     @property
     def name(self) -> str:
+        """Returns lowercase skill name for attribute access."""
         return self.title.lower()
 
     def __str__(self):
+        """Returns human-readable skill name."""
         return self.get_title_display()
 
 
 class NPCSkillAbstract(models.Model):
+    """
+    Abstract base class providing skill calculation functionality for NPCs.
+    Handles skill bonuses, penalties, training, and final skill values.
+    """
+
     class Meta:
         abstract = True
 
+    # Half character level bonus applied to all skills
     half_level: int
 
+    # Skills this NPC has been trained in (+5 bonus)
     trained_skills = models.ManyToManyField(
         Skill, verbose_name=_('Trained skills'), blank=True, related_name='npcs'
     )
@@ -40,7 +58,8 @@ class NPCSkillAbstract(models.Model):
     @property
     def skill_mod_bonus(self) -> Skills:
         """
-        Getting skill base ability modifier for every skill
+        Calculate base ability modifier bonus for each skill.
+        Each skill gets the modifier from its associated ability (STR, DEX, etc.).
         """
         return Skills(
             **{
@@ -51,34 +70,46 @@ class NPCSkillAbstract(models.Model):
 
     @property
     def skills(self: NPCProtocol) -> Skills:
+        """
+        Calculate final skill values by combining all bonuses and penalties.
+        Formula: half_level + trained_bonus + class_bonus + item_bonus + ability_mod - penalties
+        """
+        # Base half-level bonus applied to all skills
         half_level = Skills.init_with_const(Skill.objects.all(), value=self.half_level)
+        # +5 bonus for trained skills
         trained_skills = Skills.init_with_const(
             self.trained_skills.all(),
             value=5,
         )
+        # Bard class feature: +1 to all skills (minimum)
         if self.klass.name == NPCClassEnum.BARD:
             # TODO figure out how to move this logic to common bonus logic
             trained_skills += Skills.max(
                 trained_skills,
                 Skills.init_with_const(Skill.objects.all(), value=1),
             )
+        # Item and feat bonuses from equipment and character features
         bonus_skills = Skills(
             **{
                 k.lower(): v
                 for k, v in self.calculate_bonuses(*SkillEnum, check_cache=True).items()
             }
         )
+        # Class-specific mandatory trained skills (+5 bonus)
         mandatory_skills = self.klass.mandatory_skills.obj(value=5)
+        # Armor check penalties from equipped gear
         armor_skill_penalty = (
             self.armor.skill_penalty if self.armor else 0  # type: ignore
         )
         shield_skill_penalty = (
             self.arms_slot.skill_penalty if self.arms_slot else 0  # type: ignore
         )
+        # Apply total armor penalty to affected skills only
         penalty = Skills.init_with_const(
             Skill.objects.filter(is_penalty_applied=True),
             value=armor_skill_penalty + shield_skill_penalty,
         )
+        # Sum all components for final skill values
         return (
             half_level
             + trained_skills
@@ -175,13 +206,21 @@ class NPCSkillAbstract(models.Model):
 
     @property
     def skills_text(self: NPCProtocol) -> list[str]:
+        """
+        Generate text representation of skills with non-standard bonuses.
+        Only shows skills that differ from base (ability mod + half level).
+        """
         result = []
+        # Calculate baseline skills (ability mod + half level only)
         ordinary_skills = self.skill_mod_bonus + Skills.init_with_const(
             Skill.objects.all(), value=self.half_level
         )
+        # Compare each skill's final value to baseline
         for skill in Skill.objects.all():
             if getattr(ordinary_skills, skill.name) != (
                 value := getattr(self.skills, skill.name)
             ):
+                # Only include skills with bonuses beyond baseline
                 result.append(f'{skill}' f' +{value}')
+        # Return alphabetically sorted skill list
         return sorted(result)

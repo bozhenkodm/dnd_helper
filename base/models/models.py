@@ -553,8 +553,8 @@ class NPC(
         Powers can come from:
         - Race (level 0 racial powers)
         - Manually assigned powers (npcs=self)
-        - Class powers (up to current level)
-        - Subclass powers (up to current level)
+        - Default class powers (up to current level)
+        - Default subclass powers (up to current level)
         - Magic items currently equipped
         - Functional template (if assigned)
         - Paragon path (if level 11+)
@@ -564,8 +564,10 @@ class NPC(
         query = (
             models.Q(race=self.race, level=0)  # Racial powers
             | models.Q(npcs=self)  # Manually assigned
-            | models.Q(klass=self.klass, level__lte=self.level)  # Class powers
-            | models.Q(subclass=self.subclass, level__lte=self.level)  # Subclass powers
+            | models.Q(classes=self.klass, level__lte=self.level)  # Class powers
+            | models.Q(
+                subclasses=self.subclass, level__lte=self.level
+            )  # Subclass powers
             | models.Q(magic_item_type__in=self.magic_item_types)  # Magic item powers
         )
         if self.functional_template:

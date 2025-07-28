@@ -23,6 +23,8 @@ from base.objects.dice import DiceRoll
 
 
 class BaseArmorType(models.Model):
+    """Base armor type with fundamental armor statistics."""
+
     armor_class = models.PositiveSmallIntegerField(
         verbose_name=_('Name'), choices=ArmorTypeIntEnum.generate_choices(), unique=True
     )
@@ -37,6 +39,8 @@ class BaseArmorType(models.Model):
 
 
 class ArmorType(models.Model):
+    """Specific armor type extending base armor with additional properties."""
+
     class Meta:
         verbose_name = _('Armor type')
         verbose_name_plural = _('Armor types')
@@ -80,14 +84,18 @@ class ArmorType(models.Model):
 
     @property
     def armor_class(self) -> int:
+        """Calculate total armor class including base and bonus."""
         return self.base_armor_type.armor_class + self.bonus_armor_class
 
     @property
     def is_light(self) -> bool:
+        """Check if armor is light type based on base armor type."""
         return self.base_armor_type.is_light
 
 
 class ShieldType(models.Model):
+    """Shield type with defensive properties."""
+
     class Meta:
         verbose_name = _('Shield type')
         verbose_name_plural = _('Shield types')
@@ -105,6 +113,8 @@ class ShieldType(models.Model):
 
 
 class WeaponHandedness(models.Model):
+    """Weapon handedness properties (one-handed, two-handed, off-hand)."""
+
     name = models.CharField(
         verbose_name=_('Handedness'),
         choices=WeaponHandednessEnum.generate_choices(is_sorted=False),
@@ -120,18 +130,23 @@ class WeaponHandedness(models.Model):
 
     @property
     def is_no_hand(self) -> bool:
+        """Check if weapon requires no hands (ki focus or holy symbol)."""
         return self.is_one_handed is None
 
     @property
     def is_off_hand(self) -> bool:
+        """Check if weapon is used in off-hand."""
         return self.name == WeaponHandednessEnum.OFF_HAND
 
     @property
     def is_two_handed(self) -> bool:
+        """Check if weapon requires two hands."""
         return self.is_one_handed is False
 
 
 class WeaponGroup(models.Model):
+    """Weapon group classification (e.g., sword, bow, axe)."""
+
     class Meta:
         verbose_name = _('Weapon group')
         verbose_name_plural = _('Weapon group')
@@ -150,6 +165,8 @@ class WeaponGroup(models.Model):
 
 
 class WeaponCategory(models.Model):
+    """Weapon category classification (simple, martial, superior)."""
+
     class Meta:
         verbose_name = _('Weapon category')
         verbose_name_plural = _('Weapon categories')
@@ -173,6 +190,8 @@ class WeaponCategory(models.Model):
 
 
 class WeaponType(models.Model):
+    """Specific weapon type with all combat statistics and properties."""
+
     class Meta:
         verbose_name = _('Weapon type')
         verbose_name_plural = _('Weapon types')
@@ -252,25 +271,31 @@ class WeaponType(models.Model):
 
     @property
     def max_range(self):
+        """Calculate maximum range for ranged weapons (double normal range)."""
         return self.range * 2
 
     @property
     def is_ranged(self) -> bool:
+        """Check if weapon is ranged based on range value."""
         return self.range > 0
 
     @property
     def is_reach(self) -> bool:
+        """Check if weapon has reach property (distance of 2)."""
         return self.distance == 2
 
     def damage(self, weapon_number=1) -> str:
+        """Get damage string representation for weapon(s)."""
         return f'{self.dice_number * weapon_number}' f'{self.get_dice_display()}'
 
     @property
     def is_melee(self) -> bool:
+        """Check if weapon can be used in melee based on distance."""
         return bool(self.distance)
 
     @property
     def is_double(self) -> bool:
+        """Check if weapon is double-ended (has primary and secondary ends)."""
         try:
             return bool(self.primary_end or self.secondary_end)
         except WeaponType.DoesNotExist:
@@ -278,6 +303,7 @@ class WeaponType(models.Model):
 
     @property
     def properties_text(self) -> str:
+        """Generate comma-separated text of weapon properties."""
         # TODO localization
         result = []
         if self.brutal:
@@ -298,6 +324,8 @@ class WeaponType(models.Model):
 
 
 class MagicItemType(models.Model):
+    """Base magic item type with level scaling and categorization."""
+
     class Meta:
         verbose_name = _('Magic item type')
         verbose_name_plural = _('Magic item types')
@@ -340,6 +368,7 @@ class MagicItemType(models.Model):
         return self.name
 
     def level_range(self):
+        """Generate range of valid levels for this magic item type."""
         return range(
             self.min_level,
             self.max_level + 1,
@@ -348,6 +377,8 @@ class MagicItemType(models.Model):
 
 
 class MagicArmorType(MagicItemType):
+    """Magic item type specifically for armor with compatible armor types."""
+
     class Meta:
         verbose_name = _('Magic armor type')
         verbose_name_plural = _('Magic armor types')
@@ -359,6 +390,8 @@ class MagicArmorType(MagicItemType):
 
 
 class MagicArmItemType(MagicItemType):
+    """Magic item type for arms/shield slot items."""
+
     class Meta:
         verbose_name = _('Magic shield/arms slot item type')
         verbose_name_plural = _('Magic shield/arms slot item types')
@@ -369,6 +402,8 @@ class MagicArmItemType(MagicItemType):
 
 
 class MagicWeaponType(MagicItemType):
+    """Magic item type for weapons with weapon restrictions and crit properties."""
+
     class Meta:
         verbose_name = _('Magic weapon type')
         verbose_name_plural = _('Magic weapon types')
@@ -411,6 +446,8 @@ class MagicWeaponType(MagicItemType):
 
 
 class ItemAbstract(models.Model):
+    """Abstract base class for all items with magic properties and level scaling."""
+
     class Meta:
         abstract = True
 
@@ -427,6 +464,7 @@ class ItemAbstract(models.Model):
 
     @property
     def enhancement(self):
+        """Calculate enhancement bonus based on item level (every 5 levels)."""
         if not self.magic_item_type:
             return 0
         return (self.level - 1) // 5 + 1
@@ -437,12 +475,15 @@ class ItemAbstract(models.Model):
 
     @property
     def price(self):
+        """Calculate item price based on level using D&D 4e pricing formula."""
         if not self.level:
             return 0
         return (200 + (self.level % 5) * 160) * (5 ** (self.level // 5))
 
 
 class Armor(ItemAbstract):
+    """Armor item with armor type and enhancement bonuses."""
+
     class Meta:
         verbose_name = _('Armor')
         verbose_name_plural = _('Armors')
@@ -458,18 +499,22 @@ class Armor(ItemAbstract):
 
     @property
     def armor_class(self) -> int:
+        """Calculate total armor class including base AC and enhancement."""
         return self.armor_type.armor_class + self.enhancement
 
     @property
     def speed_penalty(self):
+        """Get speed penalty from armor type."""
         return self.armor_type.speed_penalty
 
     @property
     def skill_penalty(self):
+        """Get skill penalty from armor type."""
         return self.armor_type.skill_penalty
 
     @property
     def name(self) -> str:
+        """Generate full armor name including magic item type if present."""
         magic_item_type = (
             f', {self.magic_item_type.name}' if self.magic_item_type else ''
         )
@@ -477,12 +522,14 @@ class Armor(ItemAbstract):
 
     @property
     def is_light(self) -> bool:
+        """Check if armor is light type."""
         return self.armor_type.is_light
 
     @classmethod
     def create_on_base(
         cls, armor_type: ArmorType, magic_armor_type: MagicArmorType, level: int
     ):
+        """Create magic armor if it meets enhancement requirements and doesn't exist."""
         if (level - 1) // 5 + 1 < armor_type.minimal_enhancement:
             return
         if not cls.objects.filter(
@@ -495,6 +542,8 @@ class Armor(ItemAbstract):
 
 
 class Weapon(ItemAbstract):
+    """Weapon item with weapon type and enhancement bonuses."""
+
     class Meta:
         verbose_name = _('Weapon')
         verbose_name_plural = _('Weapons')
@@ -512,12 +561,14 @@ class Weapon(ItemAbstract):
 
     @property
     def title(self) -> str:
+        """Generate weapon title including magic item type if present."""
         if not self.magic_item_type:
             return str(self.weapon_type)
         return f'{self.weapon_type}, {self.magic_item_type}'
 
     @property
     def damage(self):
+        """Get damage string representation including enhancement bonus."""
         if not self.enhancement:
             return (
                 f'{self.weapon_type.dice_number}'
@@ -531,6 +582,7 @@ class Weapon(ItemAbstract):
 
     @property
     def damage_roll(self) -> DiceRoll:
+        """Get DiceRoll object for damage calculation."""
         return DiceRoll(
             rolls=self.weapon_type.dice_number,
             dice=DiceIntEnum(self.weapon_type.dice),
@@ -539,24 +591,30 @@ class Weapon(ItemAbstract):
 
     @property
     def prof_bonus(self):
+        """Get proficiency bonus from weapon type."""
         return self.weapon_type.prof_bonus
 
     @cached_property
     def handedness(self):
+        """Get weapon handedness with caching."""
         return self.weapon_type.handedness
 
     def groups(self):
+        """Get all weapon groups this weapon belongs to."""
         return self.weapon_type.groups.all()
 
     @cached_property
     def category(self):
+        """Get weapon category with caching."""
         return self.weapon_type.category
 
     @property
     def is_double(self) -> bool:
+        """Check if weapon is double-ended."""
         return self.weapon_type.is_double
 
     def get_attack_type(self, is_melee: bool, is_ranged: bool) -> str:
+        """Generate attack type string based on melee/ranged capabilities."""
         # TODO localization
         melee_attack_type, ranged_attack_type = '', ''
         is_melee = is_melee and self.weapon_type.is_melee
@@ -582,6 +640,7 @@ class Weapon(ItemAbstract):
     def create_on_base(
         cls, weapon_type: WeaponType, magic_weapon_type: MagicWeaponType, level: int
     ):
+        """Create magic weapon if it doesn't already exist."""
         if not cls.objects.filter(
             magic_item_type=magic_weapon_type, weapon_type=weapon_type, level=level
         ).exists():
@@ -592,6 +651,8 @@ class Weapon(ItemAbstract):
 
 
 class SimpleMagicItem(ItemAbstract):
+    """Base class for simple magic items that only require magic item type and level."""
+
     class Meta:
         verbose_name = _('Magic item')
         verbose_name_plural = _('Magic items')
@@ -604,6 +665,8 @@ class SimpleMagicItem(ItemAbstract):
 
 
 class NeckSlotItem(SimpleMagicItem):
+    """Magic item for neck slot with defense bonus."""
+
     class Meta:
         proxy = True
 
@@ -611,6 +674,7 @@ class NeckSlotItem(SimpleMagicItem):
 
     @property
     def defence_bonus(self):
+        """Get defense bonus equal to enhancement value."""
         return self.enhancement
 
     def __str__(self):
@@ -618,6 +682,8 @@ class NeckSlotItem(SimpleMagicItem):
 
 
 class HeadSlotItem(SimpleMagicItem):
+    """Magic item for head slot."""
+
     class Meta:
         proxy = True
 
@@ -625,6 +691,8 @@ class HeadSlotItem(SimpleMagicItem):
 
 
 class FeetSlotItem(SimpleMagicItem):
+    """Magic item for feet slot."""
+
     class Meta:
         proxy = True
 
@@ -632,6 +700,8 @@ class FeetSlotItem(SimpleMagicItem):
 
 
 class ArmsSlotItem(ItemAbstract):
+    """Magic item for arms slot that can also function as a shield."""
+
     class Meta:
         verbose_name = _('Hand item/shield')
         verbose_name_plural = _('Hand items/shields')
@@ -658,12 +728,15 @@ class ArmsSlotItem(ItemAbstract):
 
     @property
     def skill_penalty(self) -> int:
+        """Get skill penalty from shield type if present."""
         if not self.shield_type:
             return 0
         return self.shield_type.skill_penalty
 
 
 class WaistSlotItem(SimpleMagicItem):
+    """Magic item for waist slot."""
+
     class Meta:
         proxy = True
 
@@ -671,6 +744,8 @@ class WaistSlotItem(SimpleMagicItem):
 
 
 class RingsSlotItem(SimpleMagicItem):
+    """Magic item for ring slots."""
+
     class Meta:
         proxy = True
 
@@ -678,6 +753,8 @@ class RingsSlotItem(SimpleMagicItem):
 
 
 class HandsSlotItem(SimpleMagicItem):
+    """Magic item for hands slot."""
+
     class Meta:
         proxy = True
 
@@ -685,6 +762,8 @@ class HandsSlotItem(SimpleMagicItem):
 
 
 class NPCMagicItemAbstract(models.Model):
+    """Abstract model for NPC equipment slots containing various magic items."""
+
     class Meta:
         abstract = True
 
