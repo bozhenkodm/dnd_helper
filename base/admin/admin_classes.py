@@ -532,7 +532,11 @@ class NPCAdmin(admin.ModelAdmin):
         for level in LEVELS_WITH_ABILITY_BONUS:
             if level > npc.level:
                 break
-            for ability in form.cleaned_data[f'level{level}_abilities_bonus']:
+            level_abilities = form.cleaned_data[f'level{level}_abilities_bonus']
+            AbilityLevelBonus.objects.filter(npc=npc, level=level).filter(
+                ~models.Q(ability__in=level_abilities)
+            ).delete()
+            for ability in level_abilities:
                 if not AbilityLevelBonus.objects.filter(
                     npc=npc, level=level, ability=ability
                 ).exists():
