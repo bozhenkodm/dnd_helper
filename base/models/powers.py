@@ -326,19 +326,21 @@ class Power(models.Model):
 
     @property
     def default_target(self):
-        if self.range_type in (
-            PowerRangeTypeEnum.MELEE_WEAPON,
-            PowerRangeTypeEnum.MELEE,
-            PowerRangeTypeEnum.RANGED,
-            PowerRangeTypeEnum.MELEE_RANGED_WEAPON,
-            PowerRangeTypeEnum.RANGED_WEAPON,
-        ):
-            return 'Одно существо'
-        if self.range_type == PowerRangeTypeEnum.BURST:
-            return 'Все существа во вспышке'
-        if self.range_type == PowerRangeTypeEnum.BLAST:
-            return 'Все существа в волне'
-        return '----------'
+        match self.range_type:
+            case (
+                PowerRangeTypeEnum.MELEE_WEAPON
+                | PowerRangeTypeEnum.MELEE
+                | PowerRangeTypeEnum.RANGED
+                | PowerRangeTypeEnum.MELEE_RANGED_WEAPON
+                | PowerRangeTypeEnum.RANGED_WEAPON
+            ):
+                return 'Одно существо'
+            case PowerRangeTypeEnum.BURST:
+                return 'Все существа во вспышке'
+            case PowerRangeTypeEnum.BLAST:
+                return 'Все существа в волне'
+            case _:
+                return '----------'
 
     def attack_type(self, weapon=None) -> str:
         if (
@@ -450,7 +452,7 @@ class Power(models.Model):
 
         result = {
             'name': '',
-            'klass': None,
+            'klass': '',
             'level': 0,
             'description': '',
             'frequency': '',
@@ -508,7 +510,7 @@ class Power(models.Model):
                 description_lines.append(lines[current_line])
                 current_line += 1
             result['description'] = (
-                " ".join(description_lines) if description_lines else None
+                " ".join(description_lines) if description_lines else ''
             )
 
             RANGE_PATTERNS = [
@@ -888,41 +890,37 @@ class PowerMixin:
         secondary_weapon=None,
         item=None,
     ) -> int | DiceRoll:
-        if token.isdigit():
-            return int(token)
-        if token == PowerVariables.WPN:
-            return self._calculate_weapon_damage(weapon, accessory_type)
-        if token == PowerVariables.WPS:
-            return self._calculate_weapon_damage(secondary_weapon, accessory_type)
-        if token == PowerVariables.ATK:
-            return self._calculate_attack(
-                weapon,
-                accessory_type,
-            )
-        if token == PowerVariables.ATS:
-            return self._calculate_attack(
-                secondary_weapon,
-                accessory_type,
-            )
-        if token == PowerVariables.DMG:
-            return self._calculate_damage_bonus(weapon, accessory_type)
-        if token == PowerVariables.DMS:
-            return self._calculate_damage_bonus(secondary_weapon, accessory_type)
-        if token == PowerVariables.EHT:
-            return self.enhancement_with_magic_threshold(
-                weapon and weapon.enhancement or 0
-            )
-        if token == PowerVariables.EHS:
-            return self.enhancement_with_magic_threshold(
-                secondary_weapon and secondary_weapon.enhancement or 0
-            )
-        if token == PowerVariables.ITL:
-            if not item:
-                raise PowerInconsistent(_("This power doesn't use magic item"))
-            return item.level
-        if token in self._power_attrs:
-            return self._power_attrs[token]
-        return DiceRoll.from_str(token)
+        match token:
+            case t if t.isdigit():
+                return int(t)
+            case PowerVariables.WPN:
+                return self._calculate_weapon_damage(weapon, accessory_type)
+            case PowerVariables.WPS:
+                return self._calculate_weapon_damage(secondary_weapon, accessory_type)
+            case PowerVariables.ATK:
+                return self._calculate_attack(weapon, accessory_type)
+            case PowerVariables.ATS:
+                return self._calculate_attack(secondary_weapon, accessory_type)
+            case PowerVariables.DMG:
+                return self._calculate_damage_bonus(weapon, accessory_type)
+            case PowerVariables.DMS:
+                return self._calculate_damage_bonus(secondary_weapon, accessory_type)
+            case PowerVariables.EHT:
+                return self.enhancement_with_magic_threshold(
+                    weapon and weapon.enhancement or 0
+                )
+            case PowerVariables.EHS:
+                return self.enhancement_with_magic_threshold(
+                    secondary_weapon and secondary_weapon.enhancement or 0
+                )
+            case PowerVariables.ITL:
+                if not item:
+                    raise PowerInconsistent(_("This power doesn't use magic item"))
+                return item.level
+            case t if t in self._power_attrs:
+                return self._power_attrs[t]
+            case _:
+                return DiceRoll.from_str(token)
 
     def enhancement_with_magic_threshold(self: NPCProtocol, enhancement: int) -> int:
         return max((0, enhancement - self._magic_threshold))

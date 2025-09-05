@@ -124,7 +124,8 @@ class Bonus(models.Model):
     min_level = models.PositiveSmallIntegerField(
         default=1, verbose_name=_('Minimal level')
     )
-    # What type of stat this bonus applies to (ability, skill, defense, or other property)
+    # What type of stat this bonus applies to
+    # (ability, skill, defense, or other property)
     # Combines choices from multiple enums to cover all possible bonus targets
     bonus_type = models.CharField(
         verbose_name=_('Bonus type'),
@@ -170,17 +171,20 @@ class BonusMixin:
 
     def get_power_feats_bonuses_query(self: NPCProtocol) -> models.Q:
         """
-        Build a Django Q object to find all bonuses from powers and feats that apply to this NPC.
+        Build a Django Q object to find all bonuses from powers and feats
+        that apply to this NPC.
 
         Returns a complex query that includes bonuses from:
-        - Passive powers from the NPC's subclass, race, functional template, paragon path
+        - Passive powers from the NPC's subclass, race,
+        functional template, paragon path
         - Powers from magic items
         - Feats directly assigned to the NPC
         - Feats available to the NPC's class or subclass
 
         Only includes bonuses for which the NPC meets the minimum level requirement.
         """
-        # Start with powers from NPC's subclass (including generic subclass_id=0) and race
+        # Start with powers from NPC's subclass
+        # (including generic subclass_id=0) and race
         powers_query = models.Q(
             power__npcs=self,
             power__subclass__subclass_id__in=(self.subclass_id, 0),
@@ -225,7 +229,8 @@ class BonusMixin:
         Calculate total bonus values for the specified bonus types.
 
         Args:
-            *bonus_types: The types of bonuses to calculate (abilities, skills, defenses, etc.)
+            *bonus_types: The types of bonuses to calculate
+            (abilities, skills, defenses, etc.)
             check_cache: Whether to check cache first for existing calculations
 
         Returns:
@@ -270,7 +275,8 @@ class BonusMixin:
                 )
             ).distinct()
         )
-        # Process all possible bonus types (not just requested ones for caching efficiency)
+        # Process all possible bonus types
+        # (not just requested ones for caching efficiency)
         all_bonus_types = chain(
             AbilityEnum, SkillEnum, DefenceTypeEnum, NPCOtherProperties
         )
@@ -286,11 +292,13 @@ class BonusMixin:
                     if bonus.feat and not bonus.feat.fits(self):
                         continue
 
-                    # Find the specific magic item if this bonus comes from a magic item type
+                    # Find the specific magic item
+                    # if this bonus comes from a magic item type
                     item = None
                     if bonus.magic_item_type:
                         # TODO: This is inefficient - should be refactored
-                        # Currently searches through all magic items to find matching type
+                        # Currently searches through all magic items
+                        # to find matching type
                         for item in self.magic_items:
                             if item.magic_item_type == bonus.magic_item_type:
                                 break

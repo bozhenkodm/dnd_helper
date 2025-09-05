@@ -378,11 +378,13 @@ class NPC(
 
     @property
     def _tier(self) -> int:
-        if self.level < 11:
-            return 0
-        if self.level >= 21:
-            return 2
-        return 1
+        match self.level:
+            case level if level < 11:
+                return 0
+            case level if level >= 21:
+                return 2
+            case _:
+                return 1
 
     @property
     def surges(self) -> int:
@@ -411,13 +413,15 @@ class NPC(
             return base_bonus
 
         # Hexblade pact-specific damage bonuses
-        damage_modifier = 0
-        if self.subclass.slug in ('FEY_PACT', 'GLOOM_PACT'):
-            damage_modifier = self.dex_mod
-        if self.subclass.slug in ('INFERNAL_PACT', 'ELEMENTAL_PACT'):
-            damage_modifier = self.con_mod
-        if self.subclass.slug == 'STAR_PACT':
-            damage_modifier = self.int_mod
+        match self.subclass.slug:
+            case 'FEY_PACT' | 'GLOOM_PACT':
+                damage_modifier = self.dex_mod
+            case 'INFERNAL_PACT' | 'ELEMENTAL_PACT':
+                damage_modifier = self.con_mod
+            case 'STAR_PACT':
+                damage_modifier = self.int_mod
+            case _:
+                damage_modifier = 0
 
         # Additional scaling for higher levels: +2 every 10 levels after 5th
         return base_bonus + ((self.level - 5) // 10 * 2 + 2 + damage_modifier)
@@ -513,11 +517,11 @@ class NPC(
 
         Returns list of weapon tuples that can be used with this power.
         """
-        result: list[tuple[Weapon, ...]] = []
         match power.accessory_type:
             case None:
                 return [()]
             case AccessoryTypeEnum.WEAPON:
+                result = []
                 for weapon in filter(None, (self.primary_hand, self.secondary_hand)):
                     if (
                         weapon
@@ -527,10 +531,13 @@ class NPC(
                         != WeaponCategoryIntEnum.IMPLEMENT
                     ):
                         result.append((weapon,))
+                return result
             case AccessoryTypeEnum.IMPLEMENT:
+                result = []
                 for weapon in (self.primary_hand, self.secondary_hand, self.no_hand):
                     if weapon and self.is_implement_proficient(weapon):
                         result.append((weapon,))
+                return result
             case AccessoryTypeEnum.TWO_WEAPONS:
                 if (
                     self.primary_hand
@@ -540,8 +547,10 @@ class NPC(
                     and self._is_weapon_available_for_power(power, self.primary_hand)
                     and self._is_weapon_available_for_power(power, self.secondary_hand)
                 ):
-                    result.append((self.primary_hand, self.secondary_hand))
-        return result
+                    return [(self.primary_hand, self.secondary_hand)]
+                return []
+            case _:
+                return []
 
     @property
     def inventory_text(self) -> Iterable[str]:

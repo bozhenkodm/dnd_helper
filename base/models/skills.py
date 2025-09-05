@@ -72,7 +72,8 @@ class NPCSkillAbstract(models.Model):
     def skills(self: NPCProtocol) -> Skills:
         """
         Calculate final skill values by combining all bonuses and penalties.
-        Formula: half_level + trained_bonus + class_bonus + item_bonus + ability_mod - penalties
+        Formula: half_level + trained_bonus + class_bonus
+        + item_bonus + ability_mod - penalties
         """
         # Base half-level bonus applied to all skills
         half_level = Skills.init_with_const(Skill.objects.all(), value=self.half_level)
