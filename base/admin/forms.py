@@ -593,7 +593,6 @@ class PowerForm(forms.ModelForm):
                 duplicates = duplicates.exclude(pk=self.instance.pk)
 
             if duplicates.exists():
-                self.add_error('name', 'Запись с таким именем уже существует!')
                 self.show_duplicate_warning = True
         return cleaned_data
 
