@@ -1,4 +1,5 @@
 import json
+import re
 
 from django.forms import inlineformset_factory
 from django.http import HttpResponseRedirect, JsonResponse
@@ -7,6 +8,7 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import DetailView, ListView
 
+from base.objects.dice import DiceRoll
 from printer.forms import ParticipantPlaceForm
 from printer.models import GridMap, ParticipantPlace, PrintableObject, Song
 
@@ -89,3 +91,69 @@ class SongView(View):
             'printer/song.html',
             {'song': song, 'lines': lines, 'auto_mode': song.auto_mode},
         )
+
+
+class DiceRollView(View):
+    template_name = 'printer/dice_roll.html'
+
+    def parse_dice_expression(self, expression):
+        expression = expression.replace(' ', '').lower()
+
+        dice_pattern = r'(\d*)([dk])(\d+)'
+        number_pattern = r'(?<![dk])(?<!\d)(\d+)(?![dk])'
+
+        dice_matches = re.findall(dice_pattern, expression)
+        number_matches = re.findall(number_pattern, expression)
+
+        total_result = 0
+        roll_details = []
+
+        for num_str, d_char, sides_str in dice_matches:
+            num_dice = int(num_str) if num_str else 1
+            sides = int(sides_str)
+
+            try:
+                dice_roll = DiceRoll.from_str(f"{num_dice}d{sides}")
+                result = dice_roll.roll()
+                total_result += result
+                roll_details.append(
+                    {'expression': f"{num_dice}d{sides}", 'result': result}
+                )
+            except (ValueError, KeyError):
+                pass
+
+        for num_str in number_matches:
+            modifier = int(num_str)
+            total_result += modifier
+            roll_details.append({'expression': f"+{modifier}", 'result': modifier})
+
+        return total_result, roll_details
+
+    def get(self, request):
+        return render(request, self.template_name, {})
+
+    def post(self, request):
+        expression = request.POST.get('expression', '').strip()
+
+        if not expression:
+            return render(
+                request, self.template_name, {'error': 'Please enter a dice expression'}
+            )
+
+        try:
+            total, details = self.parse_dice_expression(expression)
+
+            return render(
+                request,
+                self.template_name,
+                {'expression': expression, 'total': total, 'details': details},
+            )
+        except Exception as e:
+            return render(
+                request,
+                self.template_name,
+                {
+                    'expression': expression,
+                    'error': f'Invalid dice expression: {str(e)}',
+                },
+            )

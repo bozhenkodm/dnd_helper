@@ -1,6 +1,7 @@
 from django.urls import path
 
 from printer.views import (
+    DiceRollView,
     GridMapEditView,
     GridMapListView,
     GridMapUpdateCoordsView,
@@ -24,4 +25,5 @@ urlpatterns = [
         name='gridmap_update_coords',
     ),
     path('song/<int:song_id>/', SongView.as_view(), name='song-detail'),
+    path('dice-roll/', DiceRollView.as_view(), name='dice-roll'),
 ]
