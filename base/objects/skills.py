@@ -92,5 +92,5 @@ class Skills:
         )
 
     @classmethod
-    def init_with_const(cls, skills: QuerySet['Skill'], value: int) -> "Skills":
+    def init_with_const(cls, skills: QuerySet['Skill'], value: int) -> 'Skills':
         return Skills(**{skill.name: value for skill in skills})

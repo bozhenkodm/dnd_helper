@@ -101,10 +101,10 @@ class NPCModelForm(forms.ModelForm):
             for level in LEVELS_WITH_ABILITY_BONUS:
                 if level > self.instance.level:
                     break
-                self.fields[f'level{level}_abilities_bonus'].initial = (
-                    Ability.objects.filter(
-                        level_bonuses__npc=self.instance, level_bonuses__level=level
-                    )
+                self.fields[
+                    f'level{level}_abilities_bonus'
+                ].initial = Ability.objects.filter(
+                    level_bonuses__npc=self.instance, level_bonuses__level=level
                 )
 
             self.fields['trained_skills'] = forms.ModelMultipleChoiceField(
@@ -177,15 +177,15 @@ class NPCModelForm(forms.ModelForm):
                 )
                 .order_by('magic_item_type__name', 'shield_type__base_shield_type')
             )
-            self.fields['left_ring_slot'].queryset = (
-                RingsSlotItem.objects.select_related('magic_item_type').filter(
-                    magic_item_type__slot=RingsSlotItem.SLOT.value
-                )
+            self.fields[
+                'left_ring_slot'
+            ].queryset = RingsSlotItem.objects.select_related('magic_item_type').filter(
+                magic_item_type__slot=RingsSlotItem.SLOT.value
             )
-            self.fields['right_ring_slot'].queryset = (
-                RingsSlotItem.objects.select_related('magic_item_type').filter(
-                    magic_item_type__slot=RingsSlotItem.SLOT.value
-                )
+            self.fields[
+                'right_ring_slot'
+            ].queryset = RingsSlotItem.objects.select_related('magic_item_type').filter(
+                magic_item_type__slot=RingsSlotItem.SLOT.value
             )
             self.fields['gloves_slot'].queryset = HandsSlotItem.objects.select_related(
                 'magic_item_type'
@@ -311,8 +311,7 @@ class NPCModelForm(forms.ModelForm):
             'paragon_path'
         ):
             message = (
-                'Неигровые персонажи c бонусом уровня '
-                'не могут иметь путь совершенства'
+                'Неигровые персонажи c бонусом уровня не могут иметь путь совершенства'
             )
             self.add_errors('paragon_path', 'is_bonus_applied', message)
 

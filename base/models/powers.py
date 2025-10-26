@@ -1,7 +1,7 @@
 import operator
 import re
+from collections.abc import Sequence
 from itertools import chain
-from typing import Sequence
 
 from django.core.cache import cache
 from django.db import models
@@ -292,7 +292,7 @@ class Power(models.Model):
 
     def category(
         self,
-        weapons: Sequence["Weapon"] = (),
+        weapons: Sequence['Weapon'] = (),
     ):
         # TODO localization
         if self.magic_item_type:
@@ -319,7 +319,7 @@ class Power(models.Model):
             if self.frequency == PowerFrequencyIntEnum.PASSIVE:
                 result.append('Пассивный')
         except (TypeError, IndexError, ValueError) as e:
-            raise PowerInconsistent(f'Power {self} is improperly configured: {e}')
+            raise PowerInconsistent(f'Power {self} is improperly configured') from e
         if not result:
             raise PowerInconsistent(f'Power {self} is improperly configured')
         return '; '.join(result)
@@ -399,7 +399,7 @@ class Power(models.Model):
             )
         raise PowerInconsistent(_('Wrong attack type'))
 
-    def keywords(self, weapons: Sequence["Weapon"] = ()) -> str:
+    def keywords(self, weapons: Sequence['Weapon'] = ()) -> str:
         if self.frequency == PowerFrequencyIntEnum.PASSIVE:
             return ''
         if weapons:
@@ -476,7 +476,7 @@ class Power(models.Model):
                     break
 
             first_line = ' '.join(first_line)
-            first_line_pattern = re.compile(r"^(.*?) (\S+) ([\w\-]+) (\d+)$")
+            first_line_pattern = re.compile(r'^(.*?) (\S+) ([\w\-]+) (\d+)$')
             match = first_line_pattern.match(first_line)
 
             if match:
@@ -485,12 +485,12 @@ class Power(models.Model):
 
                 # Преобразование класса в именительный падеж
                 match class_genitive:
-                    case s if s.endswith("а"):
-                        class_nominative = s.rstrip("а")
+                    case s if s.endswith('а'):
+                        class_nominative = s.rstrip('а')
                     case s if s.endswith('ея'):
-                        class_nominative = s.rstrip("я") + "й"
-                    case s if s.endswith("я"):
-                        class_nominative = s.rstrip("я") + "ь"
+                        class_nominative = s.rstrip('я') + 'й'
+                    case s if s.endswith('я'):
+                        class_nominative = s.rstrip('я') + 'ь'
                     case _:
                         class_nominative = class_genitive
                 class_nominative = class_nominative.capitalize()
@@ -505,12 +505,12 @@ class Power(models.Model):
             description_lines = []
             while current_line < len(lines) and not any(
                 lines[current_line].lower().startswith(keyword)
-                for keyword in ["на сцену", "на день", "неограниченный"]
+                for keyword in ['на сцену', 'на день', 'неограниченный']
             ):
                 description_lines.append(lines[current_line])
                 current_line += 1
             result['description'] = (
-                " ".join(description_lines) if description_lines else ''
+                ' '.join(description_lines) if description_lines else ''
             )
 
             RANGE_PATTERNS = [
@@ -608,14 +608,12 @@ class Power(models.Model):
                     accessory_match = re.findall(r'(оружие|инструмент)', line, re.I)
                     if accessory_match:
                         result['accessory_type'] = list(
-                            set(
-                                [
-                                    AccessoryTypeEnum.get_by_description(
-                                        a.capitalize()
-                                    ).value
-                                    for a in accessory_match
-                                ]
-                            )
+                            {
+                                AccessoryTypeEnum.get_by_description(
+                                    a.capitalize()
+                                ).value
+                                for a in accessory_match
+                            }
                         )
 
                 if not result['range_type']:
@@ -639,24 +637,24 @@ class Power(models.Model):
                             break
 
         except (ValueError, IndexError, AttributeError) as e:
-            print(f"Ошибка парсинга: {str(e)}")
+            print(f'Ошибка парсинга: {str(e)}')
 
         ATTRIBUTE_ATTACK_MAP = {
-            "Сила": "str",
-            "Харизма": "cha",
-            "Мудрость": "wis",
-            "Ловкость": "dex",
-            "Телосложение": "con",
-            "Интеллект": "int",
+            'Сила': 'str',
+            'Харизма': 'cha',
+            'Мудрость': 'wis',
+            'Ловкость': 'dex',
+            'Телосложение': 'con',
+            'Интеллект': 'int',
         }
 
         ATTRIBUTE_MAP = {
-            "Силы": "str",
-            "Харизмы": "cha",
-            "Мудрости": "wis",
-            "Ловкости": "dex",
-            "Телосложения": "con",
-            "Интеллекта": "int",
+            'Силы': 'str',
+            'Харизмы': 'cha',
+            'Мудрости': 'wis',
+            'Ловкости': 'dex',
+            'Телосложения': 'con',
+            'Интеллекта': 'int',
         }
 
         i = 0
@@ -666,19 +664,19 @@ class Power(models.Model):
                 or PowerPropertyTitle.ATTACK.lower() in value.split(':')[0].lower()
             ):
                 match = re.match(
-                    r"([а-яё]+)(?:\s*\+\s*(\d+))?\s+против\s+([а-яё]+)", value, re.I
+                    r'([а-яё]+)(?:\s*\+\s*(\d+))?\s+против\s+([а-яё]+)', value, re.I
                 )
                 if match:
                     attr, bonus, defense = match.groups()
                     attr_code = ATTRIBUTE_ATTACK_MAP.get(
                         attr.capitalize(), attr.lower()
                     )
-                    new_value = f"${attr_code}+atk"
+                    new_value = f'${attr_code}+atk'
 
                     if bonus:
-                        new_value += f"+{bonus}"
+                        new_value += f'+{bonus}'
 
-                    value = f"{new_value} против {defense}"
+                    value = f'{new_value} против {defense}'
             else:
                 # replace [Ор] to wpn+dmg
                 value = re.sub(r'(\d+)\[Ор\.?\]', r'\1*wpn+dmg', value)
@@ -853,7 +851,7 @@ class PowerMixin:
         return result
 
     def _calculate_attack(
-        self: NPCProtocol, weapon: "Weapon", accessory_type: AccessoryTypeEnum | None
+        self: NPCProtocol, weapon: 'Weapon', accessory_type: AccessoryTypeEnum | None
     ) -> int:
         if not weapon:
             return self.attack_bonus()
@@ -1050,7 +1048,8 @@ class PowerMixin:
         """
         properties: dict[str, PowerProperty] = {}
         for prop in power.properties.filter(
-            level__lte=self.level, subclass__in=(self.subclass_id, 0)  # type: ignore
+            level__lte=self.level,
+            subclass__in=(self.subclass_id, 0),  # type: ignore
         ).order_by('-subclass'):
             key = f'{prop.get_displayed_title()},{prop.order}'
             if key not in properties or properties[key].level < prop.level:
@@ -1075,7 +1074,7 @@ class PowerMixin:
         self: NPCProtocol,
         accessory_type: AccessoryTypeEnum | None,
         string: str,
-        weapons: Sequence["Weapon"] = (),
+        weapons: Sequence['Weapon'] = (),
         item: ItemAbstract | None = None,
     ):
         try:
@@ -1110,7 +1109,7 @@ class PowerMixin:
         self: NPCProtocol,
         *,
         power: Power,
-        weapons: Sequence["Weapon"] = (),
+        weapons: Sequence['Weapon'] = (),
         item: ItemAbstract | None = None,
     ) -> dict[str, str]:
         return PowerDisplay(

@@ -133,8 +133,10 @@ class Party(models.Model):
     members = models.ManyToManyField(
         PlayerCharacter, verbose_name=_('Player characters')
     )
-    npc_members = models.ManyToManyField(
-        NPC, verbose_name=_('Non player characters'), blank=True  # Allied NPCs
+    npc_members = models.ManyToManyField(  # Allied NPCs
+        NPC,
+        verbose_name=_('Non player characters'),
+        blank=True,
     )
 
     def __str__(self):
@@ -321,7 +323,7 @@ class Encounter(models.Model):
             participants.append(
                 EncounterParticipants(
                     encounter=self,
-                    name=f"{npc.name}, {npc.klass}",  # Include class for clarity
+                    name=f'{npc.name}, {npc.klass}',  # Include class for clarity
                     initiative=npc.initiative
                     + DiceIntEnum.D20.roll(),  # Always roll for NPCs
                     ac=npc.armor_class,
@@ -410,7 +412,7 @@ class EncounterParticipants(models.Model):
             return self.name
         return f'{self.name} №{self.number}'
 
-    def move_after(self, other: "EncounterParticipants"):
+    def move_after(self, other: 'EncounterParticipants'):
         """Move this participant's initiative to just after another.
 
         Sets initiative to 0.5 less than the target participant,

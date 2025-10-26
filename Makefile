@@ -2,10 +2,8 @@ rerun:
 	poetry run python manage.py makemigrations
 	poetry run python manage.py migrate
 	poetry run python manage.py collectstatic --noinput
-	poetry run black -S .
-	poetry run isort .
-	poetry run flake8
-	#poetry run mypy .
+	poetry run ruff format
+	poetry run ruff check --fix
 	DJANGO_RUNSERVER_HIDE_WARNING=true poetry run python manage.py runserver 0.0.0.0:8000
 
 run:
@@ -18,13 +16,10 @@ serve-dev:
 	poetry run gunicorn dnd_helper.wsgi:application --bind 127.0.0.1:8000 --workers 2 --reload --timeout 60
 
 format:
-	poetry run black -S .
-	poetry run isort .
+	poetry run ruff format
 
 lint:
-	poetry run flake8
-	poetry run mypy .
-	#poetry run vulture .
+	poetry run ruff check --fix
 
 
 shell:

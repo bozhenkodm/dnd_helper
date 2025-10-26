@@ -1,6 +1,7 @@
+from collections.abc import Callable, Iterable, Sequence
 from enum import Enum, IntEnum
 from itertools import chain
-from typing import Any, Callable, Iterable, Self, Sequence
+from typing import Any, Self
 
 from django.db import models
 

@@ -46,13 +46,13 @@ class Command(BaseCommand):
                 if len(args) == 1:
                     typing_imports.add('Optional')
                     inner = process_annotation(args[0])
-                    return f"Optional[{inner}]"
+                    return f'Optional[{inner}]'
 
             # Handle Union types
             if get_origin(annotation) is Union:
                 typing_imports.add('Union')
                 args = [process_annotation(a) for a in get_args(annotation)]
-                return f"Union[{', '.join(args)}]"
+                return f'Union[{", ".join(args)}]'
 
             # Handle other generic types
             origin = get_origin(annotation)
@@ -64,7 +64,7 @@ class Command(BaseCommand):
                 if origin.__module__ != 'builtins':
                     typing_imports.add(origin_name)
                 processed_args = ', '.join(process_annotation(arg) for arg in args)
-                return f"{origin_name}[{processed_args}]"
+                return f'{origin_name}[{processed_args}]'
 
             # Handle ForwardRefs and string annotations
             if isinstance(annotation, ForwardRef):

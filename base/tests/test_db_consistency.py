@@ -35,6 +35,6 @@ def test_npcs_are_valid(client):
 @pytest.mark.django_db
 def test_exist_non_enhanced_weapon():
     for wt in WeaponType.objects.all():
-        assert Weapon.objects.filter(
-            weapon_type=wt, level=0
-        ).exists(), f'{wt} has no weapon instance'
+        assert Weapon.objects.filter(weapon_type=wt, level=0).exists(), (
+            f'{wt} has no weapon instance'
+        )

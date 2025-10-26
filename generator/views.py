@@ -113,7 +113,7 @@ class FantasyNameView(GenerateNameFormView):
             else:
                 replacements[i] = random.choice(consolants)
         self.name = ''.join(
-            replacements.get(i, l) for i, l in enumerate(name)
+            replacements.get(i, letter) for i, letter in enumerate(name)
         ).capitalize()
         return self.name
 

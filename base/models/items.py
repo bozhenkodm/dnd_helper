@@ -248,7 +248,7 @@ class WeaponType(models.Model):
     is_small = models.BooleanField(default=False)
     is_defensive = models.BooleanField(default=False)
     primary_end = models.OneToOneField(
-        "self",
+        'self',
         verbose_name=_('Primary end'),
         on_delete=models.CASCADE,
         null=True,
@@ -286,7 +286,7 @@ class WeaponType(models.Model):
 
     def damage(self, weapon_number=1) -> str:
         """Get damage string representation for weapon(s)."""
-        return f'{self.dice_number * weapon_number}' f'{self.get_dice_display()}'
+        return f'{self.dice_number * weapon_number}{self.get_dice_display()}'
 
     @property
     def is_melee(self) -> bool:
@@ -571,8 +571,7 @@ class Weapon(ItemAbstract):
         """Get damage string representation including enhancement bonus."""
         if not self.enhancement:
             return (
-                f'{self.weapon_type.dice_number}'
-                f'{self.weapon_type.get_dice_display()}'
+                f'{self.weapon_type.dice_number}{self.weapon_type.get_dice_display()}'
             )
         return (
             f'{self.weapon_type.dice_number}'
@@ -623,8 +622,7 @@ class Weapon(ItemAbstract):
             melee_attack_type = f'Рукопашный {self.weapon_type.distance}'
         if is_ranged:
             ranged_attack_type = (
-                f'Дальнобойный '
-                f'{self.weapon_type.range}/{self.weapon_type.max_range}'
+                f'Дальнобойный {self.weapon_type.range}/{self.weapon_type.max_range}'
             )
         if is_melee and is_ranged:
             return f'{melee_attack_type} или {ranged_attack_type}'
@@ -722,9 +720,7 @@ class ArmsSlotItem(ItemAbstract):
             return f'{self.magic_item_type} {self.level} уровня'
         if not self.magic_item_type and self.shield_type:
             return str(self.shield_type)
-        return (
-            f'{self.magic_item_type}' f' ({self.shield_type})' f' {self.level} уровня'
-        )
+        return f'{self.magic_item_type} ({self.shield_type}) {self.level} уровня'
 
     @property
     def skill_penalty(self) -> int:

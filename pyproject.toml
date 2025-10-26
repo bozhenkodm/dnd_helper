@@ -11,37 +11,24 @@ version = "1.0.0"
 [tool.poetry.dependencies]
 python = "^3.12"
 Django = "^5"
-pillow = "11.3.0"
+pillow = "12"
 pytesseract = "^0"
 gunicorn = "^23"
 
 [tool.poetry.group.dev.dependencies]
-black = "^25"
-isort = "^6"
 ipython = "^9"
-flake8 = "^7"
 mypy = "^1"
 django-stubs = "^5"
 django-debug-toolbar = "^6"
-pytest = "^8"
+pytest = "^9"
 pytest-django = "^4"
 pre-commit = "^4"
 vulture = "^2"
+ruff = "0.14.4"
 
-[tool.black]
-include = '\.py$'
-skip-string-normalization = true
-target-version = ['py312']
-
-[tool.isort]
-profile = "black"
-line_length = 88
-multi_line_output = 3
-include_trailing_comma = true
-combine_as_imports = true
-
-[tool.flake8]
-max-line-length = 88
+[tool.ruff]
+line-length = 88
+target-version = "py312"
 exclude = [
     ".git",
     "__pycache__",
@@ -49,12 +36,32 @@ exclude = [
     "old",
     "build",
     "dist",
-    "*/migrations",
-    "settings.py",
     "base/models/__init__.py",
-    "whitelist.py"
+    "whitelist.py",
 ]
-ignore = ["W503", "E402"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort (import sorting)
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "E402",  # module level import not at top of file
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+skip-magic-trailing-comma = false
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "dnd_helper.settings"

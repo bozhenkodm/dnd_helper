@@ -222,6 +222,6 @@ class NPCSkillAbstract(models.Model):
                 value := getattr(self.skills, skill.name)
             ):
                 # Only include skills with bonuses beyond baseline
-                result.append(f'{skill}' f' +{value}')
+                result.append(f'{skill} +{value}')
         # Return alphabetically sorted skill list
         return sorted(result)

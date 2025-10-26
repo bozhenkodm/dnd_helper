@@ -825,9 +825,7 @@ class WeaponAdmin(admin.ModelAdmin):
             kwargs['queryset'] = MagicItemType.objects.filter(
                 slot=MagicItemSlot.WEAPON.value
             ).order_by('name')
-        return super(WeaponAdmin, self).formfield_for_foreignkey(
-            db_field, request, **kwargs
-        )
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     @admin.display(description='Категория оружия')
     def category(self, obj):
@@ -944,7 +942,7 @@ class PowerAdminBase(TextFromImage):
     @admin.display(description='Синтаксис')
     def syntax(self, obj):
         return textwrap.dedent(
-            '''
+            """
             str - модификатор силы
             con - модификатор телосложения
             dex - модификатор ловкости
@@ -966,7 +964,7 @@ class PowerAdminBase(TextFromImage):
             поддерживаются операции +, -, *, / с целыми числами, ^ (max), _ (min).
             Атака по умолчанию $[ATTACK_ATTRIBUTE]+atk+[power.attack_bonus]
             Урон по умолчанию $wpn+dmg / $[damage_dice]+dmg+[ATTACK_ATTRIBUTE]
-            '''
+            """
         )
 
     def get_fields(self, request, obj=None):
@@ -1271,14 +1269,14 @@ class MonsterAdmin(TextFromImage):
 
         # Имя и Тип
         if lines:
-            types = r"(Миньон|Артиллерия|Громила|Контроллер|Налётчик|Соглядатай|Солдат)"
-            name_type_match = re.match(rf"(.+?)\s+{types}\s+(\d+) уровня", lines[0])
+            types = r'(Миньон|Артиллерия|Громила|Контроллер|Налётчик|Соглядатай|Солдат)'
+            name_type_match = re.match(rf'(.+?)\s+{types}\s+(\d+) уровня', lines[0])
             if name_type_match:
                 obj.name = name_type_match.group(1).strip()
                 obj.role = name_type_match.group(2)
                 obj.level = int(name_type_match.group(3))
 
-        size_pattern = r"(Крошечный|Средний|Маленький|Большой|Огромный|Гигантский)"
+        size_pattern = r'(Крошечный|Средний|Маленький|Большой|Огромный|Гигантский)'
         for line in lines:
             if re.search(size_pattern, line):
                 obj.size = SizeIntEnum.get_by_description(
@@ -1288,7 +1286,7 @@ class MonsterAdmin(TextFromImage):
 
         # Инициатива и Внимательность
         for line in lines:
-            initiative_match = re.search(r"Инициатива\s*([+-]\d+)", line)
+            initiative_match = re.search(r'Инициатива\s*([+-]\d+)', line)
             # perception_match = re.search(r"Внимательность\s*([+-]\d+)", line)
             hit_points_match = re.search(r'Хиты\s*(\d+)', line)
 
@@ -1301,10 +1299,10 @@ class MonsterAdmin(TextFromImage):
 
         # Защиты
         defenses = {
-            'armor_class': r"КД\s*(\d+)",
-            'fortitude': r"Стойкость\s*(\d+)",
-            'reflex': r"Реакция\s*(\d+)",
-            'will': r"Воля\s*(\d+)",
+            'armor_class': r'КД\s*(\d+)',
+            'fortitude': r'Стойкость\s*(\d+)',
+            'reflex': r'Реакция\s*(\d+)',
+            'will': r'Воля\s*(\d+)',
         }
 
         for key, pattern in defenses.items():
@@ -1312,11 +1310,11 @@ class MonsterAdmin(TextFromImage):
             if match:
                 setattr(obj, key, int(match.group(1)))
 
-        hp_match = re.search(r"Хиты\s*(\d+)", text)
+        hp_match = re.search(r'Хиты\s*(\d+)', text)
         if hp_match:
             obj.hip_points = int(hp_match.group(1))
 
-        speed_match = re.search(r"Скорость\s*(\d+)", text)
+        speed_match = re.search(r'Скорость\s*(\d+)', text)
         if speed_match:
             obj.speed = int(speed_match.group(1))
 

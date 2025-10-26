@@ -39,7 +39,7 @@ class Constraint(models.Model):
         },
     )
     object_id = models.PositiveIntegerField(default=0)
-    belongs_to = GenericForeignKey("content_type", "object_id")
+    belongs_to = GenericForeignKey('content_type', 'object_id')
 
     def __str__(self):
         return self.name or f'{self.belongs_to}'
@@ -141,12 +141,10 @@ class PropertiesCondition(models.Model):
             ),
         ),
         max_length=max(
-            map(
-                lambda x: x.max_length(),
-                (
-                    AbilityEnum,
-                    NPCOtherProperties,
-                ),
+            x.max_length()
+            for x in (
+                AbilityEnum,
+                NPCOtherProperties,
             )
         ),
     )

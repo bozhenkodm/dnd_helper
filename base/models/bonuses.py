@@ -36,7 +36,7 @@ class Bonus(models.Model):
     # Link to a passive power that provides this bonus
     # Limited to level 0 passive powers only
     power = models.ForeignKey(
-        "base.Power",
+        'base.Power',
         verbose_name=_('Power'),
         null=True,
         blank=True,
@@ -47,7 +47,7 @@ class Bonus(models.Model):
     )
     # Link to a feat that provides this bonus
     feat = models.ForeignKey(
-        "base.Feat",
+        'base.Feat',
         verbose_name=_('Feat'),
         null=True,
         blank=True,
@@ -136,15 +136,15 @@ class Bonus(models.Model):
             NPCOtherProperties.generate_choices(),
         ),
         max_length=max(
-            map(
-                lambda x: x.max_length(),
-                (
+            (
+                x.max_length()
+                for x in (
                     AbilityEnum,
                     SkillEnum,
                     DefenceTypeEnum,
                     NPCOtherProperties,
-                ),
-            )
+                )
+            ),
         ),
         null=True,
         blank=True,
@@ -216,9 +216,7 @@ class BonusMixin:
             | models.Q(
                 feat__subclasses=self.subclass
             )  # Feats available to NPC's subclass
-        ) & models.Q(
-            min_level__lte=self.level
-        )  # NPC must meet minimum level
+        ) & models.Q(min_level__lte=self.level)  # NPC must meet minimum level
 
     def calculate_bonuses(
         self: NPCProtocol,
@@ -273,7 +271,8 @@ class BonusMixin:
                         item.magic_item_type for item in self.magic_items
                     )
                 )
-            ).distinct()
+            )
+            .distinct()
         )
         # Process all possible bonus types
         # (not just requested ones for caching efficiency)

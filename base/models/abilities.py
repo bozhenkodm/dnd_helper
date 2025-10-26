@@ -276,7 +276,7 @@ class NPCAbilityAbstract(models.Model):
         # Get the base modifier
         mod = getattr(self, ability.mod)
         # Format: 'STR 16 (+5)' where +5 includes half-level bonus
-        return f'{str(ability)[:3]} ' f'{ability_value} ({mod + self.half_level})'
+        return f'{str(ability)[:3]} {ability_value} ({mod + self.half_level})'
 
     @property
     def abilities_texts(self) -> list[str]:
@@ -285,4 +285,4 @@ class NPCAbilityAbstract(models.Model):
         Returns:
             List of formatted ability strings for display
         """
-        return list(self.get_ability_text(ability) for ability in Ability.objects.all())
+        return [self.get_ability_text(ability) for ability in Ability.objects.all()]

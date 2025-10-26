@@ -27,7 +27,7 @@ class GridMapView(DetailView):
 
 
 class GridMapEditView(View):
-    template_name = "printer/gridmap_edit.html"
+    template_name = 'printer/gridmap_edit.html'
 
     def get(self, request, *args, **kwargs):
         grid_map = get_object_or_404(GridMap, pk=self.kwargs['pk'])
@@ -72,7 +72,6 @@ class GridMapUpdateCoordsView(View):
 
 
 class SongView(View):
-
     def get(self, request, song_id):
         song = get_object_or_404(Song, pk=song_id)
         lines = []
@@ -108,16 +107,16 @@ class DiceRollView(View):
         total_result = 0
         roll_details = []
 
-        for num_str, d_char, sides_str in dice_matches:
+        for num_str, _, sides_str in dice_matches:
             num_dice = int(num_str) if num_str else 1
             sides = int(sides_str)
 
             try:
-                dice_roll = DiceRoll.from_str(f"{num_dice}d{sides}")
+                dice_roll = DiceRoll.from_str(f'{num_dice}d{sides}')
                 result = dice_roll.roll()
                 total_result += result
                 roll_details.append(
-                    {'expression': f"{num_dice}d{sides}", 'result': result}
+                    {'expression': f'{num_dice}d{sides}', 'result': result}
                 )
             except (ValueError, KeyError):
                 pass
@@ -125,7 +124,7 @@ class DiceRollView(View):
         for num_str in number_matches:
             modifier = int(num_str)
             total_result += modifier
-            roll_details.append({'expression': f"+{modifier}", 'result': modifier})
+            roll_details.append({'expression': f'+{modifier}', 'result': modifier})
 
         return total_result, roll_details
 

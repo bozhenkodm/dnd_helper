@@ -19,5 +19,5 @@ class Command(BaseCommand):
             race = choice(Race.objects.filter(is_social=True))
         klass = choice(Class.objects.all())
         self.stdout.write(
-            self.style.SUCCESS('%s; %s' % (race.name_display, klass.name_display))
+            self.style.SUCCESS(f'{race.name_display}; {klass.name_display}')
         )

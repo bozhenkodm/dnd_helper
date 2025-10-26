@@ -9,7 +9,6 @@ import base.models.powers
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [

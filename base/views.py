@@ -60,7 +60,7 @@ class EncounterDetailView(DetailView):
             participant.save()
         elif 'move_after' in request.POST:
             participant_id = request.POST.get('participant_id')
-            move_after_id = request.POST.get("move_after_id")
+            move_after_id = request.POST.get('move_after_id')
             if participant_id and move_after_id:
                 try:
                     participant = EncounterParticipants.objects.get(id=participant_id)
@@ -92,7 +92,7 @@ class PowerCreateFromImage(FormView):
         if hasattr(self, 'json_data') and isinstance(self.json_data, dict):
             # Преобразуем данные в query string
             params = urlencode(self.json_data, doseq=True)
-            return f"{base_url}?{params}"
+            return f'{base_url}?{params}'
 
         return base_url
 

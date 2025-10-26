@@ -9,7 +9,6 @@ from pytesseract import image_to_string
 
 
 class TextFromImage(admin.ModelAdmin):
-
     @abstractmethod
     def _apply_parsed_data(self, text, obj):
         pass
@@ -30,7 +29,7 @@ class TextFromImage(admin.ModelAdmin):
                 output, error = process.communicate()
 
                 if error:
-                    raise Exception(f"Ошибка получения из буфера: {error.decode()}")
+                    raise Exception(f'Ошибка получения из буфера: {error.decode()}')
 
                 img = Image.open(io.BytesIO(output))
 
@@ -38,7 +37,7 @@ class TextFromImage(admin.ModelAdmin):
 
             except Exception as e:
                 self.message_user(
-                    request, f"Ошибка обработки изображения: {str(e)}", level='ERROR'
+                    request, f'Ошибка обработки изображения: {str(e)}', level='ERROR'
                 )
 
         # Обработка загруженного через форму изображения
@@ -54,6 +53,6 @@ class TextFromImage(admin.ModelAdmin):
 
             except Exception as e:
                 self.message_user(
-                    request, f"Ошибка распознавания текста: {str(e)}", level='ERROR'
+                    request, f'Ошибка распознавания текста: {str(e)}', level='ERROR'
                 )
         super().save_model(request, obj, form, change)

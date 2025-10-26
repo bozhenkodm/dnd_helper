@@ -12,8 +12,8 @@ class DiceRoll:
 
     def __str__(self) -> str:
         if not self.addendant:
-            return f'{self.rolls}' f'{self.dice.description}'
-        return f'{self.rolls}' f'{self.dice.description}' f'+{self.addendant}'
+            return f'{self.rolls}{self.dice.description}'
+        return f'{self.rolls}{self.dice.description}+{self.addendant}'
 
     def __add__(self, other) -> 'DiceRoll':
         if not isinstance(other, int):

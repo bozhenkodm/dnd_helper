@@ -8,7 +8,6 @@ from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 
 if TYPE_CHECKING:
-
     from base.constants.constants import (
         AbilityEnum,
         AccessoryTypeEnum,

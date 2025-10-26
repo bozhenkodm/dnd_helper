@@ -1,4 +1,4 @@
-from typing import Iterable, Sequence
+from collections.abc import Iterable, Sequence
 
 from django.contrib.auth.models import User
 from django.core.cache import cache
@@ -474,7 +474,7 @@ class NPC(
 
     @property
     def magic_items(self) -> Sequence[ItemAbstract]:
-        return tuple(filter(lambda x: getattr(x, 'magic_item_type'), self.items))
+        return tuple(filter(lambda x: getattr(x, 'magic_item_type', None), self.items))
 
     @property
     def magic_item_types(self) -> Sequence[MagicItemType]:
@@ -602,11 +602,11 @@ class NPC(
                             self.get_power_display(power=power, weapons=weapons)
                         )
                     except PowerInconsistent as e:
-                        print(f"{power} display is not created with error: {e}")
+                        print(f'{power} display is not created with error: {e}')
                         powers.append(self.get_power_inconsistent_message(power))
                         continue
                     except WrongWeapon as e:
-                        print(f"{power} display is not created with error: {e}")
+                        print(f'{power} display is not created with error: {e}')
                         continue
                 continue
             for item in self.magic_items:
@@ -615,7 +615,7 @@ class NPC(
                 try:
                     powers.append(self.get_power_display(power=power, item=item))
                 except PowerInconsistent as e:
-                    print(f"{power} display is not created with error: {e}")
+                    print(f'{power} display is not created with error: {e}')
                     powers.append(self.get_power_inconsistent_message(power))
         return powers
 
