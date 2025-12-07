@@ -9,8 +9,8 @@ authors = ["Dmitry Bozhenko"]
 version = "1.0.0"
 
 [tool.poetry.dependencies]
-python = "^3.12"
-Django = "^5"
+python = "^3.13"
+Django = "^6"
 pillow = "12"
 pytesseract = "^0"
 gunicorn = "^23"

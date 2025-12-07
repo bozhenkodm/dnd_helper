@@ -1245,6 +1245,7 @@ class PlayerCharactersAdmin(admin.ModelAdmin):
         'initiative',
     )
     list_editable = list_display[1:]
+    list_filter = ('party',)
     ordering = ('name',)
 
 
