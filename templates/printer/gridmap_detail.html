@@ -129,6 +129,7 @@ td {
                 <div class="participant-container"
                      draggable="true"
                      ondragstart="drag(event)"
+                     ondblclick="rotate(event)"
                      data-participant-id="{{ cell.participant.0 }}">
                     <img class="participant-image rotate{{ cell.participant.3 }}"
                          src="{{ cell.participant.2 }}"
@@ -147,6 +148,49 @@ td {
 <script>
 function allowDrop(event) {
     event.preventDefault();
+}
+
+function rotate(event) {
+    event.preventDefault();
+    const container = event.target.closest('.participant-container');
+    const participantId = container.dataset.participantId;
+
+    // Read current rotation from the image class (e.g. "rotate90").
+    const img = container.querySelector('.participant-image');
+    const match = img.className.match(/rotate(\d+)/);
+    const current = match ? parseInt(match[1], 10) : 0;
+
+    // Rotate counterclockwise when already at 90, clockwise otherwise.
+    const clockwise = current !== 90;
+    const newRotation = (((current + (clockwise ? 90 : -90)) % 360) + 360) % 360;
+
+    // A participant may span several cells, so update every matching image.
+    document
+        .querySelectorAll(`[data-participant-id="${participantId}"] .participant-image`)
+        .forEach(el => {
+            el.classList.remove('rotate0', 'rotate90', 'rotate180', 'rotate270');
+            el.classList.add('rotate' + newRotation);
+        });
+
+    fetch('/printer/gridmap/{{ object.id }}/update-rotation/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            participant_id: participantId,
+            clockwise: clockwise
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => console.log('Rotation updated:', data))
+    .catch(error => console.error('Error updating rotation:', error));
 }
 
 function drag(event) {

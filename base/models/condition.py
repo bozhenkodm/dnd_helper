@@ -136,8 +136,9 @@ class PropertiesCondition(models.Model):
         choices=chain(
             AbilityEnum.generate_choices(is_sorted=False),
             NPCOtherProperties.generate_choices(
-                condition=lambda x: x
-                not in (NPCOtherProperties.ATTACK, NPCOtherProperties.DAMAGE)
+                condition=lambda x: (
+                    x not in (NPCOtherProperties.ATTACK, NPCOtherProperties.DAMAGE)
+                )
             ),
         ),
         max_length=max(

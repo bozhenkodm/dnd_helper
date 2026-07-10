@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 from random import randint
 
 from django.core.management import BaseCommand
@@ -13,7 +13,7 @@ def roll():
     return sum(r) - min(r)
 
 
-class Kind(str, Enum):
+class Kind(StrEnum):
     DUMMY = 'dummy'
     AVERAGE = 'average'
     GENIUS = 'genius'

@@ -9,22 +9,22 @@ authors = ["Dmitry Bozhenko"]
 version = "1.0.0"
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = "^3.14"
 Django = "^6"
-pillow = "12"
+pillow = "^12"
 pytesseract = "^0"
-gunicorn = "^23"
+gunicorn = "^26"
 
 [tool.poetry.group.dev.dependencies]
 ipython = "^9"
-mypy = "^1"
-django-stubs = "^5"
+mypy = "^2"
+django-stubs = "^6"
 django-debug-toolbar = "^6"
 pytest = "^9"
 pytest-django = "^4"
 pre-commit = "^4"
 vulture = "^2"
-ruff = "0.14.4"
+ruff = "^0.15"
 
 [tool.ruff]
 line-length = 88

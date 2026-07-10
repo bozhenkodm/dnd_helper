@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from types import SimpleNamespace
 
 from base.objects.skills import Skills
 
@@ -76,21 +76,15 @@ def test_max_classmethod():
 
 
 def test_init_with_const():
-    # Mock skill objects
-    skill1 = Mock()
-    skill1.name = 'acrobatics'
-    skill2 = Mock()
-    skill2.name = 'athletics'
-    skill3 = Mock()
-    skill3.name = 'perception'
+    skills = [
+        SimpleNamespace(name='acrobatics'),
+        SimpleNamespace(name='athletics'),
+        SimpleNamespace(name='perception'),
+    ]
 
-    # Mock QuerySet
-    mock_queryset = Mock()
-    mock_queryset.__iter__ = Mock(return_value=iter([skill1, skill2, skill3]))
-
-    result = Skills.init_with_const(mock_queryset, 15)
+    result = Skills.init_with_const(skills, 15)
 
     assert result.acrobatics == 15
     assert result.athletics == 15
     assert result.perception == 15
-    assert result.thievery == 0  # Not included in queryset
+    assert result.thievery == 0

@@ -71,6 +71,21 @@ class GridMapUpdateCoordsView(View):
         )
 
 
+class GridMapUpdateRotationView(View):
+    def post(self, request, *args, **kwargs):
+        body = json.loads(request.body.decode())
+        grid_map = get_object_or_404(GridMap, pk=self.kwargs['pk'])
+        rotation = grid_map.rotate_participant(
+            body['participant_id'], body['clockwise']
+        )
+        return JsonResponse(
+            {
+                'status': 'ok',
+                'rotation': rotation,
+            }
+        )
+
+
 class SongView(View):
     def get(self, request, song_id):
         song = get_object_or_404(Song, pk=song_id)

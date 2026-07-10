@@ -1,21 +1,24 @@
 from collections.abc import Callable, Iterable, Sequence
-from enum import Enum, IntEnum
+from enum import IntEnum, StrEnum
 from itertools import chain
 from typing import Any, Self
 
 from django.db import models
 
 
-class BaseNameValueDescriptionEnum(str, Enum):
+class BaseNameValueDescriptionEnum(StrEnum):
     description: str
 
-    def __new__(cls, value, description):
+    def __new__(cls, value: str, description: str):
         obj = str.__new__(cls, value)
         obj._value_ = value
         obj.description = description
         return obj
 
-    def _generate_next_value_(name, start, count, last_values):
+    @staticmethod
+    def _generate_next_value_(
+        name: str, start: int, count: int, last_values: list[Any]
+    ) -> str:
         return str(name)
 
     @classmethod
@@ -24,11 +27,11 @@ class BaseNameValueDescriptionEnum(str, Enum):
         *,
         is_sorted: bool = True,
         start_with: Sequence[Self] = (),
-        condition: Callable[[Any], bool] = lambda x: True,
+        condition: Callable[[Self], bool] = lambda x: True,
         description_prefix: str = '',
         zero_item: tuple[str, str] | None = None,
     ) -> list[tuple[str, str]]:
-        result = [zero_item] if zero_item else []
+        result: list[tuple[str, str]] = [zero_item] if zero_item else []
         result.extend((item.value, item.description) for item in start_with)
         if is_sorted:
             result.extend(
@@ -37,7 +40,7 @@ class BaseNameValueDescriptionEnum(str, Enum):
                         (item.value, f'{description_prefix}{item.description}')
                         for item in cls
                         if item not in start_with and condition(item)
-                    ),  # type: ignore
+                    ),
                     key=lambda x: x[1],
                 )
             )
@@ -45,16 +48,16 @@ class BaseNameValueDescriptionEnum(str, Enum):
             result.extend(
                 (item.value, f'{description_prefix}{item.description}')
                 for item in cls
-                if item not in start_with and condition(item)  # type: ignore
+                if item not in start_with and condition(item)
             )
         return result
 
     @classmethod
-    def generate_case(cls, field='name') -> models.Case:
+    def generate_case(cls, field: str = 'name') -> models.Case:
         kwargs = (
             {
-                field: item.value,  # type: ignore[attr-defined]
-                'then': models.Value(item.description),  # type: ignore[attr-defined]
+                field: item.value,
+                'then': models.Value(item.description),
             }
             for item in cls
         )
@@ -62,10 +65,10 @@ class BaseNameValueDescriptionEnum(str, Enum):
         return models.Case(*whens, output_field=models.CharField())
 
     @classmethod
-    def generate_order_case(cls, field='name') -> models.Case:
+    def generate_order_case(cls, field: str = 'name') -> models.Case:
         kwargs = (
             {
-                field: item.value,  # type: ignore[attr-defined]
+                field: item.value,
                 'then': models.Value(index),
             }
             for index, item in enumerate(cls)
@@ -79,18 +82,18 @@ class BaseNameValueDescriptionEnum(str, Enum):
 
     @classmethod
     def max_description_length(cls) -> int:
-        return max(len(item.description) for item in cls)  # type: ignore[attr-defined]
+        return max(len(item.description) for item in cls)
 
     @property
     def lvalue(self) -> str:
         return self.value.lower()
 
     @classmethod
-    def get_by_description(cls, description, default=None):
+    def get_by_description(cls, description: str, default: Self | None = None) -> Self:
         for member in cls:
             if member.description == description:
                 return member
-        if not default:
+        if default is None:
             raise ValueError(f"Нет элемента с описанием '{description}'")
         return default
 
@@ -98,14 +101,14 @@ class BaseNameValueDescriptionEnum(str, Enum):
 class IntDescriptionEnum(IntEnum):
     description: str
 
-    def __new__(cls, value, description=''):
+    def __new__(cls, value: int, description: str = '') -> Self:
         obj = int.__new__(cls, value)
         obj._value_ = value
         obj.description = description
         return obj
 
     @classmethod
-    def get_by_description(cls, description):
+    def get_by_description(cls, description: str) -> Self:
         for member in cls:
             if member.description == description:
                 return member
@@ -114,9 +117,9 @@ class IntDescriptionEnum(IntEnum):
     @classmethod
     def generate_choices(
         cls,
-        condition: Callable[['IntDescriptionEnum'], bool] = lambda x: True,
+        condition: Callable[[Self], bool] = lambda x: True,
         zero_item: tuple[int, str] | None = None,
-    ):
+    ) -> list[tuple[int, str]]:
         result: Iterable[tuple[int, str]] = (
             (item.value, item.description) for item in cls if condition(item)
         )
@@ -125,13 +128,13 @@ class IntDescriptionEnum(IntEnum):
         return sorted(result, key=lambda x: x[0])
 
     @classmethod
-    def generate_case(cls, field='name') -> models.Case:
+    def generate_case(cls, field: str = 'name') -> models.Case:
         kwargs = ({field: item.name, 'then': models.Value(item.value)} for item in cls)
         whens = (models.When(**kws) for kws in kwargs)
         return models.Case(*whens, output_field=models.CharField())
 
     @classmethod
-    def generate_value_description_case(cls, field='name'):
+    def generate_value_description_case(cls, field: str = 'name') -> models.Case:
         kwargs = (
             {field: item.value, 'then': models.Value(item.description)} for item in cls
         )

@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from types import SimpleNamespace
 
 from base.objects.abilities import Abilities
 
@@ -27,23 +27,17 @@ def test_addition():
 
 
 def test_init_with_const():
-    # Mock ability objects
-    ability1 = Mock()
-    ability1.name = 'strength'
-    ability2 = Mock()
-    ability2.name = 'dexterity'
-    ability3 = Mock()
-    ability3.name = 'constitution'
+    abilities = [
+        SimpleNamespace(name='strength'),
+        SimpleNamespace(name='dexterity'),
+        SimpleNamespace(name='constitution'),
+    ]
 
-    # Mock QuerySet
-    mock_queryset = Mock()
-    mock_queryset.__iter__ = Mock(return_value=iter([ability1, ability2, ability3]))
-
-    result = Abilities.init_with_const(mock_queryset, 15)
+    result = Abilities.init_with_const(abilities, 15)
 
     assert result.strength == 15
     assert result.dexterity == 15
     assert result.constitution == 15
-    assert result.intelligence == 0  # Not included in queryset
+    assert result.intelligence == 0
     assert result.wisdom == 0
     assert result.charisma == 0

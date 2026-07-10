@@ -358,6 +358,13 @@ class GridMap(models.Model):
             map=self, row=old_row, col=old_col
         ).count()
 
+    def rotate_participant(self, participant_place_id, clockwise: bool) -> int:
+        pp = ParticipantPlace.objects.get(id=participant_place_id, map=self)
+        step = 90 if clockwise else -90
+        pp.rotation = (pp.rotation + step) % 360
+        pp.save(update_fields=['rotation'])
+        return pp.rotation
+
 
 class Song(models.Model):
     title = models.CharField(max_length=200)

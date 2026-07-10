@@ -32,15 +32,14 @@
             font-weight: bold;
             color: #555;
         }
-        input[type="text"] {
-            width: 100%;
+        input[type="text"], input[type="number"], select {
             padding: 10px;
             border: 2px solid #ddd;
             border-radius: 5px;
             font-size: 16px;
             box-sizing: border-box;
         }
-        input[type="text"]:focus {
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
             border-color: #4CAF50;
             outline: none;
         }
@@ -52,10 +51,26 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
-            width: 100%;
         }
         button:hover {
             background-color: #45a049;
+        }
+        .btn-secondary {
+            background-color: #2196F3;
+        }
+        .btn-secondary:hover {
+            background-color: #0b7dda;
+        }
+        .btn-danger {
+            background-color: #f44336;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        .btn-danger:hover {
+            background-color: #da190b;
+        }
+        .btn-full {
+            width: 100%;
         }
         .result {
             margin-top: 30px;
@@ -102,28 +117,120 @@
             color: #666;
             margin-top: 5px;
         }
+        .dice-builder {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .dice-component {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .dice-component input[type="number"] {
+            width: 80px;
+        }
+        .dice-component select {
+            flex: 1;
+            min-width: 100px;
+        }
+        .dice-component button {
+            width: auto;
+        }
+        .modifier-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 15px;
+        }
+        .modifier-section label {
+            margin: 0;
+            white-space: nowrap;
+        }
+        .modifier-section input {
+            flex: 1;
+        }
+        .expression-preview {
+            background-color: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 18px;
+            text-align: center;
+            border: 2px solid #ffc107;
+        }
+        .mode-toggle {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .mode-toggle button {
+            width: auto;
+            margin: 0 5px;
+        }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🎲 Dice Roll</h1>
-        
-        <form method="post">
+
+        <div class="mode-toggle">
+            <button type="button" id="builderModeBtn" class="btn-secondary">Dice Builder</button>
+            <button type="button" id="manualModeBtn">Manual Input</button>
+        </div>
+
+        <form method="post" id="diceForm">
             {% csrf_token %}
-            <div class="form-group">
-                <label for="expression">Dice Expression:</label>
-                <input type="text" 
-                       id="expression" 
-                       name="expression" 
-                       value="{{ expression|default:'' }}"
-                       placeholder="e.g., 1d6+2d12+3"
-                       class="expression-input"
-                       required>
-                <div class="help-text">
-                    Examples: 1d6, 2d20+5, 1d8+2d6+3, 3d12
+
+            <!-- Dice Builder Mode -->
+            <div id="builderMode">
+                <div class="dice-builder">
+                    <label>Build Your Roll:</label>
+                    <div id="diceComponents">
+                        <!-- Dice components will be added here -->
+                    </div>
+                    <button type="button" id="addDiceBtn" class="btn-secondary">+ Add Dice</button>
+
+                    <div class="modifier-section">
+                        <label for="modifier">Modifier:</label>
+                        <input type="number" id="modifier" value="0" placeholder="0">
+                    </div>
+
+                    <div class="expression-preview" id="expressionPreview">
+                        1d20
+                    </div>
                 </div>
+                <button type="submit" class="btn-full">Roll Dice</button>
             </div>
-            <button type="submit">Roll Dice</button>
+
+            <!-- Manual Mode -->
+            <div id="manualMode" class="hidden">
+                <div class="form-group">
+                    <label for="manualExpression">Dice Expression:</label>
+                    <input type="text"
+                           id="manualExpression"
+                           name="expression"
+                           value="{{ expression|default:'' }}"
+                           placeholder="e.g., 1d6+2d12+3"
+                           class="expression-input">
+                    <div class="help-text">
+                        Examples: 1d6, 2d20+5, 1d8+2d6+3, 3d12
+                    </div>
+                </div>
+                <button type="submit" class="btn-full">Roll Dice</button>
+            </div>
+
+            <!-- Hidden input for builder mode expression -->
+            <input type="hidden" id="expression" name="expression">
         </form>
 
         {% if error %}
@@ -152,5 +259,175 @@
             </div>
         {% endif %}
     </div>
+
+    <script>
+        let diceCount = 0;
+
+        // Get expression from server if available
+        const savedExpression = "{{ expression|default:'' }}";
+
+        // Mode switching
+        const builderModeBtn = document.getElementById('builderModeBtn');
+        const manualModeBtn = document.getElementById('manualModeBtn');
+        const builderMode = document.getElementById('builderMode');
+        const manualMode = document.getElementById('manualMode');
+
+        builderModeBtn.addEventListener('click', () => {
+            builderMode.classList.remove('hidden');
+            manualMode.classList.add('hidden');
+            builderModeBtn.classList.add('btn-secondary');
+            builderModeBtn.classList.remove('btn-primary');
+            manualModeBtn.classList.remove('btn-secondary');
+        });
+
+        manualModeBtn.addEventListener('click', () => {
+            builderMode.classList.add('hidden');
+            manualMode.classList.remove('hidden');
+            manualModeBtn.classList.add('btn-secondary');
+            builderModeBtn.classList.remove('btn-secondary');
+        });
+
+        // Add dice component
+        function addDiceComponent(multiplier = 1, diceType = 'd20') {
+            const container = document.getElementById('diceComponents');
+            const component = document.createElement('div');
+            component.className = 'dice-component';
+            component.dataset.id = diceCount++;
+
+            component.innerHTML = `
+                <input type="number" class="multiplier" value="${multiplier}" min="1" max="99" placeholder="Num">
+                <select class="dice-type">
+                    <option value="d4" ${diceType === 'd4' ? 'selected' : ''}>d4</option>
+                    <option value="d6" ${diceType === 'd6' ? 'selected' : ''}>d6</option>
+                    <option value="d8" ${diceType === 'd8' ? 'selected' : ''}>d8</option>
+                    <option value="d10" ${diceType === 'd10' ? 'selected' : ''}>d10</option>
+                    <option value="d12" ${diceType === 'd12' ? 'selected' : ''}>d12</option>
+                    <option value="d20" ${diceType === 'd20' ? 'selected' : ''}>d20</option>
+                    <option value="d100" ${diceType === 'd100' ? 'selected' : ''}>d100</option>
+                </select>
+                <button type="button" class="btn-danger remove-dice">Remove</button>
+            `;
+
+            container.appendChild(component);
+
+            // Add event listeners
+            component.querySelector('.multiplier').addEventListener('input', updateExpression);
+            component.querySelector('.dice-type').addEventListener('change', updateExpression);
+            component.querySelector('.remove-dice').addEventListener('click', () => {
+                component.remove();
+                updateExpression();
+            });
+
+            updateExpression();
+        }
+
+        // Update expression preview
+        function updateExpression() {
+            const components = document.querySelectorAll('.dice-component');
+            const modifier = parseInt(document.getElementById('modifier').value) || 0;
+
+            let expression = '';
+
+            components.forEach((component, index) => {
+                const multiplier = parseInt(component.querySelector('.multiplier').value) || 1;
+                const diceType = component.querySelector('.dice-type').value;
+
+                if (index > 0) {
+                    expression += '+';
+                }
+                expression += `${multiplier}${diceType}`;
+            });
+
+            if (modifier !== 0) {
+                if (modifier > 0) {
+                    expression += `+${modifier}`;
+                } else {
+                    expression += `${modifier}`;
+                }
+            }
+
+            if (expression === '') {
+                expression = '0';
+            }
+
+            document.getElementById('expressionPreview').textContent = expression;
+        }
+
+        // Add button event listener
+        document.getElementById('addDiceBtn').addEventListener('click', () => {
+            addDiceComponent();
+        });
+
+        // Modifier input event listener
+        document.getElementById('modifier').addEventListener('input', updateExpression);
+
+        // Form submission
+        document.getElementById('diceForm').addEventListener('submit', (e) => {
+            const builderModeVisible = !builderMode.classList.contains('hidden');
+
+            if (builderModeVisible) {
+                // Get expression from builder
+                const expression = document.getElementById('expressionPreview').textContent;
+                document.getElementById('expression').value = expression;
+                document.getElementById('manualExpression').value = '';
+            } else {
+                // Get expression from manual input
+                const manualExpression = document.getElementById('manualExpression').value;
+                document.getElementById('expression').value = manualExpression;
+            }
+        });
+
+        // Parse expression and rebuild state
+        function parseAndRestoreExpression(expression) {
+            if (!expression || expression.trim() === '') {
+                // Default: one d20
+                addDiceComponent(1, 'd20');
+                return;
+            }
+
+            // Remove spaces
+            expression = expression.replace(/\s+/g, '').toLowerCase();
+
+            // Parse dice patterns (e.g., 2d6, 1d8, d20)
+            const dicePattern = /(\d*)d(\d+)/g;
+            let match;
+            let foundDice = false;
+
+            while ((match = dicePattern.exec(expression)) !== null) {
+                const multiplier = match[1] ? parseInt(match[1]) : 1;
+                const diceType = 'd' + match[2];
+                addDiceComponent(multiplier, diceType);
+                foundDice = true;
+            }
+
+            // Parse modifier (remaining number after removing dice)
+            let modifierValue = 0;
+            const cleanedExpression = expression.replace(/(\d*)d(\d+)/g, '');
+
+            if (cleanedExpression) {
+                // Match positive or negative numbers
+                const modifierMatch = cleanedExpression.match(/([+-]?\d+)/);
+                if (modifierMatch) {
+                    modifierValue = parseInt(modifierMatch[1]);
+                }
+            }
+
+            document.getElementById('modifier').value = modifierValue;
+
+            // If no dice found, add default
+            if (!foundDice) {
+                addDiceComponent(1, 'd20');
+            }
+
+            updateExpression();
+        }
+
+        // Initialize with saved expression or default
+        if (savedExpression) {
+            parseAndRestoreExpression(savedExpression);
+        } else {
+            addDiceComponent(1, 'd20');
+        }
+    </script>
 </body>
 </html>

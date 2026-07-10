@@ -1,5 +1,4 @@
 import pytest
-from django.conf import settings
 
 from base.constants.constants import LEVELS_WITH_ABILITY_BONUS, SexEnum
 from base.models.abilities import AbilityLevelBonus
@@ -9,11 +8,11 @@ from base.models.skills import Skill
 
 @pytest.fixture(scope='session')
 def django_db_setup():
-    settings.DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '/tmp/db_test.sqlite3',
-        'ATOMIC_REQUESTS': True,
-    }
+    # Reuse the existing db.sqlite3 instead of creating an empty test DB:
+    # the NPC fixture below depends on rows (races, classes, subclasses, weapons)
+    # that the project does not ship as test fixtures. @pytest.mark.django_db wraps
+    # each test in a transaction that is rolled back, so no data is persisted.
+    pass
 
 
 @pytest.fixture(scope='function')
