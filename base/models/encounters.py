@@ -358,6 +358,33 @@ class Encounter(models.Model):
         EncounterParticipants.objects.bulk_create(participants)
         self.save()
 
+    def handle_command(self, form):
+        if 'next_turn' in form:
+            self.next_turn(form)
+        elif 'previous_turn' in form:
+            self.previous_turn(form)
+        elif 'kill_participant' in form:
+            participant_id = form.get('participant_id')
+            participant = EncounterParticipants.objects.get(id=participant_id)
+            participant.is_active = False
+            participant.save()
+        elif 'unkill_participant' in form:
+            participant_id = form.get('participant_id')
+            participant = EncounterParticipants.objects.get(id=participant_id)
+            participant.is_active = True
+            participant.save()
+        elif 'move_after' in form:
+            participant_id = form.get('participant_id')
+            move_after_id = form.get('move_after_id')
+            if participant_id and move_after_id:
+                try:
+                    participant = EncounterParticipants.objects.get(id=participant_id)
+                    target = EncounterParticipants.objects.get(id=move_after_id)
+                    participant.move_after(target)
+                except (EncounterParticipants.DoesNotExist, ValueError):
+                    pass
+        else:
+            self.roll_initiative()
 
 class EncounterParticipants(models.Model):
     """Model representing a participant in an encounter with initiative order.

@@ -44,32 +44,8 @@ class EncounterDetailView(DetailView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        if 'next_turn' in request.POST:
-            obj.next_turn(request.POST)
-        elif 'previous_turn' in request.POST:
-            obj.previous_turn(request.POST)
-        elif 'kill_participant' in request.POST:
-            participant_id = request.POST.get('participant_id')
-            participant = EncounterParticipants.objects.get(id=participant_id)
-            participant.is_active = False
-            participant.save()
-        elif 'unkill_participant' in request.POST:
-            participant_id = request.POST.get('participant_id')
-            participant = EncounterParticipants.objects.get(id=participant_id)
-            participant.is_active = True
-            participant.save()
-        elif 'move_after' in request.POST:
-            participant_id = request.POST.get('participant_id')
-            move_after_id = request.POST.get('move_after_id')
-            if participant_id and move_after_id:
-                try:
-                    participant = EncounterParticipants.objects.get(id=participant_id)
-                    target = EncounterParticipants.objects.get(id=move_after_id)
-                    participant.move_after(target)
-                except (EncounterParticipants.DoesNotExist, ValueError):
-                    pass
-        else:
-            obj.roll_initiative()
+        obj.handle_command(request.POST)
+
         return self.get(request, *args, **kwargs)
 
 

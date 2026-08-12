@@ -177,74 +177,116 @@
         .hidden {
             display: none;
         }
+        .dice-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .dice-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 12px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.2s;
+            min-width: 60px;
+        }
+        .dice-btn:hover {
+            background-color: #45a049;
+        }
+        .dice-btn:active {
+            transform: scale(0.95);
+        }
+        .pool-display {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 20px;
+            font-family: monospace;
+            border: 2px solid #ddd;
+        }
+        .pool-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .pool-actions button {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+        .modifier-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .modifier-section label {
+            font-weight: bold;
+        }
+        .modifier-section input {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🎲 Dice Roll</h1>
 
-        <div class="mode-toggle">
-            <button type="button" id="builderModeBtn" class="btn-secondary">Dice Builder</button>
-            <button type="button" id="manualModeBtn">Manual Input</button>
-        </div>
-
         <form method="post" id="diceForm">
             {% csrf_token %}
 
-            <!-- Dice Builder Mode -->
-            <div id="builderMode">
-                <div class="dice-builder">
-                    <label>Build Your Roll:</label>
-                    <div id="diceComponents">
-                        <!-- Dice components will be added here -->
-                    </div>
-                    <button type="button" id="addDiceBtn" class="btn-secondary">+ Add Dice</button>
-
-                    <div class="modifier-section">
-                        <label for="modifier">Modifier:</label>
-                        <input type="number" id="modifier" value="0" placeholder="0">
-                    </div>
-
-                    <div class="expression-preview" id="expressionPreview">
-                        1d20
-                    </div>
-                </div>
-                <button type="submit" class="btn-full">Roll Dice</button>
+            <!-- Кнопки выбора кубов -->
+            <div class="dice-buttons">
+                <button type="button" class="dice-btn" data-dice="d4">d4</button>
+                <button type="button" class="dice-btn" data-dice="d6">d6</button>
+                <button type="button" class="dice-btn" data-dice="d8">d8</button>
+                <button type="button" class="dice-btn" data-dice="d10">d10</button>
+                <button type="button" class="dice-btn" data-dice="d12">d12</button>
+                <button type="button" class="dice-btn" data-dice="d20">d20</button>
+                <button type="button" class="dice-btn" data-dice="d100">d100</button>
             </div>
 
-            <!-- Manual Mode -->
-            <div id="manualMode" class="hidden">
-                <div class="form-group">
-                    <label for="manualExpression">Dice Expression:</label>
-                    <input type="text"
-                           id="manualExpression"
-                           name="expression"
-                           value="{{ expression|default:'' }}"
-                           placeholder="e.g., 1d6+2d12+3"
-                           class="expression-input">
-                    <div class="help-text">
-                        Examples: 1d6, 2d20+5, 1d8+2d6+3, 3d12
-                    </div>
+            <!-- Отображение пула -->
+            <div class="pool-display">
+                <span id="poolText">0</span>
+                <div class="pool-actions">
+                    <button type="button" id="undoBtn" class="btn-secondary">↩ Undo</button>
+                    <button type="button" id="clearBtn" class="btn-danger">Clear</button>
                 </div>
-                <button type="submit" class="btn-full">Roll Dice</button>
             </div>
 
-            <!-- Hidden input for builder mode expression -->
+            <!-- Модификатор -->
+            <div class="modifier-section">
+                <label for="modifier">Modifier:</label>
+                <input type="number" id="modifier" value="0" step="1">
+            </div>
+
+            <!-- Кнопка броска -->
+            <button type="submit" class="btn-full">Roll Dice</button>
+
+            <!-- Скрытое поле для выражения -->
             <input type="hidden" id="expression" name="expression">
         </form>
 
+        <!-- Вывод результата (как было) -->
         {% if error %}
-            <div class="error">
-                {{ error }}
-            </div>
+            <div class="error">{{ error }}</div>
         {% endif %}
 
         {% if total is not None %}
             <div class="result">
-                <div class="total">
-                    Total: {{ total }}
-                </div>
-                
+                <div class="total">Total: {{ total }}</div>
                 {% if details %}
                     <div class="details">
                         <strong>Roll Details:</strong>
@@ -261,173 +303,90 @@
     </div>
 
     <script>
-        let diceCount = 0;
+        // Хранилище пула – массив строк типа 'd6', 'd4' и т.д.
+        let pool = [];
 
-        // Get expression from server if available
-        const savedExpression = "{{ expression|default:'' }}";
+        // Элементы DOM
+        const poolText = document.getElementById('poolText');
+        const modifierInput = document.getElementById('modifier');
+        const expressionInput = document.getElementById('expression');
+        const form = document.getElementById('diceForm');
+        const undoBtn = document.getElementById('undoBtn');
+        const clearBtn = document.getElementById('clearBtn');
 
-        // Mode switching
-        const builderModeBtn = document.getElementById('builderModeBtn');
-        const manualModeBtn = document.getElementById('manualModeBtn');
-        const builderMode = document.getElementById('builderMode');
-        const manualMode = document.getElementById('manualMode');
-
-        builderModeBtn.addEventListener('click', () => {
-            builderMode.classList.remove('hidden');
-            manualMode.classList.add('hidden');
-            builderModeBtn.classList.add('btn-secondary');
-            builderModeBtn.classList.remove('btn-primary');
-            manualModeBtn.classList.remove('btn-secondary');
-        });
-
-        manualModeBtn.addEventListener('click', () => {
-            builderMode.classList.add('hidden');
-            manualMode.classList.remove('hidden');
-            manualModeBtn.classList.add('btn-secondary');
-            builderModeBtn.classList.remove('btn-secondary');
-        });
-
-        // Add dice component
-        function addDiceComponent(multiplier = 1, diceType = 'd20') {
-            const container = document.getElementById('diceComponents');
-            const component = document.createElement('div');
-            component.className = 'dice-component';
-            component.dataset.id = diceCount++;
-
-            component.innerHTML = `
-                <input type="number" class="multiplier" value="${multiplier}" min="1" max="99" placeholder="Num">
-                <select class="dice-type">
-                    <option value="d4" ${diceType === 'd4' ? 'selected' : ''}>d4</option>
-                    <option value="d6" ${diceType === 'd6' ? 'selected' : ''}>d6</option>
-                    <option value="d8" ${diceType === 'd8' ? 'selected' : ''}>d8</option>
-                    <option value="d10" ${diceType === 'd10' ? 'selected' : ''}>d10</option>
-                    <option value="d12" ${diceType === 'd12' ? 'selected' : ''}>d12</option>
-                    <option value="d20" ${diceType === 'd20' ? 'selected' : ''}>d20</option>
-                    <option value="d100" ${diceType === 'd100' ? 'selected' : ''}>d100</option>
-                </select>
-                <button type="button" class="btn-danger remove-dice">Remove</button>
-            `;
-
-            container.appendChild(component);
-
-            // Add event listeners
-            component.querySelector('.multiplier').addEventListener('input', updateExpression);
-            component.querySelector('.dice-type').addEventListener('change', updateExpression);
-            component.querySelector('.remove-dice').addEventListener('click', () => {
-                component.remove();
-                updateExpression();
+        // Функция обновления отображения пула и скрытого поля
+        function updatePoolDisplay() {
+            // Группируем кубы по типу
+            const counts = {};
+            pool.forEach(dice => {
+                counts[dice] = (counts[dice] || 0) + 1;
             });
 
-            updateExpression();
+            // Формируем строку пула
+            const parts = [];
+            for (const [dice, count] of Object.entries(counts)) {
+                parts.push(`${count}${dice}`);
+            }
+            let poolStr = parts.join(' + ') || '0';
+
+            // Получаем модификатор
+            const mod = parseInt(modifierInput.value) || 0;
+
+            // Формируем полное выражение
+            let expression = poolStr;
+            if (mod !== 0) {
+                expression += (mod > 0 ? ' + ' : ' ') + mod;
+            }
+
+            poolText.textContent = expression;
+            expressionInput.value = expression;
         }
 
-        // Update expression preview
-        function updateExpression() {
-            const components = document.querySelectorAll('.dice-component');
-            const modifier = parseInt(document.getElementById('modifier').value) || 0;
+        // Добавление куба в пул
+        function addDice(diceType) {
+            pool.push(diceType);
+            updatePoolDisplay();
+        }
 
-            let expression = '';
+        // Удаление последнего куба
+        function undoLast() {
+            if (pool.length > 0) {
+                pool.pop();
+                updatePoolDisplay();
+            }
+        }
 
-            components.forEach((component, index) => {
-                const multiplier = parseInt(component.querySelector('.multiplier').value) || 1;
-                const diceType = component.querySelector('.dice-type').value;
+        // Очистка пула
+        function clearPool() {
+            pool = [];
+            updatePoolDisplay();
+        }
 
-                if (index > 0) {
-                    expression += '+';
-                }
-                expression += `${multiplier}${diceType}`;
+        // Обработчики для кнопок кубов
+        document.querySelectorAll('.dice-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const dice = btn.dataset.dice;
+                addDice(dice);
             });
-
-            if (modifier !== 0) {
-                if (modifier > 0) {
-                    expression += `+${modifier}`;
-                } else {
-                    expression += `${modifier}`;
-                }
-            }
-
-            if (expression === '') {
-                expression = '0';
-            }
-
-            document.getElementById('expressionPreview').textContent = expression;
-        }
-
-        // Add button event listener
-        document.getElementById('addDiceBtn').addEventListener('click', () => {
-            addDiceComponent();
         });
 
-        // Modifier input event listener
-        document.getElementById('modifier').addEventListener('input', updateExpression);
+        // Обработчики для Undo и Clear
+        undoBtn.addEventListener('click', undoLast);
+        clearBtn.addEventListener('click', clearPool);
 
-        // Form submission
-        document.getElementById('diceForm').addEventListener('submit', (e) => {
-            const builderModeVisible = !builderMode.classList.contains('hidden');
+        // При изменении модификатора обновляем выражение
+        modifierInput.addEventListener('input', updatePoolDisplay);
 
-            if (builderModeVisible) {
-                // Get expression from builder
-                const expression = document.getElementById('expressionPreview').textContent;
-                document.getElementById('expression').value = expression;
-                document.getElementById('manualExpression').value = '';
-            } else {
-                // Get expression from manual input
-                const manualExpression = document.getElementById('manualExpression').value;
-                document.getElementById('expression').value = manualExpression;
-            }
+        // При отправке формы – убедимся, что скрытое поле заполнено
+        form.addEventListener('submit', (e) => {
+            // updatePoolDisplay уже вызвана при каждом изменении,
+            // но на всякий случай обновим ещё раз
+            updatePoolDisplay();
+            // Если пул пуст и модификатор 0, можно предупредить или отправить '0'
         });
 
-        // Parse expression and rebuild state
-        function parseAndRestoreExpression(expression) {
-            if (!expression || expression.trim() === '') {
-                // Default: one d20
-                addDiceComponent(1, 'd20');
-                return;
-            }
-
-            // Remove spaces
-            expression = expression.replace(/\s+/g, '').toLowerCase();
-
-            // Parse dice patterns (e.g., 2d6, 1d8, d20)
-            const dicePattern = /(\d*)d(\d+)/g;
-            let match;
-            let foundDice = false;
-
-            while ((match = dicePattern.exec(expression)) !== null) {
-                const multiplier = match[1] ? parseInt(match[1]) : 1;
-                const diceType = 'd' + match[2];
-                addDiceComponent(multiplier, diceType);
-                foundDice = true;
-            }
-
-            // Parse modifier (remaining number after removing dice)
-            let modifierValue = 0;
-            const cleanedExpression = expression.replace(/(\d*)d(\d+)/g, '');
-
-            if (cleanedExpression) {
-                // Match positive or negative numbers
-                const modifierMatch = cleanedExpression.match(/([+-]?\d+)/);
-                if (modifierMatch) {
-                    modifierValue = parseInt(modifierMatch[1]);
-                }
-            }
-
-            document.getElementById('modifier').value = modifierValue;
-
-            // If no dice found, add default
-            if (!foundDice) {
-                addDiceComponent(1, 'd20');
-            }
-
-            updateExpression();
-        }
-
-        // Initialize with saved expression or default
-        if (savedExpression) {
-            parseAndRestoreExpression(savedExpression);
-        } else {
-            addDiceComponent(1, 'd20');
-        }
+        // Инициализация – пустой пул, модификатор 0
+        updatePoolDisplay();
     </script>
 </body>
 </html>
