@@ -386,6 +386,7 @@ class Encounter(models.Model):
         else:
             self.roll_initiative()
 
+
 class EncounterParticipants(models.Model):
     """Model representing a participant in an encounter with initiative order.
 

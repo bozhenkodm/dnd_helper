@@ -21,7 +21,6 @@ format:
 lint:
 	poetry run ruff check --fix
 
-
 shell:
 	poetry run python manage.py shell -i ipython --verbosity=2
 

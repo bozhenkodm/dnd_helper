@@ -5,7 +5,7 @@ from django.views.generic import DetailView, FormView, ListView, TemplateView
 
 from base.forms.npc import NPCModelForm
 from base.forms.power import FromImageForm
-from base.models.encounters import Encounter, EncounterParticipants, Party
+from base.models.encounters import Encounter, Party
 from base.models.models import NPC
 from base.models.powers import Power
 

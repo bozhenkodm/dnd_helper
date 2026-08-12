@@ -65,4 +65,161 @@
     <br><hr
 ></div>
 </body>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const container = document.querySelector('.pagenotbreak');
+    if (!container) return;
+
+    // --- 1. Собираем все текстовые узлы, исключая кнопки и служебные теги ---
+    const textNodes = [];
+    const walker = document.createTreeWalker(
+      container,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: function(node) {
+          let parent = node.parentNode;
+          while (parent) {
+            if (parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE') {
+              return NodeFilter.FILTER_REJECT;
+            }
+            if (parent.classList && parent.classList.contains('dice-roll-btn')) {
+              return NodeFilter.FILTER_REJECT;
+            }
+            parent = parent.parentNode;
+          }
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      },
+      false
+    );
+    let node;
+    while ((node = walker.nextNode())) {
+      textNodes.push(node);
+    }
+
+    // --- 2. Регулярное выражение для поиска бросков ---
+    const diceRegex = /\b(\d*)[dkк](\d+)([+-]\d+)?\b/gi;
+
+    // --- 3. Обрабатываем каждый текстовый узел ---
+    textNodes.forEach(function(textNode) {
+      const text = textNode.textContent;
+      let match;
+      let lastIndex = 0;
+      const fragments = [];
+
+      diceRegex.lastIndex = 0;
+      while ((match = diceRegex.exec(text)) !== null) {
+        if (match.index > lastIndex) {
+          fragments.push({ type: 'text', content: text.substring(lastIndex, match.index) });
+        }
+        const full = match[0];
+        const count = match[1] || '1';
+        const sides = match[2];
+        const modifier = match[3] || '0';
+        fragments.push({
+          type: 'dice',
+          full: full,
+          count: parseInt(count),
+          sides: parseInt(sides),
+          modifier: parseInt(modifier)
+        });
+        lastIndex = match.index + full.length;
+      }
+      if (lastIndex < text.length) {
+        fragments.push({ type: 'text', content: text.substring(lastIndex) });
+      }
+
+      // Если есть хотя бы одно выражение броска — заменяем узел
+      if (fragments.some(f => f.type === 'dice')) {
+        const fragment = document.createDocumentFragment();
+        fragments.forEach(f => {
+          if (f.type === 'text') {
+            fragment.appendChild(document.createTextNode(f.content));
+          } else {
+            const btn = document.createElement('button');
+            btn.textContent = `🎲 ${f.full}`;
+            btn.className = 'dice-roll-btn';
+            btn.dataset.count = f.count;
+            btn.dataset.sides = f.sides;
+            btn.dataset.modifier = f.modifier;
+            btn.dataset.display = f.full;
+
+            btn.addEventListener('click', function(e) {
+              const count = parseInt(this.dataset.count);
+              const sides = parseInt(this.dataset.sides);
+              const modifier = parseInt(this.dataset.modifier);
+              const results = [];
+              let total = 0;
+              for (let i = 0; i < count; i++) {
+                const roll = Math.floor(Math.random() * sides) + 1;
+                results.push(roll);
+                total += roll;
+              }
+              total += modifier;
+
+              const modStr = modifier !== 0 ? (modifier > 0 ? `+${modifier}` : `${modifier}`) : '';
+              const msg = `🎲 Бросок: ${this.dataset.display}\n📊 Результаты: ${results.join(', ')}${modStr ? ` (мод. ${modifier})` : ''}\n✅ Итого: ${total}`;
+
+              // Всплывающая подсказка
+              const oldTip = document.querySelector('.dice-result-tip');
+              if (oldTip) oldTip.remove();
+
+              const tip = document.createElement('div');
+              tip.className = 'dice-result-tip';
+              tip.textContent = msg.replace(/\n/g, ' ');
+              const rect = this.getBoundingClientRect();
+              tip.style.left = rect.left + 'px';
+              tip.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+              document.body.appendChild(tip);
+
+              setTimeout(() => { if (tip.parentNode) tip.remove(); }, 5000);
+            });
+
+            fragment.appendChild(btn);
+          }
+        });
+        textNode.parentNode.replaceChild(fragment, textNode);
+      }
+    });
+
+    // --- 4. Добавляем стили (если ещё не добавлены) ---
+    if (!document.getElementById('dice-roll-styles')) {
+      const style = document.createElement('style');
+      style.id = 'dice-roll-styles';
+      style.textContent = `
+        .dice-roll-btn {
+          display: inline-block;
+          padding: 0 8px;
+          margin: 0 3px;
+          background: #4a6fa5;
+          color: #fff;
+          border: none;
+          border-radius: 12px;
+          cursor: pointer;
+          font-size: 0.9em;
+          line-height: 1.6;
+          transition: background 0.2s;
+        }
+        .dice-roll-btn:hover { background: #6b8fc4; }
+        .dice-roll-btn:active { background: #2c4a6e; }
+        .dice-result-tip {
+          position: absolute;
+          background: #333;
+          color: #fff;
+          padding: 6px 12px;
+          border-radius: 8px;
+          font-size: 0.9em;
+          white-space: nowrap;
+          z-index: 1000;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          pointer-events: none;
+        }
+        @media print {
+          .dice-roll-btn, .dice-result-tip { display: none !important; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  });
+</script>
 </html>
