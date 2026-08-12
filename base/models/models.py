@@ -279,8 +279,12 @@ class NPC(
     )
 
     def __str__(self):
-        # TODO localization
-        return f'{self.name} {self.race} {self.full_class_name} {self.level} уровня'
+        return _('{name} {race} {class_name} level {level}').format(
+            name=self.name,
+            race=self.race,
+            class_name=self.full_class_name,
+            level=self.level,
+        )
 
     @property
     def full_class_name(self) -> str:
@@ -573,7 +577,7 @@ class NPC(
         query = (
             models.Q(race=self.race, level=0)  # Racial powers
             | models.Q(npcs=self)  # Manually assigned
-            | models.Q(classes=self.klass, level__lte=self.level)  # Class powers
+            | models.Q(classes_with_one_as_default=self.klass, level__lte=self.level)  # Class powers
             | models.Q(
                 subclasses=self.subclass, level__lte=self.level
             )  # Subclass powers

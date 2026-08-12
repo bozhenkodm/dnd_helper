@@ -74,7 +74,7 @@ class Class(ClassAbstract):
         'base.Power',
         verbose_name=_('Default powers'),
         blank=True,
-        related_name='classes',  # TODO rename related_name
+        related_name='classes_with_one_as_default',
     )
 
     def __str__(self):

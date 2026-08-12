@@ -211,7 +211,9 @@ class NPCModelForm(forms.ModelForm):
     ) -> None:
         if primary_hand and primary_hand.handedness.is_two_handed:
             error = ValidationError(
-                _('A two-handed weapon occupies both hands, no other item can be in the off-hand')
+                _(
+                    'A two-handed weapon occupies both hands, no other item can be in the off-hand'
+                )
             )
             if secondary_hand:
                 self.add_error('secondary_hand', error)
@@ -223,7 +225,9 @@ class NPCModelForm(forms.ModelForm):
             return
         if not primary_hand:
             self.add_errors(
-                'primary_hand', 'secondary_hand', error=_('First equip the primary hand')
+                'primary_hand',
+                'secondary_hand',
+                error=_('First equip the primary hand'),
             )
         if primary_hand.is_double:
             self.add_errors(
@@ -257,7 +261,9 @@ class NPCModelForm(forms.ModelForm):
                 self.add_error(
                     'secondary_hand',
                     ValidationError(
-                        _('Even rangers and barbarians cannot wield a two-handed weapon in the off-hand')
+                        _(
+                            'Even rangers and barbarians cannot wield a two-handed weapon in the off-hand'
+                        )
                     ),
                 )
             elif (
@@ -305,7 +311,9 @@ class NPCModelForm(forms.ModelForm):
                 self.add_errors('sex', 'race', _('Satyrs are male only'))
 
     def check_npc_without_paragon_path(self):
-        if self.cleaned_data['is_bonus_applied'] and self.cleaned_data.get('paragon_path'):
+        if self.cleaned_data['is_bonus_applied'] and self.cleaned_data.get(
+            'paragon_path'
+        ):
             message = _('NPCs with level bonus cannot have a paragon path')
             self.add_errors('paragon_path', 'is_bonus_applied', message)
 

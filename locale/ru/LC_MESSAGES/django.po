@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-12 15:48+0000\n"
+"POT-Creation-Date: 2026-08-12 16:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -786,6 +786,11 @@ msgstr "Вооружение, которое не занимает руку"
 #: base/models/models.py:278 base/models/powers.py:86 features/models.py:10
 msgid "Powers"
 msgstr "Таланты"
+
+#: base/models/models.py:282
+#, python-brace-format
+msgid "{name} {race} {class_name} level {level}"
+msgstr "{name} {race} {class_name} {level} уровня"
 
 #: base/models/powers.py:45
 msgid "Effect type"

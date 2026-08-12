@@ -394,7 +394,7 @@ class NPCAdmin(admin.ModelAdmin):
         ('functional_template', admin.RelatedOnlyFieldListFilter),
         ('paragon_path', admin.RelatedOnlyFieldListFilter),
         'sex',
-        ('avatar', admin.EmptyFieldListFilter),  # TODO change to simple list filter
+        ('avatar', admin.EmptyFieldListFilter),
     )
     list_display = (
         'name',
