@@ -4,6 +4,7 @@ from typing import Any, cast
 from django import forms
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 
 from base.constants.constants import (
@@ -53,37 +54,37 @@ class NPCModelForm(forms.ModelForm):
     level4_abilities_bonus = forms.ModelMultipleChoiceField(
         queryset=Ability.objects.all(),
         widget=forms.CheckboxSelectMultiple,
-        label='Бонус характеристики на 4 уровне',
+        label=format_lazy(_('Level {level} ability bonus'), level=4),
         required=False,
     )
     level8_abilities_bonus = forms.ModelMultipleChoiceField(
         queryset=Ability.objects.all(),
         widget=forms.CheckboxSelectMultiple,
-        label='Бонус характеристики на 8 уровне',
+        label=format_lazy(_('Level {level} ability bonus'), level=8),
         required=False,
     )
     level14_abilities_bonus = forms.ModelMultipleChoiceField(
         queryset=Ability.objects.all(),
         widget=forms.CheckboxSelectMultiple,
-        label='Бонус характеристики на 14 уровне',
+        label=format_lazy(_('Level {level} ability bonus'), level=14),
         required=False,
     )
     level18_abilities_bonus = forms.ModelMultipleChoiceField(
         queryset=Ability.objects.all(),
         widget=forms.CheckboxSelectMultiple,
-        label='Бонус характеристики на 18 уровне',
+        label=format_lazy(_('Level {level} ability bonus'), level=18),
         required=False,
     )
     level24_abilities_bonus = forms.ModelMultipleChoiceField(
         queryset=Ability.objects.all(),
         widget=forms.CheckboxSelectMultiple,
-        label='Бонус характеристики на 24 уровне',
+        label=format_lazy(_('Level {level} ability bonus'), level=24),
         required=False,
     )
     level28_abilities_bonus = forms.ModelMultipleChoiceField(
         queryset=Ability.objects.all(),
         widget=forms.CheckboxSelectMultiple,
-        label='Бонус характеристики на 28 уровне',
+        label=format_lazy(_('Level {level} ability bonus'), level=28),
         required=False,
     )
 
@@ -143,7 +144,7 @@ class NPCModelForm(forms.ModelForm):
             )
             self.fields['subclass_id'] = forms.ChoiceField(
                 choices=self.instance.klass.subclasses.generate_choices(),
-                label='Подкласс',
+                label=_('Subclass'),
             )
 
             # TODO doesn't work
@@ -202,7 +203,7 @@ class NPCModelForm(forms.ModelForm):
             self.add_errors(
                 'arms_slot',
                 'secondary_hand',
-                'Нельзя удержать в одной руке оружие и щит',
+                _('Cannot hold a weapon and a shield in one hand'),
             )
 
     def check_two_handed_weapon_held_with_two_hands(
@@ -210,8 +211,7 @@ class NPCModelForm(forms.ModelForm):
     ) -> None:
         if primary_hand and primary_hand.handedness.is_two_handed:
             error = ValidationError(
-                'Двуручное оружие занимает обе руки, '
-                'во второй руке не может быть другого предмета'
+                _('A two-handed weapon occupies both hands, no other item can be in the off-hand')
             )
             if secondary_hand:
                 self.add_error('secondary_hand', error)
@@ -223,13 +223,13 @@ class NPCModelForm(forms.ModelForm):
             return
         if not primary_hand:
             self.add_errors(
-                'primary_hand', 'secondary_hand', error='Сначала занимаем основную руку'
+                'primary_hand', 'secondary_hand', error=_('First equip the primary hand')
             )
         if primary_hand.is_double:
             self.add_errors(
                 'primary_hand',
                 'secondary_hand',
-                error='Двойное оружие занимает две руки',
+                error=_('Double weapon occupies two hands'),
             )
         if primary_hand.handedness.is_one_handed:
             if secondary_hand.handedness.is_off_hand:
@@ -238,7 +238,7 @@ class NPCModelForm(forms.ModelForm):
                 self.add_errors(
                     'primary_hand',
                     'secondary_hand',
-                    error='Двойное и двуручное оружие занимает две руки',
+                    error=_('Double and two-handed weapons occupy two hands'),
                 )
                 return
             subclass_slug = self.instance.klass.subclasses.get(
@@ -257,8 +257,7 @@ class NPCModelForm(forms.ModelForm):
                 self.add_error(
                     'secondary_hand',
                     ValidationError(
-                        'Даже следопыты и варвары '
-                        'не могут держать двуручное оружие во второй руке'
+                        _('Even rangers and barbarians cannot wield a two-handed weapon in the off-hand')
                     ),
                 )
             elif (
@@ -268,7 +267,7 @@ class NPCModelForm(forms.ModelForm):
                 self.add_error(
                     'secondary_hand',
                     ValidationError(
-                        'Во второй руке можно держать только дополнительное оружие'
+                        _('Only an off-hand weapon can be held in the secondary hand')
                     ),
                 )
 
@@ -278,14 +277,14 @@ class NPCModelForm(forms.ModelForm):
         if secondary_hand and hasattr(secondary_hand.weapon_type, 'secondary_end'):
             self.add_error(
                 'secondary_hand',
-                ValidationError('Двойное оружие должно располагаться в основной руке'),
+                ValidationError(_('Double weapon must be in the primary hand')),
             )
         if (
             primary_hand
             and hasattr(primary_hand.weapon_type, 'secondary_end')
             and (secondary_hand or shield_is_in_hand)
         ):
-            message = 'Для двойного оружия должна быть свободна вторая рука'
+            message = _('The off-hand must be free for a double weapon')
             self.add_error('primary_hand', ValidationError(message))
             if secondary_hand:
                 self.add_error('secondary_hand', ValidationError(message))
@@ -298,21 +297,16 @@ class NPCModelForm(forms.ModelForm):
                 self.cleaned_data['race'].name == NPCRaceEnum.HAMADRYAD
                 and self.cleaned_data['sex'] != SexEnum.F
             ):
-                self.add_errors('sex', 'race', 'Гамадриады только женщины')
-
+                self.add_errors('sex', 'race', _('Hamadryads are female only'))
             if (
                 self.cleaned_data['race'].name == NPCRaceEnum.SATYR
                 and self.cleaned_data['sex'] != SexEnum.M
             ):
-                self.add_errors('sex', 'race', 'Сатиры только мужчины')
+                self.add_errors('sex', 'race', _('Satyrs are male only'))
 
     def check_npc_without_paragon_path(self):
-        if self.cleaned_data['is_bonus_applied'] and self.cleaned_data.get(
-            'paragon_path'
-        ):
-            message = (
-                'Неигровые персонажи c бонусом уровня не могут иметь путь совершенства'
-            )
+        if self.cleaned_data['is_bonus_applied'] and self.cleaned_data.get('paragon_path'):
+            message = _('NPCs with level bonus cannot have a paragon path')
             self.add_errors('paragon_path', 'is_bonus_applied', message)
 
     def clean(self) -> dict[str, Any] | None:
@@ -372,9 +366,9 @@ class SubclassForm(ClassAbstractForm):
 
 
 class ParagonPathForm(forms.ModelForm):
-    def clean(self) -> dict[str, Any] | None:
+    def clean(self):
         if self.cleaned_data.get('klass') and self.cleaned_data.get('race'):
-            message = 'Путь совершенства может быть либо классовым, либо расовым.'
+            message = _('Paragon path can be either class-based or race-based')
             self.add_error('klass', message)
             self.add_error('race', message)
         return super().clean()
@@ -420,7 +414,7 @@ class ArmsSlotItemForm(ItemAbstractForm):
 
 class MagicItemTypeFormBase(forms.ModelForm):
     upload_from_clipboard = forms.BooleanField(
-        required=False, label='Загрузить из буфера обмена', initial=False
+        required=False, label=_('Upload from clipboard'), initial=False
     )
 
 
@@ -578,9 +572,9 @@ class PowerForm(forms.ModelForm):
     )
 
     upload_from_clipboard = forms.BooleanField(
-        required=False, label='Загрузить картинку из буфера обмена', initial=False
+        required=False, label=_('Upload image from clipboard'), initial=False
     )
-    from_image = forms.ImageField(required=False, label='Распарсить из картинки')
+    from_image = forms.ImageField(required=False, label=_('Parse from image'))
 
     def clean(self):
         cleaned_data = super().clean()
@@ -609,6 +603,6 @@ class MonsterForm(forms.ModelForm):
         fields = '__all__'
 
     upload_from_clipboard = forms.BooleanField(
-        required=False, label='Загрузить картинку из буфера обмена', initial=False
+        required=False, label=_('Upload image from clipboard'), initial=False
     )
-    from_image = forms.ImageField(required=False, label='Распарсить из картинки')
+    from_image = forms.ImageField(required=False, label=_('Parse from image'))
