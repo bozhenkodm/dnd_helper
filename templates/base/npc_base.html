@@ -269,7 +269,7 @@
       setTimeout(() => { if (tip.parentNode) tip.remove(); }, 5000);
     }
 
-    // --- 6. Добавляем стили (если ещё не добавлены) ---
+    // --- 6. Добавляем стили ---
     if (!document.getElementById('dice-roll-styles')) {
       const style = document.createElement('style');
       style.id = 'dice-roll-styles';
@@ -319,7 +319,21 @@
           pointer-events: none;
         }
         @media print {
-          .dice-roll-btn, .attack-roll-btn, .dice-result-tip { display: none !important; }
+          /* Кнопки становятся невидимыми как кнопки, но их текст остаётся */
+          .dice-roll-btn, .attack-roll-btn {
+            display: inline !important;
+            background: transparent !important;
+            border: none !important;
+            color: inherit !important; /* наследуют цвет текста */
+            padding: 0 !important;
+            margin: 0 2px !important;
+            font: inherit !important; /* наследуют шрифт */
+            cursor: default !important;
+            box-shadow: none !important;
+            pointer-events: none !important; /* убираем кликабельность на печати */
+          }
+          /* Иконки 🎲 и ⚔️ останутся, если хотите убрать – удалите их из текста кнопок или скройте через ::before */
+          .dice-result-tip { display: none !important; }
         }
       `;
       document.head.appendChild(style);
