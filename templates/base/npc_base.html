@@ -70,7 +70,7 @@
     const container = document.querySelector('.pagenotbreak');
     if (!container) return;
 
-    // --- 1. Собираем все текстовые узлы, исключая кнопки и служебные теги ---
+    // --- 1. Собираем все текстовые узлы (исключая кнопки и служебные теги) ---
     const textNodes = [];
     const walker = document.createTreeWalker(
       container,
@@ -97,45 +97,105 @@
       textNodes.push(node);
     }
 
-    // --- 2. Регулярное выражение для поиска бросков ---
+    // --- 2. Регулярные выражения для поиска ---
     const diceRegex = /\b(\d*)[dkк](\d+)([+-]\d+)?\b/gi;
+    const attackRegex = /([+-]?\d+)\s*против/gi;
 
-    // --- 3. Обрабатываем каждый текстовый узел ---
-    textNodes.forEach(function(textNode) {
-      const text = textNode.textContent;
-      let match;
-      let lastIndex = 0;
+    // --- 3. Функция разбора текста на фрагменты ---
+    function parseText(text) {
       const fragments = [];
+      let lastIndex = 0;
 
+      // Соберём все совпадения для обоих типов
+      const matches = [];
+
+      // Поиск dice
+      let match;
       diceRegex.lastIndex = 0;
       while ((match = diceRegex.exec(text)) !== null) {
-        if (match.index > lastIndex) {
-          fragments.push({ type: 'text', content: text.substring(lastIndex, match.index) });
-        }
-        const full = match[0];
-        const count = match[1] || '1';
-        const sides = match[2];
-        const modifier = match[3] || '0';
-        fragments.push({
+        matches.push({
+          index: match.index,
+          end: match.index + match[0].length,
           type: 'dice',
-          full: full,
-          count: parseInt(count),
-          sides: parseInt(sides),
-          modifier: parseInt(modifier)
+          match: match
         });
-        lastIndex = match.index + full.length;
-      }
-      if (lastIndex < text.length) {
-        fragments.push({ type: 'text', content: text.substring(lastIndex) });
       }
 
-      // Если есть хотя бы одно выражение броска — заменяем узел
-      if (fragments.some(f => f.type === 'dice')) {
+      // Поиск attack
+      attackRegex.lastIndex = 0;
+      while ((match = attackRegex.exec(text)) !== null) {
+        matches.push({
+          index: match.index,
+          end: match.index + match[0].length,
+          type: 'attack',
+          match: match
+        });
+      }
+
+      // Сортируем по индексу
+      matches.sort((a, b) => a.index - b.index);
+
+      // Проходим по отсортированным совпадениям
+      for (const m of matches) {
+        if (m.index > lastIndex) {
+          fragments.push({
+            type: 'text',
+            content: text.substring(lastIndex, m.index)
+          });
+        }
+
+        if (m.type === 'dice') {
+          const full = m.match[0];
+          const count = m.match[1] || '1';
+          const sides = m.match[2];
+          const modifier = m.match[3] || '0';
+          fragments.push({
+            type: 'dice',
+            full: full,
+            count: parseInt(count),
+            sides: parseInt(sides),
+            modifier: parseInt(modifier)
+          });
+        } else { // attack
+          const number = m.match[1];
+          const suffix = m.match[0].slice(number.length); // включает пробелы и слово "против"
+          fragments.push({
+            type: 'attack',
+            full: number,
+            modifier: parseInt(number)
+          });
+          // Добавляем суффикс как обычный текст сразу после кнопки
+          fragments.push({
+            type: 'text',
+            content: suffix
+          });
+        }
+
+        lastIndex = m.end;
+      }
+
+      if (lastIndex < text.length) {
+        fragments.push({
+          type: 'text',
+          content: text.substring(lastIndex)
+        });
+      }
+
+      return fragments;
+    }
+
+    // --- 4. Обрабатываем каждый текстовый узел ---
+    textNodes.forEach(function(textNode) {
+      const text = textNode.textContent;
+      const fragments = parseText(text);
+
+      // Если есть хотя бы один специальный фрагмент – заменяем узел
+      if (fragments.some(f => f.type === 'dice' || f.type === 'attack')) {
         const fragment = document.createDocumentFragment();
         fragments.forEach(f => {
           if (f.type === 'text') {
             fragment.appendChild(document.createTextNode(f.content));
-          } else {
+          } else if (f.type === 'dice') {
             const btn = document.createElement('button');
             btn.textContent = `🎲 ${f.full}`;
             btn.className = 'dice-roll-btn';
@@ -157,6 +217,7 @@
               }
               total += modifier;
 
+              // Формируем выражение
               const parts = results.map(String);
               let sumStr = parts.join('+');
               if (modifier > 0) {
@@ -166,20 +227,23 @@
               }
 
               const msg = `🎲 Бросок: ${this.dataset.display}=${sumStr}=${total}`;
+              showTip(msg, this);
+            });
 
-              // Всплывающая подсказка
-              const oldTip = document.querySelector('.dice-result-tip');
-              if (oldTip) oldTip.remove();
+            fragment.appendChild(btn);
+          } else if (f.type === 'attack') {
+            const btn = document.createElement('button');
+            btn.textContent = `⚔️ ${f.full}`;
+            btn.className = 'attack-roll-btn';
+            btn.dataset.modifier = f.modifier;
+            btn.dataset.display = f.full;
 
-              const tip = document.createElement('div');
-              tip.className = 'dice-result-tip';
-              tip.textContent = msg.replace(/\n/g, ' ');
-              const rect = this.getBoundingClientRect();
-              tip.style.left = rect.left + 'px';
-              tip.style.top = (rect.bottom + window.scrollY + 5) + 'px';
-              document.body.appendChild(tip);
-
-              setTimeout(() => { if (tip.parentNode) tip.remove(); }, 5000);
+            btn.addEventListener('click', function(e) {
+              const mod = parseInt(this.dataset.modifier);
+              const roll = Math.floor(Math.random() * 20) + 1;
+              const total = roll + mod;
+              const msg = `🎲 Бросок: ${roll} + ${mod} = ${total}`;
+              showTip(msg, this);
             });
 
             fragment.appendChild(btn);
@@ -189,7 +253,23 @@
       }
     });
 
-    // --- 4. Добавляем стили (если ещё не добавлены) ---
+    // --- 5. Функция показа всплывающей подсказки ---
+    function showTip(msg, element) {
+      const oldTip = document.querySelector('.dice-result-tip');
+      if (oldTip) oldTip.remove();
+
+      const tip = document.createElement('div');
+      tip.className = 'dice-result-tip';
+      tip.textContent = msg.replace(/\n/g, ' ');
+      const rect = element.getBoundingClientRect();
+      tip.style.left = rect.left + 'px';
+      tip.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+      document.body.appendChild(tip);
+
+      setTimeout(() => { if (tip.parentNode) tip.remove(); }, 5000);
+    }
+
+    // --- 6. Добавляем стили (если ещё не добавлены) ---
     if (!document.getElementById('dice-roll-styles')) {
       const style = document.createElement('style');
       style.id = 'dice-roll-styles';
@@ -209,6 +289,23 @@
         }
         .dice-roll-btn:hover { background: #6b8fc4; }
         .dice-roll-btn:active { background: #2c4a6e; }
+
+        .attack-roll-btn {
+          display: inline-block;
+          padding: 0 8px;
+          margin: 0 3px;
+          background: #c97d2b;
+          color: #fff;
+          border: none;
+          border-radius: 12px;
+          cursor: pointer;
+          font-size: 0.9em;
+          line-height: 1.6;
+          transition: background 0.2s;
+        }
+        .attack-roll-btn:hover { background: #e0983d; }
+        .attack-roll-btn:active { background: #a8651f; }
+
         .dice-result-tip {
           position: absolute;
           background: #333;
@@ -222,11 +319,11 @@
           pointer-events: none;
         }
         @media print {
-          .dice-roll-btn, .dice-result-tip { display: none !important; }
+          .dice-roll-btn, .attack-roll-btn, .dice-result-tip { display: none !important; }
         }
       `;
       document.head.appendChild(style);
     }
   });
-</script>
+  </script>
 </html>
