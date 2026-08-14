@@ -138,7 +138,7 @@ class NPCModelForm(forms.ModelForm):
                     | models.Q(skill__npcs=self.instance),
                     level__lte=self.instance.level,
                 )
-                .exclude(classes=self.instance.klass)
+                .exclude(classes_with_one_as_default=self.instance.klass)
                 .exclude(subclasses__klass=self.instance.klass)
                 .order_by('level', 'frequency')
             )

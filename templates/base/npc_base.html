@@ -157,8 +157,15 @@
               }
               total += modifier;
 
-              const modStr = modifier !== 0 ? (modifier > 0 ? `+${modifier}` : `${modifier}`) : '';
-              const msg = `🎲 Бросок: ${this.dataset.display}\n📊 Результаты: ${results.join(', ')}${modStr ? ` (мод. ${modifier})` : ''}\n✅ Итого: ${total}`;
+              const parts = results.map(String);
+              let sumStr = parts.join('+');
+              if (modifier > 0) {
+                sumStr += '+' + modifier;
+              } else if (modifier < 0) {
+                sumStr += modifier;
+              }
+
+              const msg = `🎲 Бросок: ${this.dataset.display}=${sumStr}=${total}`;
 
               // Всплывающая подсказка
               const oldTip = document.querySelector('.dice-result-tip');

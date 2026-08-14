@@ -577,7 +577,9 @@ class NPC(
         query = (
             models.Q(race=self.race, level=0)  # Racial powers
             | models.Q(npcs=self)  # Manually assigned
-            | models.Q(classes_with_one_as_default=self.klass, level__lte=self.level)  # Class powers
+            | models.Q(
+                classes_with_one_as_default=self.klass, level__lte=self.level
+            )  # Class powers
             | models.Q(
                 subclasses=self.subclass, level__lte=self.level
             )  # Subclass powers

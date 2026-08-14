@@ -55,10 +55,6 @@ class ArmorType(models.Model):
         verbose_name=_('Additional armor class'),
         default=0,
     )
-    speed_penalty = models.SmallIntegerField(verbose_name=_('Speed penalty'), default=0)
-    skill_penalty = models.SmallIntegerField(
-        verbose_name=_('Skills penalty'), default=0
-    )
     minimal_enhancement = models.PositiveSmallIntegerField(
         verbose_name=_('Minimal enhancement'), default=0
     )
@@ -505,12 +501,12 @@ class Armor(ItemAbstract):
     @property
     def speed_penalty(self):
         """Get speed penalty from armor type."""
-        return self.armor_type.speed_penalty
+        return self.armor_type.base_armor_type.speed_penalty
 
     @property
     def skill_penalty(self):
         """Get skill penalty from armor type."""
-        return self.armor_type.skill_penalty
+        return self.armor_type.base_armor_type.skill_penalty
 
     @property
     def name(self) -> str:
